@@ -1,0 +1,3 @@
+# 'blhc --all' returns nothing
+# false positive
+qb-plugins: hardening-no-fortify-functions

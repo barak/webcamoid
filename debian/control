@@ -1,50 +1,158 @@
 Source: webcamoid
 Section: video
-Priority: extra
-Maintainer: Gonzalo Pedone <hipersayan.x@gmail.com>
-Build-Depends: debhelper (>= 8.0.0),
- qttools5-dev-tools,
- qtmultimedia5-dev,
- linux-libc-dev,
- libavcodec-ffmpeg-dev,
- libavdevice-ffmpeg-dev,
- libavfilter-ffmpeg-dev,
- libavformat-ffmpeg-dev,
- libavresample-ffmpeg-dev,
- libavutil-ffmpeg-dev,
- libpostproc-ffmpeg-dev,
- libswresample-ffmpeg-dev,
- libswscale-ffmpeg-dev
-Standards-Version: 3.9.4
+Priority: optional
+Maintainer: Herbert Parentes Fortes Neto <hpfn@ig.com.br>
+Build-Depends: debhelper (>= 9),
+               libavcodec-dev,
+               libavdevice-dev,
+               libavfilter-dev,
+               libavformat-dev,
+               libavresample-dev,
+               libavutil-dev,
+               libpostproc-dev,
+               libqt5opengl5-dev,
+               libqt5svg5-dev,
+               libswresample-dev,
+               libswscale-dev,
+               libv4l-dev,
+               linux-libc-dev,
+               pkg-config,
+               qtdeclarative5-dev,
+               qtmultimedia5-dev,
+               qttools5-dev-tools
+Standards-Version: 3.9.6
 Homepage: https://github.com/hipersayanX/webcamoid
-#Vcs-Git: git://github.com/hipersayanX/webcamoid.git
-#Vcs-Browser: https://github.com/hipersayanX/webcamoid
+Vcs-Git: git://anonscm.debian.org/collab-maint/webcamoid.git
+Vcs-Browser: http://anonscm.debian.org/cgit/collab-maint/webcamoid.git
 
 Package: webcamoid
 Architecture: any
-Depends: ${shlibs:Depends},
- ${misc:Depends},
- libqt5widgets5,
- libqt5multimedia5,
- libavcodec-ffmpeg56,
- libavdevice-ffmpeg56,
- libavfilter-ffmpeg5,
- libavformat-ffmpeg56,
- libavresample-ffmpeg2,
- libavutil-ffmpeg54,
- libpostproc-ffmpeg53,
- libswresample-ffmpeg1,
- libswscale-ffmpeg3
-Description: Webcamoid is a full featured webcam capture application.
+Depends: qb-plugins, qbqml, webcamoid-data, ${misc:Depends}, ${shlibs:Depends}
+Description: full featured webcam capture application
+ webcamoid allows one to capture, save and view a video stream. It also can
+ do a lot of funny things.
+ .
  Features:
  .
- * Take pictures and record videos with the webcam.
- * Manages multiple webcams.
- * Written in C++/Qt.
- * Custom controls for each webcam.
- * Add funny effects to the webcam.
- * +60 effects available.
- * Effects with live previews.
- * Translated to many languages.
- * Use custom network and local files as capture devices.
- * Capture from desktop.
+  * Take pictures and record videos with the webcam.
+  * Manages multiple webcams.
+  * GUI interface.
+  * Custom controls for each webcam.
+  * Add funny effects to the webcam.
+  * +60 effects available.
+  * Effects with live previews.
+  * Translated to many languages.
+  * Use custom network and local files as capture devices.
+  * Capture from desktop.
+
+Package: libqb6
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: full featured webcam capture application - library
+ webcamoid allows one to capture, save and view a video stream. It also can
+ do a lot of funny things.
+ .
+ Features:
+ .
+  * Take pictures and record videos with the webcam.
+  * Manages multiple webcams.
+  * GUI interface.
+  * Custom controls for each webcam.
+  * Add funny effects to the webcam.
+  * +60 effects available.
+  * Effects with live previews.
+  * Translated to many languages.
+  * Use custom network and local files as capture devices.
+  * Capture from desktop.
+ .
+ This package contains the library for webcamoid.
+
+Package: libqb6-dev
+Section: libdevel
+Architecture: any
+Depends: libqb6 (= ${binary:Version}), ${misc:Depends}
+Description: full featured webcam capture application - dev
+ webcamoid allows one to capture, save and view a video stream. It also can
+ do a lot of funny things.
+ .
+ Features:
+ .
+  * Take pictures and record videos with the webcam.
+  * Manages multiple webcams.
+  * GUI interface.
+  * Custom controls for each webcam.
+  * Add funny effects to the webcam.
+  * +60 effects available.
+  * Effects with live previews.
+  * Translated to many languages.
+  * Use custom network and local files as capture devices.
+  * Capture from desktop.
+ .
+ This package contains the development files of libqb6.
+
+Package: qb-plugins
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: full featured webcam capture application - plugins
+ webcamoid allows one to capture, save and view a video stream. It also can
+ do a lot of funny things.
+ .
+ Features:
+ .
+  * Take pictures and record videos with the webcam.
+  * Manages multiple webcams.
+  * GUI interface.
+  * Custom controls for each webcam.
+  * Add funny effects to the webcam.
+  * +60 effects available.
+  * Effects with live previews.
+  * Translated to many languages.
+  * Use custom network and local files as capture devices.
+  * Capture from desktop.
+ .
+ This package contains the plugins for webcamoid.
+
+Package: qbqml
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: full featured webcam capture application - qml module
+ webcamoid allows one to capture, save and view a video stream. It also can
+ do a lot of funny things.
+ .
+ Features:
+ .
+  * Take pictures and record videos with the webcam.
+  * Manages multiple webcams.
+  * GUI interface.
+  * Custom controls for each webcam.
+  * Add funny effects to the webcam.
+  * +60 effects available.
+  * Effects with live previews.
+  * Translated to many languages.
+  * Use custom network and local files as capture devices.
+  * Capture from desktop.
+ .
+ This package contains the qml module for webcamoid.
+
+Package: webcamoid-data
+Architecture: all
+Depends: ${misc:Depends}
+Description: icons and locale files for webcamoid
+ webcamoid allows one to capture, save and view a video stream. It also can
+ do a lot of funny things.
+ .
+ Features:
+ .
+  * Take pictures and record videos with the webcam.
+  * Manages multiple webcams.
+  * GUI interface.
+  * Custom controls for each webcam.
+  * Add funny effects to the webcam.
+  * +60 effects available.
+  * Effects with live previews.
+  * Translated to many languages.
+  * Use custom network and local files as capture devices.
+  * Capture from desktop.
+ .
+ This package contains the icons/locale files for webcamoid.

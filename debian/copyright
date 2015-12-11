@@ -3,20 +3,68 @@ Upstream-Name: webcamoid
 Source: https://github.com/hipersayanX/webcamoid
 
 Files: *
-Copyright: 2014 Gonzalo Pedone <hipersayan.x@gmail.com>
+Copyright: 2011-2015 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
 License: GPL-3+
- Webcamoid, webcam capture application.
- Copyright (C) 2011-2015  Gonzalo Exequiel Pedone
- .
- Webcamoid is free software: you can redistribute it and/or modify
+
+Files: Qb/Plugins/FaceDetect/src/haar/*
+Copyright: 2011-2015  Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
+           2000       Intel Corporation
+License: GPL-3+ and BSD-3-Clause
+
+Files: Qb/Plugins/FaceDetect/share/haarcascades/*
+Copyright: 2000      Intel Corporation
+           2004      Hannes Kruppa and Bernt Schiele (ETH Zurich, Switzerland)
+           2006-2011 Modesto Castrillon-Santana (IUSIANI, University of
+                     Las Palmas de Gran Canaria, Spain)
+License: BSD-3-Clause
+
+Files: debian/*
+Copyright: 2015 Herbert Parentes Fortes Neto <hpfn@ig.com.br>
+License: GPL-3+
+
+Files: debian/man/webcamoid.1
+Copyright: 2015 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
+License: GPL-3+
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
  .
- Webcamoid is distributed in the hope that it will be useful,
+ This package is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
  .
  You should have received a copy of the GNU General Public License
- along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: BSD-3-Clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ .
+ * Redistribution's of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+ * Redistribution's in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+ * The name of Contributor may not be used to endorse or promote
+   products derived from this software without specific prior written
+   permission.
+ .
+ This software is provided by the copyright holders and contributors
+ "as is" and any express or implied warranties, including, but not limited
+ to, the implied warranties of merchantability and fitness for a
+ particular purpose are disclaimed. In no event shall the Contributors be
+ liable for any direct, indirect, incidental, special, exemplary, or
+ consequential damages (including, but not limited to, procurement of
+ substitute goods or services; loss of use, data, or profits; or business
+ interruption) however caused and on any theory of liability, whether in
+ contract, strict liability, or tort (including negligence or otherwise)
+ arising in any way out of the use of this software, even if advised of
+ the possibility of such damage.

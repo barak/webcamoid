@@ -1,0 +1,16 @@
+Description: Set -lQb to lower case
+Author: Herbert Parentes Fortes Neto <hpfn@ig.com.br>
+Last-Update: 2015-11-14
+Index: webcamoid-6.2.0/Qb/Plugins/VCapsConvert/VCapsConvert.pro
+===================================================================
+--- webcamoid-6.2.0.orig/Qb/Plugins/VCapsConvert/VCapsConvert.pro
++++ webcamoid-6.2.0/Qb/Plugins/VCapsConvert/VCapsConvert.pro
+@@ -40,7 +40,7 @@ INCLUDEPATH += \
+     include \
+     ../../include
+ 
+-!win32: LIBS += -L../../ -lQb
++!win32: LIBS += -L../../ -lqb
+ win32: LIBS += -L../../ -lQb$${VER_MAJ}
+ 
+ !isEmpty(FFMPEGINCLUDES): INCLUDEPATH += $${FFMPEGINCLUDES}
