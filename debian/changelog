@@ -1,3 +1,16 @@
+webcamoid (6.2.0-2) experimental; urgency=medium
+
+  * debian/control:
+      - Architecture: linux-any
+  * debian/libqb6.symbols:
+      - removed a line to make symbols compliant
+        with all architectures.
+  * debian/rules:
+      - added override_dh_makeshlibs to provide the right
+        package version to dpkg-gensymbols.
+
+ -- Herbert Parentes Fortes Neto <hpfn@ig.com.br>  Tue, 29 Dec 2015 14:54:57 -0200
+
 webcamoid (6.2.0-1) experimental; urgency=low
 
   * Initial release (Closes: #763913)

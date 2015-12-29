@@ -243,7 +243,6 @@ libqb.so.6 libqb6 #MINVER#
  _ZN5QListI7QStringEC2ERKS1_@Base 6.2.0
  _ZN5QListI7QStringED1Ev@Base 6.2.0
  _ZN5QListI7QStringED2Ev@Base 6.2.0
- _ZN5QListI7QStringEpLERKS1_@Base 6.2.0
  _ZN5QListIiEC1ERKS0_@Base 6.2.0
  _ZN5QListIiEC2ERKS0_@Base 6.2.0
  _ZN5QListIiED1Ev@Base 6.2.0
