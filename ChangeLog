@@ -1,0 +1,137 @@
+Webcamoid 6.2.0:
+
+- Reworked Cartoonify plugin.
+- Some improvements in FaceDetect plugin.
+- Added Canny mode for Edge detection plugin.
+- Improved Blur and Denoise plugins.
+- Fixed QDataStream missing header.
+
+Webcamoid 6.1.0:
+
+- Removed OpenCV as dependency (yes, again).
+- Fixed Denoise plugin SEGFAULT.
+- Translations updated.
+
+Webcamoid 6.0.0:
+
+- New Qml UI, more user friendly.
+- Now, the effects can be customized.
+- A lot of bug fixes.
+
+Webcamoid 5.1.0:
+
+- From now on, Webcamoid will be developed using Qt5.
+- Removed Frei0r from dependencies.
+- Added OpenCV as dependency (Face detection).
+- Removed plasmoid build since Qt5 plugins aren't compatible with Qt4/KDE4.
+- Now, Webcamoid can be compiled using MinGW.
+- Added webcam capture support through DirectShow.
+- There are still some patches needed to make it fully work in Windows.
+
+Webcamoid 5.0.0:
+
+- Modified the effects preview for reducing resources usage.
+- Fixed stream flush on recording stop.
+- Enhanced webm video recording.
+
+Webcamoid 5.0.0rc1:
+
+- Release Candidate version.
+- Ported to Qt5 (without the plasmoid).
+- Removed KDElibs as dependency, but still required for Qt4 build.
+- Removed QImageBlitz as dependency.
+- Added more effects.
+- Fixed video sync.
+- Initial port to Windows (help needed).
+
+Webcamoid 5.0.0b2:
+
+- Beta version.
+- Fix many bugs.
+- Many internal changes.
+- Updated Italian translations (thanks to Ascaf0).
+- Updated to work with FFmpeg >= 2.0.
+
+Webcamoid 5.0.0b1:
+
+- Beta version.
+- Fixed many memory leaks and bugs.
+- Fixed video synchronization.
+
+Webcamoid 5.0.0a1:
+
+- Alpha version.
+- Added live preview for effects.
+- Added custom streams, including videos (local and remote) and IP cameras (mms, rtsp, etc.).
+- Added desktop recording.
+- Ported to C++.
+- Switched from GStramer to FFmpeg.
+- 100% Qt based software (GTK Free).
+- Remember size of the plasmoid on close.
+
+Webcamoid 4.0.0:
+
+- Failed release.
+
+Webcamoid 3.2.0:
+
+- Stand alone installation mode improved (recommended).
+- Fixed stylesheets.
+- Fixed translations.
+- Many internal changes.
+
+Webcamoid 3.1.0:
+
+- Added stand alone installation mode (Experimental).
+- Fixed some bugs.
+
+Webcamoid 3.0.0:
+
+- Removed FFmpeg from dependencies, now it is based on GStreamer.
+- Added video record.
+- Added video effects.
+- Added Catalan and Galician.
+
+Webcamoid 2.2.0:
+
+- Added new languages:
+
+- Chinese (Simplified)
+- Chinese (Traditional)
+- French
+- German
+- Greek
+- Italian
+- Japanese
+- Korean
+- Portuguese
+- Russian
+- Spanish
+
+Translations provided by Google translator, not me, except for Spanish (native) and Japanese.
+
+Webcamoid 2.1.3:
+
+- Bug fix. Pipe file is no needed anymore.
+
+Webcamoid 2.1.2:
+
+- Removed stdin, stderr and stdout pipes. Added -loglevel quiet. Apparently, suppress the output using pipes is a very bad idea.
+
+Webcamoid 2.1.1:
+
+- Fixed Popen pipe limit.
+
+Webcamoid 2.1.0:
+
+- New Github repository.
+- GUI based on Qt Designer forms.
+- Added Popup applet support, thanks to user nik3nt3.
+
+Webcamoid 2.0.0:
+
+- Removed OpenCV from dependencies, now it is based on FFmpeg + v4l2 Python wrappers.
+
+Webcamoid 1.x.x:
+
+- Old version based on OpenCV.
