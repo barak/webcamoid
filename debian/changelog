@@ -1,3 +1,9 @@
+webcamoid (6.2.0-3) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Herbert Parentes Fortes Neto <hpfn@ig.com.br>  Thu, 31 Dec 2015 12:06:47 -0200
+
 webcamoid (6.2.0-2) experimental; urgency=medium
 
   * debian/control:
