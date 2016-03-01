@@ -1,3 +1,21 @@
+webcamoid (6.2.0-4) experimental; urgency=medium
+
+  * Changed the lib name. libWebcamoid now. (Closes: #809764)
+      The last name conflicts with files in libqb-dev package.
+  * debian/control:
+      - Bump Standards-Version to 3.9.7.
+      - Vcs-* fields using https.
+      - Using Replaces and Breaks fields to remove the packages
+        with old names.
+  * debian/copyright: updated.
+  * debian/patches:
+      - all patches to lowercase removed.
+      - patches to complete remove 'qb' created.
+      - webcamoid_ffmpeg-2.9.patch created. To build with the
+        new version of ffmpeg. (Closes: 810558). Thanks Andreas Cadhalpun.
+
+ -- Herbert Parentes Fortes Neto <hpfn@ig.com.br>  Tue, 01 Mar 2016 10:57:30 -0300
+
 webcamoid (6.2.0-3) unstable; urgency=low
 
   * Upload to unstable.

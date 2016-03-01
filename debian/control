@@ -20,14 +20,18 @@ Build-Depends: debhelper (>= 9),
                qtdeclarative5-dev,
                qtmultimedia5-dev,
                qttools5-dev-tools
-Standards-Version: 3.9.6
+Standards-Version: 3.9.7
 Homepage: https://github.com/hipersayanX/webcamoid
-Vcs-Git: git://anonscm.debian.org/collab-maint/webcamoid.git
-Vcs-Browser: http://anonscm.debian.org/cgit/collab-maint/webcamoid.git
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/webcamoid.git
+Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/webcamoid.git
 
 Package: webcamoid
 Architecture: linux-any
-Depends: qb-plugins, qbqml, webcamoid-data, ${misc:Depends}, ${shlibs:Depends}
+Depends: qbqml,
+         webcamoid-data,
+         webcamoid-plugins,
+         ${misc:Depends},
+         ${shlibs:Depends}
 Description: full featured webcam capture application
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.
@@ -45,10 +49,12 @@ Description: full featured webcam capture application
   * Use custom network and local files as capture devices.
   * Capture from desktop.
 
-Package: libqb6
+Package: libwebcamoid6
 Section: libs
 Architecture: linux-any
 Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: libqb6 (= 6.2.0)
+Replaces: libqb6 (= 6.2.0)
 Description: full featured webcam capture application - library
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.
@@ -68,10 +74,12 @@ Description: full featured webcam capture application - library
  .
  This package contains the library for webcamoid.
 
-Package: libqb6-dev
+Package: libwebcamoid-dev
 Section: libdevel
 Architecture: linux-any
-Depends: libqb6 (= ${binary:Version}), ${misc:Depends}
+Depends: libwebcamoid6 (= ${binary:Version}), ${misc:Depends}
+Breaks: libqb6-dev (= 6.2.0)
+Replaces: libqb6-dev (= 6.2.0)
 Description: full featured webcam capture application - dev
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.
@@ -89,11 +97,13 @@ Description: full featured webcam capture application - dev
   * Use custom network and local files as capture devices.
   * Capture from desktop.
  .
- This package contains the development files of libqb6.
+ This package contains the development files of libwebcamoid6.
 
-Package: qb-plugins
+Package: webcamoid-plugins
 Architecture: linux-any
 Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: qb-plugins (= 6.2.0)
+Replaces: qb-plugins (= 6.2.0)
 Description: full featured webcam capture application - plugins
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.

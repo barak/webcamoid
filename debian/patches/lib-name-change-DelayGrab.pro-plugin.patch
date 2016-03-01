@@ -1,0 +1,16 @@
+Description: Change lib name. Bug #809764
+Author: Herbert Parentes Fortes Neto <hpfn@ig.com.br>
+Last-Update: 2016-01-04
+Index: webcamoid-6.2.0/Qb/Plugins/DelayGrab/DelayGrab.pro
+===================================================================
+--- webcamoid-6.2.0.orig/Qb/Plugins/DelayGrab/DelayGrab.pro
++++ webcamoid-6.2.0/Qb/Plugins/DelayGrab/DelayGrab.pro
+@@ -37,7 +37,7 @@ INCLUDEPATH += \
+     include \
+     ../../include
+ 
+-!win32: LIBS += -L../../ -lQb
++!win32: LIBS += -L../../ -lWebcamoid
+ win32: LIBS += -L../../ -lQb$${VER_MAJ}
+ 
+ OTHER_FILES += pspec.json

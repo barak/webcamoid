@@ -1,0 +1,66 @@
+Description: Replace deprecated FFmpeg API
+Author: Andreas Cadhalpun <Andreas.Cadhalpun@googlemail.com>
+Last-Update: 2016-01-09
+Index: webcamoid-6.2.0/Qb/Plugins/VCapsConvert/include/convertio.h
+===================================================================
+--- webcamoid-6.2.0.orig/Qb/Plugins/VCapsConvert/include/convertio.h
++++ webcamoid-6.2.0/Qb/Plugins/VCapsConvert/include/convertio.h
+@@ -35,10 +35,10 @@ class ConvertIO: public QObject
+ 
+     Q_PROPERTY(int iWidth READ iWidth)
+     Q_PROPERTY(int iHeight READ iHeight)
+-    Q_PROPERTY(PixelFormat iFormat READ iFormat)
++    Q_PROPERTY(AVPixelFormat iFormat READ iFormat)
+     Q_PROPERTY(int oWidth READ oWidth)
+     Q_PROPERTY(int oHeight READ oHeight)
+-    Q_PROPERTY(PixelFormat oFormat READ oFormat)
++    Q_PROPERTY(AVPixelFormat oFormat READ oFormat)
+     Q_PROPERTY(QList<int> check READ check)
+ 
+     public:
+@@ -49,19 +49,19 @@ class ConvertIO: public QObject
+ 
+         Q_INVOKABLE int iWidth() const;
+         Q_INVOKABLE int iHeight() const;
+-        Q_INVOKABLE PixelFormat iFormat() const;
++        Q_INVOKABLE AVPixelFormat iFormat() const;
+         Q_INVOKABLE int oWidth() const;
+         Q_INVOKABLE int oHeight() const;
+-        Q_INVOKABLE PixelFormat oFormat() const;
++        Q_INVOKABLE AVPixelFormat oFormat() const;
+         Q_INVOKABLE QList<int> check() const;
+ 
+     private:
+         int m_iWidth;
+         int m_iHeight;
+-        PixelFormat m_iFormat;
++        AVPixelFormat m_iFormat;
+         int m_oWidth;
+         int m_oHeight;
+-        PixelFormat m_oFormat;
++        AVPixelFormat m_oFormat;
+ };
+ 
+ #endif // CONVERTIO_H
+Index: webcamoid-6.2.0/Qb/Plugins/VCapsConvert/src/convertio.cpp
+===================================================================
+--- webcamoid-6.2.0.orig/Qb/Plugins/VCapsConvert/src/convertio.cpp
++++ webcamoid-6.2.0/Qb/Plugins/VCapsConvert/src/convertio.cpp
+@@ -93,7 +93,7 @@ int ConvertIO::iHeight() const
+     return this->m_iHeight;
+ }
+ 
+-PixelFormat ConvertIO::iFormat() const
++AVPixelFormat ConvertIO::iFormat() const
+ {
+     return this->m_iFormat;
+ }
+@@ -108,7 +108,7 @@ int ConvertIO::oHeight() const
+     return this->m_oHeight;
+ }
+ 
+-PixelFormat ConvertIO::oFormat() const
++AVPixelFormat ConvertIO::oFormat() const
+ {
+     return this->m_oFormat;
+ }

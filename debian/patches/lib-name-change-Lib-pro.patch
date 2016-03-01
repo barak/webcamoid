@@ -1,0 +1,16 @@
+Description: Change lib name. Bug #809764
+Author: Herbert Parentes Fortes Neto <hpfn@ig.com.br>
+Last-Update: 2016-01-04
+Index: webcamoid-6.2.0/Qb/Lib.pro
+===================================================================
+--- webcamoid-6.2.0.orig/Qb/Lib.pro
++++ webcamoid-6.2.0/Qb/Lib.pro
+@@ -77,7 +77,7 @@ SOURCES = \
+ 
+ DESTDIR = $${PWD}
+ 
+-TARGET = $${COMMONS_APPNAME}
++TARGET = Webcamoid
+ 
+ TEMPLATE = lib
+ 
