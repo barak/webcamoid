@@ -1,3 +1,11 @@
+webcamoid (6.2.0-5) unstable; urgency=medium
+
+  * Upload to unstable.
+  * debian/watch:
+      - version 4.
+
+ -- Herbert Parentes Fortes Neto <hpfn@ig.com.br>  Thu, 03 Mar 2016 13:53:29 -0300
+
 webcamoid (6.2.0-4) experimental; urgency=medium
 
   * Changed the lib name. libWebcamoid now. (Closes: #809764)

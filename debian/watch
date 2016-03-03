@@ -1,2 +1,2 @@
-version=3
+version=4
 https://github.com/hipersayanX/webcamoid/releases .*/archive/v?(\d\S+)\.(?:zip|tar)\.?(?:gz|bz2|xz)?
