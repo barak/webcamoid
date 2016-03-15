@@ -1,3 +1,27 @@
+webcamoid (7.0.0-1) experimental; urgency=low
+
+  * New upstream release.
+  * New names for lib, module and paths. To accommodate that 
+      debian/control and debian/*.install files were edited and renamed.
+  * debian/control:
+      - libpulse-dev added to Build-Depends.
+      - removed from Build-Depends:
+          - libavfilter-dev,
+            libavresample-dev,
+            libpostproc-dev,
+            qtmultimedia5-dev.
+      - Two more features added to long description.
+  * debian/copyright updated.
+  * debian/*.symbols:
+      - new file for soname 7.
+  * debian/man removed. The tarball has a manpage now.
+  * debian/patches -- all removed:
+      - webcamoid_ffmpeg-2.9.patch applied by the upstream.
+      - all patches about lib name removed. The upstream picked
+        another one.
+
+ -- Herbert Parentes Fortes Neto <hpfn@ig.com.br>  Tue, 15 Mar 2016 14:43:49 -0300
+
 webcamoid (6.2.0-5) unstable; urgency=medium
 
   * Upload to unstable.

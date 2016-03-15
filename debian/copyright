@@ -3,15 +3,15 @@ Upstream-Name: webcamoid
 Source: https://github.com/hipersayanX/webcamoid
 
 Files: *
-Copyright: 2011-2015 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
+Copyright: 2011-2016 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
 License: GPL-3+
 
-Files: Qb/Plugins/FaceDetect/src/haar/*
-Copyright: 2011-2015  Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
+Files: libAvKys/Plugins/FaceDetect/src/haar/*
+Copyright: 2011-2016  Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
            2000       Intel Corporation
 License: GPL-3+ and BSD-3-Clause
 
-Files: Qb/Plugins/FaceDetect/share/haarcascades/*
+Files: libAvKys/Plugins/FaceDetect/share/haarcascades/*
 Copyright: 2000      Intel Corporation
            2004      Hannes Kruppa and Bernt Schiele (ETH Zurich, Switzerland)
            2006-2011 Modesto Castrillon-Santana (IUSIANI, University of
@@ -20,10 +20,6 @@ License: BSD-3-Clause
 
 Files: debian/*
 Copyright: 2015-2016 Herbert Parentes Fortes Neto <hpfn@ig.com.br>
-License: GPL-3+
-
-Files: debian/man/webcamoid.1
-Copyright: 2015 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
 License: GPL-3+
 
 License: GPL-3+

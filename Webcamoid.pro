@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2015  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,10 +28,19 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += \
-    Qb \
-    StandAlone.pro
+    libAvKys \
+    StandAlone
+
+OTHER_FILES = \
+    .gitignore \
+    README.md
 
 # Install rules
+unix {
+     INSTALLS += desktop
+    desktop.files = $${COMMONS_TARGET}.desktop
+    desktop.path = $${DATAROOTDIR}/applications
+}
 
 INSTALLS += \
     license

@@ -1,5 +1,5 @@
-share/effects.xml usr/share/webcamoid/
-share/icons usr/share/webcamoid/
-share/mainpipeline.json usr/share/webcamoid/
-share/qml usr/share/webcamoid/
-share/ts/*.qm usr/share/webcamoid/locale
+StandAlone/share/effects.xml usr/share/webcamoid/
+StandAlone/share/icons usr/share/webcamoid/
+StandAlone/share/mainpipeline.json usr/share/webcamoid/
+StandAlone/share/qml usr/share/webcamoid/
+StandAlone/share/ts/*.qm usr/share/webcamoid/locale

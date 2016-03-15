@@ -1,0 +1,157 @@
+[
+    [
+        {
+            "pluginId": "MultiSrc",
+            "properties": {
+                "objectName": "source",
+                "loop": true,
+                "audioAlign": true
+            },
+            "connections": [
+                ["", "stateChanged", "videoMux", "setState"],
+                ["", "stateChanged", "muxAudioInput", "setState"]
+            ]
+        },
+        "DirectConnection",
+        {
+            "pluginId": "Multiplex",
+            "properties": {
+                "objectName": "videoMux",
+                "caps": "video/x-raw",
+                "outputIndex": 0
+            }
+        },
+        {
+            "pluginId": "Probe",
+            "properties": {
+                "objectName": "videoOutput"
+            }
+        }
+    ],
+    [
+        {
+            "alias": "source"
+        },
+        "DirectConnection",
+        {
+            "pluginId": "Multiplex",
+            "properties": {
+                "objectName": "muxAudioInput",
+                "caps": "audio/x-raw",
+                "outputIndex": 0
+            }
+        },
+        {
+            "pluginId": "Multiplex",
+            "properties": {
+                "objectName": "audioSwitch",
+                "outputIndex": 1
+            }
+        }
+    ],
+    [
+        {
+            "alias": "muxAudioInput"
+        },
+        "DirectConnection",
+        {
+            "pluginId": "AudioOutput",
+            "properties": {
+                "objectName": "audioOutput"
+            }
+        }
+    ],
+    [
+        {
+            "pluginId": "AudioInput",
+            "properties": {
+                "objectName": "mic"
+            }
+        },
+        {
+            "pluginId": "Multiplex",
+            "properties": {
+                "outputIndex": 1
+            },
+            "connections": [
+                ["mic", "stateChanged", "", "setState"]
+            ]
+        },
+        {
+            "alias": "audioSwitch"
+        }
+    ],
+    [
+        {
+            "alias": "videoOutput"
+        },
+        {
+            "pluginId": "RtPts",
+            "properties": {
+                "objectName": "videoGen"
+            },
+            "connections": [
+                ["record", "stateChanged", "", "setState"]
+            ]
+        },
+        "DirectConnection",
+        {
+            "pluginId": "MultiSink",
+            "properties": {
+                "objectName": "record"
+            }
+        }
+    ],
+    [
+        {
+            "alias": "audioSwitch"
+        },
+        {
+            "alias": "record"
+        }
+    ],
+    [
+        {
+            "pluginId": "VideoCapture",
+            "properties": {
+                "objectName": "videoCapture"
+            },
+            "connections": [
+                ["", "stateChanged", "videoMux", "setState"],
+                ["", "stateChanged", "muxAudioInput", "setState"]
+            ]
+        },
+        "DirectConnection",
+        {
+            "alias": "videoMux"
+        }
+    ],
+    [
+        {
+            "pluginId": "DesktopCapture",
+            "properties": {
+                "objectName": "desktopCapture"
+            },
+            "connections": [
+                ["", "stateChanged", "videoMux", "setState"],
+                ["", "stateChanged", "muxAudioInput", "setState"]
+            ]
+        },
+        "DirectConnection",
+        {
+            "alias": "videoMux"
+        }
+    ],
+    [
+        {
+            "alias": "videoOutput"
+        },
+        "DirectConnection",
+        {
+            "pluginId": "VirtualCamera",
+            "properties": {
+                "objectName": "virtualCamera"
+            }
+        }
+    ]
+]

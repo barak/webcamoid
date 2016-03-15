@@ -3,13 +3,11 @@ Section: video
 Priority: optional
 Maintainer: Herbert Parentes Fortes Neto <hpfn@ig.com.br>
 Build-Depends: debhelper (>= 9),
+               libpulse-dev,
                libavcodec-dev,
                libavdevice-dev,
-               libavfilter-dev,
                libavformat-dev,
-               libavresample-dev,
                libavutil-dev,
-               libpostproc-dev,
                libqt5opengl5-dev,
                libqt5svg5-dev,
                libswresample-dev,
@@ -18,7 +16,6 @@ Build-Depends: debhelper (>= 9),
                linux-libc-dev,
                pkg-config,
                qtdeclarative5-dev,
-               qtmultimedia5-dev,
                qttools5-dev-tools
 Standards-Version: 3.9.7
 Homepage: https://github.com/hipersayanX/webcamoid
@@ -27,7 +24,7 @@ Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/webcamoid.git
 
 Package: webcamoid
 Architecture: linux-any
-Depends: qbqml,
+Depends: akqml,
          webcamoid-data,
          webcamoid-plugins,
          ${misc:Depends},
@@ -48,13 +45,15 @@ Description: full featured webcam capture application
   * Translated to many languages.
   * Use custom network and local files as capture devices.
   * Capture from desktop.
+  * Many recording formats.
+  * Virtual webcam support for feeding other programs.
 
-Package: libwebcamoid6
+Package: libavkys7
 Section: libs
 Architecture: linux-any
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Breaks: libqb6 (= 6.2.0)
-Replaces: libqb6 (= 6.2.0)
+Breaks: libqb6 (= 6.2.0), libwebcamoid6 (= 6.2.0)
+Replaces: libqb6 (= 6.2.0), libwebcamoid6 (= 6.2.0)
 Description: full featured webcam capture application - library
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.
@@ -71,15 +70,17 @@ Description: full featured webcam capture application - library
   * Translated to many languages.
   * Use custom network and local files as capture devices.
   * Capture from desktop.
+  * Many recording formats.
+  * Virtual webcam support for feeding other programs.
  .
  This package contains the library for webcamoid.
 
-Package: libwebcamoid-dev
+Package: libavkys-dev
 Section: libdevel
 Architecture: linux-any
-Depends: libwebcamoid6 (= ${binary:Version}), ${misc:Depends}
-Breaks: libqb6-dev (= 6.2.0)
-Replaces: libqb6-dev (= 6.2.0)
+Depends: libavkys7 (= ${binary:Version}), ${misc:Depends}
+Breaks: libqb6-dev (= 6.2.0), libwebcamoid-dev (= 6.2.0)
+Replaces: libqb6-dev (= 6.2.0), libwebcamoid-dev (= 6.2.0)
 Description: full featured webcam capture application - dev
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.
@@ -96,6 +97,8 @@ Description: full featured webcam capture application - dev
   * Translated to many languages.
   * Use custom network and local files as capture devices.
   * Capture from desktop.
+  * Many recording formats.
+  * Virtual webcam support for feeding other programs.
  .
  This package contains the development files of libwebcamoid6.
 
@@ -120,12 +123,16 @@ Description: full featured webcam capture application - plugins
   * Translated to many languages.
   * Use custom network and local files as capture devices.
   * Capture from desktop.
+  * Many recording formats.
+  * Virtual webcam support for feeding other programs.
  .
  This package contains the plugins for webcamoid.
 
-Package: qbqml
+Package: akqml
 Architecture: linux-any
 Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: qbqml (= 6.2.0)
+Replaces: qbqml (= 6.2.0)
 Description: full featured webcam capture application - qml module
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.
@@ -142,6 +149,8 @@ Description: full featured webcam capture application - qml module
   * Translated to many languages.
   * Use custom network and local files as capture devices.
   * Capture from desktop.
+  * Many recording formats.
+  * Virtual webcam support for feeding other programs.
  .
  This package contains the qml module for webcamoid.
 
@@ -164,5 +173,7 @@ Description: icons and locale files for webcamoid
   * Translated to many languages.
   * Use custom network and local files as capture devices.
   * Capture from desktop.
+  * Many recording formats.
+  * Virtual webcam support for feeding other programs.
  .
  This package contains the icons/locale files for webcamoid.
