@@ -1,3 +1,11 @@
+webcamoid (7.0.0-2) unstable; urgency=low
+
+  * Upload to unstable.
+  * debian/control:
+      - long description of libavkys-dev fixed. libwebcamoid6 -> libavkys.
+
+ -- Herbert Parentes Fortes Neto <hpfn@ig.com.br>  Thu, 17 Mar 2016 16:29:47 -0300
+
 webcamoid (7.0.0-1) experimental; urgency=low
 
   * New upstream release.

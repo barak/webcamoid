@@ -100,7 +100,7 @@ Description: full featured webcam capture application - dev
   * Many recording formats.
   * Virtual webcam support for feeding other programs.
  .
- This package contains the development files of libwebcamoid6.
+ This package contains the development files of libavkys.
 
 Package: webcamoid-plugins
 Architecture: linux-any
