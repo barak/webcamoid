@@ -3,11 +3,11 @@ Section: video
 Priority: optional
 Maintainer: Herbert Parentes Fortes Neto <hpfn@ig.com.br>
 Build-Depends: debhelper (>= 9),
-               libpulse-dev,
                libavcodec-dev,
                libavdevice-dev,
                libavformat-dev,
                libavutil-dev,
+               libpulse-dev,
                libqt5opengl5-dev,
                libqt5svg5-dev,
                libswresample-dev,
@@ -25,6 +25,10 @@ Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/webcamoid.git
 Package: webcamoid
 Architecture: linux-any
 Depends: akqml,
+         qml-module-qtquick-controls,
+         qml-module-qtquick-dialogs,
+         qml-module-qtquick-layouts,
+         qml-module-qtquick-window2,
          webcamoid-data,
          webcamoid-plugins,
          ${misc:Depends},

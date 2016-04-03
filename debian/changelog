@@ -1,3 +1,14 @@
+webcamoid (7.0.0-3) unstable; urgency=low
+
+  * debian/control: (Closes:  #819880)
+      - added to Depends field of webcamoid package:
+          qml-module-qtquick-dialogs
+          qml-module-qtquick-controls
+          qml-module-qtquick-layouts
+          qml-module-qtquick-window2
+
+ -- Herbert Parentes Fortes Neto <hpfn@ig.com.br>  Sun, 03 Apr 2016 13:36:24 -0300
+
 webcamoid (7.0.0-2) unstable; urgency=low
 
   * Upload to unstable.
