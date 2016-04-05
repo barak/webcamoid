@@ -1,0 +1,53 @@
+Source: webcamoid
+Section: video
+Priority: extra
+Maintainer: Gonzalo Pedone <hipersayan.x@gmail.com>
+Build-Depends: debhelper (>= 8.0.0),
+ pkg-config,
+ linux-libc-dev,
+ qttools5-dev-tools,
+ qtdeclarative5-dev
+ libqt5svg5-dev,
+ libavcodec-dev,
+ libavdevice-dev,
+ libavformat-dev,
+ libavutil-dev,
+ libswresample-dev,
+ libswscale-dev,
+ libpulse-dev,
+ libv4l-dev
+Standards-Version: 3.9.4
+Homepage: https://github.com/hipersayanX/webcamoid
+#Vcs-Git: git://github.com/hipersayanX/webcamoid.git
+#Vcs-Browser: https://github.com/hipersayanX/webcamoid
+
+Package: webcamoid
+Architecture: any
+Depends: ${shlibs:Depends},
+ ${misc:Depends},
+ qml-module-qtquick-controls,
+ libqt5svg5,
+ libpulse0,
+ libavcodec56,
+ libavdevice56,
+ libavformat56,
+ libavutil54,
+ libswresample1,
+ libswscale3
+Suggests:
+ v4l2loopback-utils
+Description: Webcamoid is a full featured webcam capture application.
+ Features:
+ .
+ * Cross-platform (GNU/Linux, Windows)
+ * Take pictures and record videos with the webcam.
+ * Manages multiple webcams.
+ * Written in C++/Qt.
+ * Custom controls for each webcam.
+ * Add funny effects to the webcam.
+ * +60 effects available.
+ * Translated to many languages.
+ * Use custom network and local files as capture devices.
+ * Capture from desktop.
+ * Many recording formats.
+ * Virtual webcam support for feeding other programs.
