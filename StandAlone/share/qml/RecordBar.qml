@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 import QtQuick 2.5
@@ -48,9 +47,21 @@ Rectangle {
 
     function indexOfFormat(format)
     {
-        for (var i = 0; i < lsvRecordingFormatList.model.count; i++)
-            if (lsvRecordingFormatList.model.get(i).format == format)
-                return i
+        var lo = 0
+        var mid = lsvRecordingFormatList.model.count >> 1
+        var hi = lsvRecordingFormatList.model.count
+
+        while (mid !== lo || mid !== hi) {
+            if (lsvRecordingFormatList.model.get(mid).format == format)
+                return mid
+            else if (lsvRecordingFormatList.model.get(mid).format < format) {
+                lo = mid + 1
+                mid = (lo + hi) >> 1
+            } else if (lsvRecordingFormatList.model.get(mid).format > format) {
+                hi = mid
+                mid = (lo + hi) >> 1
+            }
+        }
 
         return -1
     }
@@ -74,7 +85,6 @@ Rectangle {
         }
 
         sort(lsvRecordingFormatList.model, 0, lsvRecordingFormatList.model.count)
-
         lsvRecordingFormatList.currentIndex = indexOfFormat(Webcamoid.curRecordingFormat)
     }
 

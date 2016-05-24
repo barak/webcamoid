@@ -1,2 +1,2 @@
 libAvKys/Lib/src/*.h usr/include/libAvKys
-usr/lib/*/libAvKys.so
+usr/lib/*/libavkys.so

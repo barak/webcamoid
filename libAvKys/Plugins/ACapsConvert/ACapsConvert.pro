@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
 #
-# Email   : hipersayan DOT x AT gmail DOT com
-# Web-Site: http://github.com/hipersayanX/webcamoid
+# Web-Site: http://webcamoid.github.io/
 
 exists(commons.pri) {
     include(commons.pri)
@@ -44,8 +43,7 @@ HEADERS += \
 INCLUDEPATH += \
     ../../Lib/src
 
-!win32: LIBS += -L../../Lib/ -l$${COMMONS_TARGET}
-win32: LIBS += -L../../Lib/ -l$${COMMONS_TARGET}$${VER_MAJ}
+LIBS += -L../../Lib/ -l$${COMMONS_TARGET}
 
 OTHER_FILES += pspec.json
 
@@ -61,5 +59,4 @@ TEMPLATE = lib
 
 INSTALLS += target
 
-unix: target.path = $${LIBDIR}/$${COMMONS_TARGET}
-!unix: target.path = $${PREFIX}/$${COMMONS_TARGET}/Plugins
+target.path = $${LIBDIR}/$${COMMONS_TARGET}

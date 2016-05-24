@@ -1,6 +1,6 @@
 # Webcamoid, webcam capture application #
 
-[Webcamoid](http://opendesktop.org/content/show.php/Webcamoid?content=144796) is a full featured webcam capture application.
+[Webcamoid](https://webcamoid.github.io/) is a full featured webcam capture application.
 
 ## Features ##
 
@@ -19,13 +19,11 @@
 
 ## Build and Install ##
 
-Visit the [wiki](https://github.com/hipersayanX/webcamoid/wiki) for a complete compile and install instructions.
+Visit the [wiki](https://github.com/webcamoid/webcamoid/wiki) for a comprehensive compile and install instructions.
 
-## Translating ##
+## Status ##
 
-Register in [Weblate](https://hosted.weblate.org/) and start translating Webcamoid as many other projects.
-
-[![Translation status](https://hosted.weblate.org/widgets/webcamoid/-/svg-badge.svg)](https://hosted.weblate.org/engage/webcamoid/?utm_source=widget)
+[![Build Status](https://travis-ci.org/webcamoid/webcamoid.svg?branch=master)](https://travis-ci.org/webcamoid/webcamoid)[![Build status](https://ci.appveyor.com/api/projects/status/hrgbf3qe52ysr8gl?svg=true)](https://ci.appveyor.com/project/hipersayanX/webcamoid)[![Translation status](https://hosted.weblate.org/widgets/webcamoid/-/svg-badge.svg)](https://hosted.weblate.org/engage/webcamoid/?utm_source=widget)[![CLA assistant](https://cla-assistant.io/readme/badge/webcamoid/webcamoid)](https://cla-assistant.io/webcamoid/webcamoid)
 
 ## Reporting Bugs ##
 
@@ -38,8 +36,8 @@ Use Webcamoid until an abnormal event happen, write a list with the following in
 5. Your DE/WM version.
 6. Any other useful information.
 
-Send this list to the [issues page](http://github.com/hipersayanX/webcamoid/issues). Please report **ANY** problem you have with Webcamoid in the official website, help to centralize information in one unique place.
+Send this list to the [issues page](http://github.com/webcamoid/webcamoid/issues). Please report **ANY** problem you have with Webcamoid in the official website, help to centralize information in one unique place.
 
 ## Subscribe ##
 
-Stay tuned to new releases with the project [feeds](https://github.com/hipersayanX/webcamoid/releases.atom).
+Stay tuned to new releases with the project [feeds](https://github.com/webcamoid/webcamoid/releases.atom).

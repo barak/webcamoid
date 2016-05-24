@@ -1,3 +1,24 @@
+webcamoid (7.1.0-1) experimental; urgency=medium
+
+  * New upstream release.
+  * debian/control:
+      - Bump Standards-Version. From 3.9.7 to 3.9.8.
+      - Homepage field updated.
+  * debian/copyright:
+      - Source field updated.
+  * debian/libavkys7.symbols:
+      - new file
+  * debian/libavkys7.install
+  * debian/libavkys-dev.install
+  * debian/webcamoid-plugins.install:
+      - upstream put files and directories in lowercase.
+  * debian/webcamoid.manpages created:
+      - to clean debian/webcamoid.install.
+  * debian/webcamoid.install:
+      - line about manpage removed.
+
+ -- Herbert Parentes Fortes Neto <hpfn@ig.com.br>  Tue, 24 May 2016 10:31:46 -0300
+
 webcamoid (7.0.0-3) unstable; urgency=low
 
   * debian/control: (Closes:  #819880)

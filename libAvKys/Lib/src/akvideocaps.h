@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef AKVIDEOCAPS_H
 #define AKVIDEOCAPS_H
+
+#include <QSize>
 
 #include "akcaps.h"
 #include "akfrac.h"
@@ -42,6 +43,11 @@ class AkVideoCaps: public QObject
                WRITE setBpp
                RESET resetBpp
                NOTIFY bppChanged)
+    Q_PROPERTY(QSize size
+               READ size
+               WRITE setSize
+               RESET resetSize
+               NOTIFY sizeChanged)
     Q_PROPERTY(int width
                READ width
                WRITE setWidth
@@ -249,6 +255,7 @@ class AkVideoCaps: public QObject
         bool operator ==(const AkVideoCaps &other) const;
         bool operator !=(const AkVideoCaps &other) const;
         operator bool() const;
+        operator AkCaps() const;
 
         Q_INVOKABLE bool isValid() const;
         Q_INVOKABLE bool &isValid();
@@ -256,6 +263,7 @@ class AkVideoCaps: public QObject
         Q_INVOKABLE PixelFormat &format();
         Q_INVOKABLE int bpp() const;
         Q_INVOKABLE int &bpp();
+        Q_INVOKABLE QSize size() const;
         Q_INVOKABLE int width() const;
         Q_INVOKABLE int &width();
         Q_INVOKABLE int height() const;
@@ -282,6 +290,7 @@ class AkVideoCaps: public QObject
     signals:
         void formatChanged(PixelFormat format);
         void bppChanged(int bpp);
+        void sizeChanged(const QSize &size);
         void widthChanged(int width);
         void heightChanged(int height);
         void fpsChanged(const AkFrac &fps);
@@ -289,11 +298,13 @@ class AkVideoCaps: public QObject
     public slots:
         void setFormat(PixelFormat format);
         void setBpp(int bpp);
+        void setSize(const QSize &size);
         void setWidth(int width);
         void setHeight(int height);
         void setFps(const AkFrac &fps);
         void resetFormat();
         void resetBpp();
+        void resetSize();
         void resetWidth();
         void resetHeight();
         void resetFps();

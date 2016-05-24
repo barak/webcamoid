@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
-#include "akvideocaps.h"
 #include "akutils.h"
 
 typedef QMap<QImage::Format, AkVideoCaps::PixelFormat> ImageToPixelFormatMap;
@@ -27,11 +25,11 @@ inline ImageToPixelFormatMap initImageToPixelFormatMap()
 {
     ImageToPixelFormatMap imageToFormat;
     imageToFormat[QImage::Format_Mono] = AkVideoCaps::Format_monob;
-    imageToFormat[QImage::Format_RGB32] = AkVideoCaps::Format_bgr0;
-    imageToFormat[QImage::Format_ARGB32] = AkVideoCaps::Format_bgra;
+    imageToFormat[QImage::Format_RGB32] = AkVideoCaps::Format_0rgb;
+    imageToFormat[QImage::Format_ARGB32] = AkVideoCaps::Format_argb;
     imageToFormat[QImage::Format_RGB16] = AkVideoCaps::Format_rgb565le;
     imageToFormat[QImage::Format_RGB555] = AkVideoCaps::Format_rgb555le;
-    imageToFormat[QImage::Format_RGB888] = AkVideoCaps::Format_bgr24;
+    imageToFormat[QImage::Format_RGB888] = AkVideoCaps::Format_rgb24;
     imageToFormat[QImage::Format_RGB444] = AkVideoCaps::Format_rgb444le;
     imageToFormat[QImage::Format_Grayscale8] = AkVideoCaps::Format_gray;
 
@@ -81,4 +79,50 @@ QImage AkUtils::packetToImage(const AkPacket &packet)
             image.setColor(i, i);
 
     return image;
+}
+
+AkPacket AkUtils::roundSizeTo(const AkPacket &packet, int n)
+{
+    int frameWidth = packet.property("width").toInt();
+    int frameHeight = packet.property("height").toInt();
+
+    int width = n * qRound(frameWidth / qreal(n));
+    int height = n * qRound(frameHeight / qreal(n));
+
+    if (frameWidth == width
+        && frameHeight == height)
+        return packet;
+
+    QImage frame = AkUtils::packetToImage(packet);
+
+    if (frame.isNull())
+        return packet;
+
+    return AkUtils::imageToPacket(frame.scaled(width, height), packet);
+}
+
+AkVideoPacket AkUtils::convertVideo(const AkVideoPacket &packet,
+                                    AkVideoCaps::PixelFormat format,
+                                    const QSize &size)
+{
+    if (!imageToFormat->values().contains(format))
+        return AkVideoPacket();
+
+    if (packet.caps().format() == format
+        && (size.isEmpty() || packet.caps().size() == size))
+        return packet;
+
+    QImage frame = AkUtils::packetToImage(packet.toPacket());
+
+    if (frame.isNull())
+        return packet;
+
+    QImage convertedFrame;
+
+    if (size.isEmpty())
+        convertedFrame = frame.convertToFormat(imageToFormat->key(format));
+    else
+        convertedFrame = frame.convertToFormat(imageToFormat->key(format)).scaled(size);
+
+    return AkUtils::imageToPacket(convertedFrame, packet.toPacket());
 }

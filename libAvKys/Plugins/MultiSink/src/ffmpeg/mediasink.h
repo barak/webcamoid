@@ -14,14 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef MEDIASINK_H
 #define MEDIASINK_H
 
+#include <QtConcurrent>
+#include <QQueue>
 #include <QMutex>
+#include <QWaitCondition>
 
 #include "outputparams.h"
 
@@ -46,6 +48,11 @@ class MediaSink: public QObject
     Q_PROPERTY(QVariantList streams
                READ streams
                NOTIFY streamsChanged)
+    Q_PROPERTY(qint64 maxPacketQueueSize
+               READ maxPacketQueueSize
+               WRITE setMaxPacketQueueSize
+               RESET resetMaxPacketQueueSize
+               NOTIFY maxPacketQueueSizeChanged)
 
     public:
         explicit MediaSink(QObject *parent=NULL);
@@ -55,6 +62,7 @@ class MediaSink: public QObject
         Q_INVOKABLE QString outputFormat() const;
         Q_INVOKABLE QVariantMap formatOptions() const;
         Q_INVOKABLE QVariantList streams() const;
+        Q_INVOKABLE qint64 maxPacketQueueSize() const;
 
         Q_INVOKABLE QStringList supportedFormats();
         Q_INVOKABLE QStringList fileExtensions(const QString &format);
@@ -76,11 +84,31 @@ class MediaSink: public QObject
         QString m_location;
         QString m_outputFormat;
         QVariantMap m_formatOptions;
-
         QList<QVariantMap> m_streamConfigs;
         QList<OutputParams> m_streamParams;
         AVFormatContext *m_formatContext;
-        QMutex m_mutex;
+        QThreadPool m_threadPool;
+        qint64 m_packetQueueSize;
+        qint64 m_maxPacketQueueSize;
+        bool m_runAudioLoop;
+        bool m_runVideoLoop;
+        bool m_runSubtitleLoop;
+        bool m_isRecording;
+        QMutex m_packetMutex;
+        QMutex m_audioMutex;
+        QMutex m_videoMutex;
+        QMutex m_subtitleMutex;
+        QMutex m_writeMutex;
+        QWaitCondition m_audioQueueNotEmpty;
+        QWaitCondition m_videoQueueNotEmpty;
+        QWaitCondition m_subtitleQueueNotEmpty;
+        QWaitCondition m_packetQueueNotFull;
+        QQueue<AkAudioPacket> m_audioPackets;
+        QQueue<AkVideoPacket> m_videoPackets;
+        QQueue<AkPacket> m_subtitlePackets;
+        QFuture<void> m_audioLoopResult;
+        QFuture<void> m_videoLoopResult;
+        QFuture<void> m_subtitleLoopResult;
 
         void flushStreams();
         AkVideoCaps nearestDVCaps(const AkVideoCaps &caps) const;
@@ -90,28 +118,37 @@ class MediaSink: public QObject
         AkVideoCaps nearestGXFCaps(const AkVideoCaps &caps) const;
         AkAudioCaps nearestSWFCaps(const AkAudioCaps &caps) const;
 
+        static void writeAudioLoop(MediaSink *self);
+        static void writeVideoLoop(MediaSink *self);
+        static void writeSubtitleLoop(MediaSink *self);
+        void decreasePacketQueue(int packetSize);
+
     signals:
         void locationChanged(const QString &location);
         void outputFormatChanged(const QString &outputFormat);
         void formatOptionsChanged(const QVariantMap &formatOptions);
         void streamsChanged(const QVariantList &streams);
+        void maxPacketQueueSizeChanged(qint64 maxPacketQueueSize);
         void streamUpdated(int index);
 
     public slots:
         void setLocation(const QString &location);
         void setOutputFormat(const QString &outputFormat);
         void setFormatOptions(const QVariantMap &formatOptions);
+        void setMaxPacketQueueSize(qint64 maxPacketQueueSize);
         void resetLocation();
         void resetOutputFormat();
         void resetFormatOptions();
-        void writeAudioPacket(const AkAudioPacket &packet);
-        void writeVideoPacket(const AkVideoPacket &packet);
-        void writeSubtitlePacket(const AkPacket &packet);
+        void resetMaxPacketQueueSize();
+        void enqueuePacket(const AkPacket &packet);
         void clearStreams();
         bool init();
         void uninit();
 
     private slots:
+        void writeAudioPacket(const AkAudioPacket &packet);
+        void writeVideoPacket(const AkVideoPacket &packet);
+        void writeSubtitlePacket(const AkPacket &packet);
         void updateStreams();
 };
 

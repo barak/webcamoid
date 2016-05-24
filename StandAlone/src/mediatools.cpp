@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <QSettings>
@@ -25,6 +24,12 @@
 #include <QFileDialog>
 
 #include "mediatools.h"
+
+#ifdef USE_GSTREAMER
+#include "gstreamer/cfwinfo.h"
+#else
+#include "ffmpeg/cfwinfo.h"
+#endif
 
 typedef QMap<MediaTools::RecordFrom, QString> RecordFromMap;
 
@@ -44,7 +49,6 @@ MediaTools::MediaTools(QQmlApplicationEngine *engine, QObject *parent):
     QObject(parent)
 {
     this->m_appEngine = engine;
-
     this->m_playAudioFromSource = true;
     this->m_recordAudioFrom = RecordFromMic;
     this->m_recording = false;
@@ -262,15 +266,15 @@ QStringList MediaTools::recordingFormats() const
                                   Q_ARG(QString, format),
                                   Q_ARG(QString, "video/x-raw"));
 
-        QStringList extentions;
+        QStringList extensions;
         QMetaObject::invokeMethod(this->m_record.data(),
                                   "fileExtensions",
-                                  Q_RETURN_ARG(QStringList, extentions),
+                                  Q_RETURN_ARG(QStringList, extensions),
                                   Q_ARG(QString, format));
 
         if (!audioCodecs.isEmpty()
             && !videoCodecs.isEmpty()
-            && !extentions.isEmpty())
+            && !extensions.isEmpty())
             formats << format;
     }
 
@@ -351,6 +355,11 @@ QString MediaTools::applicationVersion() const
 QString MediaTools::qtVersion() const
 {
     return QT_VERSION_STR;
+}
+
+QString MediaTools::codecFramework() const
+{
+    return CodecFramework::info();
 }
 
 QString MediaTools::copyrightNotice() const
@@ -921,6 +930,7 @@ void MediaTools::setRecordAudioFrom(const QString &recordAudioFrom)
     }
 
     this->m_recordAudioFrom = recordAudio;
+    this->updateRecordingParams();
     emit this->recordAudioFromChanged(recordAudioFrom);
 }
 
@@ -1186,11 +1196,12 @@ void MediaTools::setCurStream(const QString &stream)
         return;
 
     this->m_curStream = stream;
-    emit this->curStreamChanged(stream);
     AkElementPtr source = this->sourceElement();
 
     if (source)
         source->setProperty("media", stream);
+
+    emit this->curStreamChanged(stream);
 }
 
 void MediaTools::setPlayAudioFromSource(bool playAudio)
@@ -1206,23 +1217,19 @@ void MediaTools::setPlayAudioFromSource(bool playAudio)
 
     AkElement::ElementState sourceState = this->m_source->state();
 
-    if (playAudio) {
-        if (sourceState == AkElement::ElementStatePlaying ||
-            sourceState == AkElement::ElementStatePaused)
-            this->m_audioOutput->setState(sourceState);
+    if (sourceState == AkElement::ElementStatePlaying)
+        this->m_source->setState(AkElement::ElementStatePaused);
 
-        QObject::connect(this->m_source.data(),
-                         SIGNAL(stateChanged(AkElement::ElementState)),
-                         this->m_audioOutput.data(),
-                         SLOT(setState(AkElement::ElementState)));
-    } else {
-        this->m_audioOutput->setState(AkElement::ElementStateNull);
+    AkElement::ElementState audioOutState = this->m_audioOutput->state();
+    this->m_audioOutput->setState(AkElement::ElementStateNull);
 
-        QObject::disconnect(this->m_source.data(),
-                            SIGNAL(stateChanged(AkElement::ElementState)),
-                            this->m_audioOutput.data(),
-                            SLOT(setState(AkElement::ElementState)));
-    }
+    this->m_audioOutput->setProperty("mode",
+                                     playAudio?
+                                         "output":
+                                         "dummyoutput");
+
+    this->m_audioOutput->setState(audioOutState);
+    this->m_source->setState(sourceState);
 }
 
 void MediaTools::setWindowWidth(int windowWidth)
@@ -1514,6 +1521,26 @@ void MediaTools::saveConfigs()
     config.beginGroup("RecordConfigs");
     config.setValue("recordingFormat", this->curRecordingFormat());
     config.endGroup();
+
+    config.beginGroup("PluginsCache");
+    config.beginWriteArray("paths");
+
+    i = 0;
+
+    foreach (QString path, AkElement::pluginsCache()) {
+        config.setArrayIndex(i);
+
+#ifdef Q_OS_WIN32
+        config.setValue("path", applicationDir.relativeFilePath(path));
+#else
+        config.setValue("path", path);
+#endif
+
+        i++;
+    }
+
+    config.endArray();
+    config.endGroup();
 }
 
 void MediaTools::setStream(const QString &stream, const QString &description)
@@ -1627,11 +1654,11 @@ void MediaTools::updateRecordingParams()
     }
 
     if (this->m_recordAudioFrom == RecordFromMic) {
-        QString audioCaps;
+        AkCaps audioCaps;
 
         QMetaObject::invokeMethod(this->m_mic.data(),
                                   "caps",
-                                  Q_RETURN_ARG(QString, audioCaps));
+                                  Q_RETURN_ARG(AkCaps, audioCaps));
 
         streamCaps[1] = audioCaps;
     } else if (this->m_recordAudioFrom == RecordFromNone)

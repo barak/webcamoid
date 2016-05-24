@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 import QtQuick 2.5
@@ -24,6 +23,19 @@ import QtQuick.Layouts 1.1
 
 GridLayout {
     columns: 3
+
+    function strToSize(str)
+    {
+        if (str.length < 1)
+            return Qt.size()
+
+        var size = str.split("x")
+
+        if (size.length < 2)
+            return Qt.size()
+
+        return Qt.size(size[0], size[1])
+    }
 
     // Configure threshold.
     Label {
@@ -47,24 +59,16 @@ GridLayout {
         onValueChanged: sldThreshold.value = value
     }
 
-    // Configure levels.
+    // Scan block.
     Label {
-        text: qsTr("Levels")
+        text: qsTr("Scan block")
     }
-    Slider {
-        id: sldLevels
-        value: Cartoon.levels
-        stepSize: 1
-        maximumValue: 32
+    TextField {
+        text: Cartoon.scanSize.width + "x" + Cartoon.scanSize.height
+        validator: RegExpValidator {
+            regExp: /\d+x\d+/
+        }
 
-        onValueChanged: Cartoon.levels = value
-    }
-    SpinBox {
-        id: spbLevels
-        value: sldLevels.value
-        maximumValue: sldLevels.maximumValue
-        stepSize: sldLevels.stepSize
-
-        onValueChanged: sldLevels.value = value
+        onTextChanged: Cartoon.scanSize = strToSize(text)
     }
 }

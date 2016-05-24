@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef CARTOONELEMENT_H
@@ -26,6 +25,8 @@
 #include <ak.h>
 #include <akutils.h>
 
+#include "pixel.h"
+
 class CartoonElement: public AkElement
 {
     Q_OBJECT
@@ -34,11 +35,11 @@ class CartoonElement: public AkElement
                WRITE setThreshold
                RESET resetThreshold
                NOTIFY thresholdChange)
-    Q_PROPERTY(int levels
-               READ levels
-               WRITE setLevels
-               RESET resetLevels
-               NOTIFY levelsChange)
+    Q_PROPERTY(QSize scanSize
+               READ scanSize
+               WRITE setScanSize
+               RESET resetScanSize
+               NOTIFY scanSizeChanged)
 
     public:
         explicit CartoonElement();
@@ -47,32 +48,27 @@ class CartoonElement: public AkElement
                                               const QString &controlId) const;
 
         Q_INVOKABLE int threshold() const;
-        Q_INVOKABLE int levels() const;
+        Q_INVOKABLE QSize scanSize() const;
 
     private:
         int m_threshold;
-        int m_levels;
+        QSize m_scanSize;
+        QVector<PixelInt> m_palette;
+        qint64 m_id;
+        qint64 m_lastTime;
 
-        inline int threshold(int color, int levels)
-        {
-            if (levels < 1)
-                levels = 1;
-
-            double k = 256. / levels;
-            int r = k * int(color / k + 0.5);
-
-            return qBound(0, r, 255);
-        }
+        QVector<QRgb> palette(const QImage &img);
+        QRgb nearestColor(const QVector<QRgb> &palette, QRgb color) const;
 
     signals:
         void thresholdChange(int threshold);
-        void levelsChange(int levels);
+        void scanSizeChanged(QSize scanSize);
 
     public slots:
         void setThreshold(int threshold);
-        void setLevels(int levels);
+        void setScanSize(QSize scanSize);
         void resetThreshold();
-        void resetLevels();
+        void resetScanSize();
         AkPacket iStream(const AkPacket &packet);
 };
 

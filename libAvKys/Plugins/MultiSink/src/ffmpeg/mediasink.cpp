@@ -14,18 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <limits>
 #include <QSize>
 #include <QtMath>
+#include <akutils.h>
 
 #include "mediasink.h"
 
 #define CODEC_COMPLIANCE FF_COMPLIANCE_VERY_STRICT
 //#define CODEC_COMPLIANCE FF_COMPLIANCE_EXPERIMENTAL
+#define THREAD_WAIT_LIMIT 500
 
 typedef QMap<AVMediaType, QString> AvMediaTypeStrMap;
 
@@ -180,6 +181,12 @@ MediaSink::MediaSink(QObject *parent): QObject(parent)
     avformat_network_init();
 
     this->m_formatContext = NULL;
+    this->m_packetQueueSize = 0;
+    this->m_maxPacketQueueSize = 15 * 1024 * 1024;
+    this->m_runAudioLoop = false;
+    this->m_runVideoLoop = false;
+    this->m_runSubtitleLoop = false;
+    this->m_isRecording = false;
 
     QObject::connect(this,
                      &MediaSink::outputFormatChanged,
@@ -216,6 +223,11 @@ QVariantList MediaSink::streams() const
         streams << stream;
 
     return streams;
+}
+
+qint64 MediaSink::maxPacketQueueSize() const
+{
+    return this->m_maxPacketQueueSize;
 }
 
 QStringList MediaSink::supportedFormats()
@@ -1182,6 +1194,89 @@ AkAudioCaps MediaSink::nearestSWFCaps(const AkAudioCaps &caps) const
     return nearestCaps;
 }
 
+void MediaSink::writeAudioLoop(MediaSink *self)
+{
+    while (self->m_runAudioLoop) {
+        self->m_audioMutex.lock();
+        bool gotPacket = true;
+
+        if (self->m_audioPackets.isEmpty())
+            gotPacket = self->m_audioQueueNotEmpty.wait(&self->m_audioMutex,
+                                                        THREAD_WAIT_LIMIT);
+
+        AkAudioPacket packet;
+
+        if (gotPacket) {
+            packet = self->m_audioPackets.dequeue();
+            self->decreasePacketQueue(packet.buffer().size());
+        }
+
+        self->m_audioMutex.unlock();
+
+        if (gotPacket)
+            self->writeAudioPacket(packet);
+    }
+}
+
+void MediaSink::writeVideoLoop(MediaSink *self)
+{
+    while (self->m_runVideoLoop) {
+        self->m_videoMutex.lock();
+        bool gotPacket = true;
+
+        if (self->m_videoPackets.isEmpty())
+            gotPacket = self->m_videoQueueNotEmpty.wait(&self->m_videoMutex,
+                                                        THREAD_WAIT_LIMIT);
+
+        AkVideoPacket packet;
+
+        if (gotPacket) {
+            packet = self->m_videoPackets.dequeue();
+            self->decreasePacketQueue(packet.buffer().size());
+        }
+
+        self->m_videoMutex.unlock();
+
+        if (gotPacket)
+            self->writeVideoPacket(packet);
+    }
+}
+
+void MediaSink::writeSubtitleLoop(MediaSink *self)
+{
+    while (self->m_runSubtitleLoop) {
+        self->m_subtitleMutex.lock();
+        bool gotPacket = true;
+
+        if (self->m_subtitlePackets.isEmpty())
+            gotPacket = self->m_subtitleQueueNotEmpty.wait(&self->m_subtitleMutex,
+                                                           THREAD_WAIT_LIMIT);
+
+        AkPacket packet;
+
+        if (gotPacket) {
+            packet = self->m_subtitlePackets.dequeue();
+            self->decreasePacketQueue(packet.buffer().size());
+        }
+
+        self->m_subtitleMutex.unlock();
+
+        if (gotPacket)
+            self->writeSubtitlePacket(packet);
+    }
+}
+
+void MediaSink::decreasePacketQueue(int packetSize)
+{
+    this->m_packetMutex.lock();
+    this->m_packetQueueSize -= packetSize;
+
+    if (this->m_packetQueueSize <= this->m_maxPacketQueueSize)
+        this->m_packetQueueNotFull.wakeAll();
+
+    this->m_packetMutex.unlock();
+}
+
 void MediaSink::setLocation(const QString &location)
 {
     if (this->m_location == location)
@@ -1209,6 +1304,15 @@ void MediaSink::setFormatOptions(const QVariantMap &formatOptions)
     emit this->formatOptionsChanged(formatOptions);
 }
 
+void MediaSink::setMaxPacketQueueSize(qint64 maxPacketQueueSize)
+{
+    if (this->m_maxPacketQueueSize == maxPacketQueueSize)
+        return;
+
+    this->m_maxPacketQueueSize = maxPacketQueueSize;
+    emit this->maxPacketQueueSizeChanged(maxPacketQueueSize);
+}
+
 void MediaSink::resetLocation()
 {
     this->setLocation("");
@@ -1224,223 +1328,46 @@ void MediaSink::resetFormatOptions()
     this->setFormatOptions(QVariantMap());
 }
 
-void MediaSink::writeAudioPacket(const AkAudioPacket &packet)
+void MediaSink::resetMaxPacketQueueSize()
 {
-    if (!this->m_formatContext)
-        return;
+    this->setMaxPacketQueueSize(15 * 1024 * 1024);
+}
 
-    int streamIndex = -1;
-
-    for (int i = 0; i < this->m_streamParams.size(); i++)
-        if (this->m_streamParams[i].inputIndex() == packet.index()) {
-            streamIndex = i;
-
-            break;
-        }
-
-    if (streamIndex < 0)
-        return;
-
-    AVStream *stream = this->m_formatContext->streams[streamIndex];
-    AVCodecContext *codecContext = stream->codec;
-
-    AVFrame iFrame;
-    memset(&iFrame, 0, sizeof(AVFrame));
-    iFrame.format = codecContext->sample_fmt;
-    iFrame.channels = codecContext->channels;
-    iFrame.channel_layout = codecContext->channel_layout;
-    iFrame.sample_rate = codecContext->sample_rate;
-
-    if (!this->m_streamParams[streamIndex].convert(packet, &iFrame)) {
-        av_frame_unref(&iFrame);
-
-        return;
-    }
-
-    AkFrac outTimeBase(codecContext->time_base.num,
-                       codecContext->time_base.den);
-    qint64 pts = qRound(packet.pts()
-                        * packet.timeBase().value()
-                        / outTimeBase.value());
-    iFrame.pts = iFrame.pkt_pts = pts;
-
-    this->m_streamParams[streamIndex].addAudioSamples(&iFrame, packet.id());
-
-    int outSamples = codecContext->codec->capabilities
-                     & AV_CODEC_CAP_VARIABLE_FRAME_SIZE?
-                        iFrame.nb_samples:
-                        codecContext->frame_size;
-
-    av_frame_unref(&iFrame);
-
+void MediaSink::enqueuePacket(const AkPacket &packet)
+{
     forever {
-        pts = this->m_streamParams[streamIndex].audioPts();
-
-        uint8_t *buffer = NULL;
-        int bufferSize = this->m_streamParams[streamIndex].readAudioSamples(outSamples, &buffer);
-
-        if (bufferSize < 1)
-            break;
-
-        AVFrame oFrame;
-        memset(&oFrame, 0, sizeof(AVFrame));
-        oFrame.format = codecContext->sample_fmt;
-        oFrame.channels = codecContext->channels;
-        oFrame.channel_layout = codecContext->channel_layout;
-        oFrame.sample_rate = codecContext->sample_rate;
-        oFrame.nb_samples = outSamples;
-        oFrame.pts = oFrame.pkt_pts = pts;
-
-        if (avcodec_fill_audio_frame(&oFrame,
-                                     codecContext->channels,
-                                     codecContext->sample_fmt,
-                                     buffer,
-                                     bufferSize,
-                                     1) < 0) {
-            delete [] buffer;
-
-            continue;
-        }
-
-        // Initialize audio packet.
-        AVPacket pkt;
-        memset(&pkt, 0, sizeof(AVPacket));
-        av_init_packet(&pkt);
-
-        // Compress audio packet.
-        int gotPacket;
-        int result = avcodec_encode_audio2(codecContext,
-                                           &pkt,
-                                           &oFrame,
-                                           &gotPacket);
-
-        if (result < 0) {
-            char error[1024];
-            av_strerror(result, error, 1024);
-            qDebug() << "Error: " << error;
-            delete [] buffer;
-
-            break;
-        }
-
-        if (!gotPacket) {
-            delete [] buffer;
-
-            continue;
-        }
-
-        pkt.stream_index = streamIndex;
-        av_packet_rescale_ts(&pkt, codecContext->time_base, stream->time_base);
-
-        // Write audio packet.
-        this->m_mutex.lock();
-        av_interleaved_write_frame(this->m_formatContext, &pkt);
-        this->m_mutex.unlock();
-
-        delete [] buffer;
-    }
-}
-
-void MediaSink::writeVideoPacket(const AkVideoPacket &packet)
-{
-    if (!this->m_formatContext)
-        return;
-
-    int streamIndex = -1;
-
-    for (int i = 0; i < this->m_streamParams.size(); i++)
-        if (this->m_streamParams[i].inputIndex() == packet.index()) {
-            streamIndex = i;
-
-            break;
-        }
-
-    if (streamIndex < 0)
-        return;
-
-    AVStream *stream = this->m_formatContext->streams[streamIndex];
-    AVCodecContext *codecContext = stream->codec;
-
-    AVFrame oFrame;
-    memset(&oFrame, 0, sizeof(AVFrame));
-    oFrame.format = codecContext->pix_fmt;
-    oFrame.width = codecContext->width;
-    oFrame.height = codecContext->height;
-
-    if (!this->m_streamParams[streamIndex].convert(packet, &oFrame)) {
-        av_frame_unref(&oFrame);
-
-        return;
-    }
-
-    AkFrac outTimeBase(codecContext->time_base.num,
-                       codecContext->time_base.den);
-
-    qint64 pts = qRound(packet.pts()
-                        * packet.timeBase().value()
-                        / outTimeBase.value());
-
-    oFrame.pts = oFrame.pkt_pts =
-            this->m_streamParams[streamIndex].nextPts(pts, packet.id());
-
-    if (oFrame.pts < 0) {
-        av_frame_unref(&oFrame);
-
-        return;
-    }
-
-    AVPacket pkt;
-    av_init_packet(&pkt);
-
-    if (this->m_formatContext->oformat->flags & AVFMT_RAWPICTURE) {
-        // Raw video case - directly store the picture in the packet
-        pkt.flags |= AV_PKT_FLAG_KEY;
-        pkt.data = oFrame.data[0];
-        pkt.size = sizeof(AVPicture);
-        pkt.pts = oFrame.pts;
-        pkt.stream_index = streamIndex;
-
-        av_packet_rescale_ts(&pkt, codecContext->time_base, stream->time_base);
-
-        this->m_mutex.lock();
-        av_interleaved_write_frame(this->m_formatContext, &pkt);
-        this->m_mutex.unlock();
-    } else {
-        // encode the image
-        pkt.data = NULL; // packet data will be allocated by the encoder
-        pkt.size = 0;
-
-        int gotPacket;
-
-        if (avcodec_encode_video2(stream->codec,
-                                  &pkt,
-                                  &oFrame,
-                                  &gotPacket) < 0) {
-            av_frame_unref(&oFrame);
-
+        if (!this->m_isRecording)
             return;
+
+        this->m_packetMutex.lock();
+        bool canEnqueue = true;
+
+        if (this->m_packetQueueSize >= this->m_maxPacketQueueSize)
+            canEnqueue = this->m_packetQueueNotFull.wait(&this->m_packetMutex, THREAD_WAIT_LIMIT);
+
+        if (canEnqueue) {
+            if (packet.caps().mimeType() == "audio/x-raw") {
+                this->m_audioMutex.lock();
+                this->m_audioPackets.enqueue(AkAudioPacket(packet));
+                this->m_audioMutex.unlock();
+            } else if (packet.caps().mimeType() == "video/x-raw") {
+                this->m_videoMutex.lock();
+                this->m_videoPackets.enqueue(AkVideoPacket(packet));
+                this->m_videoMutex.unlock();
+            } else if (packet.caps().mimeType() == "text/x-raw") {
+                this->m_subtitleMutex.lock();
+                this->m_subtitlePackets.enqueue(packet);
+                this->m_subtitleMutex.unlock();
+            }
+
+            this->m_packetQueueSize += packet.buffer().size();
+            this->m_packetMutex.unlock();
+
+            break;
         }
 
-        // If size is zero, it means the image was buffered.
-        if (gotPacket) {
-            pkt.stream_index = streamIndex;
-
-            av_packet_rescale_ts(&pkt, codecContext->time_base, stream->time_base);
-
-            // Write the compressed frame to the media file.
-            this->m_mutex.lock();
-            av_interleaved_write_frame(this->m_formatContext, &pkt);
-            this->m_mutex.unlock();
-        }
+        this->m_packetMutex.unlock();
     }
-
-    av_frame_unref(&oFrame);
-}
-
-void MediaSink::writeSubtitlePacket(const AkPacket &packet)
-{
-    Q_UNUSED(packet)
-    // TODO: Implement this.
 }
 
 void MediaSink::clearStreams()
@@ -1691,6 +1618,18 @@ bool MediaSink::init()
         return false;
     }
 
+    this->m_audioPackets.clear();
+    this->m_videoPackets.clear();
+    this->m_subtitlePackets.clear();
+
+    this->m_runAudioLoop = true;
+    this->m_audioLoopResult = QtConcurrent::run(&this->m_threadPool, this->writeAudioLoop, this);
+    this->m_runVideoLoop = true;
+    this->m_videoLoopResult = QtConcurrent::run(&this->m_threadPool, this->writeVideoLoop, this);
+    this->m_runSubtitleLoop = true;
+    this->m_subtitleLoopResult = QtConcurrent::run(&this->m_threadPool, this->writeSubtitleLoop, this);
+    this->m_isRecording = true;
+
     return true;
 }
 
@@ -1698,6 +1637,19 @@ void MediaSink::uninit()
 {
     if (!this->m_formatContext)
         return;
+
+    this->m_isRecording = false;
+
+    this->m_runAudioLoop = false;
+    this->m_audioLoopResult.waitForFinished();
+    this->m_runVideoLoop = false;
+    this->m_videoLoopResult.waitForFinished();
+    this->m_runSubtitleLoop = false;
+    this->m_subtitleLoopResult.waitForFinished();
+
+    this->m_audioPackets.clear();
+    this->m_videoPackets.clear();
+    this->m_subtitlePackets.clear();
 
     // Write remaining frames in the file.
     this->flushStreams();
@@ -1718,6 +1670,225 @@ void MediaSink::uninit()
 
     avformat_free_context(this->m_formatContext);
     this->m_formatContext = NULL;
+}
+
+void MediaSink::writeAudioPacket(const AkAudioPacket &packet)
+{
+    if (!this->m_formatContext)
+        return;
+
+    int streamIndex = -1;
+
+    for (int i = 0; i < this->m_streamParams.size(); i++)
+        if (this->m_streamParams[i].inputIndex() == packet.index()) {
+            streamIndex = i;
+
+            break;
+        }
+
+    if (streamIndex < 0)
+        return;
+
+    AVStream *stream = this->m_formatContext->streams[streamIndex];
+    AVCodecContext *codecContext = stream->codec;
+
+    AVFrame iFrame;
+    memset(&iFrame, 0, sizeof(AVFrame));
+    iFrame.format = codecContext->sample_fmt;
+    iFrame.channels = codecContext->channels;
+    iFrame.channel_layout = codecContext->channel_layout;
+    iFrame.sample_rate = codecContext->sample_rate;
+
+    if (!this->m_streamParams[streamIndex].convert(packet, &iFrame)) {
+        av_frame_unref(&iFrame);
+
+        return;
+    }
+
+    AkFrac outTimeBase(codecContext->time_base.num,
+                       codecContext->time_base.den);
+    qint64 pts = qRound64(packet.pts()
+                        * packet.timeBase().value()
+                        / outTimeBase.value());
+    iFrame.pts = iFrame.pkt_pts = pts;
+    this->m_streamParams[streamIndex].addAudioSamples(&iFrame, packet.id());
+
+    int outSamples = codecContext->codec->capabilities
+                     & AV_CODEC_CAP_VARIABLE_FRAME_SIZE?
+                        iFrame.nb_samples:
+                        codecContext->frame_size;
+
+    av_frame_unref(&iFrame);
+
+    forever {
+        pts = this->m_streamParams[streamIndex].audioPts();
+        uint8_t *buffer = NULL;
+        int bufferSize = this->m_streamParams[streamIndex].readAudioSamples(outSamples, &buffer);
+
+        if (bufferSize < 1)
+            break;
+
+        AVFrame oFrame;
+        memset(&oFrame, 0, sizeof(AVFrame));
+        oFrame.format = codecContext->sample_fmt;
+        oFrame.channels = codecContext->channels;
+        oFrame.channel_layout = codecContext->channel_layout;
+        oFrame.sample_rate = codecContext->sample_rate;
+        oFrame.nb_samples = outSamples;
+        oFrame.pts = oFrame.pkt_pts = pts;
+
+        if (avcodec_fill_audio_frame(&oFrame,
+                                     codecContext->channels,
+                                     codecContext->sample_fmt,
+                                     buffer,
+                                     bufferSize,
+                                     1) < 0) {
+            delete [] buffer;
+
+            continue;
+        }
+
+        // Initialize audio packet.
+        AVPacket pkt;
+        memset(&pkt, 0, sizeof(AVPacket));
+        av_init_packet(&pkt);
+
+        // Compress audio packet.
+        int gotPacket;
+        int result = avcodec_encode_audio2(codecContext,
+                                           &pkt,
+                                           &oFrame,
+                                           &gotPacket);
+
+        if (result < 0) {
+            char error[1024];
+            av_strerror(result, error, 1024);
+            qDebug() << "Error: " << error;
+            delete [] buffer;
+
+            break;
+        }
+
+        if (!gotPacket) {
+            delete [] buffer;
+
+            continue;
+        }
+
+        pkt.stream_index = streamIndex;
+        av_packet_rescale_ts(&pkt, codecContext->time_base, stream->time_base);
+
+        // Write audio packet.
+        this->m_writeMutex.lock();
+        av_interleaved_write_frame(this->m_formatContext, &pkt);
+        this->m_writeMutex.unlock();
+
+        delete [] buffer;
+    }
+}
+
+void MediaSink::writeVideoPacket(const AkVideoPacket &packet)
+{
+    if (!this->m_formatContext)
+        return;
+
+    int streamIndex = -1;
+
+    for (int i = 0; i < this->m_streamParams.size(); i++)
+        if (this->m_streamParams[i].inputIndex() == packet.index()) {
+            streamIndex = i;
+
+            break;
+        }
+
+    if (streamIndex < 0)
+        return;
+
+    AVStream *stream = this->m_formatContext->streams[streamIndex];
+    AVCodecContext *codecContext = stream->codec;
+
+    AVFrame oFrame;
+    memset(&oFrame, 0, sizeof(AVFrame));
+    oFrame.format = codecContext->pix_fmt;
+    oFrame.width = codecContext->width;
+    oFrame.height = codecContext->height;
+
+    AkVideoPacket videoPacket = AkUtils::roundSizeTo(packet.toPacket(), 4);
+    videoPacket = AkUtils::convertVideo(videoPacket, AkVideoCaps::Format_rgb24);
+
+    if (!this->m_streamParams[streamIndex].convert(videoPacket, &oFrame)) {
+        av_frame_unref(&oFrame);
+
+        return;
+    }
+
+    AkFrac outTimeBase(codecContext->time_base.num,
+                       codecContext->time_base.den);
+
+    qint64 pts = qRound64(packet.pts()
+                        * packet.timeBase().value()
+                        / outTimeBase.value());
+
+    oFrame.pts = oFrame.pkt_pts =
+            this->m_streamParams[streamIndex].nextPts(pts, packet.id());
+
+    if (oFrame.pts < 0) {
+        av_frame_unref(&oFrame);
+
+        return;
+    }
+
+    AVPacket pkt;
+    av_init_packet(&pkt);
+
+    if (this->m_formatContext->oformat->flags & AVFMT_RAWPICTURE) {
+        // Raw video case - directly store the picture in the packet
+        pkt.flags |= AV_PKT_FLAG_KEY;
+        pkt.data = oFrame.data[0];
+        pkt.size = sizeof(AVPicture);
+        pkt.pts = oFrame.pts;
+        pkt.stream_index = streamIndex;
+
+        av_packet_rescale_ts(&pkt, codecContext->time_base, stream->time_base);
+
+        this->m_writeMutex.lock();
+        av_interleaved_write_frame(this->m_formatContext, &pkt);
+        this->m_writeMutex.unlock();
+    } else {
+        // encode the image
+        pkt.data = NULL; // packet data will be allocated by the encoder
+        pkt.size = 0;
+
+        int gotPacket;
+
+        if (avcodec_encode_video2(stream->codec,
+                                  &pkt,
+                                  &oFrame,
+                                  &gotPacket) < 0) {
+            av_frame_unref(&oFrame);
+
+            return;
+        }
+
+        // If size is zero, it means the image was buffered.
+        if (gotPacket) {
+            pkt.stream_index = streamIndex;
+            av_packet_rescale_ts(&pkt, codecContext->time_base, stream->time_base);
+
+            // Write the compressed frame to the media file.
+            this->m_writeMutex.lock();
+            av_interleaved_write_frame(this->m_formatContext, &pkt);
+            this->m_writeMutex.unlock();
+        }
+    }
+
+    av_frame_unref(&oFrame);
+}
+
+void MediaSink::writeSubtitlePacket(const AkPacket &packet)
+{
+    Q_UNUSED(packet)
+    // TODO: Implement this.
 }
 
 void MediaSink::updateStreams()

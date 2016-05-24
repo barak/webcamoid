@@ -14,17 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
 #
-# Email   : hipersayan DOT x AT gmail DOT com
-# Web-Site: http://github.com/hipersayanX/webcamoid
+# Web-Site: http://webcamoid.github.io/
 
 COMMONS_APPNAME = "libAvKys"
-COMMONS_TARGET = AvKys
+COMMONS_TARGET = $$lower($${COMMONS_APPNAME})
+COMMONS_TARGET = $$replace(COMMONS_TARGET, lib, "")
 VER_MAJ = 7
-VER_MIN = 0
+VER_MIN = 1
 VER_PAT = 0
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
-COMMONS_PROJECT_URL = "http://github.com/hipersayanX/webcamoid"
-COMMONS_PROJECT_LICENSE_URL = "https://raw.githubusercontent.com/hipersayanX/webcamoid/master/COPYING"
+COMMONS_PROJECT_URL = "http://webcamoid.github.io/"
+COMMONS_PROJECT_LICENSE_URL = "https://raw.githubusercontent.com/webcamoid/webcamoid/master/COPYING"
 COMMONS_COPYRIGHT_NOTICE = "Copyright (C) 2011-2016  Gonzalo Exequiel Pedone"
 
 isEmpty(BUILDDOCS): BUILDDOCS = 0
@@ -37,7 +37,19 @@ isEmpty(QMAKE_LRELEASE) {
     !unix: QMAKE_LRELEASE = $$[QT_INSTALL_LIBEXECS]/lrelease
 }
 
-isEmpty(PREFIX): PREFIX = /usr
+win32 {
+    !isEmpty(ProgramW6432) {
+        DEFAULT_PREFIX = $(ProgramW6432)\$${COMMONS_APPNAME}
+    } else: !isEmpty(ProgramFiles) {
+        DEFAULT_PREFIX = $(ProgramFiles)\$${COMMONS_APPNAME}
+    } else {
+        DEFAULT_PREFIX = C:\$${COMMONS_APPNAME}
+    }
+} else {
+    DEFAULT_PREFIX = /usr
+}
+
+isEmpty(PREFIX): PREFIX = $${DEFAULT_PREFIX}
 isEmpty(EXECPREFIX): EXECPREFIX = $${PREFIX}
 isEmpty(BINDIR): BINDIR = $${EXECPREFIX}/bin
 isEmpty(SBINDIR): SBINDIR = $${EXECPREFIX}/sbin
@@ -61,7 +73,7 @@ isEmpty(LICENSEDIR): LICENSEDIR = $${DATAROOTDIR}/licenses/$${COMMONS_TARGET}
 isEmpty(LOCALDIR): LOCALDIR = $${PREFIX}/local
 isEmpty(LOCALLIBDIR): LOCALLIBDIR = $${LOCALDIR}/lib
 
- DEFINES += \
+DEFINES += \
     COMMONS_APPNAME=\"\\\"$$COMMONS_APPNAME\\\"\" \
     COMMONS_TARGET=\"\\\"$$COMMONS_TARGET\\\"\" \
     COMMONS_VER_MAJ=\"\\\"$$VER_MAJ\\\"\" \
@@ -106,9 +118,13 @@ RCC_DIR = $${COMMONS_BUILD_PATH}/rcc
 UI_DIR = $${COMMONS_BUILD_PATH}/ui
 
 # Compile translations files.
-compiletr.input = TRANSLATIONS
-compiletr.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
-compiletr.commands = $$QMAKE_LRELEASE -removeidentical -compress ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
-compiletr.CONFIG += no_link
-QMAKE_EXTRA_COMPILERS += compiletr
-PRE_TARGETDEPS += compiler_compiletr_make_all
+CONFIG(debug, debug|release) {
+    compiletr.input = TRANSLATIONS
+    compiletr.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
+    compiletr.commands = $$QMAKE_LRELEASE -removeidentical -compress ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
+    compiletr.CONFIG += no_link
+    QMAKE_EXTRA_COMPILERS += compiletr
+    PRE_TARGETDEPS += compiler_compiletr_make_all
+}
+
+win32: CONFIG += skip_target_version_ext

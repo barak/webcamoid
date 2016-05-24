@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include "outputparams.h"
@@ -129,9 +128,9 @@ void OutputParams::addAudioSamples(const AVFrame *frame, qint64 id)
         qint64 pts = this->m_pts + audioBufferSamples;
         qint64 ptsDiff = qAbs(framePts - pts);
 
-        if (framePts > pts)
+        if (framePts > pts) {
             silence = ptsDiff;
-        else if (framePts < pts) {
+        } else if (framePts < pts) {
             frameSamples -= ptsDiff;
 
             if (frameSamples < 0)

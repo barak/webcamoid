@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef AKELEMENT_H
@@ -106,6 +105,8 @@ class AkElement: public QObject
         Q_INVOKABLE static QStringList listPlugins(const QString &type="");
         Q_INVOKABLE static QStringList listPluginPaths(const QString &searchPath);
         Q_INVOKABLE static QStringList listPluginPaths();
+        Q_INVOKABLE static QStringList pluginsCache();
+        Q_INVOKABLE static void setPluginsCache(const QStringList &paths);
         Q_INVOKABLE static QString pluginPath(const QString &pluginId);
         Q_INVOKABLE static QVariantMap pluginInfo(const QString &pluginId);
         Q_INVOKABLE static void clearCache();

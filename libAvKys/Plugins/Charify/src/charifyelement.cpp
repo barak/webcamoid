@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <QApplication>
@@ -35,6 +34,45 @@ inline ColorModeToStr initColorModeToStr()
 
 Q_GLOBAL_STATIC_WITH_ARGS(ColorModeToStr, colorModeToStr, (initColorModeToStr()))
 
+typedef QMap<QFont::HintingPreference, QString> HintingPreferenceToStr;
+
+inline HintingPreferenceToStr initHintingPreferenceToStr()
+{
+    HintingPreferenceToStr hintingPreferenceToStr;
+    hintingPreferenceToStr[QFont::PreferDefaultHinting] = "PreferDefaultHinting";
+    hintingPreferenceToStr[QFont::PreferNoHinting] = "PreferNoHinting";
+    hintingPreferenceToStr[QFont::PreferVerticalHinting] = "PreferVerticalHinting";
+    hintingPreferenceToStr[QFont::PreferFullHinting] = "PreferFullHinting";
+
+    return hintingPreferenceToStr;
+}
+
+Q_GLOBAL_STATIC_WITH_ARGS(HintingPreferenceToStr, hintingPreferenceToStr, (initHintingPreferenceToStr()))
+
+typedef QMap<QFont::StyleStrategy, QString> StyleStrategyToStr;
+
+inline StyleStrategyToStr initStyleStrategyToStr()
+{
+    StyleStrategyToStr styleStrategyToStr;
+    styleStrategyToStr[QFont::PreferDefault] = "PreferDefault";
+    styleStrategyToStr[QFont::PreferBitmap] = "PreferBitmap";
+    styleStrategyToStr[QFont::PreferDevice] = "PreferDevice";
+    styleStrategyToStr[QFont::PreferOutline] = "PreferOutline";
+    styleStrategyToStr[QFont::ForceOutline] = "ForceOutline";
+    styleStrategyToStr[QFont::PreferMatch] = "PreferMatch";
+    styleStrategyToStr[QFont::PreferQuality] = "PreferQuality";
+    styleStrategyToStr[QFont::PreferAntialias] = "PreferAntialias";
+    styleStrategyToStr[QFont::NoAntialias] = "NoAntialias";
+    styleStrategyToStr[QFont::OpenGLCompatible] = "OpenGLCompatible";
+    styleStrategyToStr[QFont::ForceIntegerMetrics] = "ForceIntegerMetrics";
+    styleStrategyToStr[QFont::NoSubpixelAntialias] = "NoSubpixelAntialias";
+    styleStrategyToStr[QFont::NoFontMerging] = "NoFontMerging";
+
+    return styleStrategyToStr;
+}
+
+Q_GLOBAL_STATIC_WITH_ARGS(StyleStrategyToStr, styleStrategyToStr, (initStyleStrategyToStr()))
+
 CharifyElement::CharifyElement(): AkElement()
 {
     this->m_mode = ColorModeNatural;
@@ -43,6 +81,8 @@ CharifyElement::CharifyElement(): AkElement()
         this->m_charTable.append(QChar(i));
 
     this->m_font = QApplication::font();
+    this->m_font.setHintingPreference(QFont::PreferFullHinting);
+    this->m_font.setStyleStrategy(QFont::NoAntialias);
     this->m_foregroundColor = qRgb(255, 255, 255);
     this->m_backgroundColor = qRgb(0, 0, 0);
     this->m_reversed = false;
@@ -59,6 +99,14 @@ CharifyElement::CharifyElement(): AkElement()
                      &CharifyElement::updateCharTable);
     QObject::connect(this,
                      &CharifyElement::fontChanged,
+                     this,
+                     &CharifyElement::updateCharTable);
+    QObject::connect(this,
+                     &CharifyElement::hintingPreferenceChanged,
+                     this,
+                     &CharifyElement::updateCharTable);
+    QObject::connect(this,
+                     &CharifyElement::styleStrategyChanged,
                      this,
                      &CharifyElement::updateCharTable);
     QObject::connect(this,
@@ -126,6 +174,16 @@ QString CharifyElement::charTable() const
 QFont CharifyElement::font() const
 {
     return this->m_font;
+}
+
+QString CharifyElement::hintingPreference() const
+{
+    return hintingPreferenceToStr->value(this->m_font.hintingPreference(), "PreferFullHinting");
+}
+
+QString CharifyElement::styleStrategy() const
+{
+    return styleStrategyToStr->value(this->m_font.styleStrategy(), "NoAntialias");
 }
 
 QRgb CharifyElement::foregroundColor() const
@@ -227,8 +285,43 @@ void CharifyElement::setFont(const QFont &font)
     if (this->m_font == font)
         return;
 
+    QFont::HintingPreference hp =
+            hintingPreferenceToStr->key(this->hintingPreference(),
+                                        QFont::PreferFullHinting);
+    QFont::StyleStrategy ss =
+            styleStrategyToStr->key(this->styleStrategy(),
+                                    QFont::NoAntialias);
+
     this->m_font = font;
+    this->m_font.setHintingPreference(hp);
+    this->m_font.setStyleStrategy(ss);
     emit this->fontChanged(font);
+}
+
+void CharifyElement::setHintingPreference(const QString &hintingPreference)
+{
+    QFont::HintingPreference hp =
+            hintingPreferenceToStr->key(hintingPreference,
+                                        QFont::PreferFullHinting);
+
+    if (this->m_font.hintingPreference() == hp)
+        return;
+
+    this->m_font.setHintingPreference(hp);
+    emit hintingPreferenceChanged(hintingPreference);
+}
+
+void CharifyElement::setStyleStrategy(const QString &styleStrategy)
+{
+    QFont::StyleStrategy ss =
+            styleStrategyToStr->key(styleStrategy,
+                                    QFont::NoAntialias);
+
+    if (this->m_font.styleStrategy() == ss)
+        return;
+
+    this->m_font.setStyleStrategy(ss);
+    emit styleStrategyChanged(styleStrategy);
 }
 
 void CharifyElement::setForegroundColor(QRgb foregroundColor)
@@ -276,6 +369,16 @@ void CharifyElement::resetCharTable()
 void CharifyElement::resetFont()
 {
     this->setFont(QApplication::font());
+}
+
+void CharifyElement::resetHintingPreference()
+{
+    this->setHintingPreference("PreferFullHinting");
+}
+
+void CharifyElement::resetStyleStrategy()
+{
+    this->setStyleStrategy("NoAntialias");
 }
 
 void CharifyElement::resetForegroundColor()
@@ -337,7 +440,7 @@ AkPacket CharifyElement::iStream(const AkPacket &packet)
         else {
             QChar chr = characters[qGray(textImageBits[i])].chr;
             QRgb foreground = textImageBits[i];
-            QImage image = drawChar(chr, this->m_font, fontSize, foreground, this->m_backgroundColor);
+            QImage image = this->drawChar(chr, this->m_font, fontSize, foreground, this->m_backgroundColor);
             painter.drawImage(x, y, image);
         }
     }
@@ -359,11 +462,11 @@ void CharifyElement::updateCharTable()
         colorTable[i] = qRgb(i, i, i);
 
     foreach (QChar chr, this->m_charTable) {
-        QImage image = drawChar(chr,
-                                this->m_font,
-                                fontSize,
-                                this->m_foregroundColor,
-                                this->m_backgroundColor);
+        QImage image = this->drawChar(chr,
+                                      this->m_font,
+                                      fontSize,
+                                      this->m_foregroundColor,
+                                      this->m_backgroundColor);
         int weight = this->imageWeight(image, this->m_reversed);
 
         if (this->m_mode == ColorModeFixed)

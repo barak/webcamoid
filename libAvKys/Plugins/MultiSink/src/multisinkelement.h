@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef MULTISINKELEMENT_H
@@ -70,7 +69,6 @@ class MultiSinkElement: public AkElement
         Q_INVOKABLE QVariantMap formatOptions() const;
         Q_INVOKABLE QVariantList streams() const;
         Q_INVOKABLE bool showFormatOptions() const;
-
         Q_INVOKABLE QStringList supportedFormats();
         Q_INVOKABLE QStringList fileExtensions(const QString &format);
         Q_INVOKABLE QString formatDescription(const QString &format);
@@ -94,7 +92,6 @@ class MultiSinkElement: public AkElement
     private:
         bool m_showFormatOptions;
         MediaSink m_mediaSink;
-        QMutex m_mutex;
 
     signals:
         void locationChanged(const QString &location);

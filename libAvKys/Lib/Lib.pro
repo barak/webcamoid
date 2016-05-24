@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
 #
-# Email   : hipersayan DOT x AT gmail DOT com
-# Web-Site: http://github.com/hipersayanX/webcamoid
+# Web-Site: http://webcamoid.github.io/
 
 exists(commons.pri) {
     include(commons.pri)
@@ -28,6 +27,7 @@ exists(commons.pri) {
 }
 
 CONFIG += qt
+!isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0): CONFIG += static
 
 DEFINES += \
     COMMONS_LIBRARY \
@@ -74,12 +74,11 @@ CODECFORTR = UTF-8
 CODECFORSRC = UTF-8
 
 INSTALLS += target
-unix: target.path = $${LIBDIR}
-!unix: target.path = $${PREFIX}
+unix:target.path = $${LIBDIR}
+!unix:target.path = $${BINDIR}
 
 !isEmpty(INSTALLDEVHEADERS):!isEqual(INSTALLDEVHEADERS, 0) {
     INSTALLS += headers
     headers.files = src/*.h
-    unix: headers.path = $${INCLUDEDIR}/$${COMMONS_TARGET}
-    !unix: headers.path = $${PREFIX}/${COMMONS_TARGET}/include
+    headers.path = $${INCLUDEDIR}/$${COMMONS_TARGET}
 }

@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef MEDIATOOLS_H
@@ -118,6 +117,7 @@ class MediaTools: public QObject
         Q_INVOKABLE QString applicationName() const;
         Q_INVOKABLE QString applicationVersion() const;
         Q_INVOKABLE QString qtVersion() const;
+        Q_INVOKABLE QString codecFramework() const;
         Q_INVOKABLE QString copyrightNotice() const;
         Q_INVOKABLE QString projectUrl() const;
         Q_INVOKABLE QString projectLicenseUrl() const;
