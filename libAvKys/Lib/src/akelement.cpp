@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <QRegExp>
@@ -29,38 +28,33 @@
 
 #include "ak.h"
 
-inline QStringList initPluginsSearchPaths()
-{
-    QStringList defaultPath;
-
-#ifdef Q_OS_WIN32
-    defaultPath << QCoreApplication::applicationDirPath()
-                << COMMONS_TARGET
-                << "Plugins";
-#else
-    defaultPath << LIBDIR
-                << COMMONS_TARGET;
-#endif
-
-    QStringList pluginsSearchPaths;
-    pluginsSearchPaths << defaultPath.join(QDir::separator());
-
-    return pluginsSearchPaths;
-}
-
-Q_GLOBAL_STATIC_WITH_ARGS(QStringList,
-                          pluginsSearchPaths,
-                          (initPluginsSearchPaths()))
-
-Q_GLOBAL_STATIC_WITH_ARGS(bool, recursiveSearchPaths, (false))
-
-Q_GLOBAL_STATIC(QStringList, pluginsCache)
-
 class AkElementPrivate
 {
     public:
         QString m_pluginId;
         AkElement::ElementState m_state;
+        QStringList m_pluginsSearchPaths;
+        bool m_recursiveSearchPaths;
+        QStringList m_pluginsCache;
+        QDir m_applicationDir;
+
+        AkElementPrivate()
+        {
+            this->m_recursiveSearchPaths = false;
+
+#ifdef Q_OS_WIN32
+            QString defaultPath = QString("%1/../lib/%2")
+                                  .arg(QCoreApplication::applicationDirPath())
+                                  .arg(COMMONS_TARGET);
+#else
+            QString defaultPath = QString("%1/%2")
+                                  .arg(LIBDIR)
+                                  .arg(COMMONS_TARGET);
+#endif
+
+            this->m_pluginsSearchPaths << this->convertToAbsolute(defaultPath);
+            this->m_applicationDir.setPath(QCoreApplication::applicationDirPath());
+        }
 
         static inline QList<QMetaMethod> methodsByName(const QObject *object,
                                                        const QString &methodName)
@@ -91,7 +85,19 @@ class AkElementPrivate
 
             return false;
         }
+
+        inline QString convertToAbsolute(const QString &path) const
+        {
+            if (!QDir::isRelativePath(path))
+                return QDir::cleanPath(path);
+
+            QString absPath = this->m_applicationDir.absoluteFilePath(path);
+
+            return QDir::cleanPath(absPath);
+        }
 };
+
+Q_GLOBAL_STATIC(AkElementPrivate, akElementGlobalStuff)
 
 AkElement::AkElement(QObject *parent):
     QObject(parent)
@@ -228,37 +234,36 @@ AkElementPtr AkElement::create(const QString &pluginId,
 
 bool AkElement::recursiveSearch()
 {
-    return *recursiveSearchPaths;
+    return akElementGlobalStuff->m_recursiveSearchPaths;
 }
 
 void AkElement::setRecursiveSearch(bool enable)
 {
-    *recursiveSearchPaths = enable;
+    akElementGlobalStuff->m_recursiveSearchPaths = enable;
 }
 
 QStringList AkElement::searchPaths(SearchPaths pathType)
 {
     if (pathType == SearchPathsAll)
-        return *pluginsSearchPaths;
-
-    QStringList defaults;
-    QStringList defaultPath;
+        return akElementGlobalStuff->m_pluginsSearchPaths;
 
 #ifdef Q_OS_WIN32
-    defaultPath << QCoreApplication::applicationDirPath()
-                << COMMONS_TARGET
-                << "Plugins";
+    QString defaultPath = QString("%1/../lib/%2")
+                          .arg(QCoreApplication::applicationDirPath())
+                          .arg(COMMONS_TARGET);
 #else
-    defaultPath << LIBDIR
-                << COMMONS_TARGET;
+    QString defaultPath = QString("%1/%2")
+                          .arg(LIBDIR)
+                          .arg(COMMONS_TARGET);
 #endif
 
-    defaults << defaultPath.join(QDir::separator());
+    QStringList defaults;
+    defaults << akElementGlobalStuff->convertToAbsolute(defaultPath);
 
     if (pathType == SearchPathsDefaults)
         return defaults;
 
-    QStringList extras = *pluginsSearchPaths;
+    QStringList extras = akElementGlobalStuff->m_pluginsSearchPaths;
 
     foreach (QString path, defaults)
         extras.removeAll(path);
@@ -269,34 +274,34 @@ QStringList AkElement::searchPaths(SearchPaths pathType)
 void AkElement::addSearchPath(const QString &path)
 {
     if (!path.isEmpty() && QDir(path).exists())
-        *pluginsSearchPaths << path;
+        akElementGlobalStuff->m_pluginsSearchPaths << path;
 }
 
 void AkElement::setSearchPaths(const QStringList &searchPaths)
 {
-    pluginsSearchPaths->clear();
+    akElementGlobalStuff->m_pluginsSearchPaths.clear();
 
     foreach (QString path, searchPaths)
         if (QDir(path).exists())
-            *pluginsSearchPaths << path;
+            akElementGlobalStuff->m_pluginsSearchPaths << path;
 }
 
 void AkElement::resetSearchPaths()
 {
-    pluginsSearchPaths->clear();
-
-    QStringList defaultPath;
+    akElementGlobalStuff->m_pluginsSearchPaths.clear();
 
 #ifdef Q_OS_WIN32
-    defaultPath << QCoreApplication::applicationDirPath()
-                << COMMONS_TARGET
-                << "Plugins";
+    QString defaultPath = QString("%1/../lib/%2")
+                          .arg(QCoreApplication::applicationDirPath())
+                          .arg(COMMONS_TARGET);
 #else
-    defaultPath << LIBDIR
-                << COMMONS_TARGET;
+    QString defaultPath = QString("%1/%2")
+                          .arg(LIBDIR)
+                          .arg(COMMONS_TARGET);
 #endif
 
-    *pluginsSearchPaths << defaultPath.join(QDir::separator());
+    akElementGlobalStuff->m_pluginsSearchPaths
+            << akElementGlobalStuff->convertToAbsolute(defaultPath);
 }
 
 QStringList AkElement::listPlugins(const QString &type)
@@ -309,8 +314,7 @@ QStringList AkElement::listPlugins(const QString &type)
         QJsonObject metaData = pluginLoader.metaData();
 
 #ifdef Q_OS_WIN32
-        QString pluginId = QFileInfo(path).baseName()
-                                          .remove(QRegExp(QString(COMMONS_VER_MAJ) + "$"));
+        QString pluginId = QFileInfo(path).baseName();
 #else
         QString pluginId = QFileInfo(path).baseName()
                                           .remove(QRegExp("^lib"));
@@ -345,7 +349,7 @@ QStringList AkElement::listPluginPaths(const QString &searchPath)
     QStringList files;
 
 #ifdef Q_OS_WIN32
-    QString pattern(QString("*%1.dll").arg(COMMONS_VER_MAJ));
+    QString pattern("*.dll");
 #else
     QString pattern("lib*.so");
 #endif
@@ -386,7 +390,7 @@ QStringList AkElement::listPluginPaths(const QString &searchPath)
                     }
                 }
 
-            if (!*recursiveSearchPaths)
+            if (!akElementGlobalStuff->m_recursiveSearchPaths)
                 break;
 
             QStringList dirList = dir.entryList(QDir::Dirs
@@ -405,21 +409,31 @@ QStringList AkElement::listPluginPaths(const QString &searchPath)
 
 QStringList AkElement::listPluginPaths()
 {
-    if (!pluginsCache->isEmpty())
-        return *pluginsCache;
+    if (!akElementGlobalStuff->m_pluginsCache.isEmpty())
+        return akElementGlobalStuff->m_pluginsCache;
 
     QStringList searchPaths;
 
-    for (int i = pluginsSearchPaths->length() - 1; i >= 0; i--) {
-        QStringList paths = AkElement::listPluginPaths(pluginsSearchPaths->at(i));
+    for (int i = akElementGlobalStuff->m_pluginsSearchPaths.length() - 1; i >= 0; i--) {
+        QStringList paths = AkElement::listPluginPaths(akElementGlobalStuff->m_pluginsSearchPaths[i]);
 
         if (!paths.isEmpty())
             searchPaths << paths;
     }
 
-    *pluginsCache = searchPaths;
+    akElementGlobalStuff->m_pluginsCache = searchPaths;
 
     return searchPaths;
+}
+
+QStringList AkElement::pluginsCache()
+{
+    return akElementGlobalStuff->m_pluginsCache;
+}
+
+void AkElement::setPluginsCache(const QStringList &paths)
+{
+    akElementGlobalStuff->m_pluginsCache = paths;
 }
 
 QString AkElement::pluginPath(const QString &pluginId)
@@ -430,7 +444,7 @@ QString AkElement::pluginPath(const QString &pluginId)
         QString baseName = QFileInfo(path).baseName();
 
 #ifdef Q_OS_WIN32
-        if (baseName == QString("%1%2").arg(pluginId).arg(COMMONS_VER_MAJ))
+        if (baseName == pluginId)
             return path;
 #else
         if (baseName == QString("lib%1").arg(pluginId))
@@ -455,7 +469,7 @@ QVariantMap AkElement::pluginInfo(const QString &pluginId)
 
 void AkElement::clearCache()
 {
-    pluginsCache->clear();
+    akElementGlobalStuff->m_pluginsCache.clear();
 }
 
 void AkElement::stateChange(AkElement::ElementState from, AkElement::ElementState to)

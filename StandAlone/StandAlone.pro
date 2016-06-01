@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
 #
-# Email   : hipersayan DOT x AT gmail DOT com
-# Web-Site: http://github.com/hipersayanX/webcamoid
+# Web-Site: http://webcamoid.github.io/
 
 exists(commons.pri) {
     include(commons.pri)
@@ -27,10 +26,8 @@ exists(commons.pri) {
     }
 }
 
-!isEmpty(USE_GSTREAMER): DEFINES += USE_GSTREAMER
-
 !isEmpty(BUILDDOCS):!isEqual(BUILDDOCS, 0) {
-    DOCSOURCES += ../$${COMMONS_APPNAME}.qdocconf
+    DOCSOURCES = ../$${COMMONS_APPNAME}.qdocconf
 
     builddocs.input = DOCSOURCES
     builddocs.output = share/docs_auto/html/$${COMMONS_TARGET}.index
@@ -43,7 +40,20 @@ exists(commons.pri) {
     PRE_TARGETDEPS += compiler_builddocs_make_all
 }
 
+unix {
+    MANPAGESOURCES = share/man/man1/$${COMMONS_TARGET}.1
+
+    buildmanpage.input = MANPAGESOURCES
+    buildmanpage.output = ${QMAKE_FILE_IN}.gz
+    buildmanpage.commands = gzip -fk9 ${QMAKE_FILE_IN}
+    buildmanpage.CONFIG += no_link
+
+    QMAKE_EXTRA_COMPILERS += buildmanpage
+    PRE_TARGETDEPS += compiler_buildmanpage_make_all
+}
+
 CONFIG += qt
+!isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0): CONFIG += static
 
 HEADERS = \
     src/mediatools.h \
@@ -53,11 +63,12 @@ HEADERS = \
 INCLUDEPATH += \
     ../libAvKys/Lib/src
 
-!win32: LIBS += -L../libAvKys/Lib -lAvKys
-win32: LIBS += -L../libAvKys/Lib -lAvKys$${VER_MAJ}
+LIBS += -L../libAvKys/Lib -lavkys
+win32: LIBS += -lole32
 
 OTHER_FILES = \
     share/effects.xml
+unix: OTHER_FILES += $${MANPAGESOURCES}
 
 QT += qml quick opengl widgets svg
 
@@ -93,16 +104,17 @@ CODECFORTR = UTF-8
 CODECFORSRC = UTF-8
 
 INSTALLS += target
-!unix: INSTALLS += \
-    dllDeps \
-    pluginsImageFormats \
-    pluginsPlatform \
-    pluginsQml
 
-unix:target.path = $${BINDIR}
-!unix:target.path = $${PREFIX}
+target.path = $${BINDIR}
 
 !unix {
+    INSTALLS += \
+        dllDeps \
+        pluginsImageFormats \
+        pluginsPlatform \
+        pluginsQml \
+        appIcon
+
     DLLFILES = \
         \ # Qt
         $$[QT_INSTALL_BINS]/Qt5Core.dll \
@@ -192,16 +204,64 @@ unix:target.path = $${BINDIR}
     }
 
     dllDeps.files = $${DLLFILES}
-    dllDeps.path = $${PREFIX}
+    dllDeps.path = $${BINDIR}
 
     pluginsPlatform.files = $$[QT_INSTALL_PLUGINS]/platforms/qwindows.dll
-    pluginsPlatform.path = $${PREFIX}/platforms
+    pluginsPlatform.path = $${BINDIR}/platforms
 
     pluginsImageFormats.files = $$[QT_INSTALL_PLUGINS]/imageformats/*
-    pluginsImageFormats.path = $${PREFIX}/imageformats
+    pluginsImageFormats.path = $${BINDIR}/imageformats
 
     pluginsQml.files = $$[QT_INSTALL_QML]/*
-    pluginsQml.path = $${PREFIX}/qml
+    pluginsQml.path = $${LIBDIR}/qt/qml
+
+    appIcon.files = share/icons/hicolor/256x256/webcamoid.ico
+    appIcon.path = $${PREFIX}
+}
+
+unix {
+    INSTALLS += \
+        manpage \
+        appIcon8x8 \
+        appIcon16x16 \
+        appIcon22x22 \
+        appIcon32x32 \
+        appIcon48x48 \
+        appIcon64x64 \
+        appIcon128x128 \
+        appIcon256x256 \
+        appIconScalable
+
+    manpage.files = share/man/man1/*.1.gz
+    manpage.path = $${MANDIR}/man1
+    manpage.CONFIG += no_check_exist
+
+    appIcon8x8.files = share/icons/hicolor/8x8/webcamoid.png
+    appIcon8x8.path = $${DATAROOTDIR}/icons/hicolor/8x8/apps
+
+    appIcon16x16.files = share/icons/hicolor/16x16/webcamoid.png
+    appIcon16x16.path = $${DATAROOTDIR}/icons/hicolor/16x16/apps
+
+    appIcon22x22.files = share/icons/hicolor/22x22/webcamoid.png
+    appIcon22x22.path = $${DATAROOTDIR}/icons/hicolor/22x22/apps
+
+    appIcon32x32.files = share/icons/hicolor/32x32/webcamoid.png
+    appIcon32x32.path = $${DATAROOTDIR}/icons/hicolor/32x32/apps
+
+    appIcon48x48.files = share/icons/hicolor/48x48/webcamoid.png
+    appIcon48x48.path = $${DATAROOTDIR}/icons/hicolor/48x48/apps
+
+    appIcon64x64.files = share/icons/hicolor/64x64/webcamoid.png
+    appIcon64x64.path = $${DATAROOTDIR}/icons/hicolor/64x64/apps
+
+    appIcon128x128.files = share/icons/hicolor/128x128/webcamoid.png
+    appIcon128x128.path = $${DATAROOTDIR}/icons/hicolor/128x128/apps
+
+    appIcon256x256.files = share/icons/hicolor/256x256/webcamoid.png
+    appIcon256x256.path = $${DATAROOTDIR}/icons/hicolor/256x256/apps
+
+    appIconScalable.files = share/icons/hicolor/scalable/webcamoid.svg
+    appIconScalable.path = $${DATAROOTDIR}/icons/hicolor/scalable/apps
 }
 
 !isEmpty(BUILDDOCS):!isEqual(BUILDDOCS, 0) {
@@ -210,4 +270,12 @@ unix:target.path = $${BINDIR}
     docs.files = share/docs_auto/html
     docs.path = $${HTMLDIR}
     docs.CONFIG += no_check_exist
+}
+
+#USE_GSTREAMER = 1
+
+isEmpty(USE_GSTREAMER) {
+    include(src/ffmpeg/ffmpeg.pri)
+} else {
+    include(src/gstreamer/gstreamer.pri)
 }

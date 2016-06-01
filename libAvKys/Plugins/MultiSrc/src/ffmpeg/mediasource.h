@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef MEDIASOURCE_H
@@ -31,6 +30,16 @@ typedef QSharedPointer<AbstractStream> AbstractStreamPtr;
 class MediaSource: public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(qint64 maxPacketQueueSize
+               READ maxPacketQueueSize
+               WRITE setMaxPacketQueueSize
+               RESET resetMaxPacketQueueSize
+               NOTIFY maxPacketQueueSizeChanged)
+    Q_PROPERTY(bool showLog
+               READ showLog
+               WRITE setShowLog
+               RESET resetShowLog
+               NOTIFY showLogChanged)
 
     public:
         explicit MediaSource(QObject *parent=NULL);
@@ -66,6 +75,7 @@ class MediaSource: public QObject
         QMap<int, AbstractStreamPtr> m_streamsMap;
         Clock m_globalClock;
         qreal m_curClockTime;
+        QFuture<void> m_readPacketsLoopResult;
 
         qint64 packetQueueSize();
         static void deleteFormatContext(AVFormatContext *context);

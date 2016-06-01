@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <QApplication>
@@ -115,7 +114,7 @@ AkCaps DesktopCaptureElement::caps(int stream) const
 
     AkVideoCaps caps;
     caps.isValid() = true;
-    caps.format() = AkVideoCaps::Format_bgr0;
+    caps.format() = AkVideoCaps::Format_rgb24;
     caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
     caps.width() = screen->size().width();
     caps.height() = screen->size().height();
@@ -226,14 +225,15 @@ void DesktopCaptureElement::readFrame()
 
     AkVideoCaps caps;
     caps.isValid() = true;
-    caps.format() = AkVideoCaps::Format_bgr0;
+    caps.format() = AkVideoCaps::Format_rgb24;
     caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
     caps.width() = screen->size().width();
     caps.height() = screen->size().height();
     caps.fps() = fps;
 
     QPixmap frame = screen->grabWindow(QApplication::desktop()->winId());
-    AkPacket packet = AkUtils::imageToPacket(frame.toImage(), caps.toCaps());
+    QImage frameImg= frame.toImage().convertToFormat(QImage::Format_RGB888);
+    AkPacket packet = AkUtils::imageToPacket(frameImg, caps.toCaps());
 
     if (!packet)
         return;

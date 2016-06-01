@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <QMetaEnum>
@@ -76,7 +75,7 @@ AkPacket ConvertVideo::convert(const AkPacket &packet, const AkCaps &oCaps)
         return AkPacket();
 
     // Create oPicture
-    int frameSize = av_image_get_buffer_size(AV_PIX_FMT_BGRA,
+    int frameSize = av_image_get_buffer_size(oFormat,
                                              oVideoCaps.width(),
                                              oVideoCaps.height(),
                                              1);

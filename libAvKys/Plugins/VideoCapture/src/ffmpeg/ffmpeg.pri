@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
 #
-# Email   : hipersayan DOT x AT gmail DOT com
-# Web-Site: http://github.com/hipersayanX/webcamoid
+# Web-Site: http://webcamoid.github.io/
 
 DEFINES += __STDC_CONSTANT_MACROS
 
@@ -32,7 +31,9 @@ isEmpty(FFMPEGLIBS) {
 }
 
 HEADERS += \
-    $$PWD/convertvideo.h
+    $$PWD/convertvideo.h \
+    $$PWD/clock.h
 
 SOURCES += \
-    $$PWD/convertvideo.cpp
+    $$PWD/convertvideo.cpp \
+    $$PWD/clock.cpp

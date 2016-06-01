@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef AKUTILS_H
@@ -23,12 +22,16 @@
 
 #include <QImage>
 
-#include "akpacket.h"
+#include "akvideopacket.h"
 
 namespace AkUtils
 {
     AkPacket imageToPacket(const QImage &image, const AkPacket &defaultPacket);
     QImage packetToImage(const AkPacket &packet);
+    AkPacket roundSizeTo(const AkPacket &packet, int n);
+    AkVideoPacket convertVideo(const AkVideoPacket &packet,
+                          AkVideoCaps::PixelFormat format,
+                          const QSize &size=QSize());
 }
 
 #endif // AKUTILS_H

@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <QMetaEnum>
@@ -328,6 +327,11 @@ AkVideoCaps::operator bool() const
     return this->d->m_isValid;
 }
 
+AkVideoCaps::operator AkCaps() const
+{
+    return this->toCaps();
+}
+
 bool AkVideoCaps::isValid() const
 {
     return this->d->m_isValid;
@@ -356,6 +360,11 @@ int AkVideoCaps::bpp() const
 int &AkVideoCaps::bpp()
 {
     return this->d->m_bpp;
+}
+
+QSize AkVideoCaps::size() const
+{
+    return QSize(this->d->m_width, this->d->m_height);
 }
 
 int AkVideoCaps::width() const
@@ -553,6 +562,18 @@ void AkVideoCaps::setBpp(int bpp)
     emit this->bppChanged(bpp);
 }
 
+void AkVideoCaps::setSize(const QSize &size)
+{
+    QSize curSize(this->d->m_width, this->d->m_height);
+
+    if (curSize == size)
+        return;
+
+    this->setWidth(size.width());
+    this->setHeight(size.height());
+    emit sizeChanged(size);
+}
+
 void AkVideoCaps::setWidth(int width)
 {
     if (this->d->m_width == width)
@@ -588,6 +609,11 @@ void AkVideoCaps::resetFormat()
 void AkVideoCaps::resetBpp()
 {
     this->setBpp(0);
+}
+
+void AkVideoCaps::resetSize()
+{
+    this->setSize(QSize());
 }
 
 void AkVideoCaps::resetWidth()

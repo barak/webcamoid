@@ -1,0 +1,49 @@
+version: 7.1.0.{build}-{branch}
+os: MinGW
+
+platform:
+  - x86
+
+build:
+  verbosity: minimal
+
+configuration:
+  - Debug
+  - Release
+
+branches:
+  only:
+  - master
+
+environment:
+  QTDIR: C:\Qt\5.5\mingw492_32
+  MINGW: C:\Qt\Tools\mingw492_32
+  FFMPEG_VERSION: 3.0
+
+install:
+  - if "%PLATFORM%" == "x86" (set BUILD_ARCHITECTURE=win32) else (set BUILD_ARCHITECTURE=win64)
+  # Installing various utilities
+  - choco install -y curl 7zip InnoSetup
+  - set PATH="C:\Program Files\7-Zip";"C:\Program Files (x86)\Inno Setup 5";%PATH%
+  # Configuring Qt
+  - set PATH=%PATH%;%QTDIR%\bin;%MINGW%\bin;
+  # Installing ffmpeg dev
+  - curl -kLO http://ffmpeg.zeranoe.com/builds/%BUILD_ARCHITECTURE%/dev/ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-dev.7z
+  - 7z x ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-dev.7z
+  - set FFMPEG_DEV_PATH=%CD%\ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-dev
+  # Installing ffmpeg shared
+  - curl -kLO http://ffmpeg.zeranoe.com/builds/%BUILD_ARCHITECTURE%/shared/ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-shared.7z
+  - 7z x ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-shared.7z
+  - set FFMPEG_SHARED_PATH=%CD%\ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-shared
+
+build_script:
+  - qmake Webcamoid.pro PREFIX="%CD%\build\%BUILD_ARCHITECTURE%" FFMPEGINCLUDES="%FFMPEG_DEV_PATH%\include" FFMPEGLIBS=-L"%FFMPEG_DEV_PATH%\lib" FFMPEGLIBS+=-lavcodec FFMPEGLIBS+=-lavdevice FFMPEGLIBS+=-lavformat FFMPEGLIBS+=-lavutil FFMPEGLIBS+=-lswresample FFMPEGLIBS+=-lswscale
+  - mingw32-make
+
+notifications:
+  - provider: Email
+    to:
+      - hipersayan.x@gmail.com
+    on_build_success: false
+    on_build_failure: false
+    on_build_status_changed: true

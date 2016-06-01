@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #ifndef AKAUDIOCAPS_H
@@ -149,6 +148,7 @@ class AkAudioCaps: public QObject
         bool operator ==(const AkAudioCaps &other) const;
         bool operator !=(const AkAudioCaps &other) const;
         operator bool() const;
+        operator AkCaps() const;
 
         Q_INVOKABLE bool isValid() const;
         Q_INVOKABLE bool &isValid();

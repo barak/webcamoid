@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 import QtQuick 2.5
@@ -36,7 +35,7 @@ ColumnLayout {
 
             if (formatId === MultiSink.outputFormat) {
                 outputFormatIndex = format
-                txtFileExtentions.text = MultiSink.fileExtensions(formatId).join(", ")
+                txtFileExtensions.text = MultiSink.fileExtensions(formatId).join(", ")
             }
 
             lstOutputFormats.append({format: formatId,
@@ -60,7 +59,7 @@ ColumnLayout {
             for (var i = 0; i < lstOutputFormats.count; i++)
                 if (lstOutputFormats.get(i).format === outputFormat) {
                     cbxOutputFormats.currentIndex = i
-                    txtFileExtentions.text = MultiSink.fileExtensions(lstOutputFormats.get(i).format).join(", ")
+                    txtFileExtensions.text = MultiSink.fileExtensions(lstOutputFormats.get(i).format).join(", ")
 
                     break
                 }
@@ -139,13 +138,13 @@ ColumnLayout {
     }
 
     Label {
-        text: qsTr("File extentions")
+        text: qsTr("File extensions")
         Layout.fillWidth: true
     }
     TextField {
-        id: txtFileExtentions
+        id: txtFileExtensions
         readOnly: true
-        placeholderText: qsTr("This output format has not specific extentions")
+        placeholderText: qsTr("This output format has not specific extensions")
         Layout.fillWidth: true
     }
 

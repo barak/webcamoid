@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <QDir>
@@ -35,6 +34,7 @@ class AkPrivate
         QQmlEngine *m_globalEngine;
         QString m_globalQmlPluginPath;
         QStringList m_globalQmlPluginDefaultPaths;
+        QDir m_applicationDir;
 
         AkPrivate()
         {
@@ -54,6 +54,8 @@ class AkPrivate
             qRegisterMetaType<AkPacket>("AkPacket");
             qRegisterMetaType<AkElementPtr>("AkElementPtr");
 
+            this->m_applicationDir.setPath(QCoreApplication::applicationDirPath());
+
 #ifdef Q_OS_WIN32
             // Initialize the COM library in multithread mode.
             CoInitializeEx(NULL, COINIT_MULTITHREADED);
@@ -66,6 +68,16 @@ class AkPrivate
             // Close COM library.
             CoUninitialize();
 #endif
+        }
+
+        inline QString convertToAbsolute(const QString &path) const
+        {
+            if (!QDir::isRelativePath(path))
+                return QDir::cleanPath(path);
+
+            QString absPath = this->m_applicationDir.absoluteFilePath(path);
+
+            return QDir::cleanPath(absPath);
         }
 };
 
@@ -102,8 +114,13 @@ void Ak::setQmlEngine(QQmlEngine *engine)
 QString Ak::qmlPluginPath()
 {
 #ifdef Q_OS_WIN32
-    if (akGlobalStuff->m_globalQmlPluginPath.isEmpty())
-        return QString("%1%2qml").arg(QCoreApplication::applicationDirPath()).arg(QDir::separator());
+    if (akGlobalStuff->m_globalQmlPluginPath.isEmpty()) {
+        QString qmlPluginPath = QString("%1/../lib/qt/qml")
+                                .arg(QCoreApplication::applicationDirPath());
+        qmlPluginPath = akGlobalStuff->convertToAbsolute(qmlPluginPath);
+
+        return qmlPluginPath;
+    }
 #else
     if (akGlobalStuff->m_globalQmlPluginPath.isEmpty())
         return QString(QT_INSTALL_QML);
@@ -134,7 +151,10 @@ void Ak::setQmlPluginPath(const QString &qmlPluginPath)
 void Ak::resetQmlPluginPath()
 {
 #ifdef Q_OS_WIN32
-    Ak::setQmlPluginPath(QString("%1%2qml").arg(QCoreApplication::applicationDirPath()).arg(QDir::separator()));
+    QString qmlPluginPath = QString("%1/../lib/qt/qml")
+                            .arg(QCoreApplication::applicationDirPath());
+    qmlPluginPath = akGlobalStuff->convertToAbsolute(qmlPluginPath);
+    Ak::setQmlPluginPath(qmlPluginPath);
 #else
     Ak::setQmlPluginPath(QT_INSTALL_QML);
 #endif

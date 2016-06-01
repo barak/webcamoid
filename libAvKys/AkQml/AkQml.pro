@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
 #
-# Email   : hipersayan DOT x AT gmail DOT com
-# Web-Site: http://github.com/hipersayanX/webcamoid
+# Web-Site: http://webcamoid.github.io/
 
 exists(commons.pri) {
     include(commons.pri)
@@ -49,8 +48,8 @@ HEADERS += \
 INCLUDEPATH += \
     ../Lib/src
 
-!win32: LIBS += -L../Lib/ -lAvKys
-win32: LIBS += -L../Lib/ -lAvKys$${VER_MAJ}
+LIBS += -L../Lib/ -l$${COMMONS_TARGET}
+win32: LIBS += -lole32
 
 DISTFILES = qmldir
 
@@ -59,7 +58,7 @@ INSTALLS += \
     qmldir
 
 unix: installPath = $$[QT_INSTALL_QML]/AkQml
-!unix: installPath = $${PREFIX}/qml/AkQml
+!unix: installPath = $${LIBDIR}/qt/qml/AkQml
 
 target.path = $$installPath
 

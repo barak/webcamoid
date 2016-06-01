@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include <QApplication>
@@ -274,7 +273,11 @@ void MediaSource::readPackets(MediaSource *element)
         element->m_dataMutex.lock();
 
         if (element->packetQueueSize() >= element->m_maxPacketQueueSize)
-            element->m_packetQueueNotFull.wait(&element->m_dataMutex);
+            if (!element->m_packetQueueNotFull.wait(&element->m_dataMutex, THREAD_WAIT_LIMIT)) {
+                element->m_dataMutex.unlock();
+
+                continue;
+            }
 
         AVPacket *packet = new AVPacket();
         av_init_packet(packet);
@@ -298,15 +301,11 @@ void MediaSource::readPackets(MediaSource *element)
 
         if (r < 0) {
             if (element->loop()) {
-                if (element->packetQueueSize() > 0)
-                    element->m_packetQueueEmpty.wait(&element->m_dataMutex);
-
-                QMetaObject::invokeMethod(element, "doLoop");
+                foreach (AbstractStreamPtr stream, element->m_streamsMap.values())
+                    stream->packetEnqueue(NULL);
             }
 
-            element->m_dataMutex.unlock();
-
-            return;
+            element->m_run = false;
         }
 
         element->m_dataMutex.unlock();
@@ -456,6 +455,11 @@ bool MediaSource::setState(AkElement::ElementState state)
                                      this,
                                      SLOT(log()));
 
+                    QObject::connect(stream.data(),
+                                     SIGNAL(eof()),
+                                     this,
+                                     SLOT(doLoop()));
+
                     stream->init();
 
                     if (state == AkElement::ElementStatePaused)
@@ -468,7 +472,7 @@ bool MediaSource::setState(AkElement::ElementState state)
 
             this->m_globalClock.setClock(0.);
             this->m_run = true;
-            QtConcurrent::run(&this->m_threadPool, this->readPackets, this);
+            this->m_readPacketsLoopResult = QtConcurrent::run(&this->m_threadPool, this->readPackets, this);
             this->m_curState = state;
 
             return true;
@@ -521,7 +525,7 @@ bool MediaSource::setState(AkElement::ElementState state)
         switch (state) {
         case AkElement::ElementStateNull: {
             this->m_run = false;
-            this->m_threadPool.waitForDone();
+            this->m_readPacketsLoopResult.waitForFinished();
 
             this->m_dataMutex.lock();
             this->m_packetQueueNotFull.wakeAll();
@@ -562,9 +566,6 @@ bool MediaSource::setState(AkElement::ElementState state)
 
 void MediaSource::doLoop()
 {
-    if (!this->m_run)
-        return;
-
     this->setState(AkElement::ElementStateNull);
     this->setState(AkElement::ElementStatePlaying);
 }
@@ -665,16 +666,22 @@ void MediaSource::log()
 
     QString diffType;
     qreal diff;
+    qint64 audioQueueSize = 0;
+    qint64 videoQueueSize = 0;
 
     if (audioStream && videoStream) {
         diffType = "A-V";
         diff = audioStream->clockDiff() - videoStream->clockDiff();
+        audioQueueSize = audioStream->queueSize();
+        videoQueueSize = videoStream->queueSize();
     } else if (audioStream) {
         diffType = "M-A";
         diff = -audioStream->clockDiff();
+        audioQueueSize = audioStream->queueSize();
     } else if (videoStream) {
         diffType = "M-V";
         diff = -videoStream->clockDiff();
+        videoQueueSize = videoStream->queueSize();
     } else
         return;
 
@@ -683,8 +690,8 @@ void MediaSource::log()
     QString log = logFmt.arg(this->m_globalClock.clock(), 7, 'f', 2)
                         .arg(diffType)
                         .arg(diff, 7, 'f', 3)
-                        .arg(audioStream->queueSize() / 1024, 5)
-                        .arg(videoStream->queueSize() / 1024, 5);
+                        .arg(audioQueueSize / 1024, 5)
+                        .arg(videoQueueSize / 1024, 5);
 
     qDebug() << log.toStdString().c_str();
 }

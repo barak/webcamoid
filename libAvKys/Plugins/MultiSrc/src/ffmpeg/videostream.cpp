@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Email   : hipersayan DOT x AT gmail DOT com
- * Web-Site: http://github.com/hipersayanX/webcamoid
+ * Web-Site: http://webcamoid.github.io/
  */
 
 #include "videostream.h"
 
 // no AV sync correction is done if below the minimum AV sync threshold
-#define AV_SYNC_THRESHOLD_MIN 0.01
+#define AV_SYNC_THRESHOLD_MIN 0.04
 
 // AV sync correction is done if above the maximum AV sync threshold
 #define AV_SYNC_THRESHOLD_MAX 0.1
@@ -31,25 +30,6 @@
 
 // no AV correction is done if too big error
 #define AV_NOSYNC_THRESHOLD 10.0
-
-typedef QMap<AVPixelFormat, AkVideoCaps::PixelFormat> AVPixelFormatMap;
-
-inline AVPixelFormatMap initAVPixelFormatMap()
-{
-    AVPixelFormatMap outputFormats;
-    outputFormats[AV_PIX_FMT_MONOBLACK] = AkVideoCaps::Format_monob;
-    outputFormats[AV_PIX_FMT_BGR0] = AkVideoCaps::Format_bgr0;
-    outputFormats[AV_PIX_FMT_BGRA] = AkVideoCaps::Format_bgra;
-    outputFormats[AV_PIX_FMT_RGB565LE] = AkVideoCaps::Format_rgb565le;
-    outputFormats[AV_PIX_FMT_RGB555LE] = AkVideoCaps::Format_rgb555le;
-    outputFormats[AV_PIX_FMT_BGR24] = AkVideoCaps::Format_bgr24;
-    outputFormats[AV_PIX_FMT_RGB444LE] = AkVideoCaps::Format_rgb444le;
-    outputFormats[AV_PIX_FMT_GRAY8] = AkVideoCaps::Format_gray;
-
-    return outputFormats;
-}
-
-Q_GLOBAL_STATIC_WITH_ARGS(AVPixelFormatMap, outputFormats, (initAVPixelFormatMap()))
 
 VideoStream::VideoStream(const AVFormatContext *formatContext,
                          uint index, qint64 id, Clock *globalClock,
@@ -69,13 +49,9 @@ VideoStream::~VideoStream()
 
 AkCaps VideoStream::caps() const
 {
-    AkVideoCaps::PixelFormat format =
-            outputFormats->value(this->codecContext()->pix_fmt,
-                                 AkVideoCaps::Format_bgra);
-
     AkVideoCaps caps;
     caps.isValid() = true;
-    caps.format() = format;
+    caps.format() = AkVideoCaps::Format_rgb24;
     caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
     caps.width() = this->codecContext()->width;
     caps.height() = this->codecContext()->height;
@@ -88,6 +64,12 @@ void VideoStream::processPacket(AVPacket *packet)
 {
     if (!this->isValid())
         return;
+
+    if (!packet) {
+        this->dataEnqueue((AVFrame *) NULL);
+
+        return;
+    }
 
     AVFrame *iFrame = av_frame_alloc();
     int gotFrame;
@@ -111,9 +93,9 @@ void VideoStream::processData(AVFrame *frame)
         qreal diff = pts - this->globalClock()->clock();
         qreal delay = pts - this->m_lastPts;
 
-        // skip or repeat frame. We take into account the
+        // Skip or repeat frame. We take into account the
         // delay to compute the threshold. I still don't know
-        // if it is the best guess
+        // if it is the best guess.
         double syncThreshold = qBound(AV_SYNC_THRESHOLD_MIN,
                                       delay,
                                       AV_SYNC_THRESHOLD_MAX);
@@ -121,13 +103,14 @@ void VideoStream::processData(AVFrame *frame)
         if (!qIsNaN(diff)
             && qAbs(diff) < AV_NOSYNC_THRESHOLD
             && delay < AV_SYNC_FRAMEDUP_THRESHOLD) {
-            // video is backward the external clock.
+            // Video is backward the external clock.
             if (diff <= -syncThreshold) {
+                // Drop frame.
                 this->m_lastPts = pts;
 
                 break;
             } else if (diff > syncThreshold) {
-                // video is ahead the external clock.
+                // Video is ahead the external clock.
                 QThread::usleep(1e6 * (diff - syncThreshold));
 
                 continue;
@@ -163,82 +146,69 @@ AkFrac VideoStream::fps() const
 
 AkPacket VideoStream::convert(AVFrame *iFrame)
 {
-    AVFrame *oFrame = NULL;
-    AVPixelFormat oFormat;
-    bool delFrame = false;
+    AVPixelFormat outPixFormat = AV_PIX_FMT_RGB24;
 
-    if (outputFormats->contains(AVPixelFormat(iFrame->format))) {
-        oFrame = iFrame;
-        oFormat = AVPixelFormat(iFrame->format);
-    } else {
-        oFrame = new AVFrame;
-        memset(oFrame, 0, sizeof(AVFrame));
-        oFormat = AV_PIX_FMT_BGRA;
+    // Initialize rescaling context.
+    this->m_scaleContext = sws_getCachedContext(this->m_scaleContext,
+                                                  iFrame->width,
+                                                  iFrame->height,
+                                                  AVPixelFormat(iFrame->format),
+                                                  iFrame->width,
+                                                  iFrame->height,
+                                                  outPixFormat,
+                                                  SWS_FAST_BILINEAR,
+                                                  NULL,
+                                                  NULL,
+                                                  NULL);
 
-        av_image_alloc((uint8_t **) oFrame->data,
-                       oFrame->linesize,
-                       iFrame->width,
-                       iFrame->height,
-                       oFormat,
-                       1);
+    if (!this->m_scaleContext)
+        return AkPacket();
 
-        this->m_scaleContext = sws_getCachedContext(this->m_scaleContext,
-                                                    iFrame->width,
-                                                    iFrame->height,
-                                                    AVPixelFormat(iFrame->format),
-                                                    iFrame->width,
-                                                    iFrame->height,
-                                                    oFormat,
-                                                    SWS_FAST_BILINEAR,
-                                                    NULL,
-                                                    NULL,
-                                                    NULL);
-
-        sws_scale(this->m_scaleContext,
-                  (uint8_t **) iFrame->data,
-                  iFrame->linesize,
-                  0,
-                  iFrame->height,
-                  oFrame->data,
-                  oFrame->linesize);
-
-        delFrame = true;
-    }
-
-    AkVideoPacket packet;
-    packet.caps().isValid() = true;
-    packet.caps().format() = outputFormats->value(oFormat);
-    packet.caps().bpp() = AkVideoCaps::bitsPerPixel(packet.caps().format());
-    packet.caps().width() = iFrame->width;
-    packet.caps().height() = iFrame->height;
-    packet.caps().fps() = this->fps();
-
-    int frameSize = av_image_get_buffer_size(oFormat,
+    // Create oPicture
+    int frameSize = av_image_get_buffer_size(outPixFormat,
                                              iFrame->width,
                                              iFrame->height,
                                              1);
 
     QByteArray oBuffer(frameSize, Qt::Uninitialized);
+    AVFrame oFrame;
+    memset(&oFrame, 0, sizeof(AVFrame));
 
-    av_image_copy_to_buffer((uint8_t *) oBuffer.data(),
-                            frameSize,
-                            oFrame->data,
-                            oFrame->linesize,
-                            oFormat,
-                            iFrame->width,
-                            iFrame->height,
-                            1);
-
-    packet.buffer() = oBuffer;
-    packet.pts() = av_frame_get_best_effort_timestamp(iFrame);
-    packet.timeBase() = this->timeBase();
-    packet.index() = this->index();
-    packet.id() = this->id();
-
-    if (delFrame) {
-        av_frame_unref(oFrame);
-        delete oFrame;
+    if (av_image_fill_arrays((uint8_t **) oFrame.data,
+                             oFrame.linesize,
+                             (const uint8_t *) oBuffer.constData(),
+                             outPixFormat,
+                             iFrame->width,
+                             iFrame->height,
+                             1) < 0) {
+        return AkPacket();
     }
 
-    return packet.toPacket();
+    // Convert picture format
+    sws_scale(this->m_scaleContext,
+              iFrame->data,
+              iFrame->linesize,
+              0,
+              iFrame->height,
+              oFrame.data,
+              oFrame.linesize);
+
+    AkVideoCaps caps;
+    caps.isValid() = true;
+    caps.format() = AkVideoCaps::Format_rgb24;
+    caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
+    caps.width() = iFrame->width;
+    caps.height() = iFrame->height;
+    caps.fps() = this->fps();
+
+    // Create packet
+    AkVideoPacket oPacket;
+    oPacket.caps() = caps;
+    oPacket.buffer() = oBuffer;
+    oPacket.pts() = av_frame_get_best_effort_timestamp(iFrame);
+    oPacket.timeBase() = this->timeBase();
+    oPacket.index() = this->index();
+    oPacket.id() = this->id();
+
+    return oPacket.toPacket();
 }

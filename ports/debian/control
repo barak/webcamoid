@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 8.0.0),
  pkg-config,
  linux-libc-dev,
  qttools5-dev-tools,
- qtdeclarative5-dev
+ qtdeclarative5-dev,
  libqt5svg5-dev,
  libavcodec-dev,
  libavdevice-dev,
@@ -17,17 +17,22 @@ Build-Depends: debhelper (>= 8.0.0),
  libpulse-dev,
  libv4l-dev
 Standards-Version: 3.9.4
-Homepage: https://github.com/hipersayanX/webcamoid
-#Vcs-Git: git://github.com/hipersayanX/webcamoid.git
-#Vcs-Browser: https://github.com/hipersayanX/webcamoid
+Homepage: https://webcamoid.github.io/
+#Vcs-Git: git://github.com/webcamoid/webcamoid.git
+#Vcs-Browser: https://github.com/webcamoid/webcamoid
 
 Package: webcamoid
 Architecture: any
 Depends: ${shlibs:Depends},
  ${misc:Depends},
+ qml-module-qtquick-dialogs,
  qml-module-qtquick-controls,
+ qml-module-qtquick-layouts,
+ qml-module-qtquick-window2,
  libqt5svg5,
+ libqt5opengl5-dev,
  libpulse0,
+ libv4l-0,
  libavcodec56,
  libavdevice56,
  libavformat56,
