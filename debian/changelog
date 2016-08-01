@@ -1,3 +1,21 @@
+webcamoid (7.2.0+dfsg-1) experimental; urgency=medium
+
+  * New upstream release.
+  * debian/control:
+      updated my email.
+  * debian/patches:
+      - no_virtual_camera.patch created. To avoid VirtualCamera plugin.
+        Ms-LPL license.
+  * debian/libavky7.symbols:
+      - new file created for this version.
+  * debian/README.source file created:
+      - libAvKys/Plugins/VirtualCamera directory removed. Ms-LPL license. This
+        package is a dfgs version.
+  * debian/watch:
+      - option dversionmangle was applied to remove the '+dfsg' part. 
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Mon, 01 Aug 2016 14:46:26 -0300
+
 webcamoid (7.1.0-2) unstable; urgency=medium
 
   * Upload to unstable.

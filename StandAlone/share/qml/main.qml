@@ -27,8 +27,7 @@ import Webcamoid 1.0
 ApplicationWindow {
     id: wdgMainWidget
     title: Webcamoid.applicationName()
-           +
-           " "
+           + " "
            + Webcamoid.applicationVersion()
            + " - "
            + Webcamoid.streamDescription(Webcamoid.curStream)
@@ -41,16 +40,37 @@ ApplicationWindow {
 
     property bool showEffectBar: false
 
-    onWidthChanged: Webcamoid.windowWidth = width
-    onHeightChanged: Webcamoid.windowHeight = height
-
     function rgbChangeAlpha(color, alpha)
     {
         return Qt.rgba(color.r, color.g, color.b, alpha)
     }
 
+    function togglePlay() {
+        if (Webcamoid.isPlaying) {
+            Webcamoid.stopVirtualCamera();
+            Webcamoid.stopRecording();
+            Webcamoid.stop();
+
+            if (splitView.state == "showRecordPanels")
+                splitView.state = ""
+        } else {
+            Webcamoid.start();
+
+            if (Webcamoid.enableVirtualCamera)
+                Webcamoid.startVirtualCamera("");
+        }
+    }
+
     SystemPalette {
         id: palette
+    }
+
+    onWidthChanged: Webcamoid.windowWidth = width
+    onHeightChanged: Webcamoid.windowHeight = height
+
+    Component.onCompleted: {
+        if (Webcamoid.playOnStart)
+            togglePlay()
     }
 
     Connections {
@@ -175,6 +195,44 @@ ApplicationWindow {
         }
     }
 
+    PhotoWidget {
+        id: photoWidget
+        anchors.bottom: iconBarRect.top
+        anchors.bottomMargin: 16
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: false
+
+        function savePhoto()
+        {
+            Webcamoid.takePhoto()
+            var suffix = "png";
+            var fileName = qsTr("Picture %1.%2")
+                                .arg(Webcamoid.currentTime())
+                                .arg(suffix)
+
+            var filters = ["PNG file (*.png)",
+                           "JPEG file (*.jpg)",
+                           "BMP file (*.bmp)",
+                           "GIF file (*.gif)"]
+
+            var fileUrl = Webcamoid.saveFileDialog(qsTr("Save photo as..."),
+                                     fileName,
+                                     Webcamoid.standardLocations("pictures")[0],
+                                     "." + suffix,
+                                     filters.join(";;"))
+
+            if (fileUrl !== "")
+                Webcamoid.savePhoto(fileUrl)
+        }
+
+        onTakePhoto: {
+            if (useFlash)
+                flash.show()
+            else
+                savePhoto()
+        }
+    }
+
     SplitView {
         id: splitView
         anchors.fill: parent
@@ -293,6 +351,13 @@ ApplicationWindow {
                 }
             },
             State {
+                name: "showPhotoWidget"
+                PropertyChanges {
+                    target: photoWidget
+                    visible: true
+                }
+            },
+            State {
                 name: "showEffectPanels"
                 PropertyChanges {
                     target: leftPanel
@@ -384,6 +449,81 @@ ApplicationWindow {
             onEntered: iconBarRect.opacity = 1
             onExited: iconBarRect.opacity = 0.5
 
+            Rectangle {
+                id: btnGoBack
+                height: parent.height
+                width: height
+                color: "#00000000"
+                visible: false
+
+                property int margins: 8
+
+                Component.onCompleted: {
+                    btnGoBack.width = imgGoBack.width + txtGoBack.width + 3 * btnGoBack.margins
+                }
+
+                Rectangle {
+                    id: highlighter
+                    radius: iconBarRect.radius
+                    anchors.fill: parent
+                    visible: false
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0
+                            color: Qt.rgba(0.67, 0.5, 1, 0.5)
+                        }
+
+                        GradientStop {
+                            position: 1
+                            color: Qt.rgba(0.5, 0.25, 1, 1)
+                        }
+                    }
+                }
+                Image {
+                    id: imgGoBack
+                    height: parent.height - 2 * btnGoBack.margins
+                    anchors.left: parent.left
+                    anchors.leftMargin: btnGoBack.margins
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: height
+                    source: "qrc:/icons/hicolor/scalable/go-back.svg"
+                }
+                Text {
+                    id: txtGoBack
+                    text: qsTr("Go back")
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: imgGoBack.right
+                    anchors.leftMargin: btnGoBack.margins
+                    color: "white"
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+
+                    onClicked: {
+                        iconBarRect.state = ""
+                        splitView.state = ""
+                    }
+                    onPressed: {
+                        imgGoBack.scale = 0.75
+                        txtGoBack.scale = 0.75
+                    }
+                    onReleased: {
+                        imgGoBack.scale = 1
+                        txtGoBack.scale = 1
+                    }
+                    onEntered: {
+                        highlighter.visible = true
+                    }
+                    onExited: {
+                        imgGoBack.scale = 1
+                        txtGoBack.scale = 1
+                        highlighter.visible = false
+                    }
+                }
+            }
+
             Row {
                 id: iconBar
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -399,21 +539,7 @@ ApplicationWindow {
                     text: qsTr("Play")
                     icon: "qrc:/icons/hicolor/scalable/play.svg"
 
-                    onClicked: {
-                        if (Webcamoid.isPlaying) {
-                            Webcamoid.stopVirtualCamera();
-                            Webcamoid.stopRecording();
-                            Webcamoid.stop();
-
-                            if (splitView.state == "showRecordPanels")
-                                splitView.state = ""
-                        } else {
-                            Webcamoid.start();
-
-                            if (Webcamoid.enableVirtualCamera)
-                                Webcamoid.startVirtualCamera("");
-                        }
-                    }
+                    onClicked: togglePlay()
                 }
                 IconBarItem {
                     width: iconBarRect.height
@@ -436,25 +562,10 @@ ApplicationWindow {
                     enabled: Webcamoid.isPlaying
 
                     onClicked: {
-                        Webcamoid.takePhoto()
-                        var suffix = "png";
-                        var fileName = qsTr("Picture %1.%2")
-                                            .arg(Webcamoid.currentTime())
-                                            .arg(suffix)
-
-                        var filters = ["PNG file (*.png)",
-                                       "JPEG file (*.jpg)",
-                                       "BMP file (*.bmp)",
-                                       "GIF file (*.gif)"]
-
-                        var fileUrl = Webcamoid.saveFileDialog(qsTr("Save photo as..."),
-                                                 fileName,
-                                                 Webcamoid.standardLocations("pictures")[0],
-                                                 "." + suffix,
-                                                 filters.join(";;"))
-
-                        if (fileUrl !== "")
-                            Webcamoid.savePhoto(fileUrl)
+                        if (splitView.state == "showPhotoWidget")
+                            splitView.state = ""
+                        else
+                            splitView.state = "showPhotoWidget"
                     }
                 }
                 IconBarItem {
@@ -507,8 +618,32 @@ ApplicationWindow {
                 }
             }
         }
+
+        states: [
+            State {
+                name: "showOptions"
+                PropertyChanges {
+                    target: iconBarRect
+                    width: btnGoBack.width
+                    radius: 4
+                }
+                PropertyChanges {
+                    target: iconBar
+                    visible: false
+                }
+                PropertyChanges {
+                    target: btnGoBack
+                    visible: true
+                }
+            }
+        ]
     }
 
+    Flash {
+        id: flash
+
+        onTriggered: photoWidget.savePhoto()
+    }
     About {
         id: about
     }

@@ -31,7 +31,6 @@
 
 DEFINE_GUID(CLSID_SampleGrabber, 0xc1f400a0, 0x3f08, 0x11d3, 0x9f, 0x0b, 0x00, 0x60, 0x08, 0x03, 0x9e, 0x37);
 DEFINE_GUID(CLSID_NullRenderer, 0xc1f400a4, 0x3f08, 0x11d3, 0x9f, 0x0b, 0x00, 0x60, 0x08, 0x03, 0x9e, 0x37);
-static const GUID GUID_DEVINTERFACE_USB_DEVICE = {0xA5DCBF10, 0x6530, 0x11D2, {0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED}};
 
 Q_CORE_EXPORT HINSTANCE qWinAppInst();
 
@@ -95,11 +94,11 @@ class Capture: public QObject
         Q_INVOKABLE QVariantList caps(const QString &webcam) const;
         Q_INVOKABLE QString capsDescription(const AkCaps &caps) const;
         Q_INVOKABLE QVariantList imageControls() const;
-        Q_INVOKABLE bool setImageControls(const QVariantMap &imageControls) const;
-        Q_INVOKABLE bool resetImageControls() const;
+        Q_INVOKABLE bool setImageControls(const QVariantMap &imageControls);
+        Q_INVOKABLE bool resetImageControls();
         Q_INVOKABLE QVariantList cameraControls() const;
-        Q_INVOKABLE bool setCameraControls(const QVariantMap &cameraControls) const;
-        Q_INVOKABLE bool resetCameraControls() const;
+        Q_INVOKABLE bool setCameraControls(const QVariantMap &cameraControls);
+        Q_INVOKABLE bool resetCameraControls();
         Q_INVOKABLE AkPacket readFrame();
 
     private:
@@ -107,7 +106,6 @@ class Capture: public QObject
         QString m_device;
         QList<int> m_streams;
         qint64 m_id;
-        AkCaps m_caps;
         AkFrac m_timeBase;
         IoMethod m_ioMethod;
         QMap<QString, QSize> m_resolution;
@@ -116,8 +114,15 @@ class Capture: public QObject
         FrameGrabber m_frameGrabber;
         QByteArray m_curBuffer;
         QMutex m_mutex;
+        QMutex m_controlsMutex;
         QWaitCondition m_waitCondition;
 
+        QVariantList m_globalImageControls;
+        QVariantList m_globalCameraControls;
+        QVariantMap m_localImageControls;
+        QVariantMap m_localCameraControls;
+
+        AkCaps capsFromMediaType(const AM_MEDIA_TYPE *mediaType) const;
         AkCaps capsFromMediaType(const MediaTypePtr &mediaType) const;
         HRESULT enumerateCameras(IEnumMoniker **ppEnum) const;
         MonikersMap listMonikers() const;
@@ -135,6 +140,12 @@ class Capture: public QObject
         static void deleteUnknown(IUnknown *unknown);
         static void deleteMediaType(AM_MEDIA_TYPE *mediaType);
         static void deletePin(IPin *pin);
+        QVariantList imageControls(IBaseFilter *filter) const;
+        bool setImageControls(IBaseFilter *filter, const QVariantMap &imageControls) const;
+        QVariantList cameraControls(IBaseFilter *filter) const;
+        bool setCameraControls(IBaseFilter *filter, const QVariantMap &cameraControls) const;
+        QVariantMap controlStatus(const QVariantList &controls) const;
+        QVariantMap mapDiff(const QVariantMap &map1, const QVariantMap &map2) const;
 
     signals:
         void webcamsChanged(const QStringList &webcams) const;

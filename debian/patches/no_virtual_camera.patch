@@ -1,0 +1,16 @@
+Description: No virtualcamera plugin. Ms-LPL license
+Author: Herbert Parentes Fortes Neto <hpfn@debian.org>
+LAst-Update: 2016-08-01
+Index: webcamoid-7.2.0/libAvKys/Plugins/Plugins.pro
+===================================================================
+--- webcamoid-7.2.0.orig/libAvKys/Plugins/Plugins.pro
++++ webcamoid-7.2.0/libAvKys/Plugins/Plugins.pro
+@@ -79,7 +79,7 @@ SUBDIRS += \
+     Temperature \
+     VideoCapture \
+     Vignette \
+-    VirtualCamera \
++#    VirtualCamera \
+     Warhol \
+     Warp \
+     Wave

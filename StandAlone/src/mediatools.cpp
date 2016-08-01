@@ -45,6 +45,8 @@ inline RecordFromMap initRecordFromMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(RecordFromMap, recordFromMap, (initRecordFromMap()))
 
+Q_GLOBAL_STATIC(QDir, applicationDir)
+
 MediaTools::MediaTools(QQmlApplicationEngine *engine, QObject *parent):
     QObject(parent)
 {
@@ -56,6 +58,8 @@ MediaTools::MediaTools(QQmlApplicationEngine *engine, QObject *parent):
     this->m_windowHeight = 0;
     this->m_advancedMode = false;
     this->m_enableVirtualCamera = false;
+    this->m_playOnStart = false;
+    this->m_vcamLinked = false;
 
     Ak::setQmlEngine(engine);
     this->m_pipeline = AkElement::create("Bin", "pipeline");
@@ -131,12 +135,10 @@ MediaTools::MediaTools(QQmlApplicationEngine *engine, QObject *parent):
                              SIGNAL(error(const QString &)),
                              this,
                              SIGNAL(error(const QString &)));
-
             QObject::connect(this->m_source.data(),
                              SIGNAL(stateChanged(AkElement::ElementState)),
                              this,
                              SIGNAL(stateChanged(AkElement::ElementState)));
-
             QObject::connect(this->m_source.data(),
                              SIGNAL(stateChanged(AkElement::ElementState)),
                              this->m_audioOutput.data(),
@@ -145,49 +147,47 @@ MediaTools::MediaTools(QQmlApplicationEngine *engine, QObject *parent):
 
         if (this->m_videoCapture) {
             QObject::connect(this->m_videoCapture.data(),
-                             SIGNAL(error(const QString &)),
+                             SIGNAL(mediasChanged(const QStringList &)),
                              this,
-                             SIGNAL(error(const QString &)));
-
+                             SLOT(webcamsChanged(const QStringList &)));
             QObject::connect(this->m_videoCapture.data(),
                              SIGNAL(stateChanged(AkElement::ElementState)),
                              this,
                              SIGNAL(stateChanged(AkElement::ElementState)));
+            QObject::connect(this->m_videoCapture.data(),
+                             SIGNAL(error(const QString &)),
+                             this,
+                             SIGNAL(error(const QString &)));
         }
 
         if (this->m_desktopCapture) {
+            QObject::connect(this->m_desktopCapture.data(),
+                             SIGNAL(mediasChanged(const QStringList &)),
+                             this,
+                             SLOT(webcamsChanged(const QStringList &)));
             QObject::connect(this->m_desktopCapture.data(),
                              SIGNAL(stateChanged(AkElement::ElementState)),
                              this,
                              SIGNAL(stateChanged(AkElement::ElementState)));
         }
+
+        if (this->m_audioSwitch)
+            this->m_audioSwitch->setProperty("inputIndex", 1);
+
+        if (this->m_record)
+            QObject::connect(this->m_record.data(),
+                             SIGNAL(outputFormatChanged(const QString &)),
+                             this,
+                             SIGNAL(curRecordingFormatChanged(const QString &)));
+
+        if (this->m_virtualCamera)
+            this->m_vcamLinked = true;
 
         QObject::connect(this,
                          &MediaTools::stateChanged,
                          this,
                          &MediaTools::isPlayingChanged);
-
-        if (this->m_audioSwitch)
-            this->m_audioSwitch->setProperty("inputIndex", 1);
-
-        if (this->m_videoCapture)
-            QObject::connect(this->m_videoCapture.data(),
-                             SIGNAL(mediasChanged(const QStringList &)),
-                             this,
-                             SLOT(webcamsChanged(const QStringList &)));
-
-        if (this->m_desktopCapture)
-            QObject::connect(this->m_desktopCapture.data(),
-                             SIGNAL(mediasChanged(const QStringList &)),
-                             this,
-                             SLOT(webcamsChanged(const QStringList &)));
     }
-
-    if (this->m_record)
-        QObject::connect(this->m_record.data(),
-                         SIGNAL(outputFormatChanged(const QString &)),
-                         this,
-                         SIGNAL(curRecordingFormatChanged(const QString &)));
 
     this->loadConfigs();
 }
@@ -252,6 +252,14 @@ QStringList MediaTools::recordingFormats() const
                               Q_RETURN_ARG(QStringList, supportedFormats));
 
     foreach (QString format, supportedFormats) {
+#ifndef USE_GSTREAMER
+        if (format == "gif") {
+            formats << format;
+
+            continue;
+        }
+#endif
+
         QStringList audioCodecs;
         QMetaObject::invokeMethod(this->m_record.data(),
                                   "supportedCodecs",
@@ -413,6 +421,9 @@ bool MediaTools::canModify(const QString &stream) const
 
 bool MediaTools::isCamera(const QString &stream) const
 {
+    if (!this->m_videoCapture)
+        return false;
+
     QStringList webcams;
 
     QMetaObject::invokeMethod(this->m_videoCapture.data(),
@@ -424,6 +435,9 @@ bool MediaTools::isCamera(const QString &stream) const
 
 bool MediaTools::isDesktop(const QString &stream) const
 {
+    if (!this->m_desktopCapture)
+        return false;
+
     QStringList screens;
 
     QMetaObject::invokeMethod(this->m_desktopCapture.data(),
@@ -618,6 +632,22 @@ bool MediaTools::isPlaying()
     return false;
 }
 
+QStringList MediaTools::webcams()
+{
+    QStringList webcams;
+
+    QMetaObject::invokeMethod(this->m_videoCapture.data(),
+                              "medias",
+                              Q_RETURN_ARG(QStringList, webcams));
+
+    return webcams;
+}
+
+bool MediaTools::playOnStart() const
+{
+    return this->m_playOnStart;
+}
+
 QString MediaTools::fileNameFromUri(const QString &uri) const
 {
     return QFileInfo(uri).baseName();
@@ -718,10 +748,7 @@ bool MediaTools::embedMediaControls(const QString &where,
                                      const QString &stream,
                                      const QString &name) const
 {
-    if (!this->m_appEngine
-        || !this->m_videoCapture
-        || !this->m_desktopCapture
-        || !this->m_source)
+    if (!this->m_appEngine)
         return false;
 
     QObject *interface = NULL;
@@ -731,9 +758,10 @@ bool MediaTools::embedMediaControls(const QString &where,
                                                            stream);
     else if (this->isDesktop(stream))
         interface = this->m_desktopCapture->controlInterface(this->m_appEngine, "");
-    else if (this->isVideo(stream))
-        interface = this->m_source->controlInterface(this->m_appEngine, "");
-    else
+    else if (this->isVideo(stream)) {
+        if (this->m_source)
+            interface = this->m_source->controlInterface(this->m_appEngine, "");
+    } else
         return false;
 
     if (!interface)
@@ -805,6 +833,21 @@ void MediaTools::removeInterface(const QString &where,
     }
 }
 
+void MediaTools::setApplicationDir(const QString &path)
+{
+    applicationDir->setPath(path);
+}
+
+QString MediaTools::convertToAbsolute(const QString &path)
+{
+    if (!QDir::isRelativePath(path))
+        return QDir::cleanPath(path);
+
+    QString absPath = applicationDir->absoluteFilePath(path);
+
+    return QDir::cleanPath(absPath).replace('/', QDir::separator());
+}
+
 AkElementPtr MediaTools::sourceElement() const
 {
     if (this->isCamera(this->m_curStream))
@@ -813,8 +856,6 @@ AkElementPtr MediaTools::sourceElement() const
         return this->m_desktopCapture;
     else
         return this->m_source;
-
-    return AkElementPtr();
 }
 
 bool MediaTools::embedInterface(QQmlApplicationEngine *engine,
@@ -977,10 +1018,7 @@ void MediaTools::savePhoto(const QString &fileName)
 
 bool MediaTools::start()
 {
-    if (this->m_curStream.isEmpty()
-        || !this->m_source
-        || !this->m_videoCapture
-        || !this->m_desktopCapture)
+    if (this->m_curStream.isEmpty())
         return false;
 
     // Setup the recording streams caps.
@@ -990,9 +1028,25 @@ bool MediaTools::start()
         source = this->m_videoCapture;
     else if (this->isDesktop(this->m_curStream))
         source = this->m_desktopCapture;
-    else {
+    else if (this->m_source) {
         source = this->m_source;
         source->setProperty("loop", true);
+    }
+
+    if (!source)
+        return false;
+
+    // Prevents self blocking.
+    if (this->m_curStream == this->m_virtualCamera->property("media").toString()) {
+        if (this->m_vcamLinked) {
+            this->m_videoOutput->unlink(this->m_virtualCamera);
+            this->m_vcamLinked = false;
+        }
+    } else {
+        if (!this->m_vcamLinked) {
+            this->m_videoOutput->link(this->m_virtualCamera);
+            this->m_vcamLinked = true;
+        }
     }
 
     QList<int> streams;
@@ -1171,13 +1225,10 @@ bool MediaTools::startVirtualCamera(const QString &fileName)
     QMetaObject::invokeMethod(this->m_virtualCamera.data(),
                               "clearStreams");
 
-    AkVideoCaps oVideoCaps(videoCaps);
-    oVideoCaps.format() = AkVideoCaps::Format_yuv420p;
-
     QMetaObject::invokeMethod(this->m_virtualCamera.data(),
                               "addStream",
                               Q_ARG(int, 0),
-                              Q_ARG(AkCaps, oVideoCaps.toCaps()));
+                              Q_ARG(AkCaps, videoCaps));
 
     this->m_virtualCamera->setState(AkElement::ElementStatePlaying);
 
@@ -1268,6 +1319,15 @@ void MediaTools::setEnableVirtualCamera(bool enableVirtualCamera)
     emit this->enableVirtualCameraChanged(enableVirtualCamera);
 }
 
+void MediaTools::setPlayOnStart(bool playOnStart)
+{
+    if (this->m_playOnStart == playOnStart)
+        return;
+
+    this->m_playOnStart = playOnStart;
+    emit this->playOnStartChanged(playOnStart);
+}
+
 void MediaTools::resetCurStream()
 {
     this->setCurStream("");
@@ -1311,6 +1371,11 @@ void MediaTools::resetAdvancedMode()
 void MediaTools::resetEnableVirtualCamera()
 {
     this->setEnableVirtualCamera(false);
+}
+
+void MediaTools::resetPlayOnStart()
+{
+    this->setPlayOnStart(false);
 }
 
 void MediaTools::resetEffects()
@@ -1357,10 +1422,20 @@ void MediaTools::loadConfigs()
     config.beginGroup("GeneralConfigs");
 
     this->setAdvancedMode(config.value("advancedMode", false).toBool());
+    this->setPlayOnStart(config.value("playOnStart", false).toBool());
 
     QSize windowSize = config.value("windowSize", QSize(1024, 600)).toSize();
     this->m_windowWidth = windowSize.width();
     this->m_windowHeight = windowSize.height();
+
+#ifdef Q_OS_WIN32
+    if (this->m_virtualCamera) {
+        QString driverPath = config.value("virtualCameraDriverPath",
+                                          "VirtualCameraSource.dll").toString();
+        this->m_virtualCamera->setProperty("driverPath",
+                                           this->convertToAbsolute(driverPath));
+    }
+#endif
 
     config.endGroup();
 
@@ -1435,8 +1510,16 @@ void MediaTools::saveConfigs()
     config.beginGroup("GeneralConfigs");
 
     config.setValue("advancedMode", this->advancedMode());
+    config.setValue("playOnStart", this->playOnStart());
     config.setValue("windowSize", QSize(this->m_windowWidth,
                                         this->m_windowHeight));
+
+#ifdef Q_OS_WIN32
+    if (this->m_virtualCamera) {
+        QString driverPath = this->m_virtualCamera->property("driverPath").toString();
+        config.setValue("virtualCameraDriverPath", applicationDir->relativeFilePath(driverPath));
+    }
+#endif
 
     config.endGroup();
 
@@ -1490,8 +1573,7 @@ void MediaTools::saveConfigs()
     config.beginGroup("PluginConfigs");
 
 #ifdef Q_OS_WIN32
-    QDir applicationDir(QCoreApplication::applicationDirPath());
-    QString qmlPluginPath = applicationDir.relativeFilePath(Ak::qmlPluginPath());
+    QString qmlPluginPath = applicationDir->relativeFilePath(Ak::qmlPluginPath());
 #else
     QString qmlPluginPath = Ak::qmlPluginPath();
 #endif
@@ -1507,7 +1589,7 @@ void MediaTools::saveConfigs()
         config.setArrayIndex(i);
 
 #ifdef Q_OS_WIN32
-        config.setValue("path", applicationDir.relativeFilePath(path));
+        config.setValue("path", applicationDir->relativeFilePath(path));
 #else
         config.setValue("path", path);
 #endif
@@ -1531,7 +1613,7 @@ void MediaTools::saveConfigs()
         config.setArrayIndex(i);
 
 #ifdef Q_OS_WIN32
-        config.setValue("path", applicationDir.relativeFilePath(path));
+        config.setValue("path", applicationDir->relativeFilePath(path));
 #else
         config.setValue("path", path);
 #endif
@@ -1582,14 +1664,14 @@ void MediaTools::webcamsChanged(const QStringList &webcams)
 
 void MediaTools::updateRecordingParams()
 {
-    if (this->m_curStream.isEmpty()
-        || !this->m_source
-        || !this->m_videoCapture
-        || !this->m_desktopCapture)
+    if (this->m_curStream.isEmpty())
         return;
 
     // Setup the recording streams caps.
     AkElementPtr source = this->sourceElement();
+
+    if (!source)
+        return;
 
     QList<int> streams;
     QMetaObject::invokeMethod(source.data(),

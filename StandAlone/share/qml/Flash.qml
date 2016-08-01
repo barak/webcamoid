@@ -17,32 +17,41 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#ifndef CONVERTVIDEO_H
-#define CONVERTVIDEO_H
+import QtQuick 2.5
+import QtQuick.Window 2.2
 
-#include <akvideopacket.h>
+Window {
+    id: wndFlash
+    color: "white"
+    flags: Qt.Dialog
+    modality: Qt.ApplicationModal
+    visibility: visible? Window.FullScreen: Window.Hidden
 
-extern "C"
-{
-    #include <libavcodec/avcodec.h>
-    #include <libswscale/swscale.h>
-    #include <libavutil/imgutils.h>
-    #include <libavutil/pixdesc.h>
+    property int timeout: 1500
+
+    signal triggered()
+
+    onVisibleChanged: {
+        if (visible) {
+            timerShot.start()
+            timerClose.start()
+        }
+    }
+
+    Timer {
+        id: timerShot
+        interval: 0.75 * wndFlash.timeout
+        repeat: false
+        triggeredOnStart: false
+
+        onTriggered: wndFlash.triggered()
+    }
+    Timer {
+        id: timerClose
+        interval: wndFlash.timeout
+        repeat: false
+        triggeredOnStart: false
+
+        onTriggered: wndFlash.hide()
+    }
 }
-
-class ConvertVideo: public QObject
-{
-    Q_OBJECT
-
-    public:
-        explicit ConvertVideo(QObject *parent=NULL);
-        ~ConvertVideo();
-
-        Q_INVOKABLE AkPacket convert(const AkPacket &packet,
-                                     const AkCaps &oCaps);
-
-    private:
-        SwsContext *m_scaleContext;
-};
-
-#endif // CONVERTVIDEO_H

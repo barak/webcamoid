@@ -1,7 +1,7 @@
 Source: webcamoid
 Section: video
 Priority: optional
-Maintainer: Herbert Parentes Fortes Neto <hpfn@ig.com.br>
+Maintainer: Herbert Parentes Fortes Neto <hpfn@debian.org>
 Build-Depends: debhelper (>= 9),
                libavcodec-dev,
                libavdevice-dev,
