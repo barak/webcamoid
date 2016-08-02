@@ -1,3 +1,14 @@
+webcamoid (7.2.0+dfsg-2) experimental; urgency=medium
+
+  * debian/copyright:
+      - Files-Excluded entry added.
+  * debian/rules:
+      - in PVER variable; change the delimiter to '+'.
+  * debian/libavky7.symbols:
+      - edited to fix the build in others archs.
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Tue, 02 Aug 2016 09:51:39 -0300
+
 webcamoid (7.2.0+dfsg-1) experimental; urgency=medium
 
   * New upstream release.
