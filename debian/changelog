@@ -1,3 +1,17 @@
+webcamoid (7.2.0+dfsg1-1) unstable; urgency=medium
+
+  * Upload to unstable.
+  * debian/copyright:
+      - Files-Excluded entry fixed:
+          - exclude only dshow directory. Not all VirtualCamera directory.
+  * debian/patches:
+      - no_virtual_camera.patch removed. It is not necessary.
+  * debian/README.source updated.
+  * webcamoid_7.2.0+dfsg.orig.tar.gz was replaced. Please note the '+dfsg1' 
+    (1) as a new part of the version.
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Wed, 03 Aug 2016 17:32:16 -0300
+
 webcamoid (7.2.0+dfsg-2) experimental; urgency=medium
 
   * debian/copyright:
@@ -21,7 +35,7 @@ webcamoid (7.2.0+dfsg-1) experimental; urgency=medium
       - new file created for this version.
   * debian/README.source file created:
       - libAvKys/Plugins/VirtualCamera directory removed. Ms-LPL license. This
-        package is a dfgs version.
+        package is a dfsg version.
   * debian/watch:
       - option dversionmangle was applied to remove the '+dfsg' part. 
 
