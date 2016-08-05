@@ -43,7 +43,7 @@ class VideoFrame: public QSGTexture
 
     private:
         QImage m_image;
-        int m_textureId;
+        GLuint m_textureId;
 };
 
 #endif // VIDEOFRAME_H

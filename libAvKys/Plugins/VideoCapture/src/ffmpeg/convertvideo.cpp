@@ -50,12 +50,17 @@ inline V4l2PixFmtMap initV4l2PixFmtMap()
     rawToFF["RGBR"] = AV_PIX_FMT_RGB565BE;
     rawToFF["BGR3"] = AV_PIX_FMT_BGR24;
     rawToFF["RGB3"] = AV_PIX_FMT_RGB24;
-    rawToFF["BGR4"] = AV_PIX_FMT_BGR0;
-    rawToFF["RGB4"] = AV_PIX_FMT_0RGB;
+    rawToFF["BGR4"] = AV_PIX_FMT_RGB0;
+    rawToFF["RGB4"] = AV_PIX_FMT_BGR0;
+    rawToFF["ARGB"] = AV_PIX_FMT_ARGB;
+    rawToFF["RGBA"] = AV_PIX_FMT_RGBA;
 
     // Grey formats
+    rawToFF["Y800"] = AV_PIX_FMT_GRAY8;
     rawToFF["GREY"] = AV_PIX_FMT_GRAY8;
     rawToFF["Y16 "] = AV_PIX_FMT_GRAY16LE;
+    rawToFF["B1W0"] = AV_PIX_FMT_MONOWHITE;
+    rawToFF["B0W1"] = AV_PIX_FMT_MONOBLACK;
 
     // Palette formats
     rawToFF["PAL8"] = AV_PIX_FMT_PAL8;
@@ -63,14 +68,18 @@ inline V4l2PixFmtMap initV4l2PixFmtMap()
     // Luminance+Chrominance formats
     rawToFF["YVU9"] = AV_PIX_FMT_YUV410P;
     rawToFF["YV12"] = AV_PIX_FMT_YUV420P;
+    rawToFF["I420"] = AV_PIX_FMT_YUV420P;
     rawToFF["YUYV"] = AV_PIX_FMT_YUYV422;
     rawToFF["YYUV"] = AV_PIX_FMT_YUV422P;
+    rawToFF["Y42B"] = AV_PIX_FMT_YUV422P;
     rawToFF["UYVY"] = AV_PIX_FMT_UYVY422;
     rawToFF["VYUY"] = AV_PIX_FMT_YUV422P;
     rawToFF["422P"] = AV_PIX_FMT_YUV422P;
     rawToFF["411P"] = AV_PIX_FMT_YUV411P;
     rawToFF["Y41P"] = AV_PIX_FMT_YUV411P;
+    rawToFF["YUY2"] = AV_PIX_FMT_YUYV422;
     rawToFF["Y444"] = AV_PIX_FMT_YUV444P;
+    rawToFF["444P"] = AV_PIX_FMT_YUV444P;
     rawToFF["YUV9"] = AV_PIX_FMT_YUV410P;
     rawToFF["YU12"] = AV_PIX_FMT_YUV420P;
 
@@ -206,8 +215,8 @@ bool ConvertVideo::init(const AkCaps &caps)
     this->m_codecContext->width = caps.property("width").toInt();
     this->m_codecContext->height = caps.property("height").toInt();
     AkFrac fps = caps.property("fps").toString();
-    this->m_codecContext->framerate.num = fps.num();
-    this->m_codecContext->framerate.den = fps.den();
+    this->m_codecContext->framerate.num = int(fps.num());
+    this->m_codecContext->framerate.den = int(fps.den());
     this->m_codecContext->workaround_bugs = 1;
     this->m_codecContext->idct_algo = FF_IDCT_AUTO;
     this->m_codecContext->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
@@ -276,7 +285,7 @@ void ConvertVideo::packetLoop(ConvertVideo *stream)
 
             AVPacket videoPacket;
             av_init_packet(&videoPacket);
-            videoPacket.data = (uint8_t *) packet.buffer().constData();
+            videoPacket.data = reinterpret_cast<uint8_t *>(packet.buffer().data());
             videoPacket.size = packet.buffer().size();
             videoPacket.pts = packet.pts();
             int gotFrame;
@@ -350,7 +359,7 @@ void ConvertVideo::processData(const FramePtr &frame)
                 break;
             } else if (diff > syncThreshold) {
                 // video is ahead the external clock.
-                QThread::usleep(1e6 * (diff - syncThreshold));
+                QThread::usleep(ulong(1e6 * (diff - syncThreshold)));
 
                 continue;
             }
@@ -395,9 +404,9 @@ void ConvertVideo::convert(const FramePtr &frame)
     AVFrame oFrame;
     memset(&oFrame, 0, sizeof(AVFrame));
 
-    if (av_image_fill_arrays((uint8_t **) oFrame.data,
+    if (av_image_fill_arrays(reinterpret_cast<uint8_t **>(oFrame.data),
                              oFrame.linesize,
-                             (const uint8_t *) oBuffer.constData(),
+                             reinterpret_cast<const uint8_t *>(oBuffer.constData()),
                              outPixFormat,
                              frame->width,
                              frame->height,

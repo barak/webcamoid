@@ -20,7 +20,7 @@ COMMONS_APPNAME = "libAvKys"
 COMMONS_TARGET = $$lower($${COMMONS_APPNAME})
 COMMONS_TARGET = $$replace(COMMONS_TARGET, lib, "")
 VER_MAJ = 7
-VER_MIN = 1
+VER_MIN = 2
 VER_PAT = 0
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
 COMMONS_PROJECT_URL = "http://webcamoid.github.io/"
@@ -39,11 +39,11 @@ isEmpty(QMAKE_LRELEASE) {
 
 win32 {
     !isEmpty(ProgramW6432) {
-        DEFAULT_PREFIX = $(ProgramW6432)\$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = $(ProgramW6432)\\$${COMMONS_APPNAME}
     } else: !isEmpty(ProgramFiles) {
-        DEFAULT_PREFIX = $(ProgramFiles)\$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = $(ProgramFiles)\\$${COMMONS_APPNAME}
     } else {
-        DEFAULT_PREFIX = C:\$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = C:\\$${COMMONS_APPNAME}
     }
 } else {
     DEFAULT_PREFIX = /usr
@@ -127,4 +127,11 @@ CONFIG(debug, debug|release) {
     PRE_TARGETDEPS += compiler_compiletr_make_all
 }
 
-win32: CONFIG += skip_target_version_ext
+win32 {
+    CONFIG += skip_target_version_ext
+    !isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0): QMAKE_LFLAGS = -static-libgcc -static-libstdc++
+}
+
+*clang* {
+    CONFIG += c++11
+}

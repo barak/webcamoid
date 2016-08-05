@@ -1,4 +1,4 @@
-version: 7.1.0.{build}-{branch}
+version: 7.2.0.{build}-{branch}
 os: MinGW
 
 platform:
@@ -16,9 +16,9 @@ branches:
   - master
 
 environment:
-  QTDIR: C:\Qt\5.5\mingw492_32
-  MINGW: C:\Qt\Tools\mingw492_32
-  FFMPEG_VERSION: 3.0
+  QTDIR: C:\Qt\5.7\mingw53_32
+  MINGW: C:\Qt\Tools\mingw530_32
+  FFMPEG_VERSION: 3.0.1
 
 install:
   - if "%PLATFORM%" == "x86" (set BUILD_ARCHITECTURE=win32) else (set BUILD_ARCHITECTURE=win64)

@@ -72,17 +72,18 @@ class VideoCaptureElement: public AkMultimediaSourceElement
         Q_INVOKABLE int defaultStream(const QString &mimeType) const;
         Q_INVOKABLE QString description(const QString &media) const;
         Q_INVOKABLE AkCaps caps(int stream) const;
+        Q_INVOKABLE AkCaps rawCaps(int stream) const;
         Q_INVOKABLE QStringList listCapsDescription() const;
 
         Q_INVOKABLE QString ioMethod() const;
         Q_INVOKABLE int nBuffers() const;
 
         Q_INVOKABLE QVariantList imageControls() const;
-        Q_INVOKABLE bool setImageControls(const QVariantMap &imageControls) const;
-        Q_INVOKABLE bool resetImageControls() const;
+        Q_INVOKABLE bool setImageControls(const QVariantMap &imageControls);
+        Q_INVOKABLE bool resetImageControls();
         Q_INVOKABLE QVariantList cameraControls() const;
-        Q_INVOKABLE bool setCameraControls(const QVariantMap &cameraControls) const;
-        Q_INVOKABLE bool resetCameraControls() const;
+        Q_INVOKABLE bool setCameraControls(const QVariantMap &cameraControls);
+        Q_INVOKABLE bool resetCameraControls();
 
     private:
         Capture m_capture;
@@ -91,6 +92,8 @@ class VideoCaptureElement: public AkMultimediaSourceElement
         QFuture<void> m_cameraLoopResult;
         bool m_runCameraLoop;
         bool m_pause;
+        bool m_mirror;
+        bool m_swapRgb;
 
         static void cameraLoop(VideoCaptureElement *captureElement);
 

@@ -17,24 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#ifndef CONVERTVIDEO_H
-#define CONVERTVIDEO_H
+#include "akplugin.h"
 
-#include <akvideopacket.h>
-#include <gst/video/video.h>
-
-class ConvertVideo: public QObject
+AkPlugin::~AkPlugin()
 {
-    Q_OBJECT
-
-    public:
-        explicit ConvertVideo(QObject *parent=NULL);
-        ~ConvertVideo();
-
-        Q_INVOKABLE AkPacket convert(const AkPacket &packet,
-                                     const AkCaps &oCaps);
-
-    private:
-};
-
-#endif // CONVERTVIDEO_H
+}

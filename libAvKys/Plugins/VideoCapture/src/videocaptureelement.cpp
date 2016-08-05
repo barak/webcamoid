@@ -23,11 +23,39 @@
 
 #define PAUSE_TIMEOUT 500
 
+#if defined(Q_OS_WIN32)
+inline QStringList initMirrorFormats()
+{
+    QStringList mirrorFormats;
+    mirrorFormats << "RGB3"
+                  << "RGB4"
+                  << "RGBP"
+                  << "RGBO";
+
+    return mirrorFormats;
+}
+
+Q_GLOBAL_STATIC_WITH_ARGS(QStringList, mirrorFormats, (initMirrorFormats()))
+
+inline QStringList initSwapRgbFormats()
+{
+    QStringList swapRgbFormats;
+    swapRgbFormats << "RGB3"
+                   << "YV12";
+
+    return swapRgbFormats;
+}
+
+Q_GLOBAL_STATIC_WITH_ARGS(QStringList, swapRgbFormats, (initSwapRgbFormats()))
+#endif
+
 VideoCaptureElement::VideoCaptureElement():
     AkMultimediaSourceElement()
 {
     this->m_runCameraLoop = false;
     this->m_pause = false;
+    this->m_mirror = false;
+    this->m_swapRgb = false;
 
     QObject::connect(&this->m_capture,
                      &Capture::error,
@@ -84,7 +112,7 @@ QObject *VideoCaptureElement::controlInterface(QQmlEngine *engine, const QString
 
     // Create a context for the plugin.
     QQmlContext *context = new QQmlContext(engine->rootContext());
-    context->setContextProperty("VideoCapture", (QObject *) this);
+    context->setContextProperty("VideoCapture", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
     context->setContextProperty("controlId", controlId);
 
     // Create an item with the plugin context.
@@ -153,6 +181,13 @@ AkCaps VideoCaptureElement::caps(int stream) const
     return videoCaps;
 }
 
+AkCaps VideoCaptureElement::rawCaps(int stream) const
+{
+    QVariantList streams = this->m_capture.caps(this->m_capture.device());
+
+    return streams.value(stream).value<AkCaps>();
+}
+
 QStringList VideoCaptureElement::listCapsDescription() const
 {
     QStringList capsDescriptions;
@@ -179,12 +214,12 @@ QVariantList VideoCaptureElement::imageControls() const
     return this->m_capture.imageControls();
 }
 
-bool VideoCaptureElement::setImageControls(const QVariantMap &imageControls) const
+bool VideoCaptureElement::setImageControls(const QVariantMap &imageControls)
 {
     return this->m_capture.setImageControls(imageControls);
 }
 
-bool VideoCaptureElement::resetImageControls() const
+bool VideoCaptureElement::resetImageControls()
 {
     return this->m_capture.resetImageControls();
 }
@@ -194,12 +229,12 @@ QVariantList VideoCaptureElement::cameraControls() const
     return this->m_capture.cameraControls();
 }
 
-bool VideoCaptureElement::setCameraControls(const QVariantMap &cameraControls) const
+bool VideoCaptureElement::setCameraControls(const QVariantMap &cameraControls)
 {
     return this->m_capture.setCameraControls(cameraControls);
 }
 
-bool VideoCaptureElement::resetCameraControls() const
+bool VideoCaptureElement::resetCameraControls()
 {
     return this->m_capture.resetCameraControls();
 }
@@ -303,6 +338,11 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
             QVariantList supportedCaps = this->m_capture.caps(this->m_capture.device());
             AkCaps caps = supportedCaps.value(streams[0]).value<AkCaps>();
 
+#if defined(Q_OS_WIN32)
+            QString fourcc = caps.property("fourcc").toString();
+            this->m_mirror = mirrorFormats->contains(fourcc);
+#endif
+
             if (!this->m_convertVideo.init(caps))
                 return false;
 
@@ -321,6 +361,12 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
             QVariantList supportedCaps = this->m_capture.caps(this->m_capture.device());
             AkCaps caps = supportedCaps.value(streams[0]).value<AkCaps>();
 
+#if defined(Q_OS_WIN32)
+            QString fourcc = caps.property("fourcc").toString();
+            this->m_mirror = mirrorFormats->contains(fourcc);
+            this->m_swapRgb = swapRgbFormats->contains(fourcc);
+#endif
+
             if (!this->m_convertVideo.init(caps))
                 return false;
 
@@ -330,7 +376,7 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
 
             return AkElement::setState(state);
         }
-        default:
+        case AkElement::ElementStateNull:
             break;
         }
 
@@ -349,7 +395,7 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
             this->m_pause = false;
 
             return AkElement::setState(state);
-        default:
+        case AkElement::ElementStatePaused:
             break;
         }
 
@@ -367,14 +413,12 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
             this->m_pause = true;
 
             return AkElement::setState(state);
-        default:
+        case AkElement::ElementStatePlaying:
             break;
         }
 
         break;
     }
-    default:
-        break;
     }
 
     return false;
@@ -383,10 +427,17 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
 void VideoCaptureElement::frameReady(const AkPacket &packet)
 {
 #if defined(Q_OS_WIN32)
-    QImage oImage = AkUtils::packetToImage(packet).mirrored().rgbSwapped();
+    if (this->m_mirror || this->m_swapRgb) {
+        QImage oImage = AkUtils::packetToImage(packet);
 
-    emit this->oStream(AkUtils::imageToPacket(oImage, packet));
-#else
-    emit this->oStream(packet);
+        if (this->m_mirror)
+            oImage = oImage.mirrored();
+
+        if (this->m_swapRgb)
+            oImage = oImage.rgbSwapped();
+
+        emit this->oStream(AkUtils::imageToPacket(oImage, packet));
+    } else
 #endif
+        emit this->oStream(packet);
 }
