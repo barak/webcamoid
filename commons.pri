@@ -20,7 +20,7 @@ COMMONS_APPNAME = "Webcamoid"
 COMMONS_TARGET = $$lower($${COMMONS_APPNAME})
 VER_MAJ = 7
 VER_MIN = 2
-VER_PAT = 0
+VER_PAT = 1
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
 COMMONS_PROJECT_URL = "http://webcamoid.github.io/"
 COMMONS_PROJECT_LICENSE_URL = "https://raw.githubusercontent.com/webcamoid/webcamoid/master/COPYING"
@@ -131,6 +131,5 @@ win32 {
     !isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0): QMAKE_LFLAGS = -static-libgcc -static-libstdc++
 }
 
-*clang* {
-    CONFIG += c++11
-}
+# Enable c++11 support in all platforms
+CONFIG += c++11

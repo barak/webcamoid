@@ -1,7 +1,7 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: webcamoid
 Source: http://webcamoid.github.io/#downloads
-Files-Excluded: libAvKys/Plugins/VirtualCamera
+Files-Excluded: libAvKys/Plugins/VirtualCamera/dshow
 
 Files: *
 Copyright: 2011-2016 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>

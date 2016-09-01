@@ -14,6 +14,9 @@ matrix:
       compiler: clang
       env:
       - QTVER=57
+    - os: osx
+      osx_image: xcode7.3
+      compiler: clang
 
 before_install: |
   if [ "${TRAVIS_OS_NAME}" = linux ]; then
@@ -22,7 +25,8 @@ before_install: |
     sudo add-apt-repository --yes ppa:dan-witt/gstreamer
     sudo apt-get update -qq
   elif [ "${TRAVIS_OS_NAME}" = osx ]; then
-    echo
+    brew update
+    brew upgrade
   fi
 
 install: |
@@ -36,7 +40,7 @@ install: |
     sudo apt-get -y install libpulse-dev
     sudo apt-get -y install libv4l-dev
   elif [ "${TRAVIS_OS_NAME}" = osx ]; then
-    echo
+    brew install qt5 ffmpeg
   fi
 
 before_script: |
@@ -48,6 +52,8 @@ before_script: |
       export QMAKESPEC=linux-clang
     fi
   elif [ "${TRAVIS_OS_NAME}" = osx ]; then
+    brew link --force qt5
+    FFVER=$(ffmpeg -version | head -n 1 | awk '{print $3}')
     if [ "${CXX}" = g++ ]; then
       export QMAKESPEC=macx-g++
     elif [ "${CXX}" = clang++ ]; then
@@ -55,9 +61,21 @@ before_script: |
     fi
   fi
 
-script:
-  - qmake Webcamoid.pro USE_GSTREAMER=1
-  - make
+script: |
+  if [ "${TRAVIS_OS_NAME}" = linux ]; then
+    qmake Webcamoid.pro USE_GSTREAMER=1
+  elif [ "${TRAVIS_OS_NAME}" = osx ]; then
+    qmake Webcamoid.pro \
+        FFMPEGINCLUDES="/usr/local/Cellar/ffmpeg/${FFVER}/include" \
+        FFMPEGLIBS=-L"/usr/local/Cellar/ffmpeg/${FFVER}/lib" \
+        FFMPEGLIBS+=-lavcodec \
+        FFMPEGLIBS+=-lavdevice \
+        FFMPEGLIBS+=-lavformat \
+        FFMPEGLIBS+=-lavutil \
+        FFMPEGLIBS+=-lswresample \
+        FFMPEGLIBS+=-lswscale
+  fi
+  make
 
 branches:
   only:

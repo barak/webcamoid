@@ -1,3 +1,13 @@
+webcamoid (7.2.1+dfsg1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * debian/copyright:
+      - dshow directory added to Files-Excluded. Was missing.
+  * debian/watch:
+      - number 1 added to '+dfsg' in dversionmangle variable.
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Thu, 01 Sep 2016 14:10:35 -0300
+
 webcamoid (7.2.0+dfsg1-1) unstable; urgency=medium
 
   * Upload to unstable.
