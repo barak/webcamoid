@@ -1,3 +1,10 @@
+webcamoid (7.2.1+dfsg1-2) experimental; urgency=medium
+
+  * Building a new .symbols file. To have all symbols with the same
+    version
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sun, 04 Sep 2016 11:45:24 -0300
+
 webcamoid (7.2.1+dfsg1-1) experimental; urgency=medium
 
   * New upstream release.
