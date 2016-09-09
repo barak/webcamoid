@@ -1,3 +1,9 @@
+webcamoid (7.2.1+dfsg1-3) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Fri, 09 Sep 2016 10:48:58 -0300
+
 webcamoid (7.2.1+dfsg1-2) experimental; urgency=medium
 
   * Building a new .symbols file. To have all symbols with the same
