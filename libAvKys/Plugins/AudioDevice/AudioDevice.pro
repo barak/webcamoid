@@ -26,8 +26,9 @@ exists(commons.pri) {
     }
 }
 
-!win32: include(src/pulseaudio/pulseaudio.pri)
+unix:!macx: include(src/pulseaudio/pulseaudio.pri)
 win32: include(src/wasapi/wasapi.pri)
+macx: include(src/coreaudio/coreaudio.pri)
 
 CONFIG += plugin
 
