@@ -1,3 +1,10 @@
+webcamoid (7.2.1+dfsg1-4) unstable; urgency=medium
+
+  * debian/rules:
+      -Add '-fPIE -pie' to LDFLAGS.
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Mon, 28 Nov 2016 11:57:33 -0200
+
 webcamoid (7.2.1+dfsg1-3) unstable; urgency=medium
 
   * Upload to unstable.
