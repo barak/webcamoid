@@ -25,6 +25,8 @@ Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/webcamoid.git
 Package: webcamoid
 Architecture: linux-any
 Depends: akqml,
+         qml-module-qt-labs-folderlistmodel,
+         qml-module-qt-labs-settings,
          qml-module-qtquick-controls,
          qml-module-qtquick-dialogs,
          qml-module-qtquick-layouts,

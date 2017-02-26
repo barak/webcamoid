@@ -1,3 +1,14 @@
+webcamoid (7.2.1+dfsg1-5) unstable; urgency=medium
+
+  * debian/control:
+      - Add to webcamoid 'Depends':
+          - qml-module-qt-labs-folderlistmodel
+          - qml-module-qt-labs-settings
+          (Closes: #856146)
+	  Thanks Antonio Terceiro.
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sun, 26 Feb 2017 12:28:31 -0300
+
 webcamoid (7.2.1+dfsg1-4) unstable; urgency=medium
 
   * debian/rules:
