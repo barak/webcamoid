@@ -1,3 +1,30 @@
+webcamoid (8.0.0+dfsg-1) UNRELEASED; urgency=medium
+
+  * New upstream version 8.0.0+dfsg.
+  * debian/*.symbols:
+      - new file.
+  * debian/control:
+      - Build-Depends:
+          - libav*-dev >= 3.1 (FFmpeg packages).
+      - Package libavkys7:
+          - replaced by libavkys8
+          - 'Breaks' and 'Replaces' fields updated.
+      - Package libavkys-dev:
+          - Depends on libavkys8
+          - 'Breaks' and 'Replaces' fields updated.
+  * debian/copyright:
+      - updated.
+  * debian/rules:
+      - Add override_dh_clean for:
+          - libAvKys/Tests
+          - other generated files in libAvKys
+  * debian/webcamoid-data.install:
+      - copying *.json files.
+  * debian/libavkys7.install:
+      - renamed to libavkys8.install
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Thu, 01 Jun 2017 14:38:40 -0300
+
 webcamoid (7.2.1+dfsg1-5) unstable; urgency=medium
 
   * debian/control:
