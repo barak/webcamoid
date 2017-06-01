@@ -3,10 +3,10 @@ Section: video
 Priority: optional
 Maintainer: Herbert Parentes Fortes Neto <hpfn@debian.org>
 Build-Depends: debhelper (>= 9),
-               libavcodec-dev,
-               libavdevice-dev,
-               libavformat-dev,
-               libavutil-dev,
+               libavcodec-dev (>= 3.1),
+               libavdevice-dev (>= 3.1),
+               libavformat-dev (>= 3.1),
+               libavutil-dev (>= 3.1),
                libpulse-dev,
                libqt5opengl5-dev,
                libqt5svg5-dev,
@@ -54,12 +54,12 @@ Description: full featured webcam capture application
   * Many recording formats.
   * Virtual webcam support for feeding other programs.
 
-Package: libavkys7
+Package: libavkys8
 Section: libs
 Architecture: linux-any
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Breaks: libqb6 (= 6.2.0), libwebcamoid6 (= 6.2.0)
-Replaces: libqb6 (= 6.2.0), libwebcamoid6 (= 6.2.0)
+Breaks: libavkys7 (<< 7.2.1+dfsg1-5~)
+Replaces: libavkys7 (<< 7.2.1+dfsg1-5~)
 Description: full featured webcam capture application - library
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.
@@ -84,9 +84,9 @@ Description: full featured webcam capture application - library
 Package: libavkys-dev
 Section: libdevel
 Architecture: linux-any
-Depends: libavkys7 (= ${binary:Version}), ${misc:Depends}
-Breaks: libqb6-dev (= 6.2.0), libwebcamoid-dev (= 6.2.0)
-Replaces: libqb6-dev (= 6.2.0), libwebcamoid-dev (= 6.2.0)
+Depends: libavkys8 (= ${binary:Version}), ${misc:Depends}
+Breaks: libavkys7 (<= 7.2.1+dfsg1-5~)
+Replaces: libavkys7 (<= 7.2.1+dfsg1-5~)
 Description: full featured webcam capture application - dev
  webcamoid allows one to capture, save and view a video stream. It also can
  do a lot of funny things.
