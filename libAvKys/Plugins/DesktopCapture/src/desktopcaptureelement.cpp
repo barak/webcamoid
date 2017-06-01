@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 DesktopCaptureElement::DesktopCaptureElement():
     AkMultimediaSourceElement()
 {
+    this->m_fps = AkFrac(30000, 1001);
+    this->m_timer.setInterval(qRound(1.e3 * this->m_fps.invert().value()));
     this->m_curScreenNumber = -1;
     this->m_threadedRead = true;
 
@@ -51,6 +53,50 @@ DesktopCaptureElement::DesktopCaptureElement():
 DesktopCaptureElement::~DesktopCaptureElement()
 {
     this->setState(AkElement::ElementStateNull);
+}
+
+QObject *DesktopCaptureElement::controlInterface(QQmlEngine *engine,
+                                                 const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    if (!engine)
+        return NULL;
+
+    // Load the UI from the plugin.
+    QQmlComponent component(engine, QUrl(QStringLiteral("qrc:/DesktopCapture/share/qml/main.qml")));
+
+    if (component.isError()) {
+        qDebug() << "Error in plugin "
+                 << this->metaObject()->className()
+                 << ":"
+                 << component.errorString();
+
+        return NULL;
+    }
+
+    // Create a context for the plugin.
+    QQmlContext *context = new QQmlContext(engine->rootContext());
+    context->setContextProperty("DesktopCapture", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
+    context->setContextProperty("controlId", this->objectName());
+
+    // Create an item with the plugin context.
+    QObject *item = component.create(context);
+
+    if (!item) {
+        delete context;
+
+        return NULL;
+    }
+
+    context->setParent(item);
+
+    return item;
+}
+
+AkFrac DesktopCaptureElement::fps() const
+{
+    return this->m_fps;
 }
 
 QStringList DesktopCaptureElement::medias() const
@@ -115,15 +161,31 @@ AkCaps DesktopCaptureElement::caps(int stream) const
     caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
     caps.width() = screen->size().width();
     caps.height() = screen->size().height();
-    caps.fps() = AkFrac(30000, 1001);
+    caps.fps() = this->m_fps;
 
     return caps.toCaps();
 }
 
-void DesktopCaptureElement::sendPacket(DesktopCaptureElement *element,
-                                       const AkPacket &packet)
+void DesktopCaptureElement::sendPacket(const AkPacket &packet)
 {
-    emit element->oStream(packet);
+    emit this->oStream(packet);
+}
+
+void DesktopCaptureElement::setFps(const AkFrac &fps)
+{
+    if (this->m_fps == fps)
+        return;
+
+    this->m_mutex.lock();
+    this->m_fps = fps;
+    this->m_mutex.unlock();
+    emit this->fpsChanged(fps);
+    this->m_timer.setInterval(qRound(1.e3 * this->m_fps.invert().value()));
+}
+
+void DesktopCaptureElement::resetFps()
+{
+    this->setFps(AkFrac(30000, 1001));
 }
 
 void DesktopCaptureElement::setMedia(const QString &media)
@@ -171,6 +233,7 @@ bool DesktopCaptureElement::setState(AkElement::ElementState state)
             return AkElement::setState(state);
         case AkElement::ElementStatePlaying:
             this->m_id = Ak::id();
+            this->m_timer.setInterval(qRound(1.e3 * this->m_fps.invert().value()));
             this->m_timer.start();
 
             return AkElement::setState(state);
@@ -185,6 +248,7 @@ bool DesktopCaptureElement::setState(AkElement::ElementState state)
         case AkElement::ElementStateNull:
             return AkElement::setState(state);
         case AkElement::ElementStatePlaying:
+            this->m_timer.setInterval(qRound(1.e3 * this->m_fps.invert().value()));
             this->m_timer.start();
 
             return AkElement::setState(state);
@@ -216,7 +280,9 @@ bool DesktopCaptureElement::setState(AkElement::ElementState state)
 void DesktopCaptureElement::readFrame()
 {
     QScreen *screen = QGuiApplication::screens()[this->m_curScreenNumber];
-    AkFrac fps(30000, 1001);
+    this->m_mutex.lock();
+    auto fps = this->m_fps;
+    this->m_mutex.unlock();
 
     AkVideoCaps caps;
     caps.isValid() = true;
@@ -226,14 +292,20 @@ void DesktopCaptureElement::readFrame()
     caps.height() = screen->size().height();
     caps.fps() = fps;
 
-    QPixmap frame = screen->grabWindow(QApplication::desktop()->winId());
+    auto frame =
+            screen->grabWindow(QApplication::desktop()->winId(),
+                               screen->geometry().x(),
+                               screen->geometry().y(),
+                               screen->geometry().width(),
+                               screen->geometry().height());
     QImage frameImg= frame.toImage().convertToFormat(QImage::Format_RGB888);
     AkPacket packet = AkUtils::imageToPacket(frameImg, caps.toCaps());
 
     if (!packet)
         return;
 
-    qint64 pts = qint64(QTime::currentTime().msecsSinceStartOfDay() * fps.value());
+    qint64 pts = qint64(QTime::currentTime().msecsSinceStartOfDay()
+                        * fps.value() / 1e3);
 
     packet.setPts(pts);
     packet.setTimeBase(fps.invert());
@@ -250,8 +322,8 @@ void DesktopCaptureElement::readFrame()
         this->m_curPacket = packet;
 
         this->m_threadStatus = QtConcurrent::run(&this->m_threadPool,
-                                                 this->sendPacket,
                                                  this,
+                                                 &DesktopCaptureElement::sendPacket,
                                                  this->m_curPacket);
     }
 }

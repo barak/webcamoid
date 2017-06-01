@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,12 @@
 
 FalseColorElement::FalseColorElement(): AkElement()
 {
-    this->m_table << qRgb(0, 0, 0)
-                  << qRgb(255, 0, 0)
-                  << qRgb(255, 255, 255)
-                  << qRgb(255, 255, 255);
+    this->m_table = {
+        qRgb(0, 0, 0),
+        qRgb(255, 0, 0),
+        qRgb(255, 255, 255),
+        qRgb(255, 255, 255)
+    };
 
     this->m_soft = false;
 }
@@ -71,7 +73,7 @@ QVariantList FalseColorElement::table() const
 {
     QVariantList table;
 
-    foreach (QRgb color, this->m_table)
+    for (const QRgb &color: this->m_table)
         table << color;
 
     return table;
@@ -86,7 +88,7 @@ void FalseColorElement::setTable(const QVariantList &table)
 {
     QList<QRgb> tableRgb;
 
-    foreach (QVariant color, table)
+    for (const QVariant &color: table)
         tableRgb << color.value<QRgb>();
 
     if (this->m_table == tableRgb)
@@ -107,12 +109,12 @@ void FalseColorElement::setSoft(bool soft)
 
 void FalseColorElement::resetTable()
 {
-    QVariantList table;
-
-    table << qRgb(0, 0, 0)
-          << qRgb(255, 0, 0)
-          << qRgb(255, 255, 255)
-          << qRgb(255, 255, 255);
+    static const QVariantList table = {
+        qRgb(0, 0, 0),
+        qRgb(255, 0, 0),
+        qRgb(255, 255, 255),
+        qRgb(255, 255, 255)
+    };
 
     this->setTable(table);
 }
@@ -133,10 +135,7 @@ AkPacket FalseColorElement::iStream(const AkPacket &packet)
         return AkPacket();
 
     src = src.convertToFormat(QImage::Format_Grayscale8);
-    int videoArea = src.width() * src.height();
     QImage oFrame(src.size(), QImage::Format_ARGB32);
-    const quint8 *srcBits = src.constBits();
-    QRgb *destBits = reinterpret_cast<QRgb *>(oFrame.bits());
 
     QRgb table[256];
     QList<QRgb> tableRgb = this->m_table;
@@ -180,8 +179,13 @@ AkPacket FalseColorElement::iStream(const AkPacket &packet)
         table[i] = color;
     }
 
-    for (int i = 0; i < videoArea; i++)
-        destBits[i] = table[srcBits[i]];
+    for (int y = 0; y < src.height(); y++) {
+        const quint8 *srcLine = src.constScanLine(y);
+        QRgb *dstLine = reinterpret_cast<QRgb *>(oFrame.scanLine(y));
+
+        for (int x = 0; x < src.width(); x++)
+            dstLine[x] = table[srcLine[x]];
+    }
 
     AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
     akSend(oPacket)

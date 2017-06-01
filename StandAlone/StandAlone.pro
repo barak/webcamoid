@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 # along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
 #
 # Web-Site: http://webcamoid.github.io/
+
+TRANSLATIONS = $$files(share/ts/*.ts)
 
 exists(commons.pri) {
     include(commons.pri)
@@ -45,7 +47,7 @@ unix {
 
     buildmanpage.input = MANPAGESOURCES
     buildmanpage.output = ${QMAKE_FILE_IN}.gz
-    buildmanpage.commands = gzip -fk9 ${QMAKE_FILE_IN}
+    buildmanpage.commands = gzip -c9 ${QMAKE_FILE_IN} > ${QMAKE_FILE_IN}.gz
     buildmanpage.CONFIG += no_link
 
     QMAKE_EXTRA_COMPILERS += buildmanpage
@@ -58,12 +60,19 @@ CONFIG += qt
 HEADERS = \
     src/mediatools.h \
     src/videodisplay.h \
-    src/videoframe.h
+    src/iconsprovider.h \
+    src/audiolayer.h \
+    src/videoeffects.h \
+    src/mediasource.h \
+    src/pluginconfigs.h \
+    src/clioptions.h \
+    src/recording.h \
+    src/updates.h
 
 INCLUDEPATH += \
     ../libAvKys/Lib/src
 
-LIBS += -L../libAvKys/Lib -lavkys
+LIBS += -L$${PWD}/../libAvKys/Lib -lavkys
 win32: LIBS += -lole32
 
 OTHER_FILES = \
@@ -76,24 +85,31 @@ RESOURCES += \
     Webcamoid.qrc \
     qml.qrc \
     translations.qrc \
-    share/icons/icons.qrc
+    share/icons/icons.qrc \
+    share/contributors/contributors.qrc
 
 SOURCES = \
     src/main.cpp \
     src/mediatools.cpp \
     src/videodisplay.cpp \
-    src/videoframe.cpp
+    src/iconsprovider.cpp \
+    src/audiolayer.cpp \
+    src/videoeffects.cpp \
+    src/mediasource.cpp \
+    src/pluginconfigs.cpp \
+    src/clioptions.cpp \
+    src/recording.cpp \
+    src/updates.cpp
 
 lupdate_only {
-    SOURCES = $$files(share/qml/*.qml)
+    SOURCES += $$files(share/qml/*.qml)
 }
 
-TRANSLATIONS = $$files(share/ts/*.ts)
-
-DESTDIR = $${PWD}
+DESTDIR = $${OUT_PWD}
 
 TARGET = $${COMMONS_TARGET}
 
+macx: ICON = share/icons/webcamoid.icns
 !unix: RC_ICONS = share/icons/hicolor/256x256/webcamoid.ico
 
 TEMPLATE = app
@@ -109,121 +125,13 @@ target.path = $${BINDIR}
 
 !unix {
     INSTALLS += \
-        dllDeps \
-        pluginsImageFormats \
-        pluginsScenegraph \
-        pluginsPlatform \
-        pluginsQml \
         appIcon
-
-    DLLFILES = \
-        \ # Qt
-        $$[QT_INSTALL_BINS]/Qt5Core.dll \
-        $$[QT_INSTALL_BINS]/Qt5Gui.dll \
-        $$[QT_INSTALL_BINS]/Qt5Network.dll \
-        $$[QT_INSTALL_BINS]/Qt5OpenGL.dll \
-        $$[QT_INSTALL_BINS]/Qt5Qml.dll \
-        $$[QT_INSTALL_BINS]/Qt5Quick.dll \
-        $$[QT_INSTALL_BINS]/Qt5Svg.dll \
-        $$[QT_INSTALL_BINS]/Qt5Widgets.dll \
-        \ # System
-        $$[QT_INSTALL_BINS]/libEGL.dll \
-        $$[QT_INSTALL_BINS]/libGLESv2.dll \
-        $$[QT_INSTALL_BINS]/libbz2-*.dll \
-        $$[QT_INSTALL_BINS]/libfreetype-*.dll \
-        $$[QT_INSTALL_BINS]/libgcc_s_seh-*.dll \
-        $$[QT_INSTALL_BINS]/libgcc_s_sjlj-*.dll \
-        $$[QT_INSTALL_BINS]/libglib-*.dll \
-        $$[QT_INSTALL_BINS]/libharfbuzz-?.dll \
-        $$[QT_INSTALL_BINS]/libiconv-*.dll \
-        $$[QT_INSTALL_BINS]/libintl-*.dll \
-        $$[QT_INSTALL_BINS]/libjpeg-*.dll \
-        $$[QT_INSTALL_BINS]/libpcre-*.dll \
-        $$[QT_INSTALL_BINS]/libpcre16-*.dll \
-        $$[QT_INSTALL_BINS]/libpng16-*.dll \
-        $$[QT_INSTALL_BINS]/libstdc++-*.dll \
-        $$[QT_INSTALL_BINS]/libwinpthread-*.dll \
-        $$[QT_INSTALL_BINS]/zlib1.dll
-
-    isEmpty(FFMPEGLIBS) {
-        DLLFILES += \
-            \ # FFmpeg
-            $$[QT_INSTALL_BINS]/avcodec-*.dll \
-            $$[QT_INSTALL_BINS]/avdevice-*.dll \
-            $$[QT_INSTALL_BINS]/avfilter-*.dll \
-            $$[QT_INSTALL_BINS]/avformat-*.dll \
-            $$[QT_INSTALL_BINS]/avresample-*.dll \
-            $$[QT_INSTALL_BINS]/avutil-*.dll \
-            $$[QT_INSTALL_BINS]/postproc-*.dll \
-            $$[QT_INSTALL_BINS]/swresample-*.dll \
-            $$[QT_INSTALL_BINS]/swscale-*.dll \
-            \ # SDL
-            $$[QT_INSTALL_BINS]/SDL.dll \
-            \ # Codecs
-            $$[QT_INSTALL_BINS]/libass-*.dll \
-            $$[QT_INSTALL_BINS]/libbluray-*.dll \
-            $$[QT_INSTALL_BINS]/libdcadec.dll \
-            $$[QT_INSTALL_BINS]/libeay32.dll \
-            $$[QT_INSTALL_BINS]/libexpat-*.dll \
-            $$[QT_INSTALL_BINS]/libffi-*.dll \
-            $$[QT_INSTALL_BINS]/libfontconfig-*.dll \
-            $$[QT_INSTALL_BINS]/libfribidi-*.dll \
-            $$[QT_INSTALL_BINS]/libgmp-*.dll \
-            $$[QT_INSTALL_BINS]/libgnutls-*.dll \
-            $$[QT_INSTALL_BINS]/libgomp-?.dll \
-            $$[QT_INSTALL_BINS]/libgsm.dll.*.*.* \
-            $$[QT_INSTALL_BINS]/libhogweed-*.dll \
-            $$[QT_INSTALL_BINS]/libidn-*.dll \
-            $$[QT_INSTALL_BINS]/liblzma-*.dll \
-            $$[QT_INSTALL_BINS]/libmodplug-*.dll \
-            $$[QT_INSTALL_BINS]/libmp3lame-*.dll \
-            $$[QT_INSTALL_BINS]/libnettle-*.dll \
-            $$[QT_INSTALL_BINS]/libogg-*.dll \
-            $$[QT_INSTALL_BINS]/libopencore-amrnb-*.dll \
-            $$[QT_INSTALL_BINS]/libopencore-amrwb-*.dll \
-            $$[QT_INSTALL_BINS]/libopenjpeg-*.dll \
-            $$[QT_INSTALL_BINS]/libopus-*.dll \
-            $$[QT_INSTALL_BINS]/liborc-?.*.dll \
-            $$[QT_INSTALL_BINS]/libp11-kit-*.dll \
-            $$[QT_INSTALL_BINS]/libschroedinger-*.dll \
-            $$[QT_INSTALL_BINS]/libsoxr.dll \
-            $$[QT_INSTALL_BINS]/libspeex-*.dll \
-            $$[QT_INSTALL_BINS]/libssh.dll \
-            $$[QT_INSTALL_BINS]/libtasn1-*.dll \
-            $$[QT_INSTALL_BINS]/libtheoradec-*.dll \
-            $$[QT_INSTALL_BINS]/libtheoraenc-*.dll \
-            $$[QT_INSTALL_BINS]/libvidstab.dll \
-            $$[QT_INSTALL_BINS]/libvorbis-*.dll \
-            $$[QT_INSTALL_BINS]/libvorbisenc-*.dll \
-            $$[QT_INSTALL_BINS]/libvpx.dll.*.*.* \
-            $$[QT_INSTALL_BINS]/libwebp-*.dll \
-            $$[QT_INSTALL_BINS]/libwebpmux-*.dll \
-            $$[QT_INSTALL_BINS]/libx264-*.dll \
-            $$[QT_INSTALL_BINS]/libx265.dll \
-            $$[QT_INSTALL_BINS]/libxml2-*.dll \
-            $$[QT_INSTALL_BINS]/xvidcore.dll
-    }
-
-    dllDeps.files = $${DLLFILES}
-    dllDeps.path = $${BINDIR}
-
-    pluginsPlatform.files = $$[QT_INSTALL_PLUGINS]/platforms/qwindows.dll
-    pluginsPlatform.path = $${BINDIR}/platforms
-
-    pluginsImageFormats.files = $$[QT_INSTALL_PLUGINS]/imageformats/*
-    pluginsImageFormats.path = $${BINDIR}/imageformats
-
-    pluginsScenegraph.files = $$[QT_INSTALL_PLUGINS]/scenegraph/*
-    pluginsScenegraph.path = $${BINDIR}/scenegraph
-
-    pluginsQml.files = $$[QT_INSTALL_QML]/*
-    pluginsQml.path = $${LIBDIR}/qt/qml
 
     appIcon.files = share/icons/hicolor/256x256/webcamoid.ico
     appIcon.path = $${PREFIX}
 }
 
-unix {
+unix:!macx {
     INSTALLS += \
         manpage \
         appIcon8x8 \
@@ -274,12 +182,4 @@ unix {
     docs.files = share/docs_auto/html
     docs.path = $${HTMLDIR}
     docs.CONFIG += no_check_exist
-}
-
-#USE_GSTREAMER = 1
-
-isEmpty(USE_GSTREAMER) {
-    include(src/ffmpeg/ffmpeg.pri)
-} else {
-    include(src/gstreamer/gstreamer.pri)
 }

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,8 +74,8 @@ ColumnLayout {
         text: qsTr("Color table")
     }
     Rectangle {
+        height: 400
         Layout.fillWidth: true
-        Layout.fillHeight: true
         color: palette.base
 
         ScrollView {

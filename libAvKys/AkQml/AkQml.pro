@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,25 +30,24 @@ TEMPLATE = lib
 
 QT += qml quick
 CONFIG += qt plugin
-win32: CONFIG += skip_target_version_ext
 
-DESTDIR = $${PWD}
+DESTDIR = $${OUT_PWD}
 
 TARGET = $$qtLibraryTarget(AkQml)
 
 # Input
-SOURCES += \
+SOURCES = \
     src/akqml.cpp \
     src/akqmlplugin.cpp
 
-HEADERS += \
+HEADERS = \
     src/akqml.h \
     src/akqmlplugin.h
 
 INCLUDEPATH += \
     ../Lib/src
 
-LIBS += -L../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${PWD}/../Lib/ -l$${COMMONS_TARGET}
 win32: LIBS += -lole32
 
 DISTFILES = qmldir
@@ -57,8 +56,8 @@ INSTALLS += \
     target \
     qmldir
 
-unix: installPath = $$[QT_INSTALL_QML]/AkQml
-!unix: installPath = $${LIBDIR}/qt/qml/AkQml
+unix:!macx: installPath = $$[QT_INSTALL_QML]/AkQml
+else: installPath = $${LIBDIR}/qt/qml/AkQml
 
 target.path = $$installPath
 

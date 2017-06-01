@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,13 +44,27 @@ class AkQml: public QQuickItem
         Q_INVOKABLE QObject *newCaps(const QString &caps) const;
         Q_INVOKABLE QObject *newCaps(const AkCaps &caps) const;
 
+        Q_INVOKABLE QObject *newAudioCaps() const;
+        Q_INVOKABLE QObject *newAudioCaps(const QVariantMap &caps) const;
+        Q_INVOKABLE QObject *newAudioCaps(const QString &caps) const;
+        Q_INVOKABLE QObject *newAudioCaps(const AkCaps &caps) const;
+        Q_INVOKABLE QObject *newAudioCaps(const AkAudioCaps &caps) const;
+        Q_INVOKABLE QObject *newAudioCaps(AkAudioCaps::SampleFormat format,
+                                          int channels,
+                                          int rate);
+
         Q_INVOKABLE QObject *newVideoCaps() const;
         Q_INVOKABLE QObject *newVideoCaps(const QVariantMap &caps) const;
         Q_INVOKABLE QObject *newVideoCaps(const QString &caps) const;
         Q_INVOKABLE QObject *newVideoCaps(const AkCaps &caps) const;
         Q_INVOKABLE QObject *newVideoCaps(const AkVideoCaps &caps) const;
 
+        Q_INVOKABLE QObject *newElement(const QString &pluginId,
+                                        const QString &elementName="") const;
+
         Q_INVOKABLE QVariant varFrac(AkFrac *frac) const;
+        Q_INVOKABLE QVariant varFrac(qint64 num, qint64 den) const;
+
         Q_INVOKABLE QVariant varCaps(AkCaps *caps) const;
 };
 

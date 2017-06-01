@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,22 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QQuickWindow>
+
 #include "videodisplay.h"
 
 VideoDisplay::VideoDisplay(QQuickItem *parent):
     QQuickItem(parent)
 {
     this->m_fillDisplay = false;
+    this->m_videoFrame = NULL;
     this->setFlag(ItemHasContents, true);
 }
 
 VideoDisplay::~VideoDisplay()
 {
+    if (this->m_videoFrame)
+        delete this->m_videoFrame;
 }
 
 bool VideoDisplay::fillDisplay() const
@@ -35,11 +40,20 @@ bool VideoDisplay::fillDisplay() const
     return this->m_fillDisplay;
 }
 
-QSGNode *VideoDisplay::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *updatePaintNodeData)
+QSGNode *VideoDisplay::updatePaintNode(QSGNode *oldNode,
+                                       QQuickItem::UpdatePaintNodeData *updatePaintNodeData)
 {
     Q_UNUSED(updatePaintNodeData)
 
-    if (this->m_videoFrame.textureSize().isEmpty()) {
+    this->m_mutex.lock();
+
+    if (this->m_videoFrame)
+        delete this->m_videoFrame;
+
+    this->m_videoFrame = this->window()->createTextureFromImage(this->m_frame);
+    this->m_mutex.unlock();
+
+    if (this->m_videoFrame->textureSize().isEmpty()) {
         if (oldNode)
             delete oldNode;
 
@@ -49,14 +63,14 @@ QSGNode *VideoDisplay::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaint
     QSGSimpleTextureNode *node = NULL;
 
     if (oldNode)
-        node = dynamic_cast<QSGSimpleTextureNode *>(oldNode);
+        node = static_cast<QSGSimpleTextureNode *>(oldNode);
     else
         node = new QSGSimpleTextureNode();
 
     if (this->m_fillDisplay)
         node->setRect(this->boundingRect());
     else {
-        QSizeF size(this->m_videoFrame.textureSize());
+        QSizeF size(this->m_videoFrame->textureSize());
         size.scale(this->boundingRect().size(), Qt::KeepAspectRatio);
         QRectF rect(QPointF(), size);
         rect.moveCenter(this->boundingRect().center());
@@ -64,15 +78,19 @@ QSGNode *VideoDisplay::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaint
         node->setRect(rect);
     }
 
-    node->setTexture(&this->m_videoFrame);
+    node->setTexture(this->m_videoFrame);
 
     return node;
 }
 
-void VideoDisplay::setFrame(const AkPacket &packet)
+void VideoDisplay::iStream(const AkPacket &packet)
 {
-    this->m_videoFrame = packet;
-    this->update();
+    this->m_mutex.lock();
+    this->m_frame = AkUtils::packetToImage(packet)
+                        .convertToFormat(QImage::Format_ARGB32);
+    this->m_mutex.unlock();
+
+    QMetaObject::invokeMethod(this, "update");
 }
 
 void VideoDisplay::setFillDisplay(bool fillDisplay)

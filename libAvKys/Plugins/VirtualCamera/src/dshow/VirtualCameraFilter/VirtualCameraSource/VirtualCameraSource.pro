@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ exists(commons.pri) {
 CONFIG += c++11
 CONFIG -= qt
 
-DESTDIR = $${PWD}
+DESTDIR = $${OUT_PWD}
 
 TARGET = "VirtualCameraSource"
 
 TEMPLATE = lib
 
-SOURCES += \
+SOURCES = \
     src/dllmain.cpp \
     src/vcguidef.cpp \
     src/virtualcamerasource.cpp \
@@ -58,21 +58,23 @@ INCLUDEPATH += \
     ../ipc/src
 
 CONFIG(debug, debug|release) {
-    LIBS += -L../BaseClasses -lstrmbasd
+    LIBS += -L$${OUT_PWD}/../BaseClasses -lstrmbasd
 } else {
-    LIBS += -L../BaseClasses -lstrmbase
+    LIBS += -L$${OUT_PWD}/../BaseClasses -lstrmbase
 }
 
 LIBS += \
-    -L../ipc -lipc \
+    -L$${OUT_PWD}/../ipc -lipc \
     -lstrmiids \
     -luuid \
     -lole32 \
     -loleaut32 \
+    -ladvapi32 \
+    -luser32 \
     -lwinmm \
     -lgdi32 \
-    -lgdiplus \
-    -lksguid
+    -lgdiplus
+win32-g++: LIBS += -lksguid
 
 OTHER_FILES = \
     VirtualCameraSource.def \
@@ -81,7 +83,9 @@ OTHER_FILES = \
 DEF_FILE = VirtualCameraSource.def
 RC_FILE += VirtualCameraSource.rc
 
-isEmpty(STATIC_BUILD) | isEqual(STATIC_BUILD, 0): QMAKE_LFLAGS = -static-libgcc -static-libstdc++
+isEmpty(STATIC_BUILD) | isEqual(STATIC_BUILD, 0) {
+    win32-g++: QMAKE_LFLAGS = -static-libgcc -static-libstdc++
+}
 
 INSTALLS += target
 

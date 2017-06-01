@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -207,7 +207,7 @@ QSize CharifyElement::fontSize(const QString &chrTable, const QFont &font) const
     int width = -1;
     int height = -1;
 
-    foreach (QChar chr, chrTable) {
+    for (const QChar &chr: chrTable) {
         QSize size = metrics.size(Qt::TextSingleLine, chr);
 
         if (size.width() > width)
@@ -240,14 +240,16 @@ QImage CharifyElement::drawChar(const QChar &chr, const QFont &font,
 
 int CharifyElement::imageWeight(const QImage &image, bool reversed) const
 {
-    int fontArea = image.width() * image.height();
-    const QRgb *imageBits = reinterpret_cast<const QRgb *>(image.constBits());
     int weight = 0;
 
-    for (int i = 0; i < fontArea; i++)
-        weight += qGray(imageBits[i]);
+    for (int y = 0; y < image.height(); y++) {
+        const QRgb *imageLine = reinterpret_cast<const QRgb *>(image.constScanLine(y));
 
-    weight /= fontArea;
+        for (int x = 0; x < image.width(); x++)
+            weight += qGray(imageLine[x]);
+    }
+
+    weight /= image.width() * image.height();
 
     if (reversed)
         weight = 255 - weight;
@@ -461,7 +463,7 @@ void CharifyElement::updateCharTable()
     for (int i = 0; i < 256; i++)
         colorTable[i] = qRgb(i, i, i);
 
-    foreach (QChar chr, this->m_charTable) {
+    for (const QChar &chr: this->m_charTable) {
         QImage image = this->drawChar(chr,
                                       this->m_font,
                                       fontSize,

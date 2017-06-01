@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,10 +115,7 @@ AkFrac &AkFrac::operator =(const AkFrac &other)
 
 bool AkFrac::operator ==(const AkFrac &other) const
 {
-    if (this->toString() == other.toString())
-        return true;
-
-    return false;
+    return this->toString() == other.toString();
 }
 
 bool AkFrac::operator !=(const AkFrac &other) const
@@ -142,9 +139,9 @@ qint64 AkFrac::den() const
     return this->d->m_den;
 }
 
-double AkFrac::value() const
+qreal AkFrac::value() const
 {
-    return this->d->m_num / double(this->d->m_den);
+    return this->d->m_num / qreal(this->d->m_den);
 }
 
 qint64 AkFrac::fastValue() const

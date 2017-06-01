@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,29 +31,30 @@ class VideoFormat
         static inline const QVector<VideoFormat> &formats()
         {
             static const QVector<VideoFormat> videoFormats = {
+                {AkVideoCaps::Format_none,            0, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_yuv420p,        12, AkFourCC('I', '4', '2', '0')},
                 {AkVideoCaps::Format_yuyv422,        16, AkFourCC('Y', 'U', 'Y', '2')},
                 {AkVideoCaps::Format_rgb24,          24, AkFourCC('R', 'G', 'B', '3')},
                 {AkVideoCaps::Format_bgr24,          24, AkFourCC('B', 'G', 'R', '3')},
                 {AkVideoCaps::Format_yuv422p,        16, AkFourCC('Y', '4', '2', 'B')},
                 {AkVideoCaps::Format_yuv444p,        24, AkFourCC('4', '4', '4', 'P')},
-                {AkVideoCaps::Format_yuv410p,        9,  AkFourCC('Y', 'U', 'V', '9')},
+                {AkVideoCaps::Format_yuv410p,         9, AkFourCC('Y', 'U', 'V', '9')},
                 {AkVideoCaps::Format_yuv411p,        12, AkFourCC('Y', '4', '1', 'B')},
-                {AkVideoCaps::Format_gray,           8,  AkFourCC('Y', '8', '0', '0')},
-                {AkVideoCaps::Format_monow,          1,  AkFourCC('B', '1', 'W', '0')},
-                {AkVideoCaps::Format_monob,          1,  AkFourCC('B', '0', 'W', '1')},
-                {AkVideoCaps::Format_pal8,           8,  AkFourCC('P', 'A', 'L', '\x8')},
+                {AkVideoCaps::Format_gray,            8, AkFourCC('Y', '8', '0', '0')},
+                {AkVideoCaps::Format_monow,           1, AkFourCC('B', '1', 'W', '0')},
+                {AkVideoCaps::Format_monob,           1, AkFourCC('B', '0', 'W', '1')},
+                {AkVideoCaps::Format_pal8,            8, AkFourCC('P', 'A', 'L', '\x8')},
                 {AkVideoCaps::Format_yuvj420p,       12, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_yuvj422p,       16, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_yuvj444p,       24, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_uyvy422,        16, AkFourCC('U', 'Y', 'V', 'Y')},
                 {AkVideoCaps::Format_uyyvyy411,      12, AK_FOURCC_NULL},
-                {AkVideoCaps::Format_bgr8,           8,  AK_FOURCC_NULL},
-                {AkVideoCaps::Format_bgr4,           4,  AK_FOURCC_NULL},
-                {AkVideoCaps::Format_bgr4_byte,      4,  AK_FOURCC_NULL},
-                {AkVideoCaps::Format_rgb8,           8,  AK_FOURCC_NULL},
-                {AkVideoCaps::Format_rgb4,           4,  AK_FOURCC_NULL},
-                {AkVideoCaps::Format_rgb4_byte,      4,  AK_FOURCC_NULL},
+                {AkVideoCaps::Format_bgr8,            8, AK_FOURCC_NULL},
+                {AkVideoCaps::Format_bgr4,            4, AK_FOURCC_NULL},
+                {AkVideoCaps::Format_bgr4_byte,       4, AK_FOURCC_NULL},
+                {AkVideoCaps::Format_rgb8,            8, AK_FOURCC_NULL},
+                {AkVideoCaps::Format_rgb4,            4, AK_FOURCC_NULL},
+                {AkVideoCaps::Format_rgb4_byte,       4, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_nv12,           12, AkFourCC('N', 'V', '1', '2')},
                 {AkVideoCaps::Format_nv21,           12, AkFourCC('N', 'V', '2', '1')},
                 {AkVideoCaps::Format_argb,           32, AK_FOURCC_NULL},
@@ -163,10 +164,10 @@ class VideoFormat
                 {AkVideoCaps::Format_gbrap16be,      64, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_gbrap16le,      64, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_yuvj411p,       12, AK_FOURCC_NULL},
-                {AkVideoCaps::Format_bayer_bggr8,    8,  AK_FOURCC_NULL},
-                {AkVideoCaps::Format_bayer_rggb8,    8,  AK_FOURCC_NULL},
-                {AkVideoCaps::Format_bayer_gbrg8,    8,  AK_FOURCC_NULL},
-                {AkVideoCaps::Format_bayer_grbg8,    8,  AK_FOURCC_NULL},
+                {AkVideoCaps::Format_bayer_bggr8,     8, AK_FOURCC_NULL},
+                {AkVideoCaps::Format_bayer_rggb8,     8, AK_FOURCC_NULL},
+                {AkVideoCaps::Format_bayer_gbrg8,     8, AK_FOURCC_NULL},
+                {AkVideoCaps::Format_bayer_grbg8,     8, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_bayer_bggr16le, 16, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_bayer_bggr16be, 16, AK_FOURCC_NULL},
                 {AkVideoCaps::Format_bayer_rggb16le, 16, AK_FOURCC_NULL},
@@ -192,7 +193,7 @@ class VideoFormat
                 if (formats()[i].format == format)
                     return &formats()[i];
 
-            return NULL;
+            return &formats()[0];
         }
 
         static inline const VideoFormat *byBpp(int bpp)
@@ -201,7 +202,7 @@ class VideoFormat
                 if (formats()[i].bpp == bpp)
                     return &formats()[i];
 
-            return NULL;
+            return &formats()[0];
         }
 
         static inline const VideoFormat *byFourCC(quint32 fourCC)
@@ -210,7 +211,7 @@ class VideoFormat
                 if (formats()[i].fourCC == fourCC)
                     return &formats()[i];
 
-            return NULL;
+            return &formats()[0];
         }
 };
 
@@ -289,7 +290,7 @@ AkVideoCaps::AkVideoCaps(const AkVideoCaps &other):
 
     QList<QByteArray> properties = other.dynamicPropertyNames();
 
-    foreach (QByteArray property, properties)
+    for (const QByteArray &property: properties)
         this->setProperty(property, other.property(property));
 }
 
@@ -312,7 +313,7 @@ AkVideoCaps &AkVideoCaps::operator =(const AkVideoCaps &other)
 
         QList<QByteArray> properties = other.dynamicPropertyNames();
 
-        foreach (QByteArray property, properties)
+        for (const QByteArray &property: properties)
             this->setProperty(property, other.property(property));
     }
 
@@ -343,10 +344,7 @@ AkVideoCaps &AkVideoCaps::operator =(const QString &caps)
 
 bool AkVideoCaps::operator ==(const AkVideoCaps &other) const
 {
-    if (this->toString() == other.toString())
-        return true;
-
-    return false;
+    return this->toString() == other.toString();
 }
 
 bool AkVideoCaps::operator !=(const AkVideoCaps &other) const
@@ -438,7 +436,7 @@ AkVideoCaps &AkVideoCaps::fromMap(const QVariantMap &caps)
 {
     QList<QByteArray> properties = this->dynamicPropertyNames();
 
-    foreach (QByteArray property, properties)
+    for (const QByteArray &property: properties)
         this->setProperty(property, QVariant());
 
     if (!caps.contains("mimeType")) {
@@ -447,7 +445,7 @@ AkVideoCaps &AkVideoCaps::fromMap(const QVariantMap &caps)
         return *this;
     }
 
-    foreach (QString key, caps.keys())
+    for (const QString &key: caps.keys())
         if (key == "mimeType") {
             this->d->m_isValid = caps[key].toString() == "video/x-raw";
 
@@ -466,14 +464,15 @@ AkVideoCaps &AkVideoCaps::fromString(const QString &caps)
 
 QVariantMap AkVideoCaps::toMap() const
 {
-    QVariantMap map;
-    map["format"] = this->pixelFormatToString(this->d->m_format);
-    map["bpp"] = this->d->m_bpp;
-    map["width"] = this->d->m_width;
-    map["height"] = this->d->m_height;
-    map["fps"] = QVariant::fromValue(this->d->m_fps);
+    QVariantMap map = {
+        {"format", this->pixelFormatToString(this->d->m_format)},
+        {"bpp"   , this->d->m_bpp                              },
+        {"width" , this->d->m_width                            },
+        {"height", this->d->m_height                           },
+        {"fps"   , QVariant::fromValue(this->d->m_fps)         }
+    };
 
-    foreach (QByteArray property, this->dynamicPropertyNames()) {
+    for (const QByteArray &property: this->dynamicPropertyNames()) {
         QString key = QString::fromUtf8(property.constData());
         map[key] = this->property(property);
     }
@@ -501,12 +500,12 @@ QString AkVideoCaps::toString() const
 
     QStringList properties;
 
-    foreach (QByteArray property, this->dynamicPropertyNames())
+    for (const QByteArray &property: this->dynamicPropertyNames())
         properties << QString::fromUtf8(property.constData());
 
     properties.sort();
 
-    foreach (QString property, properties)
+    for (const QString &property: properties)
         caps.append(QString(",%1=%2").arg(property)
                                      .arg(this->property(property.toStdString().c_str()).toString()));
 
@@ -522,7 +521,7 @@ AkVideoCaps &AkVideoCaps::update(const AkCaps &caps)
 
     QList<QByteArray> properties = caps.dynamicPropertyNames();
 
-    foreach (QByteArray property, properties)
+    for (const QByteArray &property: properties)
         if (property == "format")
             this->d->m_format = this->pixelFormatFromString(caps.property(property).toString());
         else if (property == "bpp")
@@ -546,12 +545,7 @@ AkCaps AkVideoCaps::toCaps() const
 
 int AkVideoCaps::bitsPerPixel(AkVideoCaps::PixelFormat pixelFormat)
 {
-    const VideoFormat *vf = VideoFormat::byFormat(pixelFormat);
-
-    if (vf)
-        return vf->bpp;
-
-    return 0;
+    return VideoFormat::byFormat(pixelFormat)->bpp;
 }
 
 int AkVideoCaps::bitsPerPixel(const QString &pixelFormat)
@@ -583,12 +577,7 @@ AkVideoCaps::PixelFormat AkVideoCaps::pixelFormatFromString(const QString &pixel
 
 quint32 AkVideoCaps::fourCC(AkVideoCaps::PixelFormat pixelFormat)
 {
-    const VideoFormat *vf = VideoFormat::byFormat(pixelFormat);
-
-    if (vf)
-        return vf->fourCC;
-
-    return AK_FOURCC_NULL;
+    return VideoFormat::byFormat(pixelFormat)->fourCC;
 }
 
 quint32 AkVideoCaps::fourCC(const QString &pixelFormat)
@@ -687,7 +676,7 @@ void AkVideoCaps::clear()
 {
     QList<QByteArray> properties = this->dynamicPropertyNames();
 
-    foreach (QByteArray property, properties)
+    for (const QByteArray &property: properties)
         this->setProperty(property.constData(), QVariant());
 }
 

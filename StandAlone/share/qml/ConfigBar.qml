@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,16 +40,20 @@ Rectangle {
             id: lstConfigs
 
             ListElement {
-                option: "audio"
-                description: qsTr("Audio")
-            }
-            ListElement {
                 option: "output"
                 description: qsTr("Output")
             }
             ListElement {
                 option: "general"
                 description: qsTr("General Options")
+            }
+            ListElement {
+                option: "plugins"
+                description: qsTr("Plugins Configs")
+            }
+            ListElement {
+                option: "updates"
+                description: qsTr("Updates")
             }
         }
 

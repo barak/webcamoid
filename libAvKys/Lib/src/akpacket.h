@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ inline T AkNoPts()
     return T(0x1) << (sizeof(T) - 1);
 }
 
-class AkPacket: public QObject
+class AKCOMMONS_EXPORT AkPacket: public QObject
 {
     Q_OBJECT
     Q_PROPERTY(AkCaps caps
@@ -104,7 +104,7 @@ class AkPacket: public QObject
     private:
         AkPacketPrivate *d;
 
-    signals:
+    Q_SIGNALS:
         void capsChanged(const AkCaps &caps);
         void dataChanged(const QVariant &data);
         void bufferChanged(const QByteArray &buffer);
@@ -113,7 +113,7 @@ class AkPacket: public QObject
         void timeBaseChanged(const AkFrac &timeBase);
         void indexChanged(int index);
 
-    public slots:
+    public Q_SLOTS:
         void setCaps(const AkCaps &caps);
         void setData(const QVariant &data);
         void setBuffer(const QByteArray &buffer);

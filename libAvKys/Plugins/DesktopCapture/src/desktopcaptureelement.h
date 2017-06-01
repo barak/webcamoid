@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 #ifndef DESKTOPCAPTUREELEMENT_H
 #define DESKTOPCAPTUREELEMENT_H
 
+#include <QQmlComponent>
+#include <QQmlContext>
 #include <QTimer>
 #include <QThreadPool>
 #include <QtConcurrent>
@@ -31,10 +33,38 @@
 class DesktopCaptureElement: public AkMultimediaSourceElement
 {
     Q_OBJECT
+    Q_PROPERTY(QStringList medias
+               READ medias
+               NOTIFY mediasChanged)
+    Q_PROPERTY(QString media
+               READ media
+               WRITE setMedia
+               RESET resetMedia
+               NOTIFY mediaChanged)
+    Q_PROPERTY(QList<int> streams
+               READ streams
+               WRITE setStreams
+               RESET resetStreams
+               NOTIFY streamsChanged)
+    Q_PROPERTY(bool loop
+               READ loop
+               WRITE setLoop
+               RESET resetLoop
+               NOTIFY loopChanged)
+    Q_PROPERTY(AkFrac fps
+               READ fps
+               WRITE setFps
+               RESET resetFps
+               NOTIFY fpsChanged)
 
     public:
         explicit DesktopCaptureElement();
         ~DesktopCaptureElement();
+
+        Q_INVOKABLE QObject *controlInterface(QQmlEngine *engine,
+                                              const QString &controlId) const;
+
+        Q_INVOKABLE AkFrac fps() const;
 
         Q_INVOKABLE QStringList medias() const;
         Q_INVOKABLE QString media() const;
@@ -45,6 +75,7 @@ class DesktopCaptureElement: public AkMultimediaSourceElement
         Q_INVOKABLE AkCaps caps(int stream) const;
 
     private:
+        AkFrac m_fps;
         QString m_curScreen;
         int m_curScreenNumber;
         qint64 m_id;
@@ -52,15 +83,23 @@ class DesktopCaptureElement: public AkMultimediaSourceElement
         QTimer m_timer;
         QThreadPool m_threadPool;
         QFuture<void> m_threadStatus;
+        QMutex m_mutex;
         AkPacket m_curPacket;
 
-        static void sendPacket(DesktopCaptureElement *element,
-                               const AkPacket &packet);
+        void sendPacket(const AkPacket &packet);
 
     signals:
-        void sizeChanged(const QString &media, const QSize &size) const;
+        void mediasChanged(const QStringList &medias);
+        void mediaChanged(const QString &media);
+        void streamsChanged(const QList<int> &streams);
+        void loopChanged(bool loop);
+        void fpsChanged(const AkFrac &fps);
+        void sizeChanged(const QString &media, const QSize &size);
+        void error(const QString &message);
 
     public slots:
+        void setFps(const AkFrac &fps);
+        void resetFps();
         void setMedia(const QString &media);
         void resetMedia();
         bool setState(AkElement::ElementState state);

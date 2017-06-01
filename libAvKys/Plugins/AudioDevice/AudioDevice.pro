@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,43 +16,15 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
-} else {
-    exists(../../commons.pri) {
-        include(../../commons.pri)
-    } else {
-        error("commons.pri file not found.")
-    }
-}
+TEMPLATE = subdirs
 
-unix:!macx: include(src/pulseaudio/pulseaudio.pri)
-win32: include(src/wasapi/wasapi.pri)
-macx: include(src/coreaudio/coreaudio.pri)
+CONFIG += ordered
 
-CONFIG += plugin
-
-HEADERS += \
-    src/audiodevice.h \
-    src/audiodeviceelement.h
-
-INCLUDEPATH += \
-    ../../Lib/src
-
-LIBS += -L../../Lib/ -l$${COMMONS_TARGET}
-
-OTHER_FILES += pspec.json
-
-QT += qml concurrent
-
-SOURCES += \
-    src/audiodevice.cpp \
-    src/audiodeviceelement.cpp
-
-DESTDIR = $${PWD}
-
-TEMPLATE = lib
-
-INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}
+SUBDIRS = src
+CONFIG(config_alsa): SUBDIRS += src/alsa
+CONFIG(config_coreaudio): SUBDIRS += src/coreaudio
+CONFIG(config_jack): SUBDIRS += src/jack
+CONFIG(config_oss): SUBDIRS += src/oss
+CONFIG(config_pulseaudio): SUBDIRS += src/pulseaudio
+CONFIG(config_qtaudio): SUBDIRS += src/qtaudio
+CONFIG(config_wasapi): SUBDIRS += src/wasapi

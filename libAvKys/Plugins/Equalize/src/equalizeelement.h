@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,19 @@
 #include <ak.h>
 #include <akutils.h>
 
+#include "pixelstructs.h"
+
 class EqualizeElement: public AkElement
 {
     Q_OBJECT
 
     public:
         explicit EqualizeElement();
+
+    private:
+        QVector<quint64> histogram(const QImage &img) const;
+        QVector<quint64> cumulativeHistogram(const QVector<quint64> &histogram) const;
+        QVector<quint8> equalizationTable(const QImage &img) const;
 
     public slots:
         AkPacket iStream(const AkPacket &packet);

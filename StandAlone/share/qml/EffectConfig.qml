@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,29 +25,71 @@ ColumnLayout {
     id: recEffectConfig
 
     property string curEffect: ""
+    property int curEffectIndex: -1
     property bool inUse: false
-    property bool advancedMode: Webcamoid.advancedMode
+    property bool editMode: false
+    property bool advancedMode: VideoEffects.advancedMode
 
     signal effectAdded(string effectId)
+
+    function showDefaultEffect()
+    {
+        var currentEffects = VideoEffects.effects
+
+        if (currentEffects.length > 0) {
+            VideoEffects.removeInterface("itmEffectControls")
+            VideoEffects.embedControls("itmEffectControls", 0)
+            curEffect = currentEffects[0]
+            curEffectIndex = 0
+            inUse = true
+        } else {
+            curEffect = ""
+            curEffectIndex = -1
+            inUse = false
+        }
+    }
 
     Connections {
         target: Webcamoid
 
-        onInterfaceLoaded: {
-            var currentEffects = Webcamoid.currentEffects
+        onInterfaceLoaded: showDefaultEffect()
+    }
+    Connections {
+        target: VideoEffects
 
-            if (currentEffects.length > 0) {
-                Webcamoid.removeInterface("itmEffectControls")
-                Webcamoid.embedEffectControls("itmEffectControls", currentEffects[0])
-            }
-        }
+        onEffectsChanged: showDefaultEffect()
     }
 
     onCurEffectChanged: {
-        Webcamoid.removeInterface("itmEffectControls")
-        Webcamoid.embedEffectControls("itmEffectControls", curEffect)
+        VideoEffects.removeInterface("itmEffectControls")
+
+        recEffectConfig.curEffect = curEffect
+        recEffectConfig.curEffectIndex = VideoEffects.effects.indexOf(curEffect)
+        recEffectConfig.inUse = recEffectConfig.curEffectIndex >= 0
+
+        if (curEffect.length > 0) {
+            var effectIndex = recEffectConfig.curEffectIndex
+
+            if (effectIndex < 0)
+                effectIndex = VideoEffects.effects.length
+
+            VideoEffects.embedControls("itmEffectControls", effectIndex)
+        }
     }
 
+    Label {
+        id: lblDescription
+        text: qsTr("Description")
+        font.bold: true
+        Layout.fillWidth: true
+    }
+    TextField {
+        id: txtDescription
+        text: VideoEffects.effectDescription(recEffectConfig.curEffect)
+        placeholderText: qsTr("Plugin description")
+        readOnly: true
+        Layout.fillWidth: true
+    }
     Label {
         id: lblEffect
         text: qsTr("Plugin id")
@@ -61,19 +103,7 @@ ColumnLayout {
         readOnly: true
         Layout.fillWidth: true
     }
-    Label {
-        id: lblDescription
-        text: qsTr("Description")
-        font.bold: true
-        Layout.fillWidth: true
-    }
-    TextField {
-        id: txtDescription
-        text: Webcamoid.effectDescription(recEffectConfig.curEffect)
-        placeholderText: qsTr("Plugin description")
-        readOnly: true
-        Layout.fillWidth: true
-    }
+
     RowLayout {
         id: rowControls
         Layout.fillWidth: true
@@ -87,19 +117,23 @@ ColumnLayout {
             id: btnAddRemove
             text: inUse? qsTr("Remove"): qsTr("Add")
             iconName: inUse? "remove": "add"
-            iconSource: inUse? "qrc:/icons/hicolor/scalable/remove.svg":
-                               "qrc:/icons/hicolor/scalable/add.svg"
+            iconSource: inUse? "image://icons/remove":
+                                  "image://icons/add"
             enabled: recEffectConfig.curEffect == ""? false: true
 
             onClicked: {
-                if (inUse) {
-                    Webcamoid.removeEffect(recEffectConfig.curEffect)
+                var effectIndex = VideoEffects.effects.indexOf(recEffectConfig.curEffect)
 
-                    if (Webcamoid.currentEffects.length < 1)
+                if (effectIndex < 0)
+                    effectIndex = VideoEffects.effects.length
+
+                if (inUse) {
+                    VideoEffects.removeEffect(effectIndex)
+
+                    if (VideoEffects.effects.length < 1)
                         recEffectConfig.curEffect = ""
-                }
-                else {
-                    Webcamoid.setAsPreview(recEffectConfig.curEffect, false)
+                } else {
+                    VideoEffects.setAsPreview(effectIndex, false)
                     recEffectConfig.effectAdded(recEffectConfig.curEffect)
                 }
             }

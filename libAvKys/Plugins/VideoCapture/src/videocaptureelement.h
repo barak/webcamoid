@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,26 +28,33 @@
 
 #include <akmultimediasourceelement.h>
 
-#ifdef Q_OS_LINUX
-#include "v4l2/capture.h"
-#elif defined(Q_OS_WIN32)
-#include "dshow/capture.h"
-#endif
+#include "convertvideo.h"
+#include "capture.h"
 
-#ifdef USE_GSTREAMER
-#include "gstreamer/convertvideo.h"
-#else
-#include "ffmpeg/convertvideo.h"
-#endif
+typedef QSharedPointer<ConvertVideo> ConvertVideoPtr;
+typedef QSharedPointer<Capture> CapturePtr;
 
 class VideoCaptureElement: public AkMultimediaSourceElement
 {
     Q_OBJECT
+    Q_PROPERTY(QStringList medias
+               READ medias
+               NOTIFY mediasChanged)
+    Q_PROPERTY(QString media
+               READ media
+               WRITE setMedia
+               RESET resetMedia
+               NOTIFY mediaChanged)
     Q_PROPERTY(QList<int> streams
                READ streams
                WRITE setStreams
                RESET resetStreams
                NOTIFY streamsChanged)
+    Q_PROPERTY(bool loop
+               READ loop
+               WRITE setLoop
+               RESET resetLoop
+               NOTIFY loopChanged)
     Q_PROPERTY(QString ioMethod
                READ ioMethod
                WRITE setIoMethod
@@ -56,6 +63,16 @@ class VideoCaptureElement: public AkMultimediaSourceElement
                READ nBuffers
                WRITE setNBuffers
                RESET resetNBuffers)
+    Q_PROPERTY(QString codecLib
+               READ codecLib
+               WRITE setCodecLib
+               RESET resetCodecLib
+               NOTIFY codecLibChanged)
+    Q_PROPERTY(QString captureLib
+               READ captureLib
+               WRITE setCaptureLib
+               RESET resetCaptureLib
+               NOTIFY captureLibChanged)
 
     public:
         explicit VideoCaptureElement();
@@ -74,10 +91,10 @@ class VideoCaptureElement: public AkMultimediaSourceElement
         Q_INVOKABLE AkCaps caps(int stream) const;
         Q_INVOKABLE AkCaps rawCaps(int stream) const;
         Q_INVOKABLE QStringList listCapsDescription() const;
-
         Q_INVOKABLE QString ioMethod() const;
         Q_INVOKABLE int nBuffers() const;
-
+        Q_INVOKABLE QString codecLib() const;
+        Q_INVOKABLE QString captureLib() const;
         Q_INVOKABLE QVariantList imageControls() const;
         Q_INVOKABLE bool setImageControls(const QVariantMap &imageControls);
         Q_INVOKABLE bool resetImageControls();
@@ -86,10 +103,11 @@ class VideoCaptureElement: public AkMultimediaSourceElement
         Q_INVOKABLE bool resetCameraControls();
 
     private:
-        Capture m_capture;
-        ConvertVideo m_convertVideo;
+        ConvertVideoPtr m_convertVideo;
+        CapturePtr m_capture;
         QThreadPool m_threadPool;
         QFuture<void> m_cameraLoopResult;
+        QMutex m_mutexLib;
         bool m_runCameraLoop;
         bool m_pause;
         bool m_mirror;
@@ -98,24 +116,36 @@ class VideoCaptureElement: public AkMultimediaSourceElement
         static void cameraLoop(VideoCaptureElement *captureElement);
 
     signals:
+        void mediasChanged(const QStringList &medias);
+        void mediaChanged(const QString &media);
+        void streamsChanged(const QList<int> &streams);
+        void loopChanged(bool loop);
         void error(const QString &message);
-        void sizeChanged(const QString &webcam, const QSize &size) const;
+        void codecLibChanged(const QString &codecLib);
+        void captureLibChanged(const QString &captureLib);
         void imageControlsChanged(const QVariantMap &imageControls) const;
         void cameraControlsChanged(const QVariantMap &cameraControls) const;
-        void streamsChanged(const QList<int> &streams);
 
     public slots:
         void setMedia(const QString &media);
         void setStreams(const QList<int> &streams);
         void setIoMethod(const QString &ioMethod);
         void setNBuffers(int nBuffers);
+        void setCodecLib(const QString &codecLib);
+        void setCaptureLib(const QString &captureLib);
         void resetMedia();
         void resetStreams();
         void resetIoMethod();
         void resetNBuffers();
+        void resetCodecLib();
+        void resetCaptureLib();
         void reset();
         bool setState(AkElement::ElementState state);
         void frameReady(const AkPacket &packet);
+
+    private slots:
+        void codecLibUpdated(const QString &codecLib);
+        void captureLibUpdated(const QString &captureLib);
 };
 
 #endif // VIDEOCAPTUREELEMENT_H

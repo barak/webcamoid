@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ inline quint32 AkFourCC(quint32 a, quint32 b, quint32 c, quint32 d)
 
 class AkVideoCapsPrivate;
 
-class AkVideoCaps: public QObject
+class AKCOMMONS_EXPORT AkVideoCaps: public QObject
 {
     Q_OBJECT
     Q_ENUMS(PixelFormat)
@@ -296,7 +296,7 @@ class AkVideoCaps: public QObject
     private:
         AkVideoCapsPrivate *d;
 
-    signals:
+    Q_SIGNALS:
         void formatChanged(PixelFormat format);
         void bppChanged(int bpp);
         void sizeChanged(const QSize &size);
@@ -304,7 +304,7 @@ class AkVideoCaps: public QObject
         void heightChanged(int height);
         void fpsChanged(const AkFrac &fps);
 
-    public slots:
+    public Q_SLOTS:
         void setFormat(PixelFormat format);
         void setBpp(int bpp);
         void setSize(const QSize &size);

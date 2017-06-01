@@ -1,81 +1,180 @@
 language: cpp
 
+cache:
+  ccache: true
+  timeout: 1000
+
 matrix:
   include:
-    - os: linux
-      dist: trusty
-      sudo: required
-      compiler: gcc
-      env:
-      - QTVER=57
-    - os: linux
-      dist: trusty
-      sudo: required
-      compiler: clang
-      env:
-      - QTVER=57
-    - os: osx
-      osx_image: xcode7.3
-      compiler: clang
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian DOCKERIMG=debian:stretch
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian DOCKERIMG=debian:stretch
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=fedora DOCKERIMG=fedora:24 FEDORAVER=24
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=fedora DOCKERIMG=fedora:24 FEDORAVER=24
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=fedora DOCKERIMG=fedora:25 FEDORAVER=25
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=fedora DOCKERIMG=fedora:25 FEDORAVER=25
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=opensuse DOCKERIMG=opensuse:42.2
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=opensuse DOCKERIMG=opensuse:42.2
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=opensuse DOCKERIMG=opensuse:tumbleweed
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=opensuse DOCKERIMG=opensuse:tumbleweed
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:trusty
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:trusty
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:xenial
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:xenial
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:yakkety
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:yakkety
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:zesty
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:zesty
+  - os: osx
+    osx_image: xcode8
+    compiler: clang
+    env:
+      - DISABLE_CCACHE=1
+  - os: osx
+    osx_image: xcode8.1
+    compiler: clang
+  - os: osx
+    osx_image: xcode8.2
+    compiler: clang
 
 before_install: |
   if [ "${TRAVIS_OS_NAME}" = linux ]; then
-    sudo add-apt-repository --yes ppa:beineri/opt-qt${QTVER}-trusty
-    sudo add-apt-repository --yes ppa:mc3man/trusty-media
-    sudo add-apt-repository --yes ppa:dan-witt/gstreamer
-    sudo apt-get update -qq
+    docker pull ${DOCKERIMG}
+    docker ps -a
+    docker run -it -d -v ${PWD}:/sources -v $HOME/.ccache:/ccache -e CCACHE_DIR=/ccache -w /sources --name ${DOCKERSYS} ${DOCKERIMG} /bin/sh
   elif [ "${TRAVIS_OS_NAME}" = osx ]; then
     brew update
     brew upgrade
   fi
 
-install: |
-  if [ "${TRAVIS_OS_NAME}" = linux ]; then
-    sudo apt-get -y install pkg-config
-    sudo apt-get -y install linux-libc-dev
-    sudo apt-get -y install qt${QTVER}tools
-    sudo apt-get -y install qt${QTVER}declarative
-    sudo apt-get -y install qt${QTVER}svg
-    sudo apt-get -y install libgstreamer-plugins-base1.0-dev
-    sudo apt-get -y install libpulse-dev
-    sudo apt-get -y install libv4l-dev
-  elif [ "${TRAVIS_OS_NAME}" = osx ]; then
-    brew install qt5 ffmpeg
-  fi
+install:
+  - ports/ci/travis/install_deps.sh
 
 before_script: |
   if [ "${TRAVIS_OS_NAME}" = linux ]; then
-    source /opt/qt${QTVER}/bin/qt${QTVER}-env.sh
     if [ "${CXX}" = g++ ]; then
-      export QMAKESPEC=linux-g++
+      export COMPILESPEC=linux-g++
     elif [ "${CXX}" = clang++ ]; then
-      export QMAKESPEC=linux-clang
+      export COMPILESPEC=linux-clang
     fi
   elif [ "${TRAVIS_OS_NAME}" = osx ]; then
     brew link --force qt5
-    FFVER=$(ffmpeg -version | head -n 1 | awk '{print $3}')
     if [ "${CXX}" = g++ ]; then
-      export QMAKESPEC=macx-g++
+      export COMPILESPEC=macx-g++
     elif [ "${CXX}" = clang++ ]; then
-      export QMAKESPEC=macx-clang
+      export COMPILESPEC=macx-clang
     fi
   fi
 
-script: |
-  if [ "${TRAVIS_OS_NAME}" = linux ]; then
-    qmake Webcamoid.pro USE_GSTREAMER=1
-  elif [ "${TRAVIS_OS_NAME}" = osx ]; then
-    qmake Webcamoid.pro \
-        FFMPEGINCLUDES="/usr/local/Cellar/ffmpeg/${FFVER}/include" \
-        FFMPEGLIBS=-L"/usr/local/Cellar/ffmpeg/${FFVER}/lib" \
-        FFMPEGLIBS+=-lavcodec \
-        FFMPEGLIBS+=-lavdevice \
-        FFMPEGLIBS+=-lavformat \
-        FFMPEGLIBS+=-lavutil \
-        FFMPEGLIBS+=-lswresample \
-        FFMPEGLIBS+=-lswscale
-  fi
-  make
+script:
+  - ports/ci/travis/build.sh
 
 branches:
   only:

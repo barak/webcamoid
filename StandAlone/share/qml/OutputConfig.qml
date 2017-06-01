@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
+import AkQml 1.0
 
 ColumnLayout {
     Component.onCompleted: {
@@ -41,15 +42,7 @@ ColumnLayout {
         checked: Webcamoid.enableVirtualCamera
         Layout.fillWidth: true
 
-        onCheckedChanged: {
-            Webcamoid.enableVirtualCamera = checked
-
-            if (checked) {
-                if (Webcamoid.isPlaying)
-                    Webcamoid.startVirtualCamera("");
-            } else
-                Webcamoid.stopVirtualCamera();
-        }
+        onCheckedChanged: Webcamoid.enableVirtualCamera = checked
 
         GridLayout {
             id: itmVirtualCameraControls

@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,11 +22,24 @@ CONFIG += ordered
 
 win32: SUBDIRS += VirtualCamera/src/dshow/VirtualCameraFilter
 
+# Base plugins
 SUBDIRS += \
     ACapsConvert \
-    Aging \
     AudioDevice \
+    AudioGen \
     Bin \
+    DesktopCapture \
+    Multiplex \
+    MultiSink \
+    MultiSrc \
+    Probe \
+    RtPts \
+    VideoCapture \
+    VirtualCamera
+
+# Video effects
+isEmpty(NOVIDEOEFFECTS): SUBDIRS += \
+    Aging \
     Blur \
     Cartoon \
     ChangeHSL \
@@ -39,7 +52,6 @@ SUBDIRS += \
     Convolve \
     DelayGrab \
     Denoise \
-    DesktopCapture \
     Dice \
     Distort \
     Dizzy \
@@ -58,28 +70,21 @@ SUBDIRS += \
     Life \
     Matrix \
     MatrixTransform \
-    Multiplex \
-    MultiSink \
-    MultiSrc \
     Nervous \
     Normalize \
     OilPaint \
     Photocopy \
     Pixelate \
     PrimariesColors \
-    Probe \
     Quark \
     Radioactive \
     Ripple \
-    RtPts \
     ScanLines \
     Scroll \
     Shagadelic \
     Swirl \
     Temperature \
-    VideoCapture \
     Vignette \
-    VirtualCamera \
     Warhol \
     Warp \
     Wave

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  */
 
 import QtQuick 2.5
-import QtQuick.Window 2.0
+import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 
@@ -55,7 +55,8 @@ ApplicationWindow {
                                 Layout.minimumHeight: 128
                                 Layout.maximumWidth: 128
                                 Layout.maximumHeight: 128
-                                source: "qrc:/icons/hicolor/128x128/webcamoid.png"
+                                source: "image://icons/webcamoid"
+                                sourceSize: Qt.size(width, height)
                             }
 
                             ColumnLayout {
@@ -69,13 +70,12 @@ ApplicationWindow {
                                     font.bold: true
                                 }
                                 Label {
-                                    text: qsTr("Using Qt %1 with %2")
+                                    text: qsTr("Using Qt %1")
                                             .arg(Webcamoid.qtVersion())
-                                            .arg(Webcamoid.codecFramework())
                                 }
                                 Button {
                                     iconName: "applications-internet"
-                                    iconSource: "qrc:/icons/hicolor/scalable/applications-internet.svg"
+                                    iconSource: "image://icons/applications-internet"
                                     text: qsTr("Website")
 
                                     onClicked: Qt.openUrlExternally(Webcamoid.projectUrl())
@@ -99,7 +99,36 @@ ApplicationWindow {
                     }
                 }
             }
+            Tab {
+                title: qsTr("Contributors")
+                clip: true
 
+                ScrollView {
+                    id: svwContributors
+
+                    Flow {
+                        id: flwContributors
+                        width: svwContributors.viewport.width
+
+                        Component.onCompleted: {
+                            var contributors = JSON.parse(Webcamoid.readFile(":/Webcamoid/Contributors/contributors.json"))
+
+                            for (var i in contributors) {
+                                var component = Qt.createComponent("Contributor.qml")
+
+                                if (component.status !== Component.Ready)
+                                    continue
+
+                                var obj = component.createObject(flwContributors);
+                                var contributor = contributors[i];
+                                obj.name = contributor.name;
+                                obj.avatar = "qrc:/Webcamoid/Contributors/" + contributor.avatar;
+                                obj.website = contributor.website;
+                            }
+                        }
+                    }
+                }
+            }
             Tab {
                 title: qsTr("License")
 
@@ -114,7 +143,7 @@ ApplicationWindow {
         Button {
             text: qsTr("Close")
             iconName: "window-close"
-            iconSource: "qrc:/icons/hicolor/scalable/window-close.svg"
+            iconSource: "image://icons/window-close"
             Layout.alignment: Qt.AlignRight
             onClicked: recAbout.close()
         }

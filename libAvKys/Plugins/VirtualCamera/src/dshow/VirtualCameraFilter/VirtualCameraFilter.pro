@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,14 +19,10 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-SUBDIRS += \
+SUBDIRS = \
     ipc
 
-isEmpty(COMPILE_VCAM_DRIVER) {
-    SUBDIRS += \
-        BaseClasses \
-        VirtualCameraSource
-} else: !isEqual(COMPILE_VCAM_DRIVER, 0) {
+CONFIG(config_vcamwin) {
     SUBDIRS += \
         BaseClasses \
         VirtualCameraSource

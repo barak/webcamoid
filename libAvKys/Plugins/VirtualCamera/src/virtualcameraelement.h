@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,17 +26,11 @@
 
 #include <akmultimediasourceelement.h>
 
-#ifdef Q_OS_LINUX
-#include "v4l2/cameraout.h"
-#elif defined(Q_OS_WIN32)
-#include "dshow/cameraout.h"
-#endif
+#include "convertvideo.h"
+#include "cameraout.h"
 
-#ifdef USE_GSTREAMER
-#include "gstreamer/convertvideo.h"
-#else
-#include "ffmpeg/convertvideo.h"
-#endif
+typedef QSharedPointer<ConvertVideo> ConvertVideoPtr;
+typedef QSharedPointer<CameraOut> CameraOutPtr;
 
 class VirtualCameraElement: public AkElement
 {
@@ -60,7 +54,8 @@ class VirtualCameraElement: public AkElement
     Q_PROPERTY(int maxCameras
                READ maxCameras)
     Q_PROPERTY(bool needRoot
-               READ needRoot)
+               READ needRoot
+               NOTIFY needRootChanged)
     Q_PROPERTY(int passwordTimeout
                READ passwordTimeout
                WRITE setPasswordTimeout
@@ -71,6 +66,19 @@ class VirtualCameraElement: public AkElement
                WRITE setRootMethod
                RESET resetRootMethod
                NOTIFY rootMethodChanged)
+    Q_PROPERTY(QStringList availableMethods
+               READ availableMethods
+               NOTIFY availableMethodsChanged)
+    Q_PROPERTY(QString convertLib
+               READ convertLib
+               WRITE setConvertLib
+               RESET resetConvertLib
+               NOTIFY convertLibChanged)
+    Q_PROPERTY(QString outputLib
+               READ outputLib
+               WRITE setOutputLib
+               RESET resetOutputLib
+               NOTIFY outputLibChanged)
 
     public:
         explicit VirtualCameraElement();
@@ -87,6 +95,9 @@ class VirtualCameraElement: public AkElement
         Q_INVOKABLE bool needRoot() const;
         Q_INVOKABLE int passwordTimeout() const;
         Q_INVOKABLE QString rootMethod() const;
+        Q_INVOKABLE QStringList availableMethods() const;
+        Q_INVOKABLE QString convertLib() const;
+        Q_INVOKABLE QString outputLib() const;
 
         Q_INVOKABLE int defaultStream(const QString &mimeType) const;
         Q_INVOKABLE QString description(const QString &media) const;
@@ -105,17 +116,13 @@ class VirtualCameraElement: public AkElement
                                       const QString &password="") const;
         Q_INVOKABLE bool removeAllWebcams(const QString &password="") const;
 
-    protected:
-        void stateChange(AkElement::ElementState from,
-                         AkElement::ElementState to);
-
     private:
-        CameraOut m_cameraOut;
-        ConvertVideo m_convertVideo;
+        ConvertVideoPtr m_convertVideo;
+        CameraOutPtr m_cameraOut;
         int m_streamIndex;
         AkCaps m_streamCaps;
         QMutex m_mutex;
-        bool m_isRunning;
+        QMutex m_mutexLib;
 
         QImage swapChannels(const QImage &image) const;
 
@@ -124,8 +131,12 @@ class VirtualCameraElement: public AkElement
         void mediasChanged(const QStringList &medias) const;
         void mediaChanged(const QString &media);
         void streamsChanged(const QList<int> &streams);
+        void needRootChanged(bool needRoot);
         void passwordTimeoutChanged(int passwordTimeout);
         void rootMethodChanged(const QString &rootMethod);
+        void availableMethodsChanged(const QStringList &availableMethods);
+        void convertLibChanged(const QString &convertLib);
+        void outputLibChanged(const QString &outputLib);
         void error(const QString &message);
 
     public slots:
@@ -133,13 +144,23 @@ class VirtualCameraElement: public AkElement
         void setMedia(const QString &media);
         void setPasswordTimeout(int passwordTimeout);
         void setRootMethod(const QString &rootMethod);
+        void setConvertLib(const QString &convertLib);
+        void setOutputLib(const QString &outputLib);
         void resetDriverPath();
         void resetMedia();
         void resetPasswordTimeout();
         void resetRootMethod();
+        void resetConvertLib();
+        void resetOutputLib();
         void clearStreams();
 
+        bool setState(AkElement::ElementState state);
         AkPacket iStream(const AkPacket &packet);
+
+    private slots:
+        void convertLibUpdated(const QString &convertLib);
+        void outputLibUpdated(const QString &outputLib);
+        void rootMethodUpdated(const QString &rootMethod);
 };
 
 #endif // VIRTUALCAMERAELEMENT_H

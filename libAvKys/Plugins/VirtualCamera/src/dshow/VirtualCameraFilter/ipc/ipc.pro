@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ exists(commons.pri) {
 CONFIG += staticlib c++11
 CONFIG -= qt
 
-DESTDIR = $${PWD}
+DESTDIR = $${OUT_PWD}
 
 TARGET = "ipc"
 
 TEMPLATE = lib
 
-SOURCES += \
+SOURCES = \
     src/mutex.cpp \
     src/waitcondition.cpp \
     src/ipcbridge.cpp
@@ -46,4 +46,6 @@ HEADERS =  \
     src/waitcondition.h \
     src/ipcbridge.h
 
-isEmpty(STATIC_BUILD) | isEqual(STATIC_BUILD, 0): QMAKE_LFLAGS = -static-libgcc -static-libstdc++
+isEmpty(STATIC_BUILD) | isEqual(STATIC_BUILD, 0) {
+    win32-g++: QMAKE_LFLAGS = -static-libgcc -static-libstdc++
+}

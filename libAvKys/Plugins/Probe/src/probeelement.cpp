@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ AkPacket ProbeElement::iStream(const AkPacket &packet)
     if (this->m_log) {
         qDebug().nospace() << "\"" << this->objectName().toStdString().c_str() << "\"";
 
-        foreach (QString line, packet.toString().split('\n'))
+        for (const QString &line: packet.toString().split('\n'))
             qDebug().nospace() << "\t"
                                << line.toStdString().c_str();
     }

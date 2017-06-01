@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,12 @@
 
 QObject *Halftone::create(const QString &key, const QString &specification)
 {
-    Q_UNUSED(key)
     Q_UNUSED(specification)
 
-    return new HalftoneElement();
+    if (key == AK_PLUGIN_TYPE_ELEMENT)
+        return new HalftoneElement();
+
+    return nullptr;
 }
 
 QStringList Halftone::keys() const

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ class TemperatureElement: public AkElement
             // http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
 
             // Temperature must fall between 1000 and 40000 degrees
-            temperature = qBound(1000.0, (double) temperature, 40000.0);
+            temperature = qBound<qreal>(1000.0, temperature, 40000.0);
 
             // All calculations require temperature / 100, so only do the conversion once
             temperature /= 100.0;
