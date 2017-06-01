@@ -8,6 +8,8 @@
 *.so
 *.so.*
 *.so.debug
+*.run
+*.AppImage
 
 # Packages #
 ############
@@ -19,6 +21,7 @@
 *.rar
 *.tar
 *.zip
+*.xz
 
 # Logs and databases #
 ######################
@@ -53,7 +56,14 @@ Makefile*
 *.pro.user*
 *.qmlproject.user*
 *.autosave
+*.qmlc
 .qmake.stash
+.qmake.cache
+
+# Android files #
+#################
+android-build
+android-*-deployment-settings.json
 
 # VIM temporary files #
 #######################
@@ -67,6 +77,13 @@ Makefile*
 ###############
 *.Debug
 *.Release
+
+# MSVC files #
+##############
+*.exp
+*.ilk
+*.lib
+*.pdb
 
 # Failed patch #
 ################

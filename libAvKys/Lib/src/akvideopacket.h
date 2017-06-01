@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 class AkVideoPacketPrivate;
 
-class AkVideoPacket: public AkPacket
+class AKCOMMONS_EXPORT AkVideoPacket: public AkPacket
 {
     Q_OBJECT
     Q_PROPERTY(AkVideoCaps caps
@@ -58,10 +58,10 @@ class AkVideoPacket: public AkPacket
     private:
         AkVideoPacketPrivate *d;
 
-    signals:
+    Q_SIGNALS:
         void capsChanged(const AkVideoCaps &caps);
 
-    public slots:
+    public Q_SLOTS:
         void setCaps(const AkVideoCaps &caps);
         void resetCaps();
 

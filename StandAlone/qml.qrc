@@ -3,7 +3,9 @@
         <file>share/qml/About.qml</file>
         <file>share/qml/AddMedia.qml</file>
         <file>share/qml/AudioConfig.qml</file>
+        <file>share/qml/AudioInfo.qml</file>
         <file>share/qml/ConfigBar.qml</file>
+        <file>share/qml/Contributor.qml</file>
         <file>share/qml/DialogBox.qml</file>
         <file>share/qml/EffectBar.qml</file>
         <file>share/qml/EffectConfig.qml</file>
@@ -15,8 +17,10 @@
         <file>share/qml/OptionList.qml</file>
         <file>share/qml/OutputConfig.qml</file>
         <file>share/qml/PhotoWidget.qml</file>
+        <file>share/qml/PluginConfig.qml</file>
         <file>share/qml/RecordBar.qml</file>
         <file>share/qml/RecordConfig.qml</file>
+        <file>share/qml/UpdatesConfig.qml</file>
         <file>share/qml/main.qml</file>
     </qresource>
 </RCC>

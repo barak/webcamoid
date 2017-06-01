@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,38 @@ QObject *AkQml::newCaps(const AkCaps &caps) const
     return new AkCaps(caps);
 }
 
+QObject *AkQml::newAudioCaps() const
+{
+    return new AkAudioCaps();
+}
+
+QObject *AkQml::newAudioCaps(const QVariantMap &caps) const
+{
+    return new AkAudioCaps(caps);
+}
+
+QObject *AkQml::newAudioCaps(const QString &caps) const
+{
+    return new AkAudioCaps(caps);
+}
+
+QObject *AkQml::newAudioCaps(const AkCaps &caps) const
+{
+    return new AkAudioCaps(caps);
+}
+
+QObject *AkQml::newAudioCaps(const AkAudioCaps &caps) const
+{
+    return new AkAudioCaps(caps);
+}
+
+QObject *AkQml::newAudioCaps(AkAudioCaps::SampleFormat format,
+                             int channels,
+                             int rate)
+{
+    return new AkAudioCaps(format, channels, rate);
+}
+
 QObject *AkQml::newVideoCaps() const
 {
     return new AkVideoCaps();
@@ -103,9 +135,20 @@ QObject *AkQml::newVideoCaps(const AkVideoCaps &caps) const
     return new AkVideoCaps(caps);
 }
 
+QObject *AkQml::newElement(const QString &pluginId,
+                           const QString &elementName) const
+{
+    return AkElement::createPtr(pluginId, elementName);
+}
+
 QVariant AkQml::varFrac(AkFrac *frac) const
 {
     return QVariant::fromValue(*frac);
+}
+
+QVariant AkQml::varFrac(qint64 num, qint64 den) const
+{
+    return QVariant::fromValue(AkFrac(num, den));
 }
 
 QVariant AkQml::varCaps(AkCaps *caps) const

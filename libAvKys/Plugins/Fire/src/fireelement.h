@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,9 +128,9 @@ class FireElement: public AkElement
                          FireMode mode);
 
         QImage zoomImage(const QImage &src, qreal factor);
-        void coolImage(const QImage &src, int colorDiff);
-        void imageAlphaDiff(const QImage &src, int alphaDiff);
-        void disolveImage(const QImage &src, qreal amount);
+        void coolImage(QImage &src, int colorDiff);
+        void imageAlphaDiff(QImage &src, int alphaDiff);
+        void disolveImage(QImage &src, qreal amount);
         QImage burn(const QImage &src, const QVector<QRgb> &palette);
         QVector<QRgb> createPalette();
 

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@ import QtQuick.Layouts 1.1
 import AkQml 1.0
 
 ColumnLayout {
-    Component.onCompleted: {
-        var supportedFormats = MultiSink.supportedFormats()
+    function updateSupportedFormats(supportedFormats)
+    {
         var outputFormatIndex = -1
+        lstOutputFormats.clear()
 
         for (var format in supportedFormats) {
             var formatId = supportedFormats[format]
@@ -43,6 +44,87 @@ ColumnLayout {
         }
 
         cbxOutputFormats.currentIndex = outputFormatIndex
+        updateStreams()
+        createControls(MultiSink.userControls, clyUserControls)
+    }
+
+    function updateStreams()
+    {
+        // Clear old options
+        for (var i = 0; i < clyStreamOptions.children.length; i++)
+          clyStreamOptions.children[i].destroy()
+
+        var streams = MultiSink.streams;
+
+        for (var stream in streams) {
+            var streamConfig = streams[stream]
+            var streamOptions = classStreamOptions.createObject(clyStreamOptions)
+            streamOptions.Layout.fillWidth = true
+
+            var streamCaps = Ak.newCaps(streamConfig.caps)
+
+            if (streamCaps.mimeType === "audio/x-raw")
+                streamOptions.state = "audio"
+            else if (streamCaps.mimeType === "video/x-raw")
+                streamOptions.state = "video"
+
+            streamOptions.outputIndex = stream
+            streamOptions.streamIndex = streamConfig.index
+
+            if (streamConfig.label)
+                streamOptions.streamLabel = streamConfig.label
+
+            streamOptions.codecsTextRole = "description"
+
+            var supportedCodecs =
+                    MultiSink.supportedCodecs(MultiSink.outputFormat,
+                                              streamCaps.mimeType)
+
+            for (var codec in supportedCodecs) {
+                var codecName = supportedCodecs[codec];
+                var codecDescription = MultiSink.codecDescription(supportedCodecs[codec]);
+                var description = codecName;
+
+                if (codecDescription.length > 0)
+                    description += " - " + codecDescription;
+
+                streamOptions.codecList.append({codec: codecName,
+                                                description: description});
+            }
+
+            streamOptions.codec = streamConfig.codec
+
+            if (streamConfig.bitrate)
+                streamOptions.bitrate = streamConfig.bitrate
+
+            if (streamConfig.gop)
+                streamOptions.videoGOP = streamConfig.gop
+
+            streamOptions.streamOptionsChanged.connect(MultiSink.updateStream)
+        }
+    }
+
+    function createControls(controls, where)
+    {
+        // Remove old controls.
+        for(var i = where.children.length - 1; i >= 0 ; i--)
+            where.children[i].destroy()
+
+        // Create new ones.
+        for (var control in controls) {
+            var obj = classUserControl.createObject(where)
+            obj.controlParams = controls[control]
+            obj.onControlChanged.connect(function (controlName, value)
+            {
+                var ctrl = {}
+                ctrl[controlName] = value
+                MultiSink.setUserControlsValues(ctrl)
+            })
+        }
+    }
+
+    Component.onCompleted: {
+        updateSupportedFormats(MultiSink.supportedFormats)
     }
 
     Component {
@@ -51,67 +133,31 @@ ColumnLayout {
         StreamOptions {
         }
     }
+    Component {
+        id: classUserControl
+
+        UserControl {
+        }
+    }
 
     Connections {
         target: MultiSink
 
+        onSupportedFormatsChanged : updateSupportedFormats(supportedFormats)
         onOutputFormatChanged: {
+            btnFormatOptions.enabled = MultiSink.formatOptions().length > 0;
+
             for (var i = 0; i < lstOutputFormats.count; i++)
                 if (lstOutputFormats.get(i).format === outputFormat) {
-                    cbxOutputFormats.currentIndex = i
-                    txtFileExtensions.text = MultiSink.fileExtensions(lstOutputFormats.get(i).format).join(", ")
+                    cbxOutputFormats.currentIndex = i;
+                    txtFileExtensions.text = MultiSink.fileExtensions(lstOutputFormats.get(i).format).join(", ");
 
-                    break
+                    break;
                 }
         }
-        onStreamsChanged: {
-            // Clear old options
-            for (var i = 0; i < clyStreamOptions.children.length; i++)
-              clyStreamOptions.children[i].destroy()
-
-            var streams = MultiSink.streams;
-
-            for (var stream in streams) {
-                var streamConfig = streams[stream]
-                var streamOptions = classStreamOptions.createObject(clyStreamOptions)
-                streamOptions.Layout.fillWidth = true
-
-                var streamCaps = Ak.newCaps(streamConfig.caps)
-
-                if (streamCaps.mimeType === "audio/x-raw")
-                    streamOptions.state = "audio"
-                else if (streamCaps.mimeType === "video/x-raw")
-                    streamOptions.state = "video"
-
-                streamOptions.outputIndex = stream
-                streamOptions.streamIndex = streamConfig.index
-
-                if (streamConfig.label)
-                    streamOptions.streamLabel = streamConfig.label
-
-                streamOptions.codecsTextRole = "description"
-
-                var supportedCodecs =
-                        MultiSink.supportedCodecs(MultiSink.outputFormat,
-                                                  streamCaps.mimeType)
-
-                for (var codec in supportedCodecs)
-                    streamOptions.codecList.append({codec: supportedCodecs[codec],
-                                                    description: supportedCodecs[codec]
-                                                                 + " - "
-                                                                 + MultiSink.codecDescription(supportedCodecs[codec])})
-
-                streamOptions.codec = streamConfig.codec
-
-                if (streamConfig.bitrate)
-                    streamOptions.bitrate = streamConfig.bitrate
-
-                if (streamConfig.gop)
-                    streamOptions.videoGOP = streamConfig.gop
-
-                streamOptions.codecOptions = streamConfig.codecOptions
-                streamOptions.streamOptionsChanged.connect(MultiSink.updateStream)
-            }
+        onStreamsChanged: updateStreams()
+        onUserControlsChanged: createControls(userControls, clyUserControls)
+        onUserControlsValuesChanged: {
         }
     }
 
@@ -128,11 +174,18 @@ ColumnLayout {
             id: lstOutputFormats
         }
 
-        onCurrentIndexChanged: MultiSink.outputFormat = lstOutputFormats.get(currentIndex).format
+        onCurrentIndexChanged: {
+            var opt = lstOutputFormats.get(currentIndex);
+
+            if (opt)
+                MultiSink.outputFormat = opt.format
+        }
     }
     TextField {
         visible: !MultiSink.showFormatOptions
-        text: lstOutputFormats.get(cbxOutputFormats.currentIndex).description
+        text: lstOutputFormats.get(cbxOutputFormats.currentIndex)?
+                  lstOutputFormats.get(cbxOutputFormats.currentIndex).description:
+                  ""
         readOnly: true
         Layout.fillWidth: true
     }
@@ -148,21 +201,34 @@ ColumnLayout {
         Layout.fillWidth: true
     }
 
-    Label {
-        text: qsTr("Format options")
+    Button {
+        id: btnFormatOptions
+        text: qsTr("Advanced Format Options")
+        iconName: "configure"
+        iconSource: "image://icons/configure"
         Layout.fillWidth: true
-    }
-    TextField {
-        id: txtFormatOptions
-        placeholderText: qsTr("Encoding options for this format.")
-        Layout.fillWidth: true
-        text: JSON.stringify(MultiSink.formatOptions)
+        enabled: MultiSink.formatOptions().length > 0
 
-        onTextChanged: MultiSink.formatOptions = JSON.parse(text)
+        onClicked: {
+            formatConfigs.isCodec = false;
+            formatConfigs.codecName =
+                    lstOutputFormats.get(cbxOutputFormats.currentIndex).format;
+            formatConfigs.show();
+        }
+    }
+    ColumnLayout {
+        id: clyUserControls
+        Layout.fillWidth: true
     }
     ColumnLayout {
         id: clyStreamOptions
         Layout.fillWidth: true
         Layout.fillHeight: true
+    }
+
+    CodecConfigs {
+        id: formatConfigs
+
+        onFormatControlsChanged: MultiSink.setFormatOptions(controlValues);
     }
 }

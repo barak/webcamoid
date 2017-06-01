@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
 #ifndef VIDEODISPLAY_H
 #define VIDEODISPLAY_H
 
+#include <QMutex>
 #include <QQuickItem>
 #include <QSGSimpleTextureNode>
 
-#include "videoframe.h"
+#include "akutils.h"
 
 class VideoDisplay: public QQuickItem
 {
@@ -37,14 +38,16 @@ class VideoDisplay: public QQuickItem
                NOTIFY fillDisplayChanged)
 
     public:
-        VideoDisplay(QQuickItem *parent = NULL);
+        VideoDisplay(QQuickItem *parent=NULL);
         ~VideoDisplay();
 
         Q_INVOKABLE bool fillDisplay() const;
 
     private:
         bool m_fillDisplay;
-        VideoFrame m_videoFrame;
+        QSGTexture *m_videoFrame;
+        QImage m_frame;
+        QMutex m_mutex;
 
     protected:
         QSGNode *updatePaintNode(QSGNode *oldNode,
@@ -54,7 +57,7 @@ class VideoDisplay: public QQuickItem
         void fillDisplayChanged();
 
     public slots:
-        void setFrame(const AkPacket &packet);
+        void iStream(const AkPacket &packet);
         void setFillDisplay(bool fillDisplay);
         void resetFillDisplay();
 };

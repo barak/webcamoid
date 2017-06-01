@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,47 +16,11 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
-} else {
-    exists(../../commons.pri) {
-        include(../../commons.pri)
-    } else {
-        error("commons.pri file not found.")
-    }
-}
+TEMPLATE = subdirs
 
-#USE_GSTREAMER = 1
+CONFIG += ordered
 
-isEmpty(USE_GSTREAMER) {
-    include(src/ffmpeg/ffmpeg.pri)
-} else {
-    include(src/gstreamer/gstreamer.pri)
-}
-
-CONFIG += plugin
-
-HEADERS += \
-    src/acapsconvert.h \
-    src/acapsconvertelement.h
-
-INCLUDEPATH += \
-    ../../Lib/src
-
-LIBS += -L../../Lib/ -l$${COMMONS_TARGET}
-
-OTHER_FILES += pspec.json
-
-QT += qml
-
-SOURCES += \
-    src/acapsconvert.cpp \
-    src/acapsconvertelement.cpp
-
-DESTDIR = $${PWD}
-
-TEMPLATE = lib
-
-INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}
+SUBDIRS = src
+CONFIG(config_ffmpeg_avresample): SUBDIRS += src/ffmpegav
+CONFIG(config_ffmpeg_swresample): SUBDIRS += src/ffmpegsw
+CONFIG(config_ffmpeg_gstreamer): SUBDIRS += src/gstreamer

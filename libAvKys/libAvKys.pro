@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,6 +35,70 @@ exists(commons.pri) {
     QMAKE_EXTRA_COMPILERS += builddocs
     PRE_TARGETDEPS += compiler_builddocs_make_all
 }
+
+# Check what libraries and frameworks are available
+load(configure)
+QMAKE_CONFIG_TESTS_DIR=$$PWD/Tests
+isEmpty(NOALSA): qtCompileTest(alsa)
+isEmpty(NOAVFOUNDATION): qtCompileTest(avfoundation)
+isEmpty(NOCOREAUDIO): qtCompileTest(coreaudio)
+isEmpty(NODSHOW): qtCompileTest(dshow)
+
+# Test FFmpeg
+isEmpty(NOFFMPEG) {
+    !isEmpty(FFMPEGINCLUDES): cache(FFMPEGINCLUDES)
+    !isEmpty(FFMPEGLIBS): cache(FFMPEGLIBS)
+    qtCompileTest(ffmpeg)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_contextframerate)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_extracodecformats)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_freecontext)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_packetref)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_rescalets)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_sendrecv)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_subtitledata)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avformat_allocoutputcontext)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avformat_codecpar)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avutil_extraoptions)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avutil_extrapixformats)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avutil_framealloc)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avutil_sampleformat64)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avresample)
+    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_swresample)
+}
+
+isEmpty(NOGSTREAMER) {
+    !isEmpty(GSTREAMERINCLUDES): cache(GSTREAMERINCLUDES)
+    !isEmpty(GSTREAMERLIBS): cache(GSTREAMERLIBS)
+    qtCompileTest(gstreamer)
+}
+
+isEmpty(NOJACK): qtCompileTest(jack)
+
+isEmpty(NOLIBUVC) {
+    !isEmpty(LIBUSBINCLUDES): cache(LIBUSBINCLUDES)
+    !isEmpty(LIBUSBLIBS): cache(LIBUSBLIBS)
+    !isEmpty(LIBUVCINCLUDES): cache(LIBUVCINCLUDES)
+    !isEmpty(LIBUVCLIBS): cache(LIBUVCLIBS)
+    qtCompileTest(libuvc)
+    qtCompileTest(libuvcdev)
+}
+
+isEmpty(NOOSS) {
+    cache(INCLUDEDIR)
+    qtCompileTest(oss)
+}
+
+isEmpty(NOPULSEAUDIO): qtCompileTest(pulseaudio)
+isEmpty(NOQTAUDIO): qtCompileTest(qtaudio)
+
+isEmpty(NOV4L2) {
+    qtCompileTest(v4l2)
+    CONFIG(config_v4l2): qtCompileTest(v4l2intmenu)
+    isEmpty(NOV4LUTILS): CONFIG(config_v4l2): qtCompileTest(v4lutils)
+}
+
+isEmpty(NOVCAMWIN): qtCompileTest(vcamwin)
+isEmpty(NOWASAPI): qtCompileTest(wasapi)
 
 TEMPLATE = subdirs
 

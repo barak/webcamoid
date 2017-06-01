@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  */
 
 import QtQuick 2.5
-import QtQuick.Window 2.0
+import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
@@ -34,9 +34,9 @@ ApplicationWindow {
 
     function defaultDescription(url)
     {
-        return Webcamoid.streams.indexOf(url) < 0?
+        return MediaSource.streams.indexOf(url) < 0?
                     Webcamoid.fileNameFromUri(url):
-                    Webcamoid.streamDescription(url)
+                    MediaSource.description(url)
     }
 
     SystemPalette {
@@ -48,9 +48,9 @@ ApplicationWindow {
             return
 
         txtDescription.text = recAddMedia.editMode?
-                    Webcamoid.streamDescription(Webcamoid.curStream): ""
+                    MediaSource.description(MediaSource.stream): ""
         txtMedia.text = recAddMedia.editMode?
-                    Webcamoid.curStream: ""
+                    MediaSource.stream: ""
     }
 
     ColumnLayout {
@@ -70,7 +70,7 @@ ApplicationWindow {
         TextField {
             id: txtDescription
             placeholderText: qsTr("Insert media description")
-            text: recAddMedia.editMode? Webcamoid.streamDescription(Webcamoid.curStream): ""
+            text: recAddMedia.editMode? MediaSource.description(MediaSource.stream): ""
             Layout.fillWidth: true
         }
 
@@ -85,7 +85,7 @@ ApplicationWindow {
             TextField {
                 id: txtMedia
                 placeholderText: qsTr("Select media file")
-                text: recAddMedia.editMode? Webcamoid.curStream: ""
+                text: recAddMedia.editMode? MediaSource.stream: ""
                 Layout.fillWidth: true
             }
 
@@ -93,7 +93,7 @@ ApplicationWindow {
                 id: btnAddMedia
                 text: qsTr("Search")
                 iconName: "edit-find"
-                iconSource: "qrc:/icons/hicolor/scalable/edit-find.svg"
+                iconSource: "image://icons/edit-find"
                 width: 30
 
                 onClicked: fileDialog.open()
@@ -115,19 +115,22 @@ ApplicationWindow {
                 id: btnOk
                 text: qsTr("Ok")
                 iconName: "ok"
-                iconSource: "qrc:/icons/hicolor/scalable/ok.svg"
+                iconSource: "image://icons/ok"
 
                 onClicked: {
                     if (txtMedia.text.length > 0) {
+                        var uris = MediaSource.uris;
+
                         if (recAddMedia.editMode
-                            && Webcamoid.curStream !== txtMedia.text.toString())
-                            Webcamoid.removeStream(Webcamoid.curStream)
+                            && MediaSource.stream !== txtMedia.text.toString())
+                            delete uris[MediaSource.stream];
 
                         if (txtDescription.text.length < 1)
-                            txtDescription.text = recAddMedia.defaultDescription(txtMedia.text)
+                            txtDescription.text = recAddMedia.defaultDescription(txtMedia.text);
 
-                        Webcamoid.setStream(txtMedia.text, txtDescription.text)
-                        Webcamoid.curStream = txtMedia.text
+                        uris[txtMedia.text] = txtDescription.text;
+                        MediaSource.uris = uris;
+                        MediaSource.stream = txtMedia.text;
                     }
 
                     recAddMedia.visible = false
@@ -138,7 +141,7 @@ ApplicationWindow {
                 id: btnCancel
                 text: qsTr("Cancel")
                 iconName: "cancel"
-                iconSource: "qrc:/icons/hicolor/scalable/cancel.svg"
+                iconSource: "image://icons/cancel"
 
                 onClicked: recAddMedia.visible = false
             }

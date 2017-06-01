@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,60 +16,15 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
-} else {
-    exists(../../commons.pri) {
-        include(../../commons.pri)
-    } else {
-        error("commons.pri file not found.")
-    }
-}
+TEMPLATE = subdirs
 
-!win32: include(src/v4l2/v4l2.pri)
-win32: include(src/dshow/dshow.pri)
+CONFIG += ordered
 
-#USE_GSTREAMER = 1
-
-isEmpty(USE_GSTREAMER) {
-    include(src/ffmpeg/ffmpeg.pri)
-} else {
-    include(src/gstreamer/gstreamer.pri)
-}
-
-CONFIG += plugin
-
-HEADERS += \
-    src/videocapture.h \
-    src/videocaptureelement.h
-
-INCLUDEPATH += \
-    ../../Lib/src
-
-LIBS += -L../../Lib/ -l$${COMMONS_TARGET}
-
-OTHER_FILES += pspec.json
-
-QT += qml concurrent
-
-RESOURCES += \
-    VideoCapture.qrc \
-    translations.qrc
-
-SOURCES += \
-    src/videocapture.cpp \
-    src/videocaptureelement.cpp
-
-lupdate_only {
-    SOURCES = $$files(share/qml/*.qml)
-}
-
-TRANSLATIONS = $$files(share/ts/*.ts)
-
-DESTDIR = $${PWD}
-
-TEMPLATE = lib
-
-INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}
+SUBDIRS = src
+CONFIG(config_avfoundation): SUBDIRS += src/avfoundation
+CONFIG(config_dshow): SUBDIRS += src/dshow
+CONFIG(config_ffmpeg): SUBDIRS += src/ffmpeg
+CONFIG(config_gstreamer): SUBDIRS += src/gstreamer
+CONFIG(config_libuvc): SUBDIRS += src/libuvc
+CONFIG(config_v4l2): SUBDIRS += src/v4l2sys
+CONFIG(config_v4lutils): SUBDIRS += src/v4lutils

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,12 @@
 
 namespace Ak
 {
-    qint64 id();
-    void setQmlEngine(QQmlEngine *engine);
-    QString qmlPluginPath();
-    void setQmlPluginPath(const QString &qmlPluginPath);
-    void resetQmlPluginPath();
+    AKCOMMONS_EXPORT qint64 id();
+    AKCOMMONS_EXPORT void setQmlEngine(QQmlEngine *engine);
+    AKCOMMONS_EXPORT QStringList qmlImportPathList();
+    AKCOMMONS_EXPORT void addQmlImportPath(const QString &path);
+    AKCOMMONS_EXPORT void setQmlImportPathList(const QStringList &paths);
+    AKCOMMONS_EXPORT void resetQmlImportPathList();
 }
 
 #endif // AK_H

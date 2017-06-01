@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,22 +25,27 @@ GridLayout {
     id: recMediaConfig
     columns: 1
 
+    function showControls(stream)
+    {
+        txtMedia.text = stream
+        txtDescription.text = MediaSource.description(stream)
+        btnEdit.enabled = stream in MediaSource.uris
+        btnRemove.enabled = btnEdit.enabled
+
+        MediaSource.removeInterface("itmMediaControls");
+        MediaSource.embedControls("itmMediaControls", stream);
+    }
+
+    Connections {
+        target: MediaSource
+
+        onStreamChanged: showControls(stream)
+    }
+
     Connections {
         target: Webcamoid
-        onCurStreamChanged: {
-            txtMedia.text = Webcamoid.curStream
-            txtDescription.text = Webcamoid.streamDescription(Webcamoid.curStream)
-            btnEdit.enabled = Webcamoid.canModify(Webcamoid.curStream)
-            btnRemove.enabled = Webcamoid.canModify(Webcamoid.curStream)
 
-            Webcamoid.removeInterface("itmMediaControls");
-            Webcamoid.embedMediaControls("itmMediaControls", Webcamoid.curStream);
-        }
-
-        onInterfaceLoaded: {
-            Webcamoid.removeInterface("itmMediaControls");
-            Webcamoid.embedMediaControls("itmMediaControls", Webcamoid.curStream);
-        }
+        onInterfaceLoaded: showControls(MediaSource.stream)
     }
 
     Label {
@@ -83,7 +88,7 @@ GridLayout {
             id: btnEdit
             text: qsTr("Edit")
             iconName: "edit"
-            iconSource: "qrc:/icons/hicolor/scalable/edit.svg"
+            iconSource: "image://icons/edit"
 
             onClicked: dlgAddMedia.visible = true
         }
@@ -92,9 +97,13 @@ GridLayout {
             id: btnRemove
             text: qsTr("Remove")
             iconName: "remove"
-            iconSource: "qrc:/icons/hicolor/scalable/remove.svg"
+            iconSource: "image://icons/remove"
 
-            onClicked: Webcamoid.removeStream(Webcamoid.curStream)
+            onClicked: {
+                var uris = MediaSource.uris
+                delete uris[MediaSource.stream]
+                MediaSource.uris = uris
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,15 +36,16 @@ AkPacket NormalizeElement::iStream(const AkPacket &packet)
     // form histogram
     QVector<HistogramListItem> histogram(256, HistogramListItem());
 
-    const QRgb *dest = reinterpret_cast<const QRgb *>(oFrame.constBits());
-    int videoArea = oFrame.width() * oFrame.height();
+    for (int y = 0; y < oFrame.height(); y++) {
+        const QRgb *dstLine = reinterpret_cast<const QRgb *>(oFrame.constScanLine(y));
 
-    for (int i = 0; i < videoArea; i++) {
-        QRgb pixel = dest[i];
-        histogram[qRed(pixel)].red++;
-        histogram[qGreen(pixel)].green++;
-        histogram[qBlue(pixel)].blue++;
-        histogram[qAlpha(pixel)].alpha++;
+        for (int x = 0; x < oFrame.width(); x++) {
+            QRgb pixel = dstLine[x];
+            histogram[qRed(pixel)].red++;
+            histogram[qGreen(pixel)].green++;
+            histogram[qBlue(pixel)].blue++;
+            histogram[qAlpha(pixel)].alpha++;
+        }
     }
 
     // find the histogram boundaries by locating the .01 percent levels.

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ AkPacket NervousElement::iStream(const AkPacket &packet)
     int diff = this->m_frames.size() - this->m_nFrames;
 
     for (int i = 0; i < diff && !this->m_frames.isEmpty(); i++)
-        this->m_frames.takeFirst();
+        this->m_frames.removeFirst();
 
     if (this->m_frames.isEmpty())
         akSend(packet)

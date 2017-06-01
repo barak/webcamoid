@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+TRANSLATIONS = $$files(share/ts/*.ts)
+
 exists(commons.pri) {
     include(commons.pri)
 } else {
@@ -28,25 +30,33 @@ exists(commons.pri) {
 
 CONFIG += plugin
 
-HEADERS += \
+HEADERS = \
     src/desktopcapture.h \
     src/desktopcaptureelement.h
 
 INCLUDEPATH += \
     ../../Lib/src
 
-LIBS += -L../../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${PWD}/../../Lib/ -l$${COMMONS_TARGET}
 win32: LIBS += -lole32
 
 OTHER_FILES += pspec.json
 
 QT += widgets qml concurrent
 
-SOURCES += \
+RESOURCES += \
+    DesktopCapture.qrc \
+    translations.qrc
+
+SOURCES = \
     src/desktopcapture.cpp \
     src/desktopcaptureelement.cpp
 
-DESTDIR = $${PWD}
+lupdate_only {
+    SOURCES += $$files(share/qml/*.qml)
+}
+
+DESTDIR = $${OUT_PWD}
 
 TEMPLATE = lib
 

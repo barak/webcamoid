@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,8 +106,7 @@ ColumnLayout {
                         cbxTable.currentIndex = i
 
                         break
-                    }
-                    else if (i == cbxTable.model.count - 1) {
+                    } else if (i == cbxTable.model.count - 1) {
                         cbxTable.model.get(i).table = ColorTap.table
                         cbxTable.currentIndex = i
 

@@ -1,44 +1,101 @@
-version: 7.2.1.{build}-{branch}
+version: 8.0.0.{build}-{branch}
 os: MinGW
 
 platform:
   - x86
 
 build:
-  verbosity: minimal
+  parallel: true
+  verbosity: detailed
 
 configuration:
-  - Debug
-  - Release
+  - release
+#  - debug
 
 branches:
   only:
   - master
 
 environment:
-  QTDIR: C:\Qt\5.7\mingw53_32
-  MINGW: C:\Qt\Tools\mingw530_32
-  FFMPEG_VERSION: 3.0.1
+  global:
+    FFMPEG_VERSION: 3.2.2
+    GSTREAMER_VERSION: 1.11.1
+    QMAKESPEC: win32-g++
+    MAKETOOL: mingw32-make
+
+  matrix:
+    - QTDIR: C:\Qt\5.6\mingw49_32
+      TOOLSDIR: C:\Qt\Tools\mingw482_32
+    - QTDIR: C:\Qt\5.7\mingw53_32
+      TOOLSDIR: C:\Qt\Tools\mingw482_32
+    - QTDIR: C:\Qt\5.6\mingw49_32
+      TOOLSDIR: C:\Qt\Tools\mingw491_32
+    - QTDIR: C:\Qt\5.7\mingw53_32
+      TOOLSDIR: C:\Qt\Tools\mingw491_32
+    - QTDIR: C:\Qt\5.6\mingw49_32
+      TOOLSDIR: C:\Qt\Tools\mingw492_32
+    - QTDIR: C:\Qt\5.7\mingw53_32
+      TOOLSDIR: C:\Qt\Tools\mingw492_32
+    - QTDIR: C:\Qt\5.6\mingw49_32
+      TOOLSDIR: C:\Qt\Tools\mingw530_32
+    - QTDIR: C:\Qt\5.7\mingw53_32
+      TOOLSDIR: C:\Qt\Tools\mingw530_32
+    - QTDIR: C:\Qt\5.6\msvc2013
+      TOOLSDIR: C:\Qt\Tools\QtCreator
+      QMAKESPEC: win32-msvc2013
+      VSVER: 12
+      MAKETOOL: jom
+    - QTDIR: C:\Qt\5.7\msvc2013
+      TOOLSDIR: C:\Qt\Tools\QtCreator
+      QMAKESPEC: win32-msvc2013
+      VSVER: 12
+      MAKETOOL: jom
+    - QTDIR: C:\Qt\5.6\msvc2013_64
+      TOOLSDIR: C:\Qt\Tools\QtCreator
+      PLATFORM: x64
+      QMAKESPEC: win32-msvc2013
+      VSVER: 12
+      MAKETOOL: jom
+    - QTDIR: C:\Qt\5.7\msvc2013_64
+      TOOLSDIR: C:\Qt\Tools\QtCreator
+      PLATFORM: x64
+      QMAKESPEC: win32-msvc2013
+      VSVER: 12
+      MAKETOOL: jom
+    - QTDIR: C:\Qt\5.6\msvc2015
+      TOOLSDIR: C:\Qt\Tools\QtCreator
+      QMAKESPEC: win32-msvc2015
+      VSVER: 14
+      MAKETOOL: jom
+    - QTDIR: C:\Qt\5.7\msvc2015
+      TOOLSDIR: C:\Qt\Tools\QtCreator
+      QMAKESPEC: win32-msvc2015
+      VSVER: 14
+      MAKETOOL: jom
+    - QTDIR: C:\Qt\5.6\msvc2015_64
+      TOOLSDIR: C:\Qt\Tools\QtCreator
+      PLATFORM: x64
+      QMAKESPEC: win32-msvc2015
+      VSVER: 14
+      MAKETOOL: jom
+    - QTDIR: C:\Qt\5.7\msvc2015_64
+      TOOLSDIR: C:\Qt\Tools\QtCreator
+      PLATFORM: x64
+      QMAKESPEC: win32-msvc2015
+      VSVER: 14
+      MAKETOOL: jom
 
 install:
-  - if "%PLATFORM%" == "x86" (set BUILD_ARCHITECTURE=win32) else (set BUILD_ARCHITECTURE=win64)
-  # Installing various utilities
-  - choco install -y curl 7zip InnoSetup
-  - set PATH="C:\Program Files\7-Zip";"C:\Program Files (x86)\Inno Setup 5";%PATH%
-  # Configuring Qt
-  - set PATH=%PATH%;%QTDIR%\bin;%MINGW%\bin;
-  # Installing ffmpeg dev
-  - curl -kLO http://ffmpeg.zeranoe.com/builds/%BUILD_ARCHITECTURE%/dev/ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-dev.7z
-  - 7z x ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-dev.7z
-  - set FFMPEG_DEV_PATH=%CD%\ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-dev
-  # Installing ffmpeg shared
-  - curl -kLO http://ffmpeg.zeranoe.com/builds/%BUILD_ARCHITECTURE%/shared/ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-shared.7z
-  - 7z x ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-shared.7z
-  - set FFMPEG_SHARED_PATH=%CD%\ffmpeg-%FFMPEG_VERSION%-%BUILD_ARCHITECTURE%-shared
+  - ports\ci\appveyor\install_deps.bat
 
 build_script:
-  - qmake Webcamoid.pro PREFIX="%CD%\build\%BUILD_ARCHITECTURE%" FFMPEGINCLUDES="%FFMPEG_DEV_PATH%\include" FFMPEGLIBS=-L"%FFMPEG_DEV_PATH%\lib" FFMPEGLIBS+=-lavcodec FFMPEGLIBS+=-lavdevice FFMPEGLIBS+=-lavformat FFMPEGLIBS+=-lavutil FFMPEGLIBS+=-lswresample FFMPEGLIBS+=-lswscale
-  - mingw32-make
+  - ports\ci\appveyor\build.bat
+
+cache:
+  - ffmpeg-%FFMPEG_VERSION%-win32-dev.zip
+#  - ../webcamoid-shadow-build -> libAvKys/libAvKys.pro
+#  - ../webcamoid-shadow-build -> appveyor.yml
+#  - gstreamer-1.0-devel-x86-%GSTREAMER_VERSION%.msi
 
 notifications:
   - provider: Email

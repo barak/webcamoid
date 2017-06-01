@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,13 +19,10 @@
 COMMONS_APPNAME = "libAvKys"
 COMMONS_TARGET = $$lower($${COMMONS_APPNAME})
 COMMONS_TARGET = $$replace(COMMONS_TARGET, lib, "")
-VER_MAJ = 7
-VER_MIN = 2
-VER_PAT = 1
+VER_MAJ = 8
+VER_MIN = 0
+VER_PAT = 0
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
-COMMONS_PROJECT_URL = "http://webcamoid.github.io/"
-COMMONS_PROJECT_LICENSE_URL = "https://raw.githubusercontent.com/webcamoid/webcamoid/master/COPYING"
-COMMONS_COPYRIGHT_NOTICE = "Copyright (C) 2011-2016  Gonzalo Exequiel Pedone"
 
 isEmpty(BUILDDOCS): BUILDDOCS = 0
 isEmpty(QDOCTOOL): {
@@ -38,12 +35,16 @@ isEmpty(QMAKE_LRELEASE) {
 }
 
 win32 {
+    host_name = $$lower($$QMAKE_HOST.os)
+
     !isEmpty(ProgramW6432) {
-        DEFAULT_PREFIX = $(ProgramW6432)\\$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = $(ProgramW6432)/$${COMMONS_APPNAME}
     } else: !isEmpty(ProgramFiles) {
-        DEFAULT_PREFIX = $(ProgramFiles)\\$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = $(ProgramFiles)/$${COMMONS_APPNAME}
+    } else: contains(host_name, linux) {
+        DEFAULT_PREFIX = /$${COMMONS_APPNAME}
     } else {
-        DEFAULT_PREFIX = C:\\$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = C:/$${COMMONS_APPNAME}
     }
 } else {
     DEFAULT_PREFIX = /usr
@@ -78,9 +79,6 @@ DEFINES += \
     COMMONS_TARGET=\"\\\"$$COMMONS_TARGET\\\"\" \
     COMMONS_VER_MAJ=\"\\\"$$VER_MAJ\\\"\" \
     COMMONS_VERSION=\"\\\"$$VERSION\\\"\" \
-    COMMONS_PROJECT_URL=\"\\\"$$COMMONS_PROJECT_URL\\\"\" \
-    COMMONS_PROJECT_LICENSE_URL=\"\\\"$$COMMONS_PROJECT_LICENSE_URL\\\"\" \
-    COMMONS_COPYRIGHT_NOTICE=\"\\\"$$COMMONS_COPYRIGHT_NOTICE\\\"\" \
     PREFIX=\"\\\"$$PREFIX\\\"\" \
     EXECPREFIX=\"\\\"$$EXECPREFIX\\\"\" \
     BINDIR=\"\\\"$$BINDIR\\\"\" \
@@ -118,7 +116,7 @@ RCC_DIR = $${COMMONS_BUILD_PATH}/rcc
 UI_DIR = $${COMMONS_BUILD_PATH}/ui
 
 # Compile translations files.
-CONFIG(debug, debug|release) {
+isEmpty(NOLRELEASE): !isEmpty(TRANSLATIONS): CONFIG(debug, debug|release) {
     compiletr.input = TRANSLATIONS
     compiletr.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
     compiletr.commands = $$QMAKE_LRELEASE -removeidentical -compress ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
@@ -129,8 +127,11 @@ CONFIG(debug, debug|release) {
 
 win32 {
     CONFIG += skip_target_version_ext
-    !isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0): QMAKE_LFLAGS = -static-libgcc -static-libstdc++
+    !isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0) {
+        win32-g++: QMAKE_LFLAGS = -static-libgcc -static-libstdc++
+    }
 }
+macx: QT_CONFIG -= no-pkg-config
 
 # Enable c++11 support in all platforms
-CONFIG += c++11
+!CONFIG(c++11): CONFIG += c++11

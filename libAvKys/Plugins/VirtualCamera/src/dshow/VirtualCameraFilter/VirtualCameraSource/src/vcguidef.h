@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,17 @@
 #include <strmif.h>
 
 #include "filtercommons.h"
+
+#ifdef __out
+#undef __out
+#endif
+
+#ifdef __in
+#undef __in
+#endif
+
+#include <string>
+#include <vector>
 
 #define OUTPUT_PIN_NAME L"Output"
 #define FILTER_MERIT MERIT_NORMAL

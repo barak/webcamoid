@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,37 +72,38 @@ int AgingElement::nScratches() const
     return this->m_scratches.size();
 }
 
-int AgingElement::addDust() const
+bool AgingElement::addDust() const
 {
     return this->m_addDust;
 }
 
 QImage AgingElement::colorAging(const QImage &src)
 {
-    QImage dest(src.size(), src.format());
+    QImage dst(src.size(), src.format());
 
     int lumaVariance = 8;
     int colorVariance = 24;
     int luma = -32 + qrand() % lumaVariance;
 
-    const QRgb *srcBits = reinterpret_cast<const QRgb *>(src.constBits());
-    QRgb *destBits = reinterpret_cast<QRgb *>(dest.bits());
-    int videoArea = dest.width() * dest.height();
+    for (int y = 0; y < src.height(); y++) {
+        const QRgb *srcLine = reinterpret_cast<const QRgb *>(src.constScanLine(y));
+        QRgb *dstLine = reinterpret_cast<QRgb *>(dst.scanLine(y));
 
-    for (int i = 0; i < videoArea; i++) {
-        int c = qrand() % colorVariance;
-        int r = qRed(srcBits[i]) + luma + c;
-        int g = qGreen(srcBits[i]) + luma + c;
-        int b = qBlue(srcBits[i]) + luma + c;
+        for (int x = 0; x < src.width(); x++) {
+            int c = qrand() % colorVariance;
+            int r = qRed(srcLine[x]) + luma + c;
+            int g = qGreen(srcLine[x]) + luma + c;
+            int b = qBlue(srcLine[x]) + luma + c;
 
-        r = qBound(0, r, 255);
-        g = qBound(0, g, 255);
-        b = qBound(0, b, 255);
+            r = qBound(0, r, 255);
+            g = qBound(0, g, 255);
+            b = qBound(0, b, 255);
 
-        destBits[i] = qRgba(r, g, b, qAlpha(srcBits[i]));
+            dstLine[x] = qRgba(r, g, b, qAlpha(srcLine[x]));
+        }
     }
 
-    return dest;
+    return dst;
 }
 
 void AgingElement::scratching(QImage &dest)
@@ -234,7 +235,7 @@ void AgingElement::setNScratches(int nScratches)
     emit this->nScratchesChanged(nScratches);
 }
 
-void AgingElement::setAddDust(int addDust)
+void AgingElement::setAddDust(bool addDust)
 {
     if (this->m_addDust == addDust)
         return;

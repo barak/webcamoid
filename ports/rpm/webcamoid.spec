@@ -1,9 +1,5 @@
-%if %{defined mgaversion}
-%define debug_package %{nil}
-%endif
-
 Name: webcamoid
-Version: 7.2.1
+Version: 8.0.0
 Release: 1%{?dist}
 Summary: The full webcam and multimedia suite
 
@@ -17,11 +13,6 @@ Group: Productivity/Multimedia/Video/Players
 License: GPL-3.0+
 %endif
 
-%if %{defined mgaversion}
-Group: Video/Utilities
-License: GPLv3+
-%endif
-
 Url: https://webcamoid.github.io/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
@@ -31,13 +22,18 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 Requires: v4l2loopback
 
 BuildRequires: fdupes
+BuildRequires: make
 BuildRequires: gcc-c++
 BuildRequires: qt5-qttools-devel
 BuildRequires: qt5-qtdeclarative-devel
+BuildRequires: qt5-qtmultimedia-devel
 BuildRequires: qt5-qtsvg-devel
 BuildRequires: ffmpeg-devel
+BuildRequires: gstreamer1-plugins-base-devel
 BuildRequires: libv4l-devel
+BuildRequires: alsa-lib-devel
 BuildRequires: pulseaudio-libs-devel
+BuildRequires: jack-audio-connection-kit-devel
 %endif
 
 %if %{defined suse_version}
@@ -48,31 +44,14 @@ BuildRequires: update-desktop-files
 BuildRequires: libqt5-linguist
 BuildRequires: libqt5-qtbase-devel
 BuildRequires: libqt5-qtdeclarative-devel
+BuildRequires: libqt5-qtmultimedia-devel
 BuildRequires: libqt5-qtsvg-devel
 BuildRequires: ffmpeg-devel
+BuildRequires: gstreamer-plugins-base-devel
 BuildRequires: libv4l-devel
+BuildRequires: alsa-devel
 BuildRequires: libpulse-devel
-%endif
-
-%if %{defined mgaversion}
-Requires: v4l2loopback
-
-BuildRequires: fdupes
-BuildRequires: qttools5
-
-%ifarch i586
-BuildRequires: libqt5qml-devel
-BuildRequires: libqt5svg-devel
-BuildRequires: libffmpeg-devel
-BuildRequires: libv4l-devel
-BuildRequires: libpulseaudio-devel
-%else
-BuildRequires: lib64qt5qml-devel
-BuildRequires: lib64qt5svg-devel
-BuildRequires: lib64ffmpeg-devel
-BuildRequires: lib64v4l-devel
-BuildRequires: lib64pulseaudio-devel
-%endif
+BuildRequires: libjack-devel
 %endif
 
 Conflicts: plasmoid-webcamoid
@@ -96,21 +75,21 @@ Features:
     * Virtual webcam support for feeding other programs.
 
 %package -n libavkys7
-Version: 7.2.1
+Version: 8.0.0
 Summary: Modular audio and video processing library
 
 %description -n libavkys7
 LibAvKys is a Qt library that provides a wide range of plugins for audio and video playing, recording, capture, and processing.
 
 %package -n akqml
-Version: 7.2.1
+Version: 8.0.0
 Summary: Modular audio and video processing library (qml files)
 
 %description -n akqml
 LibAvKys is a Qt library that provides a wide range of plugins for audio and video playing, recording, capture, and processing.
 
 %package -n libavkys-devel
-Version: 7.2.1
+Version: 8.0.0
 Summary: Modular audio and video processing library (development files)
 
 %if %{defined fedora}
@@ -121,15 +100,11 @@ Group: Development/Libraries
 Group: Development/Libraries/Other
 %endif
 
-%if %{defined mgaversion}
-Group: Development/KDE and Qt
-%endif
-
 %description -n libavkys-devel
 LibAvKys is a Qt library that provides a wide range of plugins for audio and video playing, recording, capture, and processing.
 
 %package -n avkys-plugins
-Version: 7.2.1
+Version: 8.0.0
 Summary: Modular audio and video processing library (plugins)
 
 %description -n avkys-plugins
@@ -153,14 +128,9 @@ find . -name ".gitignore" -exec rm {} \;
       LICENSEDIR=%{_defaultdocdir}/webcamoid \
       INSTALLDEVHEADERS=1
 %endif
-%if %{defined mgaversion}
-  %{_libdir}/qt5/bin/qmake Webcamoid.pro \
-      LIBDIR=%{_libdir} \
-      LICENSEDIR=%{_defaultdocdir}/webcamoid \
-      INSTALLDEVHEADERS=1
-%endif
-%if !%{defined fedora} && !%{defined suse_version} && !%{defined mgaversion}
+%if !%{defined fedora} && !%{defined suse_version}}
   qmake -qt=5 Webcamoid.pro \
+      ROOT_METHOD=sudo \
       INSTALLDEVHEADERS=1
 %endif
 
@@ -218,7 +188,7 @@ rm -rf %{buildroot}
 
 %files -n libavkys7
 %defattr(-,root,root,-)
-%{_libdir}/libavkys.so.7.2.1
+%{_libdir}/libavkys.so.8.0.0
 %{_defaultdocdir}/avkys/COPYING
 
 %files -n akqml
@@ -232,8 +202,8 @@ rm -rf %{buildroot}
 %{_includedir}/avkys
 %{_includedir}/avkys/*.h
 %{_libdir}/libavkys.so
-%{_libdir}/libavkys.so.7
-%{_libdir}/libavkys.so.7.1
+%{_libdir}/libavkys.so.8
+%{_libdir}/libavkys.so.8.0
 
 %files -n avkys-plugins
 %defattr(-,root,root,-)
@@ -241,5 +211,5 @@ rm -rf %{buildroot}
 %{_libdir}/avkys/lib*.so
 
 %changelog
-* Tue Aug 30 2016 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com> 7.2.1-1
+* Tue May 16 2017 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com> 8.0.0-1
 - New release

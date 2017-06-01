@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+TRANSLATIONS = $$files(share/ts/*.ts)
+
 exists(commons.pri) {
     include(commons.pri)
 } else {
@@ -28,7 +30,7 @@ exists(commons.pri) {
 
 CONFIG += plugin
 
-HEADERS += \
+HEADERS = \
     src/facedetect.h \
     src/facedetectelement.h \
     src/haar/haarcascade.h \
@@ -40,7 +42,7 @@ HEADERS += \
 INCLUDEPATH += \
     ../../Lib/src
 
-LIBS += -L../../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${PWD}/../../Lib/ -l$${COMMONS_TARGET}
 
 OTHER_FILES += pspec.json
 
@@ -48,9 +50,11 @@ QT += qml widgets concurrent
 
 RESOURCES += \
     FaceDetect.qrc \
+    haarcascades.qrc \
+    masks.qrc \
     translations.qrc
 
-SOURCES += \
+SOURCES = \
     src/facedetect.cpp \
     src/facedetectelement.cpp \
     src/haar/haarcascade.cpp \
@@ -60,12 +64,10 @@ SOURCES += \
     src/haar/haartree.cpp
 
 lupdate_only {
-    SOURCES = $$files(share/qml/*.qml)
+    SOURCES += $$files(share/qml/*.qml)
 }
 
-TRANSLATIONS = $$files(share/ts/*.ts)
-
-DESTDIR = $${PWD}
+DESTDIR = $${OUT_PWD}
 
 TEMPLATE = lib
 

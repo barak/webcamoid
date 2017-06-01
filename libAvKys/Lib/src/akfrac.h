@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,11 @@
 #include <QObject>
 #include <QDebug>
 
+#include "akcommons.h"
+
 class AkFracPrivate;
 
-class AkFrac: public QObject
+class AKCOMMONS_EXPORT AkFrac: public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int num
@@ -41,7 +43,7 @@ class AkFrac: public QObject
     Q_PROPERTY(bool isValid
                READ isValid
                NOTIFY isValidChanged)
-    Q_PROPERTY(double value
+    Q_PROPERTY(qreal value
                READ value
                NOTIFY valueChanged)
     Q_PROPERTY(QString string
@@ -61,7 +63,7 @@ class AkFrac: public QObject
 
         Q_INVOKABLE qint64 num() const;
         Q_INVOKABLE qint64 den() const;
-        Q_INVOKABLE double value() const;
+        Q_INVOKABLE qreal value() const;
         Q_INVOKABLE qint64 fastValue() const;
         Q_INVOKABLE bool isValid() const;
         Q_INVOKABLE QString toString() const;
@@ -70,14 +72,14 @@ class AkFrac: public QObject
     private:
         AkFracPrivate *d;
 
-    signals:
+    Q_SIGNALS:
         void numChanged();
         void denChanged();
         void isValidChanged();
         void valueChanged();
         void stringChanged();
 
-    public slots:
+    public Q_SLOTS:
         void setNumDen(qint64 num, qint64 den);
         void setNumDen(const QString &fracString);
         void setNum(qint64 num);

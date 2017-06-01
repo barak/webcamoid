@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ exists(commons.pri) {
 
 CONFIG += plugin
 
-HEADERS += \
+HEADERS = \
     src/equalize.h \
     src/equalizeelement.h \
     src/pixelstructs.h
@@ -36,17 +36,17 @@ HEADERS += \
 INCLUDEPATH += \
     ../../Lib/src
 
-LIBS += -L../../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${PWD}/../../Lib/ -l$${COMMONS_TARGET}
 
 OTHER_FILES += pspec.json
 
 QT += qml
 
-SOURCES += \
+SOURCES = \
     src/equalize.cpp \
     src/equalizeelement.cpp
 
-DESTDIR = $${PWD}
+DESTDIR = $${OUT_PWD}
 
 TEMPLATE = lib
 

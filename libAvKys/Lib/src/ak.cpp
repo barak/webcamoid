@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ class AkPrivate
 {
     public:
         QQmlEngine *m_globalEngine;
-        QString m_globalQmlPluginPath;
-        QStringList m_globalQmlPluginDefaultPaths;
+        QStringList m_qmlImportPathList;
+        QStringList m_qmlDefaultImportPathList;
         QDir m_applicationDir;
 
         AkPrivate()
@@ -44,8 +44,20 @@ class AkPrivate
             qRegisterMetaType<QColor>("QColor");
             qRegisterMetaType<AkCaps>("AkCaps");
             qRegisterMetaTypeStreamOperators<AkCaps>("AkCaps");
+            qRegisterMetaType<AkCaps::CapsType>("AkCaps::CapsType");
+            qRegisterMetaType<AkCaps::CapsType>("CapsType");
+            qRegisterMetaType<AkAudioCaps>("AkAudioCaps");
+            qRegisterMetaTypeStreamOperators<AkAudioCaps>("AkAudioCaps");
+            qRegisterMetaType<AkAudioCaps::SampleFormat>("AkAudioCaps::SampleFormat");
+            qRegisterMetaType<AkAudioCaps::SampleFormat>("SampleFormat");
+            qRegisterMetaType<AkAudioCaps::SampleType>("AkAudioCaps::SampleType");
+            qRegisterMetaType<AkAudioCaps::SampleType>("SampleType");
+            qRegisterMetaType<AkAudioCaps::ChannelLayout>("AkAudioCaps::ChannelLayout");
+            qRegisterMetaType<AkAudioCaps::ChannelLayout>("ChannelLayout");
             qRegisterMetaType<AkVideoCaps>("AkVideoCaps");
             qRegisterMetaTypeStreamOperators<AkVideoCaps>("AkVideoCaps");
+            qRegisterMetaType<AkVideoCaps::PixelFormat>("AkVideoCaps::PixelFormat");
+            qRegisterMetaType<AkVideoCaps::PixelFormat>("PixelFormat");
             qRegisterMetaType<AkElement::ElementState>("AkElement::ElementState");
             qRegisterMetaType<AkElement::ElementState>("ElementState");
             qRegisterMetaTypeStreamOperators<AkElement::ElementState>("AkElement::ElementState");
@@ -79,6 +91,29 @@ class AkPrivate
 
             return QDir::cleanPath(absPath);
         }
+
+        inline QStringList qmlImportPaths() const
+        {
+            QStringList importPaths {QString(QT_INSTALL_QML)};
+
+        #ifdef Q_OS_WIN32
+            QString relativePath =
+                    QString("%1/../lib/qt/qml")
+                        .arg(QCoreApplication::applicationDirPath());
+        #elif defined(Q_OS_OSX)
+            QString relativePath =
+                    QString("%1/../Resources/qml")
+                        .arg(QCoreApplication::applicationDirPath());
+        #else
+            QString relativePath =
+                    QString("%1/../lib/qt/qml")
+                        .arg(QCoreApplication::applicationDirPath());
+        #endif
+
+            importPaths << this->convertToAbsolute(relativePath);
+
+            return importPaths;
+        }
 };
 
 Q_GLOBAL_STATIC(AkPrivate, akGlobalStuff)
@@ -96,7 +131,7 @@ void Ak::setQmlEngine(QQmlEngine *engine)
         return;
 
     if (akGlobalStuff->m_globalEngine) {
-        akGlobalStuff->m_globalEngine->setImportPathList(akGlobalStuff->m_globalQmlPluginDefaultPaths);
+        akGlobalStuff->m_globalEngine->setImportPathList(akGlobalStuff->m_qmlDefaultImportPathList);
         akGlobalStuff->m_globalEngine = NULL;
     }
 
@@ -104,58 +139,54 @@ void Ak::setQmlEngine(QQmlEngine *engine)
         return;
 
     akGlobalStuff->m_globalEngine = engine;
-    akGlobalStuff->m_globalQmlPluginDefaultPaths = akGlobalStuff->m_globalEngine->importPathList();
+    akGlobalStuff->m_qmlDefaultImportPathList = akGlobalStuff->m_globalEngine->importPathList();
 
-    if (!akGlobalStuff->m_globalQmlPluginPath.isEmpty()
-        && !akGlobalStuff->m_globalQmlPluginDefaultPaths.contains(akGlobalStuff->m_globalQmlPluginPath))
-        akGlobalStuff->m_globalEngine->addImportPath(akGlobalStuff->m_globalQmlPluginPath);
+    for (auto &path: akGlobalStuff->qmlImportPaths())
+        akGlobalStuff->m_globalEngine->addImportPath(path);
+
+    for (auto &path: akGlobalStuff->m_qmlImportPathList)
+        akGlobalStuff->m_globalEngine->addImportPath(path);
 }
 
-QString Ak::qmlPluginPath()
+QStringList Ak::qmlImportPathList()
 {
-#ifdef Q_OS_WIN32
-    if (akGlobalStuff->m_globalQmlPluginPath.isEmpty()) {
-        QString qmlPluginPath = QString("%1/../lib/qt/qml")
-                                .arg(QCoreApplication::applicationDirPath());
-        qmlPluginPath = akGlobalStuff->convertToAbsolute(qmlPluginPath);
-
-        return qmlPluginPath;
-    }
-#else
-    if (akGlobalStuff->m_globalQmlPluginPath.isEmpty())
-        return QString(QT_INSTALL_QML);
-#endif
-
-    return akGlobalStuff->m_globalQmlPluginPath;
+    return akGlobalStuff->m_qmlImportPathList;
 }
 
-void Ak::setQmlPluginPath(const QString &qmlPluginPath)
+void Ak::addQmlImportPath(const QString &path)
 {
-    if (akGlobalStuff->m_globalQmlPluginPath == qmlPluginPath)
-        return;
-
-    akGlobalStuff->m_globalQmlPluginPath = qmlPluginPath;
+    akGlobalStuff->m_qmlImportPathList << path;
 
     if (akGlobalStuff->m_globalEngine) {
-        if (akGlobalStuff->m_globalQmlPluginDefaultPaths.isEmpty())
-            akGlobalStuff->m_globalQmlPluginDefaultPaths = akGlobalStuff->m_globalEngine->importPathList();
-        else
-            akGlobalStuff->m_globalEngine->setImportPathList(akGlobalStuff->m_globalQmlPluginDefaultPaths);
+        akGlobalStuff->m_globalEngine->setImportPathList(akGlobalStuff->m_qmlDefaultImportPathList);
 
-        if (!akGlobalStuff->m_globalQmlPluginPath.isEmpty()
-            && !akGlobalStuff->m_globalQmlPluginDefaultPaths.contains(akGlobalStuff->m_globalQmlPluginPath))
-            akGlobalStuff->m_globalEngine->addImportPath(akGlobalStuff->m_globalQmlPluginPath);
+        for (auto &path: akGlobalStuff->qmlImportPaths())
+            akGlobalStuff->m_globalEngine->addImportPath(path);
+
+        for (auto &path: akGlobalStuff->m_qmlImportPathList)
+            akGlobalStuff->m_globalEngine->addImportPath(path);
     }
 }
 
-void Ak::resetQmlPluginPath()
+void Ak::setQmlImportPathList(const QStringList &paths)
 {
-#ifdef Q_OS_WIN32
-    QString qmlPluginPath = QString("%1/../lib/qt/qml")
-                            .arg(QCoreApplication::applicationDirPath());
-    qmlPluginPath = akGlobalStuff->convertToAbsolute(qmlPluginPath);
-    Ak::setQmlPluginPath(qmlPluginPath);
-#else
-    Ak::setQmlPluginPath(QT_INSTALL_QML);
-#endif
+    if (akGlobalStuff->m_qmlImportPathList == paths)
+        return;
+
+    akGlobalStuff->m_qmlImportPathList = paths;
+
+    if (akGlobalStuff->m_globalEngine) {
+        akGlobalStuff->m_globalEngine->setImportPathList(akGlobalStuff->m_qmlDefaultImportPathList);
+
+        for (auto &path: akGlobalStuff->qmlImportPaths())
+            akGlobalStuff->m_globalEngine->addImportPath(path);
+
+        for (auto &path: akGlobalStuff->m_qmlImportPathList)
+            akGlobalStuff->m_globalEngine->addImportPath(path);
+    }
+}
+
+void Ak::resetQmlImportPathList()
+{
+    Ak::setQmlImportPathList({});
 }

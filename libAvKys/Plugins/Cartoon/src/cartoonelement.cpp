@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ QVector<QRgb> CartoonElement::palette(const QImage &img,
             this->rgb16Torgb24(&r, &g, &b, histogram[i].second);
             bool add = true;
 
-            foreach (QRgb color, palette) {
+            for (const QRgb &color: palette) {
                 int dr = r - qRed(color);
                 int dg = g - qGreen(color);
                 int db = b - qBlue(color);

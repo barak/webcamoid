@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -653,7 +653,7 @@ HRESULT VirtualCameraSourceStream::Set(LONG Property, LONG lValue, LONG Flags)
         m_gamma = lValue;
         break;
     case VideoProcAmp_ColorEnable:
-        m_colorEnable = lValue;
+        m_colorEnable = lValue != 0;
         break;
     default:
         return E_PROP_ID_UNSUPPORTED;

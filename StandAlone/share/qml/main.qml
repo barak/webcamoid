@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,12 @@
 
 import QtQuick 2.5
 import QtQuick.Dialogs 1.2
-import QtQuick.Window 2.0
+import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
+import AkQml 1.0
 import Webcamoid 1.0
+import WebcamoidUpdates 1.0
 
 ApplicationWindow {
     id: wdgMainWidget
@@ -30,7 +32,7 @@ ApplicationWindow {
            + " "
            + Webcamoid.applicationVersion()
            + " - "
-           + Webcamoid.streamDescription(Webcamoid.curStream)
+           + MediaSource.description(MediaSource.stream)
     visible: true
     x: (Screen.desktopAvailableWidth - width) / 2
     y: (Screen.desktopAvailableHeight - height) / 2
@@ -42,50 +44,90 @@ ApplicationWindow {
 
     function rgbChangeAlpha(color, alpha)
     {
-        return Qt.rgba(color.r, color.g, color.b, alpha)
+        return Qt.rgba(color.r, color.g, color.b, alpha);
     }
 
     function togglePlay() {
-        if (Webcamoid.isPlaying) {
-            Webcamoid.stopVirtualCamera();
-            Webcamoid.stopRecording();
-            Webcamoid.stop();
+        if (MediaSource.state === AkElement.ElementStatePlaying) {
+            Webcamoid.virtualCameraState = AkElement.ElementStateNull;
+            Recording.state = AkElement.ElementStateNull;
+            MediaSource.state = AkElement.ElementStateNull;
 
             if (splitView.state == "showRecordPanels")
-                splitView.state = ""
+                splitView.state = "";
         } else {
-            Webcamoid.start();
+            MediaSource.state = AkElement.ElementStatePlaying;
 
             if (Webcamoid.enableVirtualCamera)
-                Webcamoid.startVirtualCamera("");
+                Webcamoid.virtualCameraState = AkElement.ElementStatePlaying;
+        }
+    }
+
+    function notifyUpdate(versionType)
+    {
+        if (Updates.notifyNewVersion
+            && versionType == UpdatesT.VersionTypeOld) {
+            trayIcon.show();
+            trayIcon.showMessage(qsTr("New version available!"),
+                                 qsTr("Download %1 %2 NOW!")
+                                    .arg(Webcamoid.applicationName())
+                                    .arg(Updates.latestVersion));
+            notifyTimer.start();
         }
     }
 
     SystemPalette {
         id: palette
     }
+    Timer {
+        id: notifyTimer
+        repeat: false
+        triggeredOnStart: false
+        interval: 10000
+
+        onTriggered: trayIcon.hide()
+    }
 
     onWidthChanged: Webcamoid.windowWidth = width
     onHeightChanged: Webcamoid.windowHeight = height
+    onClosing: trayIcon.hide()
 
     Component.onCompleted: {
-        if (Webcamoid.playOnStart)
-            togglePlay()
+        if (MediaSource.playOnStart)
+            togglePlay();
+
+        notifyUpdate(Updates.versionType);
     }
 
     Connections {
-        target: Webcamoid
+        target: MediaSource
+
         onStateChanged: {
-            if (Webcamoid.isPlaying) {
-                itmPlayStopButton.icon = "qrc:/icons/hicolor/scalable/stop.svg"
+            if (state === AkElement.ElementStatePlaying) {
+                itmPlayStopButton.text = qsTr("Stop")
+                itmPlayStopButton.icon = "image://icons/webcamoid-stop"
                 videoDisplay.visible = true
-            }
-            else {
-                itmPlayStopButton.icon = "qrc:/icons/hicolor/scalable/play.svg"
+            } else {
+                itmPlayStopButton.text = qsTr("Play")
+                itmPlayStopButton.icon = "image://icons/webcamoid-play"
                 videoDisplay.visible = false
             }
         }
-        onRecordingChanged: recordingNotice.visible = recording
+    }
+    Connections {
+        target: Recording
+
+        onStateChanged: recordingNotice.visible = state === AkElement.ElementStatePlaying
+    }
+    Connections {
+        target: Updates
+
+        onVersionTypeChanged: notifyUpdate(versionType);
+    }
+    Connections {
+        target: trayIcon
+
+        onMessageClicked: Qt.openUrlExternally(Webcamoid.projectDownloadsUrl())
     }
 
     VideoDisplay {
@@ -117,7 +159,8 @@ ApplicationWindow {
 
         Image {
             id: recordingIcon
-            source: "qrc:/icons/hicolor/scalable/recording.svg"
+            source: "image://icons/webcamoid-recording"
+            sourceSize: Qt.size(width, height)
             width: height
             anchors.left: parent.left
             anchors.leftMargin: 8
@@ -204,7 +247,7 @@ ApplicationWindow {
 
         function savePhoto()
         {
-            Webcamoid.takePhoto()
+            Recording.takePhoto()
             var suffix = "png";
             var fileName = qsTr("Picture %1.%2")
                                 .arg(Webcamoid.currentTime())
@@ -222,7 +265,7 @@ ApplicationWindow {
                                      filters.join(";;"))
 
             if (fileUrl !== "")
-                Webcamoid.savePhoto(fileUrl)
+                Recording.savePhoto(fileUrl)
         }
 
         onTakePhoto: {
@@ -254,11 +297,17 @@ ApplicationWindow {
                     visible: false
                     anchors.fill: parent
                 }
+                AudioConfig {
+                    id: audioConfig
+                    visible: false
+                    anchors.fill: parent
+                }
                 EffectBar {
                     id: effectBar
                     visible: false
                     anchors.fill: parent
                     onCurEffectChanged: effectConfig.curEffect = curEffect
+                    onCurEffectIndexChanged: effectConfig.curEffectIndex = curEffectIndex
                 }
                 RecordBar {
                     id: recordBar
@@ -275,9 +324,10 @@ ApplicationWindow {
                             generalConfig.children[0].destroy()
 
                         var options = {
-                            "audio": "AudioConfig.qml",
                             "output": "OutputConfig.qml",
-                            "general": "GeneralConfig.qml"
+                            "general": "GeneralConfig.qml",
+                            "plugins": "PluginConfig.qml",
+                            "updates": "UpdatesConfig.qml",
                         }
 
                         if (options[option]) {
@@ -310,10 +360,17 @@ ApplicationWindow {
                     visible: false
                     anchors.fill: parent
                 }
+                AudioInfo {
+                    id: audioInfo
+                    visible: false
+                    anchors.fill: parent
+                    state: audioConfig.state
+                }
                 EffectConfig {
                     id: effectConfig
                     curEffect: effectBar.curEffect
-                    inUse: !effectBar.editMode
+                    curEffectIndex: effectBar.curEffectIndex
+                    editMode: !effectBar.editMode
                     visible: false
                     anchors.fill: parent
                 }
@@ -347,6 +404,25 @@ ApplicationWindow {
                 }
                 PropertyChanges {
                     target: mediaConfig
+                    visible: true
+                }
+            },
+            State {
+                name: "showAudioPanels"
+                PropertyChanges {
+                    target: leftPanel
+                    visible: true
+                }
+                PropertyChanges {
+                    target: rightPanel
+                    visible: true
+                }
+                PropertyChanges {
+                    target: audioConfig
+                    visible: true
+                }
+                PropertyChanges {
+                    target: audioInfo
                     visible: true
                 }
             },
@@ -426,7 +502,7 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         opacity: 0.5
 
-        property real nIcons: 7
+        property real nIcons: 8
 
         gradient: Gradient {
             GradientStop {
@@ -486,9 +562,10 @@ ApplicationWindow {
                     anchors.leftMargin: btnGoBack.margins
                     anchors.verticalCenter: parent.verticalCenter
                     width: height
-                    source: "qrc:/icons/hicolor/scalable/go-back.svg"
+                    source: "image://icons/webcamoid-go-back"
+                    sourceSize: Qt.size(width, height)
                 }
-                Text {
+                Label {
                     id: txtGoBack
                     text: qsTr("Go back")
                     anchors.verticalCenter: parent.verticalCenter
@@ -537,15 +614,15 @@ ApplicationWindow {
                     width: iconBarRect.height
                     height: iconBarRect.height
                     text: qsTr("Play")
-                    icon: "qrc:/icons/hicolor/scalable/play.svg"
+                    icon: "image://icons/webcamoid-play"
 
                     onClicked: togglePlay()
                 }
                 IconBarItem {
                     width: iconBarRect.height
                     height: iconBarRect.height
-                    text: qsTr("Configure streams")
-                    icon: "qrc:/icons/hicolor/scalable/camera-web.svg"
+                    text: qsTr("Configure sources")
+                    icon: "image://icons/webcamoid-camera-web"
 
                     onClicked: {
                         if (splitView.state == "showMediaPanels")
@@ -557,9 +634,22 @@ ApplicationWindow {
                 IconBarItem {
                     width: iconBarRect.height
                     height: iconBarRect.height
+                    text: qsTr("Configure audio")
+                    icon: "image://icons/webcamoid-sound"
+
+                    onClicked: {
+                        if (splitView.state == "showAudioPanels")
+                            splitView.state = ""
+                        else
+                            splitView.state = "showAudioPanels"
+                    }
+                }
+                IconBarItem {
+                    width: iconBarRect.height
+                    height: iconBarRect.height
                     text: qsTr("Take a photo")
-                    icon: "qrc:/icons/hicolor/scalable/picture.svg"
-                    enabled: Webcamoid.isPlaying
+                    icon: "image://icons/webcamoid-picture"
+                    enabled: MediaSource.state === AkElement.ElementStatePlaying
 
                     onClicked: {
                         if (splitView.state == "showPhotoWidget")
@@ -572,8 +662,8 @@ ApplicationWindow {
                     width: iconBarRect.height
                     height: iconBarRect.height
                     text: qsTr("Record video")
-                    icon: "qrc:/icons/hicolor/scalable/video.svg"
-                    enabled: Webcamoid.isPlaying
+                    icon: "image://icons/webcamoid-video"
+                    enabled: MediaSource.state === AkElement.ElementStatePlaying
 
                     onClicked: {
                         if (splitView.state == "showRecordPanels")
@@ -586,7 +676,7 @@ ApplicationWindow {
                     width: iconBarRect.height
                     height: iconBarRect.height
                     text: qsTr("Configure Effects")
-                    icon: "qrc:/icons/hicolor/scalable/effects.svg"
+                    icon: "image://icons/webcamoid-effects"
 
                     onClicked: {
                         if (splitView.state == "showEffectPanels")
@@ -599,7 +689,7 @@ ApplicationWindow {
                     width: iconBarRect.height
                     height: iconBarRect.height
                     text: qsTr("Preferences")
-                    icon: "qrc:/icons/hicolor/scalable/setup.svg"
+                    icon: "image://icons/webcamoid-setup"
 
                     onClicked: {
                         if (splitView.state == "showConfigPanels")
@@ -612,7 +702,7 @@ ApplicationWindow {
                     width: iconBarRect.height
                     height: iconBarRect.height
                     text: qsTr("About")
-                    icon: "qrc:/icons/hicolor/scalable/help-about.svg"
+                    icon: "image://icons/webcamoid-help-about"
 
                     onClicked: about.show()
                 }

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,69 +30,63 @@ Rectangle {
     function sort(model, lo, hi)
     {
         if (lo >= hi)
-            return
+            return;
 
-        var pivot = lo
-        var pivotDesc = model.get(pivot).description.toLowerCase()
+        var pivot = lo;
+        var pivotDesc = model.get(pivot).description.toLowerCase();
 
         for (var j = pivot + 1; j < hi; j++)
             if (model.get(j).description.toLowerCase() < pivotDesc) {
-                model.move(j, lo, 1)
-                pivot++
+                model.move(j, lo, 1);
+                pivot++;
             }
 
-        sort(model, lo, pivot)
-        sort(model, pivot + 1, hi)
+        sort(model, lo, pivot);
+        sort(model, pivot + 1, hi);
     }
 
     function indexOfFormat(format)
     {
-        var lo = 0
-        var mid = lsvRecordingFormatList.model.count >> 1
-        var hi = lsvRecordingFormatList.model.count
+        var lo = 0;
+        var mid = lsvRecordingFormatList.model.count >> 1;
+        var hi = lsvRecordingFormatList.model.count;
 
         while (mid !== lo || mid !== hi) {
             if (lsvRecordingFormatList.model.get(mid).format == format)
-                return mid
+                return mid;
             else if (lsvRecordingFormatList.model.get(mid).format < format) {
-                lo = mid + 1
-                mid = (lo + hi) >> 1
+                lo = mid + 1;
+                mid = (lo + hi) >> 1;
             } else if (lsvRecordingFormatList.model.get(mid).format > format) {
-                hi = mid
-                mid = (lo + hi) >> 1
+                hi = mid;
+                mid = (lo + hi) >> 1;
             }
         }
 
         return -1
     }
 
-    function updateRecordingFormatList()
+    function updateRecordingFormatList(availableFormats)
     {
-        var curRecordingFormat = Webcamoid.curRecordingFormat
-        var formats = Webcamoid.recordingFormats
-        lsvRecordingFormatList.model.clear()
+        var recordingFormat = Recording.format;
+        lsvRecordingFormatList.model.clear();
 
-        if (formats.length > 0)
-            Webcamoid.curRecordingFormat = formats.indexOf(curRecordingFormat) < 0?
-                        formats[0]: curRecordingFormat
-        else
-            Webcamoid.curRecordingFormat = ""
-
-        for (var format in formats) {
+        for (var format in availableFormats) {
             lsvRecordingFormatList.model.append({
-                format: formats[format],
-                description: Webcamoid.recordingFormatDescription(formats[format])})
+                format: availableFormats[format],
+                description: Recording.formatDescription(availableFormats[format])});
         }
 
-        sort(lsvRecordingFormatList.model, 0, lsvRecordingFormatList.model.count)
-        lsvRecordingFormatList.currentIndex = indexOfFormat(Webcamoid.curRecordingFormat)
+        sort(lsvRecordingFormatList.model, 0, lsvRecordingFormatList.model.count);
+        lsvRecordingFormatList.currentIndex = indexOfFormat(recordingFormat);
     }
 
-    Component.onCompleted: recRecordBar.updateRecordingFormatList()
+    Component.onCompleted: updateRecordingFormatList(Recording.availableFormats)
 
     Connections {
-        target: Webcamoid
-        onCurRecordingFormatChanged: lsvRecordingFormatList.currentIndex = recRecordBar.indexOfFormat(curRecordingFormat)
+        target: Recording
+
+        onAvailableFormatsChanged: updateRecordingFormatList(availableFormats)
     }
 
     TextField {
@@ -118,12 +112,12 @@ Rectangle {
             textRole: "description"
 
             onCurrentIndexChanged: {
-                var option = model.get(currentIndex)
+                var option = model.get(currentIndex);
 
                 if (option)
-                    Webcamoid.curRecordingFormat = option.format
+                    Recording.format = option.format
 
-                txtSearchFormat.text = ""
+                txtSearchFormat.text = "";
             }
         }
     }

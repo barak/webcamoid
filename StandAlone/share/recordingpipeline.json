@@ -1,0 +1,20 @@
+[
+    [
+        {
+            "pluginId": "RtPts",
+            "properties": {
+                "objectName": "videoGen"
+            },
+            "connections": [
+                ["record", "stateChanged", "", "setState"]
+            ]
+        },
+        "DirectConnection",
+        {
+            "pluginId": "MultiSink",
+            "properties": {
+                "objectName": "record"
+            }
+        }
+    ]
+]

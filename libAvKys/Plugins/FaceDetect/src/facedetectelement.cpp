@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -336,7 +336,7 @@ AkPacket FaceDetectElement::iStream(const AkPacket &packet)
     QPainter painter;
     painter.begin(&oFrame);
 
-    foreach (QRect face, vecFaces) {
+    for (const QRect &face: vecFaces) {
         QRect rect(int(scale * face.x()),
                    int(scale * face.y()),
                    int(scale * face.width()),

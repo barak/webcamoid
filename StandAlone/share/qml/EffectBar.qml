@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2016  Gonzalo Exequiel Pedone
+ * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +28,13 @@ Rectangle {
     height: 400
 
     property string curEffect: ""
+    property int curEffectIndex: -1
     property bool editMode: false
-    property bool advancedMode: Webcamoid.advancedMode
+    property bool advancedMode: VideoEffects.advancedMode
+    property bool lock: false
 
     function updateAppliedEffectList() {
-        var effects = Webcamoid.currentEffects
+        var effects = VideoEffects.effects
 
         var option = lsvAppliedEffectList.model.get(lsvAppliedEffectList.currentIndex)
         var curEffect = option? option.effect: ""
@@ -45,18 +47,18 @@ Rectangle {
 
             lsvAppliedEffectList.model.append({
                 effect: effects[effect],
-                description: Webcamoid.effectInfo(effects[effect])["MetaData"]["description"]})
+                description: VideoEffects.effectInfo(effects[effect])["MetaData"]["description"]})
         }
 
         lsvAppliedEffectList.currentIndex = currentIndex < 0? 0: currentIndex
     }
 
     function updateEffectList() {
-        var effects = Webcamoid.availableEffects()
-
-        var curEffects = Webcamoid.currentEffects
-        var option = lsvEffectList.model.get(lsvEffectList.currentIndex)
-        var curEffect = option? option.effect: curEffects.length > 0? curEffects[0]: ""
+        var effects = VideoEffects.availableEffects
+        var curEffects = VideoEffects.effects
+        var curEffect = curEffects.length > 0?
+                    curEffects[curEffects.length - 1]: advancedMode?
+                        effects[0]: ""
         var currentIndex = -1
         lsvEffectList.model.clear()
 
@@ -66,11 +68,11 @@ Rectangle {
 
             lsvEffectList.model.append({
                 effect: effects[effect],
-                description: Webcamoid.effectInfo(effects[effect])["MetaData"]["description"]})
+                description: VideoEffects.effectInfo(effects[effect])["MetaData"]["description"]})
         }
 
         lsvEffectList.currentIndex = currentIndex >= 0 || !advancedMode?
-                                     currentIndex: 0
+                                     currentIndex: -1
     }
 
     onEditModeChanged: {
@@ -88,14 +90,23 @@ Rectangle {
     }
 
     Connections {
-        target: Webcamoid
-        onCurrentEffectsChanged: {
-            if (advancedMode) {
-                recEffectBar.updateAppliedEffectList()
-                recEffectBar.updateEffectList()
-            }
+        target: VideoEffects
 
+        onAvailableEffectsChanged: {
+            recEffectBar.updateAppliedEffectList()
+            recEffectBar.updateEffectList()
+        }
+        onEffectsChanged: {
+            if (lock)
+                return
+
+            recEffectBar.updateAppliedEffectList()
+            recEffectBar.updateEffectList()
             recEffectBar.editMode = false
+        }
+        onAdvancedModeChanged: {
+            updateAppliedEffectList()
+            updateEffectList()
         }
     }
 
@@ -119,7 +130,7 @@ Rectangle {
         anchors.top: txtSearchEffect.bottom
         visible: advancedMode? false: true
 
-        property bool selected: Webcamoid.currentEffects.length < 1
+        property bool selected: VideoEffects.effects.length < 1
 
         property color gradUp: selected?
                                    Qt.rgba(0.75, 0, 0, 1):
@@ -154,6 +165,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
             text: qsTr("None")
+            color: effectResetButton.selected? Qt.rgba(1, 1, 1, 1): Qt.rgba(0.75, 0.75, 0.75, 1)
         }
 
         MouseArea {
@@ -185,8 +197,9 @@ Rectangle {
             onReleased: txtEffectResetButton.scale = 1
             onClicked: {
                 lsvEffectList.currentIndex = -1
-                Webcamoid.resetEffects()
+                VideoEffects.effects = []
                 recEffectBar.curEffect = ""
+                recEffectBar.curEffectIndex = -1
             }
         }
     }
@@ -204,12 +217,14 @@ Rectangle {
         onCurrentIndexChanged: {
             var option = model.get(currentIndex)
             recEffectBar.curEffect = option? option.effect: ""
+            recEffectBar.curEffectIndex = currentIndex
             txtSearchEffect.text = ""
         }
         onVisibleChanged: {
             if (visible) {
                 var option = model.get(currentIndex)
                 recEffectBar.curEffect = option? option.effect: ""
+                recEffectBar.curEffectIndex = currentIndex
                 txtSearchEffect.text = ""
             }
         }
@@ -230,11 +245,11 @@ Rectangle {
             if (visible) {
                 var option = lsvEffectList.model.get(lsvEffectList.currentIndex)
                 var effect = option? option.effect: ""
-                Webcamoid.showPreview(effect)
+                VideoEffects.showPreview(effect)
                 recEffectBar.curEffect = effect
-            }
-            else
-                Webcamoid.removePreview()
+                recEffectBar.curEffectIndex = 0
+            } else
+                VideoEffects.removeAllPreviews()
         }
 
         OptionList {
@@ -248,19 +263,25 @@ Rectangle {
                 if (!option)
                     return
 
+                recEffectBar.lock = true
                 var effect = option.effect
 
                 if (scrollEffects.visible) {
                     if (advancedMode)
-                        Webcamoid.showPreview(effect)
+                        VideoEffects.showPreview(effect)
                     else {
-                        Webcamoid.resetEffects()
-                        Webcamoid.appendEffect(effect, false)
+                        VideoEffects.effects = []
+                        VideoEffects.appendEffect(effect, false)
                     }
                 }
 
                 recEffectBar.curEffect = effect
+
+                if (!advancedMode)
+                    recEffectBar.curEffectIndex = 0
+
                 txtSearchEffect.text = ""
+                recEffectBar.lock = false
             }
         }
     }
@@ -293,7 +314,8 @@ Rectangle {
             height: 32
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
-            source: "qrc:/icons/hicolor/scalable/effect-add.svg"
+            source: "image://icons/webcamoid-add"
+            sourceSize: Qt.size(width, height)
         }
 
         MouseArea {
@@ -333,7 +355,7 @@ Rectangle {
             }
             PropertyChanges {
                 target: imgAddEffect
-                source: "qrc:/icons/hicolor/scalable/down.svg"
+                source: "image://icons/webcamoid-down"
             }
             PropertyChanges {
                 target: recEffectBar
