@@ -1,4 +1,4 @@
-webcamoid (8.0.0+dfsg-1) UNRELEASED; urgency=medium
+webcamoid (8.0.0+dfsg-1) experimental; urgency=medium
 
   * New upstream version 8.0.0+dfsg.
   * debian/*.symbols:
