@@ -162,7 +162,7 @@ CaptureDShow::CaptureDShow(QObject *parent):
 {
     this->m_id = -1;
     this->m_ioMethod = IoMethodGrabSample;
-    this->m_graph = NULL;
+    this->m_graph = nullptr;
 
     QObject::connect(&this->m_frameGrabber,
                      &FrameGrabber::frameReady,
@@ -236,9 +236,9 @@ QString CaptureDShow::description(const QString &webcam) const
     if (!moniker)
         return QString();
 
-    IPropertyBag *pPropBag = NULL;
-    HRESULT hr = moniker->BindToStorage(0,
-                                        0,
+    IPropertyBag *pPropBag = nullptr;
+    HRESULT hr = moniker->BindToStorage(nullptr,
+                                        nullptr,
                                         IID_IPropertyBag,
                                         reinterpret_cast<void **>(&pPropBag));
 
@@ -249,10 +249,10 @@ QString CaptureDShow::description(const QString &webcam) const
     VariantInit(&var);
 
     // Get description or friendly name.
-    hr = pPropBag->Read(L"Description", &var, 0);
+    hr = pPropBag->Read(L"Description", &var, nullptr);
 
     if (FAILED(hr))
-        hr = pPropBag->Read(L"FriendlyName", &var, 0);
+        hr = pPropBag->Read(L"FriendlyName", &var, nullptr);
 
     QString description;
 
@@ -395,7 +395,7 @@ bool CaptureDShow::resetCameraControls()
 
 AkPacket CaptureDShow::readFrame()
 {
-    IBaseFilter *source = NULL;
+    IBaseFilter *source = nullptr;
     this->m_graph->FindFilterByName(SOURCE_FILTER_NAME, &source);
 
     if (source) {
@@ -428,6 +428,7 @@ AkPacket CaptureDShow::readFrame()
     ZeroMemory(&mediaType, sizeof(AM_MEDIA_TYPE));
     this->m_grabber->GetConnectedMediaType(&mediaType);
     AkCaps caps = this->capsFromMediaType(&mediaType);
+    this->freeMediaType(mediaType);
 
     AkPacket packet;
 
@@ -445,7 +446,7 @@ AkPacket CaptureDShow::readFrame()
 
         if (!this->m_curBuffer.isEmpty()) {
             int bufferSize = this->m_curBuffer.size();
-            QByteArray oBuffer(bufferSize, Qt::Uninitialized);
+            QByteArray oBuffer(bufferSize, 0);
             memcpy(oBuffer.data(),
                    this->m_curBuffer.constData(),
                    size_t(bufferSize));
@@ -462,12 +463,12 @@ AkPacket CaptureDShow::readFrame()
     } else {
         long bufferSize;
 
-        HRESULT hr = this->m_grabber->GetCurrentBuffer(&bufferSize, NULL);
+        HRESULT hr = this->m_grabber->GetCurrentBuffer(&bufferSize, nullptr);
 
         if (FAILED(hr))
             return AkPacket();
 
-        QByteArray oBuffer(bufferSize, Qt::Uninitialized);
+        QByteArray oBuffer(bufferSize, 0);
         hr = this->m_grabber->GetCurrentBuffer(&bufferSize,
                                                reinterpret_cast<long *>(oBuffer.data()));
 
@@ -552,9 +553,9 @@ AkCaps CaptureDShow::capsFromMediaType(const MediaTypePtr &mediaType) const
 HRESULT CaptureDShow::enumerateCameras(IEnumMoniker **ppEnum) const
 {
     // Create the System Device Enumerator.
-    ICreateDevEnum *pDevEnum = NULL;
+    ICreateDevEnum *pDevEnum = nullptr;
     HRESULT hr = CoCreateInstance(CLSID_SystemDeviceEnum,
-                                  NULL,
+                                  nullptr,
                                   CLSCTX_INPROC_SERVER,
                                   IID_ICreateDevEnum,
                                   reinterpret_cast<void **>(&pDevEnum));
@@ -577,16 +578,16 @@ HRESULT CaptureDShow::enumerateCameras(IEnumMoniker **ppEnum) const
 MonikersMap CaptureDShow::listMonikers() const
 {
     MonikersMap monikers;
-    IEnumMoniker *pEnum = NULL;
+    IEnumMoniker *pEnum = nullptr;
     HRESULT hr = this->enumerateCameras(&pEnum);
 
     if (SUCCEEDED(hr)) {
-        IMoniker *pMoniker = NULL;
+        IMoniker *pMoniker = nullptr;
 
-        for (int i = 0; pEnum->Next(1, &pMoniker, NULL) == S_OK; i++) {
-            IPropertyBag *pPropBag = NULL;
-            HRESULT hr = pMoniker->BindToStorage(0,
-                                                 0,
+        for (int i = 0; pEnum->Next(1, &pMoniker, nullptr) == S_OK; i++) {
+            IPropertyBag *pPropBag = nullptr;
+            HRESULT hr = pMoniker->BindToStorage(nullptr,
+                                                 nullptr,
                                                  IID_IPropertyBag,
                                                  reinterpret_cast<void **>(&pPropBag));
 
@@ -598,7 +599,7 @@ MonikersMap CaptureDShow::listMonikers() const
 
             VARIANT var;
             VariantInit(&var);
-            hr = pPropBag->Read(L"DevicePath", &var, 0);
+            hr = pPropBag->Read(L"DevicePath", &var, nullptr);
 
             QString devicePath;
 
@@ -634,17 +635,17 @@ IBaseFilter *CaptureDShow::findFilterP(const QString &webcam) const
     MonikerPtr moniker = this->findMoniker(webcam);
 
     if (!moniker)
-        return NULL;
+        return nullptr;
 
-    IBaseFilter *filter = NULL;
+    IBaseFilter *filter = nullptr;
 
-    HRESULT hr = moniker->BindToObject(NULL,
-                                       NULL,
+    HRESULT hr = moniker->BindToObject(nullptr,
+                                       nullptr,
                                        IID_IBaseFilter,
                                        reinterpret_cast<void **>(&filter));
 
     if (FAILED(hr))
-        return NULL;
+        return nullptr;
 
     return filter;
 }
@@ -672,14 +673,14 @@ MediaTypesList CaptureDShow::listMediaTypes(IBaseFilter *filter) const
     MediaTypesList mediaTypes;
 
     for (const PinPtr &pin: pins) {
-        IEnumMediaTypes *pEnum = NULL;
+        IEnumMediaTypes *pEnum = nullptr;
         pin->EnumMediaTypes(&pEnum);
-        AM_MEDIA_TYPE *mediaType = NULL;
+        AM_MEDIA_TYPE *mediaType = nullptr;
 
-        while (pEnum->Next(1, &mediaType, NULL) == S_OK)
+        while (pEnum->Next(1, &mediaType, nullptr) == S_OK)
             if (mediaType->formattype == FORMAT_VideoInfo
                 && mediaType->cbFormat >= sizeof(VIDEOINFOHEADER)
-                && mediaType->pbFormat != NULL
+                && mediaType->pbFormat != nullptr
                 && guidToStr->contains(mediaType->subtype)) {
                 mediaTypes << MediaTypePtr(mediaType, this->deleteMediaType);
             } else {
@@ -694,7 +695,7 @@ MediaTypesList CaptureDShow::listMediaTypes(IBaseFilter *filter) const
 
 bool CaptureDShow::isPinConnected(IPin *pPin, bool *ok) const
 {
-    IPin *pTmp = NULL;
+    IPin *pTmp = nullptr;
     HRESULT hr = pPin->ConnectedTo(&pTmp);
 
     if (ok)
@@ -721,22 +722,22 @@ bool CaptureDShow::isPinConnected(IPin *pPin, bool *ok) const
 PinPtr CaptureDShow::findUnconnectedPin(IBaseFilter *pFilter,
                                         PIN_DIRECTION PinDir) const
 {
-    IEnumPins *pEnum = NULL;
+    IEnumPins *pEnum = nullptr;
 
     if (FAILED(pFilter->EnumPins(&pEnum)))
         return PinPtr();
 
     PinPtr matchedPin;
-    IPin *pPin = NULL;
+    IPin *pPin = nullptr;
 
-    while (pEnum->Next(1, &pPin, NULL) == S_OK) {
+    while (pEnum->Next(1, &pPin, nullptr) == S_OK) {
         PIN_DIRECTION pinDir;
 
         if (FAILED(pPin->QueryDirection(&pinDir))
             || pinDir != PinDir)
             continue;
 
-        bool ok;
+        bool ok = false;
         bool connected = this->isPinConnected(pPin, &ok);
 
         if (!ok || connected)
@@ -782,12 +783,12 @@ PinList CaptureDShow::enumPins(IBaseFilter *filter,
         return PinList();
 
     PinList pinList;
-    IEnumPins *enumPins = NULL;
+    IEnumPins *enumPins = nullptr;
 
     if (SUCCEEDED(filter->EnumPins(&enumPins))) {
-        IPin *pin = NULL;
+        IPin *pin = nullptr;
 
-        while (S_OK == enumPins->Next(1, &pin, NULL)) {
+        while (S_OK == enumPins->Next(1, &pin, nullptr)) {
             PIN_DIRECTION pinDir;
 
             if (SUCCEEDED(pin->QueryDirection(&pinDir))
@@ -798,7 +799,7 @@ PinList CaptureDShow::enumPins(IBaseFilter *filter,
             }
 
             pin->Release();
-            pin = NULL;
+            pin = nullptr;
         }
     }
 
@@ -812,23 +813,27 @@ void CaptureDShow::deleteUnknown(IUnknown *unknown)
     unknown->Release();
 }
 
+void CaptureDShow::freeMediaType(AM_MEDIA_TYPE &mediaType)
+{
+    if (mediaType.cbFormat) {
+        CoTaskMemFree(PVOID(mediaType.pbFormat));
+        mediaType.cbFormat = 0;
+        mediaType.pbFormat = nullptr;
+    }
+
+    if (mediaType.pUnk) {
+        // pUnk should not be used.
+        mediaType.pUnk->Release();
+        mediaType.pUnk = nullptr;
+    }
+}
+
 void CaptureDShow::deleteMediaType(AM_MEDIA_TYPE *mediaType)
 {
     if (!mediaType)
         return;
 
-    if (mediaType->cbFormat != 0) {
-        CoTaskMemFree(PVOID(mediaType->pbFormat));
-        mediaType->cbFormat = 0;
-        mediaType->pbFormat = NULL;
-    }
-
-    if (mediaType->pUnk != NULL) {
-        // pUnk should not be used.
-        mediaType->pUnk->Release();
-        mediaType->pUnk = NULL;
-    }
-
+    CaptureDShow::freeMediaType(*mediaType);
     CoTaskMemFree(mediaType);
 }
 
@@ -850,7 +855,7 @@ QVariantList CaptureDShow::imageControls(IBaseFilter *filter) const
     qint32 value;
 
     QVariantList controls;
-    IAMVideoProcAmp *pProcAmp = NULL;
+    IAMVideoProcAmp *pProcAmp = nullptr;
 
     if (SUCCEEDED(filter->QueryInterface(IID_IAMVideoProcAmp,
                                          reinterpret_cast<void **>(&pProcAmp)))) {
@@ -902,7 +907,7 @@ bool CaptureDShow::setImageControls(IBaseFilter *filter,
     if (!filter)
         return false;
 
-    IAMVideoProcAmp *pProcAmp = NULL;
+    IAMVideoProcAmp *pProcAmp = nullptr;
 
     if (SUCCEEDED(filter->QueryInterface(IID_IAMVideoProcAmp,
                                          reinterpret_cast<void **>(&pProcAmp)))) {
@@ -934,7 +939,7 @@ QVariantList CaptureDShow::cameraControls(IBaseFilter *filter) const
     qint32 value;
 
     QVariantList controls;
-    IAMCameraControl *pCameraControl = NULL;
+    IAMCameraControl *pCameraControl = nullptr;
 
     if (SUCCEEDED(filter->QueryInterface(IID_IAMCameraControl,
                                          reinterpret_cast<void **>(&pCameraControl)))) {
@@ -975,7 +980,7 @@ bool CaptureDShow::setCameraControls(IBaseFilter *filter,
     if (!filter)
         return false;
 
-    IAMCameraControl *pCameraControl = NULL;
+    IAMCameraControl *pCameraControl = nullptr;
 
     if (SUCCEEDED(filter->QueryInterface(IID_IAMCameraControl,
                                          reinterpret_cast<void **>(&pCameraControl)))) {
@@ -1025,63 +1030,69 @@ bool CaptureDShow::init()
 {
     // Create the pipeline.
     if (FAILED(CoCreateInstance(CLSID_FilterGraph,
-                                NULL,
+                                nullptr,
                                 CLSCTX_INPROC_SERVER,
                                 IID_IGraphBuilder,
                                 reinterpret_cast<void **>(&this->m_graph))))
         return false;
 
     // Create the webcam filter.
-    IBaseFilter *webcamFilter = this->findFilterP(this->m_device);
+    this->m_webcamFilter = this->findFilter(this->m_device);
 
-    if (!webcamFilter) {
+    if (!this->m_webcamFilter) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
 
         return false;
     }
 
-    if (FAILED(this->m_graph->AddFilter(webcamFilter, SOURCE_FILTER_NAME))) {
+    if (FAILED(this->m_graph->AddFilter(this->m_webcamFilter.data(),
+                                        SOURCE_FILTER_NAME))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
     // Create the Sample Grabber filter.
-    IBaseFilter *grabberFilter = NULL;
+    IBaseFilter *grabberFilter = nullptr;
 
     if (FAILED(CoCreateInstance(CLSID_SampleGrabber,
-                                NULL,
+                                nullptr,
                                 CLSCTX_INPROC_SERVER,
                                 IID_IBaseFilter,
                                 reinterpret_cast<void **>(&grabberFilter)))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
     if (FAILED(this->m_graph->AddFilter(grabberFilter, L"Grabber"))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
-    ISampleGrabber *grabberPtr = NULL;
+    ISampleGrabber *grabberPtr = nullptr;
 
     if (FAILED(grabberFilter->QueryInterface(IID_ISampleGrabber,
                                              reinterpret_cast<void **>(&grabberPtr)))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
     if (FAILED(grabberPtr->SetOneShot(FALSE))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
@@ -1090,7 +1101,8 @@ bool CaptureDShow::init()
 
     if (FAILED(hr)) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
@@ -1102,56 +1114,64 @@ bool CaptureDShow::init()
 
     this->m_grabber = SampleGrabberPtr(grabberPtr, this->deleteUnknown);
 
-    if (!this->connectFilters(this->m_graph, webcamFilter, grabberFilter)) {
+    if (!this->connectFilters(this->m_graph,
+                              this->m_webcamFilter.data(),
+                              grabberFilter)) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
     // Create null filter.
-    IBaseFilter *nullFilter = NULL;
+    IBaseFilter *nullFilter = nullptr;
 
     if (FAILED(CoCreateInstance(CLSID_NullRenderer,
-                                NULL,
+                                nullptr,
                                 CLSCTX_INPROC_SERVER,
                                 IID_IBaseFilter,
                                 reinterpret_cast<void **>(&nullFilter)))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
     if (FAILED(this->m_graph->AddFilter(nullFilter, L"NullFilter"))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
     if (!this->connectFilters(this->m_graph, grabberFilter, nullFilter)) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
     // Set capture format
-    QList<int> streams = this->streams();
+    auto streams = this->streams();
 
     if (streams.isEmpty()) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
-    MediaTypesList mediaTypes = this->listMediaTypes(webcamFilter);
+    auto mediaTypes = this->listMediaTypes(this->m_webcamFilter.data());
 
     if (mediaTypes.isEmpty()) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
@@ -1162,15 +1182,16 @@ bool CaptureDShow::init()
 
     if (FAILED(grabberPtr->SetMediaType(mediaType.data()))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
 
-    PinList pins = this->enumPins(webcamFilter, PINDIR_OUTPUT);
+    PinList pins = this->enumPins(this->m_webcamFilter.data(), PINDIR_OUTPUT);
 
     for (const PinPtr &pin: pins) {
-        IAMStreamConfig *pStreamConfig = NULL;
+        IAMStreamConfig *pStreamConfig = nullptr;
         HRESULT hr =
                 pin->QueryInterface(IID_IAMStreamConfig,
                                     reinterpret_cast<void **>(&pStreamConfig));
@@ -1183,12 +1204,13 @@ bool CaptureDShow::init()
     }
 
     // Run the pipeline
-    IMediaControl *control = NULL;
+    IMediaControl *control = nullptr;
 
     if (FAILED(this->m_graph->QueryInterface(IID_IMediaControl,
                                              reinterpret_cast<void **>(&control)))) {
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
@@ -1200,7 +1222,8 @@ bool CaptureDShow::init()
     if (FAILED(control->Run())) {
         control->Release();
         this->m_graph->Release();
-        this->m_graph = NULL;
+        this->m_graph = nullptr;
+        this->m_webcamFilter.clear();
 
         return false;
     }
@@ -1215,7 +1238,7 @@ bool CaptureDShow::init()
 
 void CaptureDShow::uninit()
 {
-    IMediaControl *control = NULL;
+    IMediaControl *control = nullptr;
 
     if (SUCCEEDED(this->m_graph->QueryInterface(IID_IMediaControl,
                                                 reinterpret_cast<void **>(&control)))) {
@@ -1225,7 +1248,8 @@ void CaptureDShow::uninit()
 
     this->m_grabber.clear();
     this->m_graph->Release();
-    this->m_graph = NULL;
+    this->m_graph = nullptr;
+    this->m_webcamFilter.clear();
 }
 
 void CaptureDShow::setDevice(const QString &device)
@@ -1278,8 +1302,7 @@ void CaptureDShow::setStreams(const QList<int> &streams)
     if (stream >= supportedCaps.length())
         return;
 
-    QList<int> inputStreams;
-    inputStreams << stream;
+    QList<int> inputStreams {stream};
 
     if (this->streams() == inputStreams)
         return;

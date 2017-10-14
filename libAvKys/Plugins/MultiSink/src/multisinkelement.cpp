@@ -54,46 +54,6 @@ MultiSinkElement::~MultiSinkElement()
     this->setState(AkElement::ElementStateNull);
 }
 
-QObject *MultiSinkElement::controlInterface(QQmlEngine *engine,
-                                            const QString &controlId) const
-{
-    Q_UNUSED(controlId)
-
-    if (!engine)
-        return NULL;
-
-    // Load the UI from the plugin.
-    QQmlComponent component(engine, QUrl(QStringLiteral("qrc:/MultiSink/share/qml/main.qml")));
-
-    if (component.isError()) {
-        qDebug() << "Error in plugin "
-                 << this->metaObject()->className()
-                 << ":"
-                 << component.errorString();
-
-        return NULL;
-    }
-
-    // Create a context for the plugin.
-    QQmlContext *context = new QQmlContext(engine->rootContext());
-    context->setContextProperty("MultiSink", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
-    context->setContextProperty("MultiSinkUtils", const_cast<QObject *>(qobject_cast<const QObject *>(&this->m_utils)));
-    context->setContextProperty("controlId", this->objectName());
-
-    // Create an item with the plugin context.
-    QObject *item = component.create(context);
-
-    if (!item) {
-        delete context;
-
-        return NULL;
-    }
-
-    context->setParent(item);
-
-    return item;
-}
-
 QString MultiSinkElement::location() const
 {
     return this->m_location;
@@ -210,6 +170,23 @@ QVariantMap MultiSinkElement::updateStream(int index,
 QVariantList MultiSinkElement::codecOptions(int index)
 {
     return this->m_mediaWriter->codecOptions(index);
+}
+
+QString MultiSinkElement::controlInterfaceProvide(const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    return QString("qrc:/MultiSink/share/qml/main.qml");
+}
+
+void MultiSinkElement::controlInterfaceConfigure(QQmlContext *context,
+                                                 const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    context->setContextProperty("MultiSink", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
+    context->setContextProperty("MultiSinkUtils", const_cast<QObject *>(qobject_cast<const QObject *>(&this->m_utils)));
+    context->setContextProperty("controlId", this->objectName());
 }
 
 void MultiSinkElement::setLocation(const QString &location)
@@ -337,21 +314,11 @@ void MultiSinkElement::clearStreams()
 
 AkPacket MultiSinkElement::iStream(const AkPacket &packet)
 {
-    this->m_mutex.lock();
-
-    if (this->state() != ElementStatePlaying) {
-        this->m_mutex.unlock();
-
+    if (this->state() != ElementStatePlaying)
         return AkPacket();
-    }
 
-    if (this->m_inputStreams.contains(packet.index())) {
-        this->m_mutexLib.lock();
+    if (this->m_inputStreams.contains(packet.index()))
         this->m_mediaWriter->enqueuePacket(packet);
-        this->m_mutexLib.unlock();
-    }
-
-    this->m_mutex.unlock();
 
     return AkPacket();
 }
@@ -359,22 +326,16 @@ AkPacket MultiSinkElement::iStream(const AkPacket &packet)
 bool MultiSinkElement::setState(AkElement::ElementState state)
 {
     AkElement::ElementState curState = this->state();
-    QMutexLocker locker(&this->m_mutexLib);
-    this->m_mutex.lock();
 
     if (curState == AkElement::ElementStateNull) {
         if (state != AkElement::ElementStateNull
             && (!this->m_mediaWriter->init())) {
-            this->m_mutex.unlock();
-
             return false;
         }
     } else {
         if (state == AkElement::ElementStateNull)
             this->m_mediaWriter->uninit();
     }
-
-    this->m_mutex.unlock();
 
     return AkElement::setState(state);
 }
@@ -384,8 +345,6 @@ void MultiSinkElement::codecLibUpdated(const QString &codecLib)
     auto state = this->state();
     this->setState(AkElement::ElementStateNull);
     auto location = this->m_mediaWriter->location();
-
-    this->m_mutexLib.lock();
 
     this->m_mediaWriter =
             ptr_init<MediaWriter>(this->loadSubModule("MultiSink", codecLib));
@@ -448,8 +407,6 @@ void MultiSinkElement::codecLibUpdated(const QString &codecLib)
                      &MultiSinkElement::formatOptionsChanged,
                      this->m_mediaWriter.data(),
                      &MediaWriter::setFormatOptions);
-
-    this->m_mutexLib.unlock();
 
     this->m_mediaWriter->setLocation(location);
     emit this->supportedFormatsChanged(this->supportedFormats());

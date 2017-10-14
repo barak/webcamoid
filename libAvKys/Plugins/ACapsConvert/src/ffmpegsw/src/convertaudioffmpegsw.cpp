@@ -62,7 +62,7 @@ Q_GLOBAL_STATIC_WITH_ARGS(ChannelLayoutsMap, channelLayouts, (initChannelFormats
 ConvertAudioFFmpegSW::ConvertAudioFFmpegSW(QObject *parent):
     ConvertAudio(parent)
 {
-    this->m_resampleContext = NULL;
+    this->m_resampleContext = nullptr;
 
 #ifndef QT_DEBUG
     av_log_set_level(AV_LOG_QUIET);
@@ -118,7 +118,7 @@ AkPacket ConvertAudioFFmpegSW::convert(const AkAudioPacket &packet)
                                iSampleFormat,
                                iSampleRate,
                                0,
-                               NULL);
+                               nullptr);
 
     if (!this->m_resampleContext)
         return AkPacket();
@@ -163,7 +163,7 @@ AkPacket ConvertAudioFFmpegSW::convert(const AkAudioPacket &packet)
                                                oSampleFormat,
                                                1);
 
-    QByteArray oBuffer(frameSize, Qt::Uninitialized);
+    QByteArray oBuffer(frameSize, 0);
 
     if (avcodec_fill_audio_frame(&oFrame,
                                  oFrame.channels,

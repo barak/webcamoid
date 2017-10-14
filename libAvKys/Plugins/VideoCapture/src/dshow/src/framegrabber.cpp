@@ -40,7 +40,7 @@ ULONG FrameGrabber::Release()
 
 HRESULT FrameGrabber::QueryInterface(const IID &riid, void **ppvObject)
 {
-    if (NULL == ppvObject)
+    if (ppvObject == nullptr)
         return E_POINTER;
 
     if (riid == __uuidof(IUnknown)) {
@@ -60,7 +60,10 @@ HRESULT FrameGrabber::QueryInterface(const IID &riid, void **ppvObject)
 
 HRESULT FrameGrabber::SampleCB(double time, IMediaSample *sample)
 {
-    BYTE *buffer = NULL;
+    if (!sample)
+        return S_FALSE;
+
+    BYTE *buffer = nullptr;
     LONG bufferSize = sample->GetSize();
 
     HRESULT hr = sample->GetPointer(&buffer);
@@ -77,6 +80,9 @@ HRESULT FrameGrabber::SampleCB(double time, IMediaSample *sample)
 
 HRESULT FrameGrabber::BufferCB(double time, BYTE *buffer, long bufferSize)
 {
+    if (!buffer || bufferSize < 1)
+        return S_FALSE;
+
     QByteArray oBuffer(reinterpret_cast<char *>(buffer), bufferSize);
 
     emit this->frameReady(time, oBuffer);

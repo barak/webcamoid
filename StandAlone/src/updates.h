@@ -21,8 +21,7 @@
 #define UPDATES_H
 
 #include <QTimer>
-#include <QQmlComponent>
-#include <QQmlContext>
+#include <QDateTime>
 #include <QQmlApplicationEngine>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -63,8 +62,8 @@ class Updates: public QObject
             VersionTypeDevelopment
         };
 
-        explicit Updates(QQmlApplicationEngine *engine=NULL,
-                         QObject *parent=NULL);
+        explicit Updates(QQmlApplicationEngine *engine=nullptr,
+                         QObject *parent=nullptr);
         ~Updates();
 
         Q_INVOKABLE bool notifyNewVersion() const;
@@ -117,7 +116,7 @@ class Updates: public QObject
 
     public slots:
         void checkUpdates();
-        void setQmlEngine(QQmlApplicationEngine *engine=NULL);
+        void setQmlEngine(QQmlApplicationEngine *engine=nullptr);
         void setNotifyNewVersion(bool notifyNewVersion);
         void setCheckInterval(int checkInterval);
         void resetNotifyNewVersion();

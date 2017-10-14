@@ -37,44 +37,6 @@ DenoiseElement::~DenoiseElement()
     delete [] this->m_weight;
 }
 
-QObject *DenoiseElement::controlInterface(QQmlEngine *engine, const QString &controlId) const
-{
-    Q_UNUSED(controlId)
-
-    if (!engine)
-        return NULL;
-
-    // Load the UI from the plugin.
-    QQmlComponent component(engine, QUrl(QStringLiteral("qrc:/Denoise/share/qml/main.qml")));
-
-    if (component.isError()) {
-        qDebug() << "Error in plugin "
-                 << this->metaObject()->className()
-                 << ":"
-                 << component.errorString();
-
-        return NULL;
-    }
-
-    // Create a context for the plugin.
-    QQmlContext *context = new QQmlContext(engine->rootContext());
-    context->setContextProperty("Denoise", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
-    context->setContextProperty("controlId", this->objectName());
-
-    // Create an item with the plugin context.
-    QObject *item = component.create(context);
-
-    if (!item) {
-        delete context;
-
-        return NULL;
-    }
-
-    context->setParent(item);
-
-    return item;
-}
-
 int DenoiseElement::radius() const
 {
     return this->m_radius;
@@ -187,6 +149,22 @@ void DenoiseElement::denoise(const DenoiseStaticParams &staticParams,
     delete params;
 }
 
+QString DenoiseElement::controlInterfaceProvide(const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    return QString("qrc:/Denoise/share/qml/main.qml");
+}
+
+void DenoiseElement::controlInterfaceConfigure(QQmlContext *context,
+                                               const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    context->setContextProperty("Denoise", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
+    context->setContextProperty("controlId", this->objectName());
+}
+
 void DenoiseElement::setRadius(int radius)
 {
     if (this->m_radius == radius)
@@ -286,6 +264,9 @@ AkPacket DenoiseElement::iStream(const AkPacket &packet)
     staticParams.sigma = this->m_sigma < 0.1? 0.1: this->m_sigma;
 
     QThreadPool threadPool;
+
+    if (threadPool.maxThreadCount() < 8)
+        threadPool.setMaxThreadCount(8);
 
     for (int y = 0, pos = 0; y < src.height(); y++) {
         const QRgb *iLine = reinterpret_cast<const QRgb *>(src.constScanLine(y));

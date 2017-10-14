@@ -39,7 +39,7 @@ void SubtitleStream::processPacket(AVPacket *packet)
         return;
 
     if (!packet) {
-        this->dataEnqueue(reinterpret_cast<AVSubtitle *>(NULL));
+        this->subtitleEnqueue(nullptr);
 
         return;
     }
@@ -53,7 +53,7 @@ void SubtitleStream::processPacket(AVPacket *packet)
                              packet);
 
     if (gotSubtitle) {
-        this->dataEnqueue(subtitle);
+        this->subtitleEnqueue(subtitle);
 
         return;
     }
@@ -62,7 +62,7 @@ void SubtitleStream::processPacket(AVPacket *packet)
     AkCaps caps(this->caps());
     caps.setProperty("type", "ass");
 
-    QByteArray oBuffer(packet->size, Qt::Uninitialized);
+    QByteArray oBuffer(packet->size, 0);
     memcpy(oBuffer.data(), packet->data, size_t(packet->size));
 
     AkPacket oPacket(caps, oBuffer);
@@ -105,7 +105,7 @@ void SubtitleStream::processData(AVSubtitle *subtitle)
             if (av_image_check_size(uint(subtitle->rects[i]->w),
                                     uint(subtitle->rects[i]->h),
                                     0,
-                                    NULL) < 0)
+                                    nullptr) < 0)
                 continue;
 
             if (av_image_fill_linesizes(frame.linesize,
@@ -118,7 +118,7 @@ void SubtitleStream::processData(AVSubtitle *subtitle)
             int frameSize = av_image_fill_pointers(data,
                                                    pixFmt,
                                                    subtitle->rects[i]->h,
-                                                   NULL,
+                                                   nullptr,
                                                    frame.linesize);
 
 

@@ -22,6 +22,8 @@
 
 #include <QStringList>
 #include <QQmlEngine>
+#include <QQmlComponent>
+#include <QQmlContext>
 
 #include "akaudiopacket.h"
 #include "akvideopacket.h"
@@ -61,10 +63,11 @@ class AKCOMMONS_EXPORT AkElement: public QObject
             ElementStatePlaying
         };
 
-        explicit AkElement(QObject *parent=NULL);
+        explicit AkElement(QObject *parent=nullptr);
         virtual ~AkElement();
 
         Q_INVOKABLE QString pluginId() const;
+        Q_INVOKABLE static QString pluginId(const QString &path);
         Q_INVOKABLE QString pluginPath() const;
         Q_INVOKABLE virtual AkElement::ElementState state() const;
         Q_INVOKABLE virtual QObject *controlInterface(QQmlEngine *engine,
@@ -117,15 +120,14 @@ class AKCOMMONS_EXPORT AkElement: public QObject
         Q_INVOKABLE static void resetSubModulesPath();
         Q_INVOKABLE static QStringList listPlugins(const QString &type="");
         Q_INVOKABLE static QStringList listPluginPaths(const QString &searchPath);
-        Q_INVOKABLE static QStringList listPluginPaths();
-        Q_INVOKABLE static QStringList pluginsCache();
-        Q_INVOKABLE static void setPluginsCache(const QStringList &paths);
-        Q_INVOKABLE static QList<QByteArray> pluginsHashes(bool all=false);
-        Q_INVOKABLE static void setPluginsHashes(const QList<QByteArray> &pluginsHashes);
+        Q_INVOKABLE static QStringList listPluginPaths(bool all=false);
+        Q_INVOKABLE static void setPluginPaths(const QStringList &paths);
         Q_INVOKABLE static QStringList pluginsBlackList();
         Q_INVOKABLE static void setPluginsBlackList(const QStringList &blackList);
         Q_INVOKABLE static QString pluginPath(const QString &pluginId);
         Q_INVOKABLE static QVariantMap pluginInfo(const QString &pluginId);
+        Q_INVOKABLE static void setPluginInfo(const QString &path,
+                                              const QVariantMap &metaData);
         Q_INVOKABLE static void clearCache();
 
         virtual AkPacket operator ()(const AkPacket &packet);
@@ -136,6 +138,9 @@ class AKCOMMONS_EXPORT AkElement: public QObject
         AkElementPrivate *d;
 
     protected:
+        virtual QString controlInterfaceProvide(const QString &controlId) const;
+        virtual void controlInterfaceConfigure(QQmlContext *context,
+                                               const QString &controlId) const;
         virtual void stateChange(AkElement::ElementState from, AkElement::ElementState to);
 
     Q_SIGNALS:

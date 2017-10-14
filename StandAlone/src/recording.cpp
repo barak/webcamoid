@@ -25,7 +25,7 @@
 
 #include "recording.h"
 
-#define DEFAULT_RECORD_AUDIO false
+#define DEFAULT_RECORD_AUDIO true
 #define AUDIO_RECORDING_KEY "Enable audio recording"
 
 Recording::Recording(QQmlApplicationEngine *engine, QObject *parent):
@@ -35,25 +35,8 @@ Recording::Recording(QQmlApplicationEngine *engine, QObject *parent):
     this->m_recordAudio = DEFAULT_RECORD_AUDIO;
     this->m_state = AkElement::ElementStateNull;
     this->setQmlEngine(engine);
-    this->m_pipeline = AkElement::create("Bin", "pipeline");
 
-    if (this->m_pipeline) {
-        QFile jsonFile(":/Webcamoid/share/recordingpipeline.json");
-        jsonFile.open(QFile::ReadOnly);
-        QString description(jsonFile.readAll());
-        jsonFile.close();
-
-        this->m_pipeline->setProperty("description", description);
-
-        QMetaObject::invokeMethod(this->m_pipeline.data(),
-                                  "element",
-                                  Q_RETURN_ARG(AkElementPtr, this->m_videoGen),
-                                  Q_ARG(QString, "videoGen"));
-        QMetaObject::invokeMethod(this->m_pipeline.data(),
-                                  "element",
-                                  Q_RETURN_ARG(AkElementPtr, this->m_record),
-                                  Q_ARG(QString, "record"));
-    }
+    this->m_record = AkElement::create("MultiSink");
 
     if (this->m_record) {
         QObject::connect(this->m_record.data(),
@@ -242,7 +225,6 @@ bool Recording::embedControls(const QString &where,
 
         // Finally, embed the plugin item UI in the desired place.
         interfaceItem->setParentItem(item);
-        interfaceItem->setParent(item);
 
         QQmlProperty::write(interfaceItem,
                             "anchors.fill",
@@ -268,8 +250,8 @@ void Recording::removeInterface(const QString &where)
         QList<decltype(item)> childItems = item->childItems();
 
         for (auto child: childItems) {
-            child->setParentItem(NULL);
-            child->setParent(NULL);
+            child->setParentItem(nullptr);
+            child->setParent(nullptr);
 
             delete child;
         }
@@ -367,9 +349,7 @@ void Recording::setState(AkElement::ElementState state)
     if (this->m_state == state)
         return;
 
-    this->m_mutex.lock();
     this->m_record->setState(state);
-    this->m_mutex.unlock();
     this->m_state = state;
     emit this->stateChanged(state);
 }
@@ -431,17 +411,14 @@ void Recording::savePhoto(const QString &fileName)
 
 AkPacket Recording::iStream(const AkPacket &packet)
 {
-    this->m_mutex.lock();
-    this->m_curPacket = packet;
-
-    if (this->m_state == AkElement::ElementStatePlaying) {
-        if (packet.caps().mimeType() == "video/x-raw")
-            (*this->m_videoGen)(packet);
-        else
-            (*this->m_record)(packet);
+    if (packet.caps().mimeType() == "video/x-raw") {
+        this->m_mutex.lock();
+        this->m_curPacket = packet;
+        this->m_mutex.unlock();
     }
 
-    this->m_mutex.unlock();
+    if (this->m_state == AkElement::ElementStatePlaying)
+        (*this->m_record)(packet);
 
     return AkPacket();
 }
@@ -641,8 +618,6 @@ void Recording::loadStreams(const QString &format)
 
             config.endGroup();
         }
-
-    this->m_videoGen->setProperty("fps", this->m_videoCaps.property("fps"));
 }
 
 void Recording::loadCodecOptions(const QVariantList &streams)

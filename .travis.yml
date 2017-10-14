@@ -4,6 +4,10 @@ cache:
   ccache: true
   timeout: 1000
 
+env:
+  global:
+    - QTIFWVER=3.0.1
+
 matrix:
   include:
   - os: linux
@@ -133,32 +137,61 @@ matrix:
     env:
       - DOCKERSYS=debian DOCKERIMG=ubuntu:zesty
   - os: osx
-    osx_image: xcode8
+    osx_image: xcode8.3
     compiler: clang
+  - os: osx
+    osx_image: xcode9
+    compiler: clang
+  - language: android
+    jdk: oraclejdk8
+    android:
+      components:
+        - tools
+        - platform-tools
+        - build-tools-22.0.1
+        - android-22
+        - sys-img-armeabi-v7a-android-22
     env:
-      - DISABLE_CCACHE=1
-  - os: osx
-    osx_image: xcode8.1
-    compiler: clang
-  - os: osx
-    osx_image: xcode8.2
-    compiler: clang
+      - ANDROID_BUILD=1
+      - COMPILER=g++
+      - QTVER=5.8.0
+      - NDKVER=r14b
+      - TARGET_ARCH=armv7
+  - language: android
+    jdk: oraclejdk8
+    android:
+      components:
+        - tools
+        - platform-tools
+        - build-tools-22.0.1
+        - android-22
+        - sys-img-x86-android-22
+    env:
+      - ANDROID_BUILD=1
+      - COMPILER=g++
+      - QTVER=5.8.0
+      - NDKVER=r14b
+      - TARGET_ARCH=x86
 
 before_install: |
-  if [ "${TRAVIS_OS_NAME}" = linux ]; then
-    docker pull ${DOCKERIMG}
-    docker ps -a
-    docker run -it -d -v ${PWD}:/sources -v $HOME/.ccache:/ccache -e CCACHE_DIR=/ccache -w /sources --name ${DOCKERSYS} ${DOCKERIMG} /bin/sh
-  elif [ "${TRAVIS_OS_NAME}" = osx ]; then
-    brew update
-    brew upgrade
+  if [ -z "${ANDROID_BUILD}" ]; then
+    if [ "${TRAVIS_OS_NAME}" = linux ]; then
+      docker pull ${DOCKERIMG}
+      docker ps -a
+      docker run -it -d -v ${PWD}:/sources -v $HOME/.ccache:/ccache -e CCACHE_DIR=/ccache -w /sources --name ${DOCKERSYS} ${DOCKERIMG} /bin/sh
+    elif [ "${TRAVIS_OS_NAME}" = osx ]; then
+      brew update
+      brew upgrade
+    fi
   fi
 
 install:
   - ports/ci/travis/install_deps.sh
 
 before_script: |
-  if [ "${TRAVIS_OS_NAME}" = linux ]; then
+  if [ "${ANDROID_BUILD}" = 1 ]; then
+    export COMPILESPEC=android-${COMPILER}
+  elif [ "${TRAVIS_OS_NAME}" = linux ]; then
     if [ "${CXX}" = g++ ]; then
       export COMPILESPEC=linux-g++
     elif [ "${CXX}" = clang++ ]; then
@@ -175,6 +208,9 @@ before_script: |
 
 script:
   - ports/ci/travis/build.sh
+
+after_success:
+  - ports/ci/travis/deploy.sh
 
 branches:
   only:

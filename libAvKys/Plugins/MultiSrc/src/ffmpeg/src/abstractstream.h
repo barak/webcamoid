@@ -28,7 +28,6 @@
 
 extern "C"
 {
-    #include <libavdevice/avdevice.h>
     #include <libavformat/avformat.h>
     #include <libavcodec/avcodec.h>
     #include <libavutil/imgutils.h>
@@ -54,11 +53,11 @@ class AbstractStream: public QObject
                NOTIFY pausedChanged)
 
     public:
-        explicit AbstractStream(const AVFormatContext *formatContext=NULL,
+        explicit AbstractStream(const AVFormatContext *formatContext=nullptr,
                                 uint index=0, qint64 id=-1,
-                                Clock *globalClock=NULL,
+                                Clock *globalClock=nullptr,
                                 bool noModify=false,
-                                QObject *parent=NULL);
+                                QObject *parent=nullptr);
         virtual ~AbstractStream();
 
         Q_INVOKABLE bool paused() const;
@@ -74,7 +73,7 @@ class AbstractStream: public QObject
         Q_INVOKABLE virtual AkCaps caps() const;
         Q_INVOKABLE void packetEnqueue(AVPacket *packet);
         Q_INVOKABLE void dataEnqueue(AVFrame *frame);
-        Q_INVOKABLE void dataEnqueue(AVSubtitle *subtitle);
+        Q_INVOKABLE void subtitleEnqueue(AVSubtitle *subtitle);
         Q_INVOKABLE qint64 queueSize();
         Q_INVOKABLE Clock *globalClock();
         Q_INVOKABLE qreal clockDiff() const;

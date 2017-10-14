@@ -31,8 +31,10 @@ CONFIG += plugin
 HEADERS = \
     src/plugin.h \
     src/mediawriterffmpeg.h \
-    src/outputparams.h \
-    ../mediawriter.h
+    ../mediawriter.h \
+    src/abstractstream.h \
+    src/videostream.h \
+    src/audiostream.h
 
 INCLUDEPATH += \
     ../../../../Lib/src \
@@ -81,8 +83,10 @@ QT += qml concurrent
 SOURCES = \
     src/plugin.cpp \
     src/mediawriterffmpeg.cpp \
-    src/outputparams.cpp \
-    ../mediawriter.cpp
+    ../mediawriter.cpp \
+    src/abstractstream.cpp \
+    src/videostream.cpp \
+    src/audiostream.cpp
 
 DESTDIR = $${OUT_PWD}/../../submodules/MultiSink
 

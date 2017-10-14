@@ -6,7 +6,7 @@
     <message>
         <location filename="../qml/About.qml" line="27"/>
         <source>About %1</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 info</translation>
     </message>
     <message>
         <location filename="../qml/About.qml" line="46"/>
@@ -21,7 +21,7 @@
     <message>
         <location filename="../qml/About.qml" line="73"/>
         <source>Using Qt %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Kasutades Qt %1</translation>
     </message>
     <message>
         <location filename="../qml/About.qml" line="87"/>
@@ -34,22 +34,22 @@
         <translation>Lihtne programm veebikaamerast piltide ja videote salvestamiseks.</translation>
     </message>
     <message>
+        <location filename="../qml/About.qml" line="103"/>
+        <source>Thanks!</source>
+        <translation>Aitäh!</translation>
+    </message>
+    <message>
         <location filename="../qml/About.qml" line="79"/>
         <source>Website</source>
         <translation>Veebisait</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="103"/>
-        <source>Contributors</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/About.qml" line="133"/>
+        <location filename="../qml/About.qml" line="115"/>
         <source>License</source>
         <translation>Litsents</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="144"/>
+        <location filename="../qml/About.qml" line="126"/>
         <source>Close</source>
         <translation>Sulge</translation>
     </message>
@@ -105,66 +105,66 @@
 <context>
     <name>AudioConfig</name>
     <message>
-        <location filename="../qml/AudioConfig.qml" line="110"/>
+        <location filename="../qml/AudioConfig.qml" line="116"/>
         <source>Outputs</source>
-        <translation type="unfinished"></translation>
+        <translation>Väljundid</translation>
     </message>
     <message>
-        <location filename="../qml/AudioConfig.qml" line="113"/>
+        <location filename="../qml/AudioConfig.qml" line="119"/>
         <source>Select the output device for audio playing</source>
-        <translation type="unfinished"></translation>
+        <translation>Vali väljundseade heli mängimiseks</translation>
     </message>
     <message>
-        <location filename="../qml/AudioConfig.qml" line="127"/>
+        <location filename="../qml/AudioConfig.qml" line="133"/>
         <source>Inputs</source>
-        <translation type="unfinished"></translation>
+        <translation>Sisendid</translation>
     </message>
     <message>
-        <location filename="../qml/AudioConfig.qml" line="129"/>
+        <location filename="../qml/AudioConfig.qml" line="135"/>
         <source>Select the device for audio capturing</source>
-        <translation type="unfinished"></translation>
+        <translation>Vali heli salvestamise seade</translation>
     </message>
     <message>
-        <location filename="../qml/AudioConfig.qml" line="186"/>
-        <location filename="../qml/AudioConfig.qml" line="288"/>
+        <location filename="../qml/AudioConfig.qml" line="192"/>
+        <location filename="../qml/AudioConfig.qml" line="294"/>
         <source>Silence</source>
-        <translation type="unfinished"></translation>
+        <translation>Vaikus</translation>
     </message>
 </context>
 <context>
     <name>AudioInfo</name>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="162"/>
+        <location filename="../qml/AudioInfo.qml" line="168"/>
         <source>Description</source>
-        <translation type="unfinished">Kirjeldus</translation>
+        <translation>Kirjeldus</translation>
     </message>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="177"/>
-        <location filename="../qml/AudioInfo.qml" line="184"/>
+        <location filename="../qml/AudioInfo.qml" line="183"/>
+        <location filename="../qml/AudioInfo.qml" line="190"/>
         <source>Device description</source>
-        <translation type="unfinished"></translation>
+        <translation>Seadme kirjeldus</translation>
     </message>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="192"/>
-        <location filename="../qml/AudioInfo.qml" line="207"/>
-        <location filename="../qml/AudioInfo.qml" line="214"/>
+        <location filename="../qml/AudioInfo.qml" line="198"/>
+        <location filename="../qml/AudioInfo.qml" line="213"/>
+        <location filename="../qml/AudioInfo.qml" line="220"/>
         <source>Device id</source>
-        <translation type="unfinished"></translation>
+        <translation>Seadme id</translation>
     </message>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="229"/>
+        <location filename="../qml/AudioInfo.qml" line="235"/>
         <source>Sample Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Diskreetimisvorming</translation>
     </message>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="255"/>
+        <location filename="../qml/AudioInfo.qml" line="261"/>
         <source>Channels</source>
-        <translation type="unfinished"></translation>
+        <translation>Kanalid</translation>
     </message>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="281"/>
+        <location filename="../qml/AudioInfo.qml" line="287"/>
         <source>Sample Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Diskreetimissagedus</translation>
     </message>
 </context>
 <context>
@@ -172,22 +172,22 @@
     <message>
         <location filename="../qml/ConfigBar.qml" line="44"/>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Väljund</translation>
     </message>
     <message>
         <location filename="../qml/ConfigBar.qml" line="48"/>
         <source>General Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Üldised seaded</translation>
     </message>
     <message>
         <location filename="../qml/ConfigBar.qml" line="52"/>
         <source>Plugins Configs</source>
-        <translation type="unfinished"></translation>
+        <translation>Pistikute häälestused</translation>
     </message>
     <message>
         <location filename="../qml/ConfigBar.qml" line="56"/>
         <source>Updates</source>
-        <translation type="unfinished"></translation>
+        <translation>Värskendused</translation>
     </message>
 </context>
 <context>
@@ -235,62 +235,67 @@
 <context>
     <name>GeneralConfig</name>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="37"/>
+        <location filename="../qml/GeneralConfig.qml" line="38"/>
         <source>Play webcam on start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="43"/>
+        <location filename="../qml/GeneralConfig.qml" line="44"/>
         <source>Enable advanced effects mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="49"/>
+        <location filename="../qml/GeneralConfig.qml" line="50"/>
         <source>Frameworks &amp; libraries</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="59"/>
+        <location filename="../qml/GeneralConfig.qml" line="60"/>
         <source>Video capture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="69"/>
+        <location filename="../qml/GeneralConfig.qml" line="70"/>
+        <source>Desktop capture</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="80"/>
         <source>Audio capture/play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="79"/>
+        <location filename="../qml/GeneralConfig.qml" line="90"/>
         <source>Video convert</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="89"/>
+        <location filename="../qml/GeneralConfig.qml" line="100"/>
         <source>Audio convert</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="99"/>
+        <location filename="../qml/GeneralConfig.qml" line="110"/>
         <source>Video output</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="109"/>
+        <location filename="../qml/GeneralConfig.qml" line="120"/>
         <source>Video output convert</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="119"/>
+        <location filename="../qml/GeneralConfig.qml" line="130"/>
         <source>Video playback</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="129"/>
+        <location filename="../qml/GeneralConfig.qml" line="140"/>
         <source>Video record</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="139"/>
+        <location filename="../qml/GeneralConfig.qml" line="150"/>
         <source>Root method</source>
         <translation type="unfinished"></translation>
     </message>
@@ -359,7 +364,7 @@
     <message>
         <location filename="../qml/PhotoWidget.qml" line="81"/>
         <source>Cancel</source>
-        <translation type="unfinished">Loobu</translation>
+        <translation>Loobu</translation>
     </message>
     <message>
         <location filename="../qml/PhotoWidget.qml" line="81"/>
@@ -381,7 +386,7 @@
     </message>
     <message>
         <location filename="../qml/PluginConfig.qml" line="96"/>
-        <source>Search paths</source>
+        <source>Extra search paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -392,12 +397,12 @@
     <message>
         <location filename="../qml/PluginConfig.qml" line="114"/>
         <source>Add</source>
-        <translation type="unfinished">Lisa</translation>
+        <translation>Lisa</translation>
     </message>
     <message>
         <location filename="../qml/PluginConfig.qml" line="122"/>
         <source>Remove</source>
-        <translation type="unfinished">Eemalda</translation>
+        <translation>Eemalda</translation>
     </message>
     <message>
         <location filename="../qml/PluginConfig.qml" line="159"/>
@@ -440,7 +445,7 @@
     <message>
         <location filename="../../src/clioptions.cpp" line="32"/>
         <source>Webcam capture application.</source>
-        <translation type="unfinished">Veebikaamera salvestusprogramm.</translation>
+        <translation>Veebikaamera salvestusprogramm.</translation>
     </message>
     <message>
         <location filename="../../src/clioptions.cpp" line="36"/>
@@ -449,21 +454,21 @@
     </message>
     <message>
         <location filename="../../src/clioptions.cpp" line="44"/>
-        <source>Path to search the Qml interface.</source>
+        <source>Semi-colon separated list of paths to search the Qml interface.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="52"/>
+        <location filename="../../src/clioptions.cpp" line="53"/>
         <source>Search in the specified plugins paths recursively.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="58"/>
+        <location filename="../../src/clioptions.cpp" line="59"/>
         <source>Semi-colon separated list of paths to search for plugins.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="65"/>
+        <location filename="../../src/clioptions.cpp" line="66"/>
         <source>Semi-colon separated list of paths to avoid loading.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -513,35 +518,35 @@
 <context>
     <name>Recording</name>
     <message>
-        <location filename="../../src/recording.cpp" line="606"/>
+        <location filename="../../src/recording.cpp" line="577"/>
         <source>Audio</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/recording.cpp" line="607"/>
+        <location filename="../../src/recording.cpp" line="578"/>
         <source>Video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/recording.cpp" line="608"/>
+        <location filename="../../src/recording.cpp" line="579"/>
         <source>Subtitle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/recording.cpp" line="665"/>
-        <location filename="../../src/recording.cpp" line="831"/>
+        <location filename="../../src/recording.cpp" line="634"/>
+        <location filename="../../src/recording.cpp" line="800"/>
         <source>audio</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/recording.cpp" line="666"/>
-        <location filename="../../src/recording.cpp" line="832"/>
+        <location filename="../../src/recording.cpp" line="635"/>
+        <location filename="../../src/recording.cpp" line="801"/>
         <source>video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/recording.cpp" line="667"/>
-        <location filename="../../src/recording.cpp" line="833"/>
+        <location filename="../../src/recording.cpp" line="636"/>
+        <location filename="../../src/recording.cpp" line="802"/>
         <source>subtitle</source>
         <translation type="unfinished"></translation>
     </message>

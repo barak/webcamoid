@@ -21,8 +21,6 @@
 #define MULTISINKELEMENT_H
 
 #include <QMutex>
-#include <QQmlComponent>
-#include <QQmlContext>
 #include <ak.h>
 
 #include "mediawriter.h"
@@ -84,9 +82,6 @@ class MultiSinkElement: public AkElement
         explicit MultiSinkElement();
         ~MultiSinkElement();
 
-        Q_INVOKABLE QObject *controlInterface(QQmlEngine *engine,
-                                              const QString &controlId) const;
-
         Q_INVOKABLE QString location() const;
         Q_INVOKABLE QStringList supportedFormats() const;
         Q_INVOKABLE QString outputFormat() const;
@@ -120,8 +115,6 @@ class MultiSinkElement: public AkElement
         QVariantList m_userControls;
         QVariantMap m_userControlsValues;
         MediaWriterPtr m_mediaWriter;
-        QMutex m_mutex;
-        QMutex m_mutexLib;
         MultiSinkUtils m_utils;
         QList<int> m_inputStreams;
 
@@ -133,6 +126,11 @@ class MultiSinkElement: public AkElement
         QMap<QString, QString> m_codecDescription;
         QMap<QString, QString> m_codecType;
         QMap<QString, QVariantMap> m_defaultCodecParams;
+
+    protected:
+        QString controlInterfaceProvide(const QString &controlId) const;
+        void controlInterfaceConfigure(QQmlContext *context,
+                                       const QString &controlId) const;
 
     signals:
         void locationChanged(const QString &location);

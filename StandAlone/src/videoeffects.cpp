@@ -44,8 +44,8 @@ VideoEffects::VideoEffects(QQmlApplicationEngine *engine, QObject *parent):
 
     this->m_availableEffects = AkElement::listPlugins("VideoFilter");
 
-    qSort(this->m_availableEffects.begin(), this->m_availableEffects.end(),
-          [this] (const QString &pluginId1, const QString &pluginId2) {
+    std::sort(this->m_availableEffects.begin(), this->m_availableEffects.end(),
+              [this] (const QString &pluginId1, const QString &pluginId2) {
         auto desc1 = this->effectDescription(pluginId1);
         auto desc2 = this->effectDescription(pluginId2);
 
@@ -150,7 +150,6 @@ bool VideoEffects::embedControls(const QString &where,
 
         // Finally, embed the plugin item UI in the desired place.
         interfaceItem->setParentItem(item);
-        interfaceItem->setParent(item);
 
         QQmlProperty::write(interfaceItem,
                             "anchors.fill",
@@ -176,8 +175,8 @@ void VideoEffects::removeInterface(const QString &where) const
         QList<decltype(item)> childItems = item->childItems();
 
         for (auto child: childItems) {
-            child->setParentItem(NULL);
-            child->setParent(NULL);
+            child->setParentItem(nullptr);
+            child->setParent(nullptr);
 
             delete child;
         }

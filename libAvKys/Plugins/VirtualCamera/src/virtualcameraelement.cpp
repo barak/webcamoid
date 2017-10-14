@@ -24,6 +24,8 @@
 
 #ifdef Q_OS_WIN32
     #define PREFERRED_FORMAT AkVideoCaps::Format_0rgb
+#elif defined(Q_OS_OSX)
+    #define PREFERRED_FORMAT AkVideoCaps::Format_argb
 #else
     #define PREFERRED_FORMAT AkVideoCaps::Format_yuv420p
 #endif
@@ -98,53 +100,6 @@ VirtualCameraElement::VirtualCameraElement():
 VirtualCameraElement::~VirtualCameraElement()
 {
     this->setState(AkElement::ElementStateNull);
-}
-
-QObject *VirtualCameraElement::controlInterface(QQmlEngine *engine,
-                                                const QString &controlId) const
-{
-    if (!engine)
-        return NULL;
-
-    // Load the UI from the plugin.
-    QQmlComponent component(engine, QUrl(QStringLiteral("qrc:/VirtualCamera/share/qml/main.qml")));
-
-    if (component.isError()) {
-        qDebug() << "Error in plugin "
-                 << this->metaObject()->className()
-                 << ":"
-                 << component.errorString();
-
-        return NULL;
-    }
-
-    // Create a context for the plugin.
-    QQmlContext *context = new QQmlContext(engine->rootContext());
-    context->setContextProperty("VirtualCamera", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
-    context->setContextProperty("controlId", controlId);
-
-#ifdef Q_OS_LINUX
-    context->setContextProperty("OsName", "linux");
-#elif defined(Q_OS_OSX)
-    context->setContextProperty("OsName", "mac");
-#elif defined(Q_OS_WIN32)
-    context->setContextProperty("OsName", "windows");
-#else
-    context->setContextProperty("OsName", "");
-#endif
-
-    // Create an item with the plugin context.
-    QObject *item = component.create(context);
-
-    if (!item) {
-        delete context;
-
-        return NULL;
-    }
-
-    context->setParent(item);
-
-    return item;
 }
 
 QString VirtualCameraElement::driverPath() const
@@ -254,7 +209,7 @@ QVariantMap VirtualCameraElement::updateStream(int streamIndex,
 }
 
 QString VirtualCameraElement::createWebcam(const QString &description,
-                                           const QString &password) const
+                                           const QString &password)
 {
     return this->m_cameraOut->createWebcam(description, password);
 }
@@ -267,12 +222,12 @@ bool VirtualCameraElement::changeDescription(const QString &webcam,
 }
 
 bool VirtualCameraElement::removeWebcam(const QString &webcam,
-                                        const QString &password) const
+                                        const QString &password)
 {
     return this->m_cameraOut->removeWebcam(webcam, password);
 }
 
-bool VirtualCameraElement::removeAllWebcams(const QString &password) const
+bool VirtualCameraElement::removeAllWebcams(const QString &password)
 {
     return this->m_cameraOut->removeAllWebcams(password);
 }
@@ -294,6 +249,32 @@ QImage VirtualCameraElement::swapChannels(const QImage &image) const
     }
 
     return swapped;
+}
+
+QString VirtualCameraElement::controlInterfaceProvide(const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    return QString("qrc:/VirtualCamera/share/qml/main.qml");
+}
+
+void VirtualCameraElement::controlInterfaceConfigure(QQmlContext *context,
+                                                     const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    context->setContextProperty("VirtualCamera", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
+    context->setContextProperty("controlId", controlId);
+
+#ifdef Q_OS_LINUX
+    context->setContextProperty("OsName", "linux");
+#elif defined(Q_OS_OSX)
+    context->setContextProperty("OsName", "mac");
+#elif defined(Q_OS_WIN32)
+    context->setContextProperty("OsName", "windows");
+#else
+    context->setContextProperty("OsName", "");
+#endif
 }
 
 void VirtualCameraElement::setDriverPath(const QString &driverPath)
@@ -465,6 +446,8 @@ AkPacket VirtualCameraElement::iStream(const AkPacket &packet)
 #ifdef Q_OS_WIN32
         oPacket = AkUtils::roundSizeTo(AkUtils::imageToPacket(image, packet),
                                        PREFERRED_ROUNDING);
+#elif defined(Q_OS_OSX)
+        oPacket = packet;
 #else
         image = this->swapChannels(image);
 

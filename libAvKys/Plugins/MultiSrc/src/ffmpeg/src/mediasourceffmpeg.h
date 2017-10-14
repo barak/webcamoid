@@ -43,7 +43,7 @@ class MediaSourceFFmpeg: public MediaSource
                NOTIFY showLogChanged)
 
     public:
-        explicit MediaSourceFFmpeg(QObject *parent=NULL);
+        explicit MediaSourceFFmpeg(QObject *parent=nullptr);
         ~MediaSourceFFmpeg();
 
         Q_INVOKABLE QStringList medias() const;
@@ -81,8 +81,8 @@ class MediaSourceFFmpeg: public MediaSource
         qint64 packetQueueSize();
         static void deleteFormatContext(AVFormatContext *context);
         AbstractStreamPtr createStream(int index, bool noModify=false);
-        static void readPackets(MediaSourceFFmpeg *element);
-        static void unlockQueue(MediaSourceFFmpeg *element);
+        void readPackets();
+        void unlockQueue();
 
         inline int roundDown(int value, int multiply)
         {
