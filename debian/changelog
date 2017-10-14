@@ -1,3 +1,20 @@
+webcamoid (8.1.0+dfsg-1) experimental; urgency=medium
+
+  * New upstream version 8.1.0+dfsg
+  * debian/control:
+      - Bump Standards-Version from 3.9.8 to 4.1.1
+  * debian/copyright:
+      - Fix 'Files-Excluded' path and added a comment
+        dshow dir was not properly removed in version 7.2.0
+  * debian/akqml.install:
+      - Fix path
+  * debian/gbp.conf:
+      - Add file
+  * debian/libavkys8.symbols:
+      - New file
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sat, 14 Oct 2017 14:07:51 -0300
+
 webcamoid (8.0.0+dfsg-2) unstable; urgency=medium
 
   * Upload to unstable. 
