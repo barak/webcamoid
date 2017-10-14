@@ -143,7 +143,7 @@ void AudioStream::processPacket(AVPacket *packet)
         return;
 
     if (!packet) {
-        this->dataEnqueue(reinterpret_cast<AVFrame *>(NULL));
+        this->dataEnqueue(nullptr);
 
         return;
     }
@@ -249,13 +249,13 @@ AkPacket AudioStream::frameToPacket(AVFrame *iFrame)
     AVFrame frame;
     memset(&frame, 0, sizeof(AVFrame));
 
-    int frameSize = av_samples_get_buffer_size(NULL,
+    int frameSize = av_samples_get_buffer_size(nullptr,
                                                iChannels,
                                                iFrame->nb_samples,
                                                AVSampleFormat(iFrame->format),
                                                1);
 
-    QByteArray iBuffer(frameSize, Qt::Uninitialized);
+    QByteArray iBuffer(frameSize, 0);
 
     if (av_samples_fill_arrays(frame.data,
                                frame.linesize,

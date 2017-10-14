@@ -85,8 +85,7 @@ RESOURCES += \
     Webcamoid.qrc \
     qml.qrc \
     translations.qrc \
-    share/icons/icons.qrc \
-    share/contributors/contributors.qrc
+    share/icons/icons.qrc
 
 SOURCES = \
     src/main.cpp \
@@ -144,7 +143,7 @@ unix:!macx {
         appIcon256x256 \
         appIconScalable
 
-    manpage.files = share/man/man1/*.1.gz
+    manpage.files = share/man/man1/webcamoid.1.gz
     manpage.path = $${MANDIR}/man1
     manpage.CONFIG += no_check_exist
 

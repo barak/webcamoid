@@ -104,43 +104,7 @@ VideoCaptureElement::~VideoCaptureElement()
     this->setState(AkElement::ElementStateNull);
 }
 
-QObject *VideoCaptureElement::controlInterface(QQmlEngine *engine, const QString &controlId) const
-{
-    if (!engine)
-        return NULL;
-
-    // Load the UI from the plugin.
-    QQmlComponent component(engine, QUrl(QStringLiteral("qrc:/VideoCapture/share/qml/main.qml")));
-
-    if (component.isError()) {
-        qDebug() << "Error in plugin "
-                 << this->metaObject()->className()
-                 << ":"
-                 << component.errorString();
-
-        return NULL;
-    }
-
-    // Create a context for the plugin.
-    QQmlContext *context = new QQmlContext(engine->rootContext());
-    context->setContextProperty("VideoCapture", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
-    context->setContextProperty("controlId", controlId);
-
-    // Create an item with the plugin context.
-    QObject *item = component.create(context);
-
-    if (!item) {
-        delete context;
-
-        return NULL;
-    }
-
-    context->setParent(item);
-
-    return item;
-}
-
-QStringList VideoCaptureElement::medias() const
+QStringList VideoCaptureElement::medias()
 {
     return this->m_capture->webcams();
 }
@@ -160,7 +124,7 @@ QList<int> VideoCaptureElement::listTracks(const QString &mimeType)
     return this->m_capture->listTracks(mimeType);
 }
 
-int VideoCaptureElement::defaultStream(const QString &mimeType) const
+int VideoCaptureElement::defaultStream(const QString &mimeType)
 {
     if (mimeType == "video/x-raw")
         return 0;
@@ -168,12 +132,12 @@ int VideoCaptureElement::defaultStream(const QString &mimeType) const
     return -1;
 }
 
-QString VideoCaptureElement::description(const QString &media) const
+QString VideoCaptureElement::description(const QString &media)
 {
     return this->m_capture->description(media);
 }
 
-AkCaps VideoCaptureElement::caps(int stream) const
+AkCaps VideoCaptureElement::caps(int stream)
 {
     QVariantList streams = this->m_capture->caps(this->m_capture->device());
     AkCaps caps = streams.value(stream).value<AkCaps>();
@@ -260,7 +224,7 @@ bool VideoCaptureElement::resetCameraControls()
     return this->m_capture->resetCameraControls();
 }
 
-void VideoCaptureElement::cameraLoop(VideoCaptureElement *captureElement)
+void VideoCaptureElement::cameraLoop()
 {
 #ifdef Q_OS_WIN32
     // Initialize the COM library in multithread mode.
@@ -269,15 +233,15 @@ void VideoCaptureElement::cameraLoop(VideoCaptureElement *captureElement)
 
     bool initConvert = true;
 
-    if (captureElement->m_capture->init()) {
-        while (captureElement->m_runCameraLoop) {
-            if (captureElement->m_pause) {
+    if (this->m_capture->init()) {
+        while (this->m_runCameraLoop) {
+            if (this->m_pause) {
                 QThread::msleep(PAUSE_TIMEOUT);
 
                 continue;
             }
 
-            AkPacket packet = captureElement->m_capture->readFrame();
+            AkPacket packet = this->m_capture->readFrame();
 
             if (!packet)
                 continue;
@@ -287,27 +251,43 @@ void VideoCaptureElement::cameraLoop(VideoCaptureElement *captureElement)
 
 #ifdef Q_OS_WIN32
                 QString fourcc = caps.property("fourcc").toString();
-                captureElement->m_mirror = mirrorFormats->contains(fourcc);
-                captureElement->m_swapRgb = swapRgbFormats->contains(fourcc);
+                this->m_mirror = mirrorFormats->contains(fourcc);
+                this->m_swapRgb = swapRgbFormats->contains(fourcc);
 #endif
 
-                if (!captureElement->m_convertVideo->init(caps))
+                if (!this->m_convertVideo->init(caps))
                     break;
 
                 initConvert = false;
             }
 
-            captureElement->m_convertVideo->packetEnqueue(packet);
+            this->m_convertVideo->packetEnqueue(packet);
         }
 
-        captureElement->m_convertVideo->uninit();
-        captureElement->m_capture->uninit();
+        this->m_convertVideo->uninit();
+        this->m_capture->uninit();
     }
 
 #ifdef Q_OS_WIN32
     // Close COM library.
     CoUninitialize();
 #endif
+}
+
+QString VideoCaptureElement::controlInterfaceProvide(const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    return QString("qrc:/VideoCapture/share/qml/main.qml");
+}
+
+void VideoCaptureElement::controlInterfaceConfigure(QQmlContext *context,
+                                                    const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    context->setContextProperty("VideoCapture", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
+    context->setContextProperty("controlId", controlId);
 }
 
 void VideoCaptureElement::setMedia(const QString &media)
@@ -391,14 +371,18 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
         case AkElement::ElementStatePaused: {
             this->m_pause = true;
             this->m_runCameraLoop = true;
-            this->m_cameraLoopResult = QtConcurrent::run(&this->m_threadPool, this->cameraLoop, this);
+            this->m_cameraLoopResult = QtConcurrent::run(&this->m_threadPool,
+                                                         this,
+                                                         &VideoCaptureElement::cameraLoop);
 
             return AkElement::setState(state);
         }
         case AkElement::ElementStatePlaying: {
             this->m_pause = false;
             this->m_runCameraLoop = true;
-            this->m_cameraLoopResult = QtConcurrent::run(&this->m_threadPool, this->cameraLoop, this);
+            this->m_cameraLoopResult = QtConcurrent::run(&this->m_threadPool,
+                                                         this,
+                                                         &VideoCaptureElement::cameraLoop);
 
             return AkElement::setState(state);
         }

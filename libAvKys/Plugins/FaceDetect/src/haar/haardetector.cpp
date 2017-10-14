@@ -133,7 +133,7 @@ class HaarDetectorPrivate
                            QVector<int> &labels,
                            int i, int label, qreal eps) const;
         QVector<int> classifyRectangles(const QVector<QRect> &rectangles,
-                                        qreal eps, int *nClasses=NULL) const;
+                                        qreal eps, int *nClasses=nullptr) const;
         RectVector groupRectangles(const RectVector &rects, int minNeighbors=3,
                                    qreal eps=0.2) const;
 };
@@ -1132,6 +1132,10 @@ QVector<QRect> HaarDetector::detect(const QImage &image, qreal scaleFactor,
     QThreadPool threadPool;
     QMutex mutex;
     static const int border = 1;
+
+    if (threadPool.maxThreadCount() < 8)
+        threadPool.setMaxThreadCount(8);
+
     this->d->m_mutex.lock();
 
     for (qreal scale = 1; ; scale *= scaleFactor) {

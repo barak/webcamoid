@@ -1,10 +1,51 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ "${TRAVIS_OS_NAME}" = linux ]; then
+if [ "${TRAVIS_OS_NAME}" = linux ] && [ "${ANDROID_BUILD}" != 1 ]; then
+    mkdir -p .local/bin
+
+    # Install Qt Installer Framework
+    wget -c http://download.qt.io/official_releases/qt-installer-framework/${QTIFWVER}/QtInstallerFramework-linux-x64.run
+    chmod +x QtInstallerFramework-linux-x64.run
+    export QT_QPA_PLATFORM=minimal
+
+    ./QtInstallerFramework-linux-x64.run \
+        --script "$PWD/ports/ci/travis/qtifw_non_interactive_install.qs" \
+        --no-force-installations
+
+    cp -vf ~/Qt/QtIFW-${QTIFWVER/-*/}/bin/* .local/bin/
+
+    # Install AppImageTool
+    wget -c -O .local/bin/appimagetool-x86_64.AppImage https://github.com/AppImage/AppImageKit/releases/download/9/appimagetool-x86_64.AppImage
+    chmod +x .local/bin/appimagetool-x86_64.AppImage
+
+    cd .local/bin
+    ./appimagetool-x86_64.AppImage --appimage-extract
+    cp -vf squashfs-root/usr/bin/* .
+    cd ../..
+
+    # Set default Docker command
     EXEC="docker exec ${DOCKERSYS}"
 fi
 
-if [ "${DOCKERSYS}" = debian ]; then
+if [ "${ANDROID_BUILD}" = 1 ]; then
+    sudo apt-get -y install make
+
+    mkdir -p build
+    cd build
+
+    # Install Android NDK
+    wget -c https://dl.google.com/android/repository/android-ndk-${NDKVER}-linux-x86_64.zip
+    unzip -q android-ndk-${NDKVER}-linux-x86_64.zip
+
+    # Install Qt for Android
+    wget -c https://download.qt.io/archive/qt/${QTVER:0:3}/${QTVER}/qt-opensource-linux-x64-android-${QTVER}.run
+    chmod +x qt-opensource-linux-x64-android-${QTVER}.run
+    export QT_QPA_PLATFORM=minimal
+
+    ./qt-opensource-linux-x64-android-${QTVER}.run \
+        --script "$PWD/../ports/ci/travis/qt_non_interactive_install.qs" \
+        --no-force-installations
+elif [ "${DOCKERSYS}" = debian ]; then
     ${EXEC} apt-get -y update
 
     if [ "${DOCKERIMG}" = ubuntu:trusty ]; then
@@ -20,6 +61,7 @@ if [ "${DOCKERSYS}" = debian ]; then
 
     # Install dev tools
     ${EXEC} apt-get -y install \
+        xvfb \
         g++ \
         clang \
         ccache \
@@ -40,14 +82,24 @@ if [ "${DOCKERSYS}" = debian ]; then
             qt58tools \
             qt58declarative \
             qt58multimedia \
-            qt58svg
+            qt58svg \
+            qt58quickcontrols \
+            qt58quickcontrols2 \
+            qt58graphicaleffects
     else
         ${EXEC} apt-get -y install \
             qt5-qmake \
             qtdeclarative5-dev \
             qtmultimedia5-dev \
             libqt5opengl5-dev \
-            libqt5svg5-dev
+            libqt5svg5-dev \
+            qml-module-qt-labs-folderlistmodel \
+            qml-module-qt-labs-settings \
+            qml-module-qtqml-models2 \
+            qml-module-qtquick-controls \
+            qml-module-qtquick-dialogs \
+            qml-module-qtquick-extras \
+            qml-module-qtquick-privatewidgets
     fi
 
     # Install FFmpeg dev
@@ -69,6 +121,10 @@ elif [ "${DOCKERSYS}" = fedora ]; then
     ${EXEC} dnf -y update
 
     ${EXEC} dnf -y install \
+        file \
+        which \
+        xorg-x11-xauth \
+        xorg-x11-server-Xvfb \
         ccache \
         clang \
         make \
@@ -77,6 +133,8 @@ elif [ "${DOCKERSYS}" = fedora ]; then
         qt5-qtdeclarative-devel \
         qt5-qtmultimedia-devel \
         qt5-qtsvg-devel \
+        qt5-qtquickcontrols \
+        qt5-qtgraphicaleffects \
         ffmpeg-devel \
         gstreamer1-plugins-base-devel \
         libv4l-devel \
@@ -87,6 +145,10 @@ elif [ "${DOCKERSYS}" = opensuse ]; then
     ${EXEC} zypper -n update
 
     ${EXEC} zypper -n in \
+        which \
+        xauth \
+        xvfb-run \
+        python3 \
         ccache \
         clang \
         libqt5-linguist \
@@ -94,6 +156,8 @@ elif [ "${DOCKERSYS}" = opensuse ]; then
         libqt5-qtdeclarative-devel \
         libqt5-qtmultimedia-devel \
         libqt5-qtsvg-devel \
+        libqt5-qtquickcontrols \
+        libqt5-qtgraphicaleffects \
         ffmpeg-devel \
         gstreamer-plugins-base-devel \
         libv4l-devel \
@@ -102,6 +166,8 @@ elif [ "${DOCKERSYS}" = opensuse ]; then
         libjack-devel
 elif [ "${TRAVIS_OS_NAME}" = osx ]; then
     brew install \
+        p7zip \
+        python3 \
         ccache \
         pkg-config \
         qt5 \
@@ -111,4 +177,20 @@ elif [ "${TRAVIS_OS_NAME}" = osx ]; then
         pulseaudio \
         jack \
         libuvc
+
+    # Install Qt Installer Framework
+    wget -c http://download.qt.io/official_releases/qt-installer-framework/${QTIFWVER}/QtInstallerFramework-mac-x64.dmg
+    7z x -oqtifw QtInstallerFramework-mac-x64.dmg
+    7z x -oqtifw qtifw/5.hfsx
+    chmod +x qtifw/QtInstallerFramework-mac-x64/QtInstallerFramework-mac-x64.app/Contents/MacOS/QtInstallerFramework-mac-x64
+
+    qtifw/QtInstallerFramework-mac-x64/QtInstallerFramework-mac-x64.app/Contents/MacOS/QtInstallerFramework-mac-x64 \
+        --script "$PWD/ports/ci/travis/qtifw_non_interactive_install.qs" \
+        --no-force-installations
+
+    # Install Syphon framework
+    wget -c https://github.com/Syphon/Simple/releases/download/version-3/Syphon.Simple.Apps.3.zip
+    unzip Syphon.Simple.Apps.3.zip
+    mkdir -p Syphon
+    cp -Rvf "Syphon Simple Apps/Simple Client.app/Contents/Frameworks/Syphon.framework" ./Syphon
 fi

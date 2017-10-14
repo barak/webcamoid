@@ -16,50 +16,9 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-TRANSLATIONS = $$files(share/ts/*.ts)
+TEMPLATE = subdirs
 
-exists(commons.pri) {
-    include(commons.pri)
-} else {
-    exists(../../commons.pri) {
-        include(../../commons.pri)
-    } else {
-        error("commons.pri file not found.")
-    }
-}
+CONFIG += ordered
 
-CONFIG += plugin
-
-HEADERS = \
-    src/desktopcapture.h \
-    src/desktopcaptureelement.h
-
-INCLUDEPATH += \
-    ../../Lib/src
-
-LIBS += -L$${PWD}/../../Lib/ -l$${COMMONS_TARGET}
-win32: LIBS += -lole32
-
-OTHER_FILES += pspec.json
-
-QT += widgets qml concurrent
-
-RESOURCES += \
-    DesktopCapture.qrc \
-    translations.qrc
-
-SOURCES = \
-    src/desktopcapture.cpp \
-    src/desktopcaptureelement.cpp
-
-lupdate_only {
-    SOURCES += $$files(share/qml/*.qml)
-}
-
-DESTDIR = $${OUT_PWD}
-
-TEMPLATE = lib
-
-INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}
+SUBDIRS = src src/qtscreen
+CONFIG(config_avfoundation): SUBDIRS += src/avfoundation

@@ -18,6 +18,7 @@
  */
 
 #include <QQuickWindow>
+#include <QSGSimpleTextureNode>
 
 #include "videodisplay.h"
 
@@ -25,14 +26,11 @@ VideoDisplay::VideoDisplay(QQuickItem *parent):
     QQuickItem(parent)
 {
     this->m_fillDisplay = false;
-    this->m_videoFrame = NULL;
     this->setFlag(ItemHasContents, true);
 }
 
 VideoDisplay::~VideoDisplay()
 {
-    if (this->m_videoFrame)
-        delete this->m_videoFrame;
 }
 
 bool VideoDisplay::fillDisplay() const
@@ -46,31 +44,49 @@ QSGNode *VideoDisplay::updatePaintNode(QSGNode *oldNode,
     Q_UNUSED(updatePaintNodeData)
 
     this->m_mutex.lock();
-
-    if (this->m_videoFrame)
-        delete this->m_videoFrame;
-
-    this->m_videoFrame = this->window()->createTextureFromImage(this->m_frame);
+    auto frame = this->m_frame.format() == QImage::Format_ARGB32?
+                     this->m_frame.copy():
+                     this->m_frame.convertToFormat(QImage::Format_ARGB32);
     this->m_mutex.unlock();
 
-    if (this->m_videoFrame->textureSize().isEmpty()) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+    if (this->window()->rendererInterface()->graphicsApi() == QSGRendererInterface::Software) {
+#endif
+        frame = frame.scaled(this->boundingRect().size().toSize(),
+                             this->m_fillDisplay?
+                                 Qt::IgnoreAspectRatio:
+                                 Qt::KeepAspectRatio,
+                             Qt::SmoothTransformation);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+    }
+#endif
+
+    auto videoFrame = this->window()->createTextureFromImage(frame);
+
+    if (!videoFrame || videoFrame->textureSize().isEmpty()) {
         if (oldNode)
             delete oldNode;
 
-        return NULL;
+        if (videoFrame)
+            delete videoFrame;
+
+        return nullptr;
     }
 
-    QSGSimpleTextureNode *node = NULL;
+    QSGSimpleTextureNode *node = nullptr;
 
     if (oldNode)
         node = static_cast<QSGSimpleTextureNode *>(oldNode);
     else
         node = new QSGSimpleTextureNode();
 
+    node->setOwnsTexture(true);
+    node->setFiltering(QSGTexture::Linear);
+
     if (this->m_fillDisplay)
         node->setRect(this->boundingRect());
     else {
-        QSizeF size(this->m_videoFrame->textureSize());
+        QSizeF size(videoFrame->textureSize());
         size.scale(this->boundingRect().size(), Qt::KeepAspectRatio);
         QRectF rect(QPointF(), size);
         rect.moveCenter(this->boundingRect().center());
@@ -78,7 +94,7 @@ QSGNode *VideoDisplay::updatePaintNode(QSGNode *oldNode,
         node->setRect(rect);
     }
 
-    node->setTexture(this->m_videoFrame);
+    node->setTexture(videoFrame);
 
     return node;
 }
@@ -86,8 +102,7 @@ QSGNode *VideoDisplay::updatePaintNode(QSGNode *oldNode,
 void VideoDisplay::iStream(const AkPacket &packet)
 {
     this->m_mutex.lock();
-    this->m_frame = AkUtils::packetToImage(packet)
-                        .convertToFormat(QImage::Format_ARGB32);
+    this->m_frame = AkUtils::packetToImage(packet);
     this->m_mutex.unlock();
 
     QMetaObject::invokeMethod(this, "update");

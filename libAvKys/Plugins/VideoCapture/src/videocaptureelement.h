@@ -20,11 +20,8 @@
 #ifndef VIDEOCAPTUREELEMENT_H
 #define VIDEOCAPTUREELEMENT_H
 
-#include <QTimer>
 #include <QThreadPool>
 #include <QtConcurrent>
-#include <QQmlComponent>
-#include <QQmlContext>
 
 #include <akmultimediasourceelement.h>
 
@@ -78,17 +75,14 @@ class VideoCaptureElement: public AkMultimediaSourceElement
         explicit VideoCaptureElement();
         ~VideoCaptureElement();
 
-        Q_INVOKABLE QObject *controlInterface(QQmlEngine *engine,
-                                              const QString &controlId) const;
-
-        Q_INVOKABLE QStringList medias() const;
+        Q_INVOKABLE QStringList medias();
         Q_INVOKABLE QString media() const;
         Q_INVOKABLE QList<int> streams() const;
         Q_INVOKABLE QList<int> listTracks(const QString &mimeType="");
 
-        Q_INVOKABLE int defaultStream(const QString &mimeType) const;
-        Q_INVOKABLE QString description(const QString &media) const;
-        Q_INVOKABLE AkCaps caps(int stream) const;
+        Q_INVOKABLE int defaultStream(const QString &mimeType);
+        Q_INVOKABLE QString description(const QString &media);
+        Q_INVOKABLE AkCaps caps(int stream);
         Q_INVOKABLE AkCaps rawCaps(int stream) const;
         Q_INVOKABLE QStringList listCapsDescription() const;
         Q_INVOKABLE QString ioMethod() const;
@@ -113,7 +107,12 @@ class VideoCaptureElement: public AkMultimediaSourceElement
         bool m_mirror;
         bool m_swapRgb;
 
-        static void cameraLoop(VideoCaptureElement *captureElement);
+        void cameraLoop();
+
+    protected:
+        QString controlInterfaceProvide(const QString &controlId) const;
+        void controlInterfaceConfigure(QQmlContext *context,
+                                       const QString &controlId) const;
 
     signals:
         void mediasChanged(const QStringList &medias);

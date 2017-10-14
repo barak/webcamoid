@@ -22,7 +22,6 @@
 
 #include <QMutex>
 #include <QQuickItem>
-#include <QSGSimpleTextureNode>
 
 #include "akutils.h"
 
@@ -38,14 +37,13 @@ class VideoDisplay: public QQuickItem
                NOTIFY fillDisplayChanged)
 
     public:
-        VideoDisplay(QQuickItem *parent=NULL);
+        VideoDisplay(QQuickItem *parent=nullptr);
         ~VideoDisplay();
 
         Q_INVOKABLE bool fillDisplay() const;
 
     private:
         bool m_fillDisplay;
-        QSGTexture *m_videoFrame;
         QImage m_frame;
         QMutex m_mutex;
 

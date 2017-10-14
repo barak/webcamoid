@@ -1,4 +1,4 @@
-version: 8.0.0.{build}-{branch}
+version: 8.1.0.{build}-{branch}
 os: MinGW
 
 platform:
@@ -18,10 +18,11 @@ branches:
 
 environment:
   global:
-    FFMPEG_VERSION: 3.2.2
-    GSTREAMER_VERSION: 1.11.1
+    FFMPEG_VERSION: 3.3.3
+    GSTREAMER_VERSION: 1.12.2
     QMAKESPEC: win32-g++
     MAKETOOL: mingw32-make
+    INSTALL_PREFIX: C:/projects/webcamoid/ports/deploy/temp_priv/root
 
   matrix:
     - QTDIR: C:\Qt\5.6\mingw49_32
@@ -91,11 +92,8 @@ install:
 build_script:
   - ports\ci\appveyor\build.bat
 
-cache:
-  - ffmpeg-%FFMPEG_VERSION%-win32-dev.zip
-#  - ../webcamoid-shadow-build -> libAvKys/libAvKys.pro
-#  - ../webcamoid-shadow-build -> appveyor.yml
-#  - gstreamer-1.0-devel-x86-%GSTREAMER_VERSION%.msi
+on_success:
+  - ports\ci\appveyor\deploy.bat
 
 notifications:
   - provider: Email

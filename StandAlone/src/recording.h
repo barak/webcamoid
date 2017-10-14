@@ -21,8 +21,6 @@
 #define RECORDING_H
 
 #include <QMutex>
-#include <QQmlComponent>
-#include <QQmlContext>
 #include <QQmlApplicationEngine>
 #include <QImage>
 #include <akelement.h>
@@ -69,8 +67,8 @@ class Recording: public QObject
                NOTIFY stateChanged)
 
     public:
-        explicit Recording(QQmlApplicationEngine *engine=NULL,
-                           QObject *parent=NULL);
+        explicit Recording(QQmlApplicationEngine *engine=nullptr,
+                           QObject *parent=nullptr);
         ~Recording();
 
         Q_INVOKABLE QStringList availableFormats() const;
@@ -95,8 +93,6 @@ class Recording: public QObject
         bool m_recordAudio;
         QString m_videoFileName;
         AkElement::ElementState m_state;
-        AkElementPtr m_pipeline;
-        AkElementPtr m_videoGen;
         AkElementPtr m_record;
         QMutex m_mutex;
         AkPacket m_curPacket;
@@ -129,7 +125,7 @@ class Recording: public QObject
         void takePhoto();
         void savePhoto(const QString &fileName);
         AkPacket iStream(const AkPacket &packet);
-        void setQmlEngine(QQmlApplicationEngine *engine=NULL);
+        void setQmlEngine(QQmlApplicationEngine *engine=nullptr);
 
     private slots:
         void supportedFormatsUpdated(const QStringList &availableFormats);
