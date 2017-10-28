@@ -1,3 +1,9 @@
+webcamoid (8.1.0+dfsg-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sat, 28 Oct 2017 14:30:57 -0200
+
 webcamoid (8.1.0+dfsg-1) experimental; urgency=medium
 
   * New upstream version 8.1.0+dfsg
@@ -13,7 +19,7 @@ webcamoid (8.1.0+dfsg-1) experimental; urgency=medium
   * debian/libavkys8.symbols:
       - New file
 
- -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sat, 14 Oct 2017 14:07:51 -0300
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sat, 28 Oct 2017 14:30:44 -0200
 
 webcamoid (8.0.0+dfsg-2) unstable; urgency=medium
 
