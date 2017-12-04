@@ -20,7 +20,8 @@ override_dh_auto_configure:
 		"QMAKE_LFLAGS=${LDFLAGS}" \
 		"LIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH)" \
                 "LOCALEDIR=/usr/share/webcamoid/locale" \
-                Webcamoid.pro
+		"INSTALLQMLDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/qt5/qml" \
+		Webcamoid.pro
 
 override_dh_makeshlibs:
 	dh_makeshlibs -- -v$(PVER)
