@@ -1,3 +1,11 @@
+webcamoid (8.1.0+dfsg-3) unstable; urgency=medium
+
+  * AkQml default qt5 path. Thanks Victor Porton. (Closes: #883402)
+    debian/akqml.install
+    debian/rules
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Mon, 04 Dec 2017 09:55:25 -0200
+
 webcamoid (8.1.0+dfsg-2) unstable; urgency=medium
 
   * Upload to unstable.
@@ -23,7 +31,7 @@ webcamoid (8.1.0+dfsg-1) experimental; urgency=medium
 
 webcamoid (8.0.0+dfsg-2) unstable; urgency=medium
 
-  * Upload to unstable. 
+  * Upload to unstable
 
  -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sun, 18 Jun 2017 14:48:17 -0300
 
@@ -104,7 +112,7 @@ webcamoid (7.2.0+dfsg1-1) unstable; urgency=medium
   * debian/patches:
       - no_virtual_camera.patch removed. It is not necessary.
   * debian/README.source updated.
-  * webcamoid_7.2.0+dfsg.orig.tar.gz was replaced. Please note the '+dfsg1' 
+  * webcamoid_7.2.0+dfsg.orig.tar.gz was replaced. Please note the '+dfsg1'
     (1) as a new part of the version.
 
  -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Wed, 03 Aug 2016 17:32:16 -0300
@@ -134,7 +142,7 @@ webcamoid (7.2.0+dfsg-1) experimental; urgency=medium
       - libAvKys/Plugins/VirtualCamera directory removed. Ms-LPL license. This
         package is a dfsg version.
   * debian/watch:
-      - option dversionmangle was applied to remove the '+dfsg' part. 
+      - option dversionmangle was applied to remove the '+dfsg' part.
 
  -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Mon, 01 Aug 2016 14:46:26 -0300
 
@@ -189,7 +197,7 @@ webcamoid (7.0.0-2) unstable; urgency=low
 webcamoid (7.0.0-1) experimental; urgency=low
 
   * New upstream release.
-  * New names for lib, module and paths. To accommodate that 
+  * New names for lib, module and paths. To accommodate that
       debian/control and debian/*.install files were edited and renamed.
   * debian/control:
       - libpulse-dev added to Build-Depends.
