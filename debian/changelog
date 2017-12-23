@@ -1,3 +1,16 @@
+webcamoid (8.1.0+dfsg-4) unstable; urgency=medium
+
+  * debian/control:
+      - Bump Sandards-Version from 4.1.1 to 4.1.2
+      - Set Multi-Arch for:
+          - webcamoid-data
+          - webcamoid-plugins
+          - akqml
+          - libavkys8
+          - libavkys-dev
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sat, 23 Dec 2017 11:53:50 -0200
+
 webcamoid (8.1.0+dfsg-3) unstable; urgency=medium
 
   * AkQml default qt5 path. Thanks Victor Porton. (Closes: #883402)
