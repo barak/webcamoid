@@ -57,6 +57,7 @@ Description: full featured webcam capture application
 Package: libavkys8
 Section: libs
 Architecture: linux-any
+Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Breaks: libavkys7 (<< 7.2.1+dfsg1-5~)
 Replaces: libavkys7 (<< 7.2.1+dfsg1-5~)
@@ -84,6 +85,7 @@ Description: full featured webcam capture application - library
 Package: libavkys-dev
 Section: libdevel
 Architecture: linux-any
+Multi-Arch: same
 Depends: libavkys8 (= ${binary:Version}), ${misc:Depends}
 Breaks: libavkys7 (<= 7.2.1+dfsg1-5~)
 Replaces: libavkys7 (<= 7.2.1+dfsg1-5~)
@@ -110,6 +112,7 @@ Description: full featured webcam capture application - dev
 
 Package: webcamoid-plugins
 Architecture: linux-any
+Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Breaks: qb-plugins (= 6.2.0)
 Replaces: qb-plugins (= 6.2.0)
@@ -136,6 +139,7 @@ Description: full featured webcam capture application - plugins
 
 Package: akqml
 Architecture: linux-any
+Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Breaks: qbqml (= 6.2.0)
 Replaces: qbqml (= 6.2.0)
@@ -162,6 +166,7 @@ Description: full featured webcam capture application - qml module
 
 Package: webcamoid-data
 Architecture: all
+Multi-Arch: foreign
 Depends: ${misc:Depends}
 Description: icons and locale files for webcamoid
  webcamoid allows one to capture, save and view a video stream. It also can
