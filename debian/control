@@ -17,7 +17,7 @@ Build-Depends: debhelper (>= 9),
                pkg-config,
                qtdeclarative5-dev,
                qttools5-dev-tools
-Standards-Version: 4.1.1
+Standards-Version: 4.1.2
 Homepage: http://webcamoid.github.io/
 Vcs-Git: https://anonscm.debian.org/git/collab-maint/webcamoid.git
 Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/webcamoid.git
