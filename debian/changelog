@@ -1,3 +1,13 @@
+webcamoid (8.1.0+dfsg-5) unstable; urgency=medium
+
+  * DH_LEVEL: 11
+  * debian/rules:
+      - dh option '--parallel'
+      - relying on dh_auto_configure
+    (Closes: #885159) - Thanks Pino Toscano
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Mon, 25 Dec 2017 13:29:48 -0200
+
 webcamoid (8.1.0+dfsg-4) unstable; urgency=medium
 
   * debian/control:
