@@ -6,22 +6,18 @@ export PVER=$(shell dpkg-parsechangelog --show-field version | cut -d"+" -f1 )
 
 export DEB_BUILD_MAINT_OPTIONS := hardening=+all
 export DEB_LDFLAGS_MAINT_APPEND := -fPIE -pie -Wl,--as-needed
+export QT_SELECT=5
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 %:
-	dh $@ --buildsystem=qmake
+	dh $@ --parallel --buildsystem=qmake
 
 override_dh_auto_configure:
-	mkdir -p build
-	qmake -qt=5 \
-		"QMAKE_CFLAGS=${CFLAGS}" \
-		"QMAKE_CXXFLAGS=${CXXFLAGS} ${CPPFLAGS}" \
-		"QMAKE_LFLAGS=${LDFLAGS}" \
+	dh_auto_configure -- \
 		"LIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH)" \
-                "LOCALEDIR=/usr/share/webcamoid/locale" \
-		"INSTALLQMLDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/qt5/qml" \
-		Webcamoid.pro
+		"LOCALEDIR=/usr/share/webcamoid/locale" \
+		"INSTALLQMLDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/qt5/qml"
 
 override_dh_makeshlibs:
 	dh_makeshlibs -- -v$(PVER)
