@@ -1,3 +1,12 @@
+webcamoid (8.1.0+dfsg-8) experimental; urgency=medium
+
+  * debian/patches:
+      - Add patch to build with ffmpeg 4.0 - #888371
+        Upload to experimental to confirm archs
+        ffmpeg_4.0.patch
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sat, 21 Jul 2018 11:30:15 -0300
+
 webcamoid (8.1.0+dfsg-7) unstable; urgency=medium
 
   * Remove autopkgtest:
