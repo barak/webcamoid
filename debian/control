@@ -3,10 +3,10 @@ Section: video
 Priority: optional
 Maintainer: Herbert Parentes Fortes Neto <hpfn@debian.org>
 Build-Depends: debhelper (>= 11),
-               libavcodec-dev (>= 3.1),
-               libavdevice-dev (>= 3.1),
-               libavformat-dev (>= 3.1),
-               libavutil-dev (>= 3.1),
+               libavcodec-dev (>= 4.0),
+               libavdevice-dev (>= 4.0),
+               libavformat-dev (>= 4.0),
+               libavutil-dev (>= 4.0),
                libpulse-dev,
                libqt5opengl5-dev,
                libqt5svg5-dev,
