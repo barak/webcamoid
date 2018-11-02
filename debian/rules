@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 
 export PVER=$(shell dpkg-parsechangelog --show-field version | cut -d"+" -f1 )
 
@@ -30,4 +30,3 @@ override_dh_clean:
 	rm -f ./libAvKys/config.log
 	rm -f ./libAvKys/.qmake.cache
 	rm -f ./libAvKys/.qmake.stash
-
