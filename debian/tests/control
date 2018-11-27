@@ -1,0 +1,3 @@
+Tests: check-auto-tests.sh
+Depends: @builddeps@
+Restrictions: allow-stderr
