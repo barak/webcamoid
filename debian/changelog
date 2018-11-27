@@ -1,3 +1,10 @@
+webcamoid (8.1.0+dfsg-11) unstable; urgency=medium
+
+  * debian/tests:
+      - CI tests - upstream tests
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Tue, 27 Nov 2018 11:17:01 -0200
+
 webcamoid (8.1.0+dfsg-10) unstable; urgency=medium
 
   * debian/control:
