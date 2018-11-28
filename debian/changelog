@@ -1,3 +1,10 @@
+webcamoid (8.1.0+dfsg-12) unstable; urgency=medium
+
+  * debian/tests:
+      - Use shunit2
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Wed, 28 Nov 2018 09:03:18 -0200
+
 webcamoid (8.1.0+dfsg-11) unstable; urgency=medium
 
   * debian/tests:
