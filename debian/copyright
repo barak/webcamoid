@@ -6,11 +6,11 @@ Comment: dshow directory has Ms-LPL license. Affect dshow dir only
          https://lists.debian.org/debian-legal/2017/10/msg00001.html
 
 Files: *
-Copyright: 2011-2017 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
+Copyright: 2011-2019 Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
 License: GPL-3+
 
 Files: libAvKys/Plugins/FaceDetect/src/haar/*
-Copyright: 2011-2016  Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
+Copyright: 2016  Gonzalo Exequiel Pedone <hipersayan.x@gmail.com>
            2000       Intel Corporation
 License: GPL-3+ and BSD-3-Clause
 
@@ -32,7 +32,7 @@ Copyright: 2016 Stephen J. Gowdy <linux.usb.ids@gmail.com>
 License: BSD-3-clause
 
 Files: debian/*
-Copyright: 2015-2018 Herbert Parentes Fortes Neto <hpfn@debian.org>
+Copyright: 2015-2019 Herbert Parentes Fortes Neto <hpfn@debian.org>
 License: GPL-3+
 
 License: GPL-3+
