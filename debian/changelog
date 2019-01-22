@@ -1,3 +1,28 @@
+webcamoid (8.5.0+dfsg-1) experimental; urgency=medium
+
+  * New upstream version 8.5.0+dfsg
+  * debian/control:
+      - Update Build-Depends and Webcamoid pkg Depends
+      - Bump Standards-Version from 4.2.1 to 4.3.0
+  * debian/copyright:
+      - Update year for myself and upstream
+  * debian/clean:
+      - Remove libAkQml.so file
+  * debian/gbp.conf:
+      - Remove sign-tags
+  * debian/watch:
+      - Add repacksuffix,repack,compression to opts
+      - dversionmangle: remove number 1 from +dfsg
+  * debian/patches:
+      - Remove upstream patches
+      - Add patch for .desktop file
+  * Add new .symbols file
+  * debian/webcamoid-data.install:
+      - StandAlone does not have .json and effects.xml files
+
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Tue, 22 Jan 2019 15:54:16 -0200
+
 webcamoid (8.1.0+dfsg-12) unstable; urgency=medium
 
   * debian/tests:
