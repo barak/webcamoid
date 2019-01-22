@@ -1,3 +1,2 @@
 Tests: check-auto-tests.sh
-Depends: @builddeps@, shunit2
-#Restrictions: allow-stderr
+Depends: shunit2, @builddeps@
