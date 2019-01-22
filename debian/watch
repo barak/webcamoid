@@ -1,3 +1,6 @@
 version=4
-opts=dversionmangle=s/\+dfsg1// \
+opts=\
+repacksuffix=+dfsg,\
+repack,compression=xz,\
+dversionmangle=s/\+dfsg1// \
 https://github.com/hipersayanX/webcamoid/releases .*/archive/v?(\d\S+)\.(?:zip|tar)\.?(?:gz|bz2|xz)? debian uupdate
