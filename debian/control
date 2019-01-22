@@ -19,7 +19,8 @@ Build-Depends: debhelper (>= 11),
                qtdeclarative5-dev,
                qtmultimedia5-dev,
                qtquickcontrols2-5-dev,
-               qttools5-dev-tools
+               qttools5-dev-tools,
+               libgstreamer-plugins-base1.0-dev
 Standards-Version: 4.3.0
 Homepage: http://webcamoid.github.io/
 Vcs-Git: https://salsa.debian.org/debian/webcamoid.git
