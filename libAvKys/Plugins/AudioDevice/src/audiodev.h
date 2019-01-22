@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,10 @@
 #ifndef AUDIODEV_H
 #define AUDIODEV_H
 
-#include <akaudiopacket.h>
+#include <akaudiocaps.h>
 
-class AudioDeviceElement;
+class AudioDevPrivate;
+class AkAudioPacket;
 
 class AudioDev: public QObject
 {
@@ -32,9 +33,10 @@ class AudioDev: public QObject
                NOTIFY errorChanged)
 
     public:
-        explicit AudioDev(QObject *parent=nullptr);
+        AudioDev(QObject *parent=nullptr);
         virtual ~AudioDev();
 
+        Q_INVOKABLE QVector<int> &commonSampleRates();
         Q_INVOKABLE virtual QString error() const;
         Q_INVOKABLE virtual QString defaultInput();
         Q_INVOKABLE virtual QString defaultOutput();
@@ -50,8 +52,8 @@ class AudioDev: public QObject
         Q_INVOKABLE virtual bool write(const AkAudioPacket &packet);
         Q_INVOKABLE virtual bool uninit();
 
-    protected:
-        QVector<int> m_commonSampleRates;
+    private:
+        AudioDevPrivate *d;
 
     Q_SIGNALS:
         void errorChanged(const QString &error);
@@ -59,8 +61,6 @@ class AudioDev: public QObject
         void defaultOutputChanged(const QString &defaultOutput);
         void inputsChanged(const QStringList &inputs);
         void outputsChanged(const QStringList &outputs);
-
-    friend class AudioDeviceElement;
 };
 
 #endif // AUDIODEV_H

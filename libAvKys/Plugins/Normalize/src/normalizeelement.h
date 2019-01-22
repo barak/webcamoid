@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,14 @@
 #ifndef NORMALIZEELEMENT_H
 #define NORMALIZEELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
 
 class NormalizeElement: public AkElement
 {
     Q_OBJECT
 
     public:
-        explicit NormalizeElement();
+        NormalizeElement();
 
     public slots:
         AkPacket iStream(const AkPacket &packet);

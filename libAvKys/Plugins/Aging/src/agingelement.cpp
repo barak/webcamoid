@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,29 +17,120 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <cstdlib>
+#include <QImage>
+#include <QVector>
 #include <QTime>
+#include <QMutex>
+#include <QQmlContext>
+#include <akvideopacket.h>
 
 #include "agingelement.h"
+#include "scratch.h"
 
-AgingElement::AgingElement(): AkElement()
+class AgingElementPrivate
 {
-    this->m_scratches.resize(7);
-    this->m_addDust = true;
+    public:
+        QVector<Scratch> m_scratches;
+        QMutex m_mutex;
+        bool m_addDust {true};
+
+        QImage colorAging(const QImage &src);
+        void scratching(QImage &dest);
+        void pits(QImage &dest);
+        void dusts(QImage &dest);
+};
+
+AgingElement::AgingElement():
+    AkElement()
+{
+    this->d = new AgingElementPrivate;
+    this->d->m_scratches.resize(7);
 
     qsrand(uint(QTime::currentTime().msec()));
 }
 
+AgingElement::~AgingElement()
+{
+    delete this->d;
+}
+
 int AgingElement::nScratches() const
 {
-    return this->m_scratches.size();
+    return this->d->m_scratches.size();
 }
 
 bool AgingElement::addDust() const
 {
-    return this->m_addDust;
+    return this->d->m_addDust;
 }
 
-QImage AgingElement::colorAging(const QImage &src)
+QString AgingElement::controlInterfaceProvide(const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    return QString("qrc:/Aging/share/qml/main.qml");
+}
+
+void AgingElement::controlInterfaceConfigure(QQmlContext *context,
+                                             const QString &controlId) const
+{
+    Q_UNUSED(controlId)
+
+    context->setContextProperty("Aging", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
+    context->setContextProperty("controlId", this->objectName());
+}
+
+void AgingElement::setNScratches(int nScratches)
+{
+    if (this->d->m_scratches.size() == nScratches)
+        return;
+
+    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_scratches.resize(nScratches);
+    emit this->nScratchesChanged(nScratches);
+}
+
+void AgingElement::setAddDust(bool addDust)
+{
+    if (this->d->m_addDust == addDust)
+        return;
+
+    this->d->m_addDust = addDust;
+    emit this->addDustChanged(addDust);
+}
+
+void AgingElement::resetNScratches()
+{
+    this->setNScratches(7);
+}
+
+void AgingElement::resetAddDust()
+{
+    this->setAddDust(true);
+}
+
+AkPacket AgingElement::iStream(const AkPacket &packet)
+{
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
+
+    if (src.isNull())
+        return AkPacket();
+
+    QImage oFrame = src.convertToFormat(QImage::Format_ARGB32);
+    oFrame = this->d->colorAging(oFrame);
+    this->d->scratching(oFrame);
+    this->d->pits(oFrame);
+
+    if (this->d->m_addDust)
+        this->d->dusts(oFrame);
+
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
+    akSend(oPacket)
+}
+
+QImage AgingElementPrivate::colorAging(const QImage &src)
 {
     QImage dst(src.size(), src.format());
 
@@ -48,8 +139,8 @@ QImage AgingElement::colorAging(const QImage &src)
     int luma = -32 + qrand() % lumaVariance;
 
     for (int y = 0; y < src.height(); y++) {
-        const QRgb *srcLine = reinterpret_cast<const QRgb *>(src.constScanLine(y));
-        QRgb *dstLine = reinterpret_cast<QRgb *>(dst.scanLine(y));
+        auto srcLine = reinterpret_cast<const QRgb *>(src.constScanLine(y));
+        auto dstLine = reinterpret_cast<QRgb *>(dst.scanLine(y));
 
         for (int x = 0; x < src.width(); x++) {
             int c = qrand() % colorVariance;
@@ -68,35 +159,35 @@ QImage AgingElement::colorAging(const QImage &src)
     return dst;
 }
 
-void AgingElement::scratching(QImage &dest)
+void AgingElementPrivate::scratching(QImage &dest)
 {
     QMutexLocker locker(&this->m_mutex);
 
-    for (int i = 0; i < this->m_scratches.size(); i++) {
-        if (this->m_scratches[i].life() < 1.0) {
+    for (auto &scratch: this->m_scratches) {
+        if (scratch.life() < 1.0) {
             if (qrand() <= 0.06 * RAND_MAX) {
-                this->m_scratches[i] = Scratch(2.0, 33.0,
-                                               1.0, 1.0,
-                                               0.0, dest.width() - 1,
-                                               0.0, 512.0,
-                                               0.0, dest.height() - 1);
-            } else
+                scratch = Scratch(2.0, 33.0,
+                                  1.0, 1.0,
+                                  0.0, dest.width() - 1,
+                                  0.0, 512.0,
+                                  0, dest.height() - 1);
+            } else {
                 continue;
+            }
         }
 
-        if (this->m_scratches[i].x() < 0.0
-            || this->m_scratches[i].x() >= dest.width()) {
-            this->m_scratches[i]++;
+        if (scratch.x() < 0.0 || scratch.x() >= dest.width()) {
+            scratch++;
 
             continue;
         }
 
         int lumaVariance = 8;
         int luma = 32 + qrand() % lumaVariance;
-        int x = int(this->m_scratches[i].x());
+        int x = int(scratch.x());
 
-        int y1 = this->m_scratches[i].y();
-        int y2 = this->m_scratches[i].isAboutToDie()?
+        int y1 = scratch.y();
+        int y2 = scratch.isAboutToDie()?
                      qrand() % dest.height():
                      dest.height();
 
@@ -113,11 +204,11 @@ void AgingElement::scratching(QImage &dest)
             line[x] = qRgba(r, g, b, qAlpha(line[x]));
         }
 
-        this->m_scratches[i]++;
+        scratch++;
     }
 }
 
-void AgingElement::pits(QImage &dest)
+void AgingElementPrivate::pits(QImage &dest)
 {
     int pnum;
     int pnumscale = int(0.03 * qMax(dest.width(), dest.height()));
@@ -152,7 +243,7 @@ void AgingElement::pits(QImage &dest)
     }
 }
 
-void AgingElement::dusts(QImage &dest)
+void AgingElementPrivate::dusts(QImage &dest)
 {
     static int dustInterval = 0;
 
@@ -187,66 +278,4 @@ void AgingElement::dusts(QImage &dest)
     }
 }
 
-QString AgingElement::controlInterfaceProvide(const QString &controlId) const
-{
-    Q_UNUSED(controlId)
-
-    return QString("qrc:/Aging/share/qml/main.qml");
-}
-
-void AgingElement::controlInterfaceConfigure(QQmlContext *context,
-                                             const QString &controlId) const
-{
-    Q_UNUSED(controlId)
-
-    context->setContextProperty("Aging", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
-    context->setContextProperty("controlId", this->objectName());
-}
-
-void AgingElement::setNScratches(int nScratches)
-{
-    if (this->m_scratches.size() == nScratches)
-        return;
-
-    QMutexLocker locker(&this->m_mutex);
-    this->m_scratches.resize(nScratches);
-    emit this->nScratchesChanged(nScratches);
-}
-
-void AgingElement::setAddDust(bool addDust)
-{
-    if (this->m_addDust == addDust)
-        return;
-
-    this->m_addDust = addDust;
-    emit this->addDustChanged(addDust);
-}
-
-void AgingElement::resetNScratches()
-{
-    this->setNScratches(7);
-}
-
-void AgingElement::resetAddDust()
-{
-    this->setAddDust(true);
-}
-
-AkPacket AgingElement::iStream(const AkPacket &packet)
-{
-    QImage src = AkUtils::packetToImage(packet);
-
-    if (src.isNull())
-        return AkPacket();
-
-    QImage oFrame = src.convertToFormat(QImage::Format_ARGB32);
-    oFrame = this->colorAging(oFrame);
-    this->scratching(oFrame);
-    this->pits(oFrame);
-
-    if (this->m_addDust)
-        this->dusts(oFrame);
-
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
-    akSend(oPacket)
-}
+#include "moc_agingelement.cpp"

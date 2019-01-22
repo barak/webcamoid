@@ -1,3 +1,21 @@
+REM Webcamoid, webcam capture application.
+REM Copyright (C) 2017  Gonzalo Exequiel Pedone
+REM
+REM Webcamoid is free software: you can redistribute it and/or modify
+REM it under the terms of the GNU General Public License as published by
+REM the Free Software Foundation, either version 3 of the License, or
+REM (at your option) any later version.
+REM
+REM Webcamoid is distributed in the hope that it will be useful,
+REM but WITHOUT ANY WARRANTY; without even the implied warranty of
+REM MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+REM GNU General Public License for more details.
+REM
+REM You should have received a copy of the GNU General Public License
+REM along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
+REM
+REM Web-Site: http://webcamoid.github.io/
+
 if "%PLATFORM%" == "x86" (
     set FF_ARCH=win32
     set GST_ARCH=x86
@@ -9,10 +27,10 @@ if "%PLATFORM%" == "x86" (
 )
 
 rem Installing various utilities
-
 choco install -y curl 7zip InnoSetup
 
-if not "%VSVER%" == "" call "C:\Program Files (x86)\Microsoft Visual Studio %VSVER%.0\VC\vcvarsall" %VC_ARGS%
+rem Visual Studio init
+if not "%VSPATH%" == "" call "%VSPATH%\vcvarsall" %VC_ARGS%
 
 set PATH=%PATH%;"C:\Program Files\7-Zip";"C:\Program Files (x86)\Inno Setup 5";%QTDIR%\bin;%TOOLSDIR%\bin
 
@@ -21,7 +39,7 @@ set FFMPEG_DEV_FILE=ffmpeg-%FFMPEG_VERSION%-%FF_ARCH%-dev.zip
 
 if not exist %FFMPEG_DEV_FILE% curl --retry 10 -kLOC - https://ffmpeg.zeranoe.com/builds/%FF_ARCH%/dev/%FFMPEG_DEV_FILE%
 
-if exist %FFMPEG_DEV_FILE% 7z x %FFMPEG_DEV_FILE% -aoa
+if exist %FFMPEG_DEV_FILE% 7z x %FFMPEG_DEV_FILE% -aoa -bb
 
 set FFMPEG_DEV_PATH=%CD%\ffmpeg-%FFMPEG_VERSION%-%FF_ARCH%-dev
 
@@ -30,7 +48,7 @@ set FFMPEG_BIN_FILE=ffmpeg-%FFMPEG_VERSION%-%FF_ARCH%-shared.zip
 
 if not exist %FFMPEG_BIN_FILE% curl --retry 10 -kLOC - https://ffmpeg.zeranoe.com/builds/%FF_ARCH%/shared/%FFMPEG_BIN_FILE%
 
-if exist %FFMPEG_BIN_FILE% 7z x %FFMPEG_BIN_FILE% -aoa
+if exist %FFMPEG_BIN_FILE% 7z x %FFMPEG_BIN_FILE% -aoa -bb
 
 set PATH=%CD%\ffmpeg-%FFMPEG_VERSION%-%FF_ARCH%-shared\bin;%PATH%
 

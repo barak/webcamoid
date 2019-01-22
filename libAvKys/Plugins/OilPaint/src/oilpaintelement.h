@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef OILPAINTELEMENT_H
 #define OILPAINTELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class OilPaintElementPrivate;
 
 class OilPaintElement: public AkElement
 {
@@ -33,12 +34,13 @@ class OilPaintElement: public AkElement
                NOTIFY radiusChanged)
 
     public:
-        explicit OilPaintElement();
+        OilPaintElement();
+        ~OilPaintElement();
 
         Q_INVOKABLE int radius() const;
 
     private:
-        int m_radius;
+        OilPaintElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

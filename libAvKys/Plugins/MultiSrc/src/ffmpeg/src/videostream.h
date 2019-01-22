@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,28 +20,20 @@
 #ifndef VIDEOSTREAM_H
 #define VIDEOSTREAM_H
 
-extern "C"
-{
-    #include <libavcodec/avcodec.h>
-    #include <libswscale/swscale.h>
-}
-
-#ifdef PixelFormat
-#undef PixelFormat
-#endif
-
 #include "abstractstream.h"
+
+class VideoStreamPrivate;
 
 class VideoStream: public AbstractStream
 {
     Q_OBJECT
 
     public:
-        explicit VideoStream(const AVFormatContext *formatContext=nullptr,
-                             uint index=0, qint64 id=-1,
-                             Clock *globalClock=nullptr,
-                             bool noModify=false,
-                             QObject *parent=nullptr);
+        VideoStream(const AVFormatContext *formatContext=nullptr,
+                    uint index=0, qint64 id=-1,
+                    Clock *globalClock=nullptr,
+                    bool noModify=false,
+                    QObject *parent=nullptr);
         ~VideoStream();
 
         Q_INVOKABLE AkCaps caps() const;
@@ -51,15 +43,7 @@ class VideoStream: public AbstractStream
         void processData(AVFrame *frame);
 
     private:
-        SwsContext *m_scaleContext;
-
-        // Sync properties.
-        qreal m_lastPts;
-
-        AkFrac fps() const;
-        AkPacket convert(AVFrame *iFrame);
-        int64_t bestEffortTimestamp(const AVFrame *frame) const;
-        AVFrame *copyFrame(AVFrame *frame) const;
+        VideoStreamPrivate *d;
 };
 
 #endif // VIDEOSTREAM_H

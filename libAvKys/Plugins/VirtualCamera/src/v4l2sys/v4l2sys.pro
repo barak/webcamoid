@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,42 +16,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
-} else {
-    exists(../../../../commons.pri) {
-        include(../../../../commons.pri)
-    } else {
-        error("commons.pri file not found.")
-    }
-}
+TEMPLATE = subdirs
+CONFIG += ordered
 
-CONFIG += plugin
-
-HEADERS += \
-    src/plugin.h \
-    src/cameraoutv4l2.h \
-    ../cameraout.h
-
-INCLUDEPATH += \
-    ../../../../Lib/src \
-    ../
-
-LIBS += -L$${PWD}/../../../../Lib/ -l$${COMMONS_TARGET}
-
-OTHER_FILES += pspec.json
-
-QT += qml
-
-SOURCES += \
-    src/plugin.cpp \
-    src/cameraoutv4l2.cpp \
-    ../cameraout.cpp
-
-DESTDIR = $${OUT_PWD}/../../submodules/VirtualCamera
-
-TEMPLATE = lib
-
-INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}/submodules/VirtualCamera
+SUBDIRS = \
+    VCamIPC

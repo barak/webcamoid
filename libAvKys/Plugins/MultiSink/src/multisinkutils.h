@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ class MultiSinkUtils: public QObject
     Q_OBJECT
 
     public:
-        explicit MultiSinkUtils(QObject *parent=nullptr);
+        MultiSinkUtils(QObject *parent=nullptr);
 
         Q_INVOKABLE bool matches(const QString &pattern,
                                  const QStringList &strings) const;

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,11 @@
  */
 
 #include "akqml.h"
+#include "ak.h"
+#include "akfrac.h"
+#include "akcaps.h"
+#include "akvideocaps.h"
+#include "akelement.h"
 
 AkQml::AkQml(QQuickItem *parent):
     QQuickItem(parent)
@@ -27,10 +32,6 @@ AkQml::AkQml(QQuickItem *parent):
     // following line and re-implement updatePaintNode()
 
     // setFlag(ItemHasContents, true);
-}
-
-AkQml::~AkQml()
-{
 }
 
 qint64 AkQml::id() const
@@ -141,6 +142,11 @@ QObject *AkQml::newElement(const QString &pluginId,
     return AkElement::createPtr(pluginId, elementName);
 }
 
+QVariant AkQml::varFrac(QObject *frac) const
+{
+    return QVariant::fromValue(*qobject_cast<AkFrac *>(frac));
+}
+
 QVariant AkQml::varFrac(AkFrac *frac) const
 {
     return QVariant::fromValue(*frac);
@@ -151,7 +157,14 @@ QVariant AkQml::varFrac(qint64 num, qint64 den) const
     return QVariant::fromValue(AkFrac(num, den));
 }
 
+QVariant AkQml::varCaps(QObject *caps) const
+{
+    return QVariant::fromValue(*qobject_cast<AkCaps *>(caps));
+}
+
 QVariant AkQml::varCaps(AkCaps *caps) const
 {
     return QVariant::fromValue(*caps);
 }
+
+#include "moc_akqml.cpp"

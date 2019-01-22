@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,12 @@
 #ifndef MEDIASOURCE_H
 #define MEDIASOURCE_H
 
-#include <QMutex>
-#include <QQmlApplicationEngine>
 #include <akelement.h>
 
+class MediaSourcePrivate;
 class MediaSource;
+class AkCaps;
+class QQmlApplicationEngine;
 
 typedef QSharedPointer<MediaSource> MediaSourcePtr;
 
@@ -42,9 +43,6 @@ class MediaSource: public QObject
     Q_PROPERTY(QStringList cameras
                READ cameras
                NOTIFY camerasChanged)
-    Q_PROPERTY(QStringList syphonServers
-               READ syphonServers
-               NOTIFY syphonServersChanged)
     Q_PROPERTY(QStringList desktops
                READ desktops
                NOTIFY desktopsChanged)
@@ -71,14 +69,13 @@ class MediaSource: public QObject
                NOTIFY playOnStartChanged)
 
     public:
-        explicit MediaSource(QQmlApplicationEngine *engine=nullptr,
-                             QObject *parent=nullptr);
+        MediaSource(QQmlApplicationEngine *engine=nullptr,
+                    QObject *parent=nullptr);
         ~MediaSource();
 
         Q_INVOKABLE QString stream() const;
         Q_INVOKABLE QStringList streams() const;
         Q_INVOKABLE QStringList cameras() const;
-        Q_INVOKABLE QStringList syphonServers() const;
         Q_INVOKABLE QStringList desktops() const;
         Q_INVOKABLE QVariantMap uris() const;
         Q_INVOKABLE AkCaps audioCaps() const;
@@ -92,31 +89,12 @@ class MediaSource: public QObject
         Q_INVOKABLE void removeInterface(const QString &where) const;
 
     private:
-        QQmlApplicationEngine *m_engine;
-        QString m_stream;
-        QStringList m_streams;
-        QStringList m_cameras;
-        QStringList m_desktops;
-        QStringList m_syphonServers;
-        QVariantMap m_uris;
-        QMap<QString, QString> m_descriptions;
-        AkCaps m_audioCaps;
-        AkCaps m_videoCaps;
-        AkElement::ElementState m_inputState;
-        bool m_playOnStart;
-        AkElementPtr m_pipeline;
-        AkElementPtr m_cameraCapture;
-        AkElementPtr m_desktopCapture;
-        AkElementPtr m_uriCapture;
-        AkElementPtr m_syphonCapture;
-
-        AkElementPtr sourceElement(const QString &stream) const;
+        MediaSourcePrivate *d;
 
     signals:
         void streamChanged(const QString &stream);
         void streamsChanged(const QStringList &streams);
         void camerasChanged(const QStringList &cameras);
-        void syphonServersChanged(const QStringList &servers);
         void desktopsChanged(const QStringList &desktops);
         void urisChanged(const QVariantMap &uris);
         void audioCapsChanged(const AkCaps &audioCaps);
@@ -142,7 +120,6 @@ class MediaSource: public QObject
         void updateStreams();
         bool setStreams(const QStringList &streams);
         bool setCameras(const QStringList &cameras);
-        bool setSyphonServers(const QStringList &servers);
         bool setDesktops(const QStringList &desktops);
         void setAudioCaps(const AkCaps &audioCaps);
         void setVideoCaps(const AkCaps &videoCaps);
@@ -155,6 +132,7 @@ class MediaSource: public QObject
         void saveDesktopCaptureCaptureLib(const QString &captureLib);
         void saveMultiSrcCodecLib(const QString &codecLib);
         void saveProperties();
+        void webcamStreamsChanged(const QList<int> &streams);
 };
 
 #endif // MEDIASOURCE_H

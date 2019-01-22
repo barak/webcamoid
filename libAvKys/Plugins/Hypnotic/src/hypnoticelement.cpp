@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,16 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QMap>
+#include <QImage>
+#include <QQmlContext>
 #include <QtMath>
+#include <akvideopacket.h>
 
 #include "hypnoticelement.h"
 
-typedef QMap<HypnoticElement::OpticMode, QString> OpticModeMap;
+using OpticModeMap = QMap<HypnoticElement::OpticMode, QString>;
+using OpticalMap = QMap<HypnoticElement::OpticMode, QImage>;
 
 inline OpticModeMap initOpticModeMap()
 {
@@ -37,31 +42,50 @@ inline OpticModeMap initOpticModeMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(OpticModeMap, opticModeToStr, (initOpticModeMap()))
 
+class HypnoticElementPrivate
+{
+    public:
+        HypnoticElement::OpticMode m_mode {HypnoticElement::OpticModeSpiral1};
+        int m_speedInc {0};
+        int m_threshold {127};
+        QSize m_frameSize;
+        QVector<QRgb> m_palette;
+        OpticalMap m_opticalMap;
+        quint8 m_speed {16};
+        quint8 m_phase {0};
+
+        QVector<QRgb> createPalette();
+        OpticalMap createOpticalMap(const QSize &size);
+        QImage imageThreshold(const QImage &src, int threshold);
+};
+
 HypnoticElement::HypnoticElement(): AkElement()
 {
-    this->m_mode = OpticModeSpiral1;
-    this->m_speedInc = 0;
-    this->m_threshold = 127;
+    this->d = new HypnoticElementPrivate;
+    this->d->m_palette = this->d->createPalette();
+}
 
-    this->m_palette = this->createPalette();
+HypnoticElement::~HypnoticElement()
+{
+    delete this->d;
 }
 
 QString HypnoticElement::mode() const
 {
-    return opticModeToStr->value(this->m_mode);
+    return opticModeToStr->value(this->d->m_mode);
 }
 
 int HypnoticElement::speedInc() const
 {
-    return this->m_speedInc;
+    return this->d->m_speedInc;
 }
 
 int HypnoticElement::threshold() const
 {
-    return this->m_threshold;
+    return this->d->m_threshold;
 }
 
-QVector<QRgb> HypnoticElement::createPalette()
+QVector<QRgb> HypnoticElementPrivate::createPalette()
 {
     QVector<QRgb> palette(256);
 
@@ -80,23 +104,28 @@ QVector<QRgb> HypnoticElement::createPalette()
     return palette;
 }
 
-HypnoticElement::OpticalMap HypnoticElement::createOpticalMap(const QSize &size)
+OpticalMap HypnoticElementPrivate::createOpticalMap(const QSize &size)
 {
-    OpticalMap opticalMap;
-    int sci = 640 / size.width();
+    OpticalMap opticalMap {
+        {HypnoticElement::OpticModeSpiral1         , QImage(size, QImage::Format_Indexed8)},
+        {HypnoticElement::OpticModeSpiral2         , QImage(size, QImage::Format_Indexed8)},
+        {HypnoticElement::OpticModeParabola        , QImage(size, QImage::Format_Indexed8)},
+        {HypnoticElement::OpticModeHorizontalStripe, QImage(size, QImage::Format_Indexed8)}
+    };
 
-    opticalMap[OpticModeSpiral1] = QImage(size, QImage::Format_Indexed8);
-    opticalMap[OpticModeSpiral2] = QImage(size, QImage::Format_Indexed8);
-    opticalMap[OpticModeParabola] = QImage(size, QImage::Format_Indexed8);
-    opticalMap[OpticModeHorizontalStripe] = QImage(size, QImage::Format_Indexed8);
+    int sci = 640 / size.width();
 
     for (int y = 0; y < size.height(); y++) {
         qreal yy = qreal(y - size.height() / 2) / size.width();
 
-        quint8 *spiral1Line = opticalMap[OpticModeSpiral1].scanLine(y);
-        quint8 *spiral2Line = opticalMap[OpticModeSpiral2].scanLine(y);
-        quint8 *parabolaLine = opticalMap[OpticModeParabola].scanLine(y);
-        quint8 *horizontalStripeLine = opticalMap[OpticModeHorizontalStripe].scanLine(y);
+        quint8 *spiral1Line =
+                opticalMap[HypnoticElement::OpticModeSpiral1].scanLine(y);
+        quint8 *spiral2Line =
+                opticalMap[HypnoticElement::OpticModeSpiral2].scanLine(y);
+        quint8 *parabolaLine =
+                opticalMap[HypnoticElement::OpticModeParabola].scanLine(y);
+        quint8 *horizontalStripeLine =
+                opticalMap[HypnoticElement::OpticModeHorizontalStripe].scanLine(y);
 
         for (int x = 0; x < size.width(); x++) {
             qreal xx = qreal(x) / size.width() - 0.5;
@@ -110,7 +139,7 @@ HypnoticElement::OpticalMap HypnoticElement::createOpticalMap(const QSize &size)
             qreal rr = r * 300 - j * 32;
 
             j *= 64;
-            j += (rr > 28)? (rr - 28) * 16: 0;
+            j += (rr > 28.0)? qRound((rr - 28.0) * 16.0): 0;
 
             spiral2Line[x] = (uint((at / M_PI * 4096) + (r * 1600) - j)) & 255;
             parabolaLine[x] = (uint(yy / (xx * xx * 0.3 + 0.1) * 400)) & 255;
@@ -121,7 +150,7 @@ HypnoticElement::OpticalMap HypnoticElement::createOpticalMap(const QSize &size)
     return opticalMap;
 }
 
-QImage HypnoticElement::imageThreshold(const QImage &src, int threshold)
+QImage HypnoticElementPrivate::imageThreshold(const QImage &src, int threshold)
 {
     QImage diff(src.size(), QImage::Format_Grayscale8);
 
@@ -156,28 +185,28 @@ void HypnoticElement::setMode(const QString &mode)
 {
     OpticMode opticMode = opticModeToStr->key(mode, OpticModeSpiral1);
 
-    if (this->m_mode == opticMode)
+    if (this->d->m_mode == opticMode)
         return;
 
-    this->m_mode = opticMode;
+    this->d->m_mode = opticMode;
     emit this->modeChanged(mode);
 }
 
 void HypnoticElement::setSpeedInc(int speedInc)
 {
-    if (this->m_speedInc == speedInc)
+    if (this->d->m_speedInc == speedInc)
         return;
 
-    this->m_speedInc = speedInc;
+    this->d->m_speedInc = speedInc;
     emit this->speedIncChanged(speedInc);
 }
 
 void HypnoticElement::setThreshold(int threshold)
 {
-    if (this->m_threshold == threshold)
+    if (this->d->m_threshold == threshold)
         return;
 
-    this->m_threshold = threshold;
+    this->d->m_threshold = threshold;
     emit this->thresholdChanged(threshold);
 }
 
@@ -198,7 +227,8 @@ void HypnoticElement::resetThreshold()
 
 AkPacket HypnoticElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -206,30 +236,33 @@ AkPacket HypnoticElement::iStream(const AkPacket &packet)
     src = src.convertToFormat(QImage::Format_ARGB32);
     QImage oFrame(src.size(), src.format());
 
-    if (src.size() != this->m_frameSize) {
-        this->m_speed = 16;
-        this->m_phase = 0;
-        this->m_opticalMap = this->createOpticalMap(src.size());
-        this->m_frameSize = src.size();
+    if (src.size() != this->d->m_frameSize) {
+        this->d->m_speed = 16;
+        this->d->m_phase = 0;
+        this->d->m_opticalMap = this->d->createOpticalMap(src.size());
+        this->d->m_frameSize = src.size();
     }
 
-    QImage opticalMap = this->m_opticalMap.value(this->m_mode,
-                                                 this->m_opticalMap[OpticModeSpiral1]);
+    QImage opticalMap =
+            this->d->m_opticalMap.value(this->d->m_mode,
+                                        this->d->m_opticalMap[OpticModeSpiral1]);
 
-    this->m_speed += this->m_speedInc;
-    this->m_phase -= this->m_speed;
+    this->d->m_speed += this->d->m_speedInc;
+    this->d->m_phase -= this->d->m_speed;
 
-    QImage diff = this->imageThreshold(src, this->m_threshold);
+    QImage diff = this->d->imageThreshold(src, this->d->m_threshold);
 
     for (int i = 0, y = 0; y < src.height(); y++) {
         QRgb *oLine = reinterpret_cast<QRgb *>(oFrame.scanLine(y));
-        const quint8 *optLine = opticalMap.constScanLine(y);
-        const quint8 *diffLine = diff.constScanLine(y);
+        auto optLine = opticalMap.constScanLine(y);
+        auto diffLine = diff.constScanLine(y);
 
         for (int x = 0; x < src.width(); i++, x++)
-            oLine[x] = this->m_palette[((char(optLine[x] + this->m_phase)) ^ diffLine[x]) & 255];
+            oLine[x] = this->d->m_palette[((char(optLine[x] + this->d->m_phase)) ^ diffLine[x]) & 255];
     }
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_hypnoticelement.cpp"

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef SCROLLELEMENT_H
 #define SCROLLELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class ScrollElementPrivate;
 
 class ScrollElement: public AkElement
 {
@@ -38,18 +39,14 @@ class ScrollElement: public AkElement
                NOTIFY noiseChanged)
 
     public:
-        explicit ScrollElement();
+        ScrollElement();
+        ~ScrollElement();
 
         Q_INVOKABLE qreal speed() const;
         Q_INVOKABLE qreal noise() const;
 
     private:
-        qreal m_speed;
-        qreal m_noise;
-        qreal m_offset;
-        QSize m_curSize;
-
-        QImage generateNoise(const QSize &size, qreal persent);
+        ScrollElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

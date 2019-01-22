@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,40 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QImage>
+#include <QVariant>
+#include <QQmlContext>
+#include <akvideopacket.h>
+
 #include "falsecolorelement.h"
+
+class FalseColorElementPrivate
+{
+    public:
+        QList<QRgb> m_table {
+            qRgb(0, 0, 0),
+            qRgb(255, 0, 0),
+            qRgb(255, 255, 255),
+            qRgb(255, 255, 255)
+        };
+        bool m_soft {false};
+};
 
 FalseColorElement::FalseColorElement(): AkElement()
 {
-    this->m_table = {
-        qRgb(0, 0, 0),
-        qRgb(255, 0, 0),
-        qRgb(255, 255, 255),
-        qRgb(255, 255, 255)
-    };
+    this->d = new FalseColorElementPrivate;
+}
 
-    this->m_soft = false;
+FalseColorElement::~FalseColorElement()
+{
+    delete this->d;
 }
 
 QVariantList FalseColorElement::table() const
 {
     QVariantList table;
 
-    for (const QRgb &color: this->m_table)
+    for (const QRgb &color: this->d->m_table)
         table << color;
 
     return table;
@@ -43,7 +58,7 @@ QVariantList FalseColorElement::table() const
 
 bool FalseColorElement::soft() const
 {
-    return this->m_soft;
+    return this->d->m_soft;
 }
 
 QString FalseColorElement::controlInterfaceProvide(const QString &controlId) const
@@ -69,19 +84,19 @@ void FalseColorElement::setTable(const QVariantList &table)
     for (const QVariant &color: table)
         tableRgb << color.value<QRgb>();
 
-    if (this->m_table == tableRgb)
+    if (this->d->m_table == tableRgb)
         return;
 
-    this->m_table = tableRgb;
+    this->d->m_table = tableRgb;
     emit this->tableChanged(table);
 }
 
 void FalseColorElement::setSoft(bool soft)
 {
-    if (this->m_soft == soft)
+    if (this->d->m_soft == soft)
         return;
 
-    this->m_soft = soft;
+    this->d->m_soft = soft;
     emit this->softChanged(soft);
 }
 
@@ -104,10 +119,11 @@ void FalseColorElement::resetSoft()
 
 AkPacket FalseColorElement::iStream(const AkPacket &packet)
 {
-    if (this->m_table.isEmpty())
+    if (this->d->m_table.isEmpty())
         akSend(packet)
 
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -116,12 +132,12 @@ AkPacket FalseColorElement::iStream(const AkPacket &packet)
     QImage oFrame(src.size(), QImage::Format_ARGB32);
 
     QRgb table[256];
-    QList<QRgb> tableRgb = this->m_table;
+    QList<QRgb> tableRgb = this->d->m_table;
 
     for (int i = 0; i < 256; i++) {
         QRgb color;
 
-        if (this->m_soft) {
+        if (this->d->m_soft) {
             int low = i * (tableRgb.size() - 1) / 255;
             low = qBound(0, low, tableRgb.size() - 2);
             int high = low + 1;
@@ -165,6 +181,8 @@ AkPacket FalseColorElement::iStream(const AkPacket &packet)
             dstLine[x] = table[srcLine[x]];
     }
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_falsecolorelement.cpp"

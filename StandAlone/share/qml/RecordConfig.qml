@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2015  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,12 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
+import QtQuick 2.7
 import QtQuick.Dialogs 1.2
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
 import AkQml 1.0
+import AkQmlControls 1.0
 
 ColumnLayout {
     id: recRecordConfig
@@ -106,15 +107,19 @@ ColumnLayout {
         readOnly: true
         Layout.fillWidth: true
     }
-    ScrollView {
+    AkScrollView {
         id: scrollControls
+        clip: true
+        contentHeight: itmRecordControls.height
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        contentItem: RowLayout {
+        RowLayout {
             id: itmRecordControls
             objectName: "itmRecordControls"
-            width: scrollControls.viewport.width
+            width: scrollControls.width
+                   - (scrollControls.ScrollBar.vertical.visible?
+                          scrollControls.ScrollBar.vertical.width: 0)
         }
     }
 

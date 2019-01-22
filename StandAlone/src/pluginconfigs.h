@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,12 @@
 #ifndef PLUGINCONFIGS_H
 #define PLUGINCONFIGS_H
 
-#include <QQmlApplicationEngine>
+#include <QObject>
 
-#include "clioptions.h"
-
+class PluginConfigsPrivate;
 class PluginConfigs;
+class CliOptions;
+class QQmlApplicationEngine;
 
 typedef QSharedPointer<PluginConfigs> PluginConfigsPtr;
 
@@ -33,18 +34,15 @@ class PluginConfigs: public QObject
     Q_OBJECT
 
     public:
-        explicit PluginConfigs(QQmlApplicationEngine *engine=nullptr,
-                               QObject *parent=nullptr);
-        explicit PluginConfigs(const CliOptions &cliOptions,
-                               QQmlApplicationEngine *engine=nullptr,
-                               QObject *parent=nullptr);
+        PluginConfigs(QQmlApplicationEngine *engine=nullptr,
+                      QObject *parent=nullptr);
+        PluginConfigs(const CliOptions &cliOptions,
+                      QQmlApplicationEngine *engine=nullptr,
+                      QObject *parent=nullptr);
         ~PluginConfigs();
 
     private:
-        QQmlApplicationEngine *m_engine;
-        QStringList m_plugins;
-
-        QString convertToAbsolute(const QString &path) const;
+        PluginConfigsPrivate *d;
 
     signals:
         void pluginsChanged(const QStringList &plugins);

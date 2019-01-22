@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 GridLayout {
     id: grdCameraControl
@@ -151,8 +152,8 @@ GridLayout {
 
         Slider {
             id: sldRange
-            minimumValue: discreteRange? grdCameraControl.minimumValue: 0
-            maximumValue: discreteRange? grdCameraControl.maximumValue: 1
+            from: discreteRange? grdCameraControl.minimumValue: 0
+            to: discreteRange? grdCameraControl.maximumValue: 1
             stepSize: discreteRange? grdCameraControl.stepSize: 1
             value: controlParams[2] == "number"? grdCameraControl.value: 0
             Layout.fillWidth: true
@@ -160,24 +161,24 @@ GridLayout {
 
             onValueChanged: {
                 if (visible) {
-                    spbRange.value = value
+                    spbRange.rvalue = value
                     grdCameraControl.controlChanged(controlName, value)
                 }
             }
         }
-        SpinBox {
+        AkSpinBox {
             id: spbRange
             minimumValue: discreteRange? grdCameraControl.minimumValue: 0
             maximumValue: discreteRange? grdCameraControl.maximumValue: 1
-            stepSize: discreteRange? grdCameraControl.stepSize: 1
-            decimals: stepSize < 1? 2: 0
-            value: sldRange.value
+            step: discreteRange? grdCameraControl.stepSize: 1
+            decimals: step < 1? 2: 0
+            rvalue: sldRange.value
             Layout.minimumWidth: minimumRightWidth
             visible: discreteRange
 
-            onValueChanged: {
+            onRvalueChanged: {
                 if (visible)
-                    sldRange.value = value
+                    sldRange.value = rvalue
             }
         }
         TextField {

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
 #ifndef DICEELEMENT_H
 #define DICEELEMENT_H
 
-#include <QMutex>
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class DiceElementPrivate;
 
 class DiceElement: public AkElement
 {
@@ -34,16 +34,13 @@ class DiceElement: public AkElement
                NOTIFY diceSizeChanged)
 
     public:
-        explicit DiceElement();
+        DiceElement();
+        ~DiceElement();
 
         Q_INVOKABLE int diceSize() const;
 
     private:
-        int m_diceSize;
-
-        QMutex m_mutex;
-        QImage m_diceMap;
-        QSize m_frameSize;
+        DiceElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

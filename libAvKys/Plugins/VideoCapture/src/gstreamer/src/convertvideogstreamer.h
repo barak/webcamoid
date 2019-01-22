@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,21 +20,16 @@
 #ifndef CONVERTVIDEOGSTREAMER_H
 #define CONVERTVIDEOGSTREAMER_H
 
-#include <QtConcurrent>
-#include <ak.h>
-#include <akvideopacket.h>
-#include <gst/video/video.h>
-#include <gst/app/gstappsrc.h>
-#include <gst/app/gstappsink.h>
-
 #include "convertvideo.h"
+
+class ConvertVideoGStreamerPrivate;
 
 class ConvertVideoGStreamer: public ConvertVideo
 {
     Q_OBJECT
 
     public:
-        explicit ConvertVideoGStreamer(QObject *parent=nullptr);
+        ConvertVideoGStreamer(QObject *parent=nullptr);
         ~ConvertVideoGStreamer();
 
         Q_INVOKABLE void packetEnqueue(const AkPacket &packet);
@@ -42,22 +37,9 @@ class ConvertVideoGStreamer: public ConvertVideo
         Q_INVOKABLE void uninit();
 
     private:
-        QThreadPool m_threadPool;
-        GstElement *m_pipeline;
-        GstElement *m_source;
-        GstElement *m_sink;
-        GMainLoop *m_mainLoop;
-        guint m_busWatchId;
-        qint64 m_id;
-        qint64 m_ptsDiff;
+        ConvertVideoGStreamerPrivate *d;
 
-        GstElement *decoderFromCaps(const GstCaps *caps) const;
-        void waitState(GstState state);
-        static gboolean busCallback(GstBus *bus,
-                                    GstMessage *message,
-                                    gpointer userData);
-        static GstFlowReturn videoBufferCallback(GstElement *videoOutput,
-                                                 gpointer userData);
+        friend class ConvertVideoGStreamerPrivate;
 };
 
 #endif // CONVERTVIDEOGSTREAMER_H

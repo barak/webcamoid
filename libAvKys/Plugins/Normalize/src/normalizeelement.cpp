@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QImage>
+#include <akvideopacket.h>
+
 #include "normalizeelement.h"
 #include "pixelstructs.h"
 
@@ -26,7 +29,8 @@ NormalizeElement::NormalizeElement(): AkElement()
 
 AkPacket NormalizeElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -50,7 +54,7 @@ AkPacket NormalizeElement::iStream(const AkPacket &packet)
 
     // find the histogram boundaries by locating the .01 percent levels.
     ShortPixel high, low;
-    qint32 thresholdIntensity = qint32(oFrame.width() * oFrame.height() / 1e3);
+    auto thresholdIntensity = qint32(oFrame.width() * oFrame.height() / 1e3);
     IntegerPixel intensity;
 
     for (low.red = 0; low.red < 256; low.red++) {
@@ -160,6 +164,8 @@ AkPacket NormalizeElement::iStream(const AkPacket &packet)
         }
     }
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_normalizeelement.cpp"

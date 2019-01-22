@@ -6,7 +6,10 @@ cache:
 
 env:
   global:
-    - QTIFWVER=3.0.1
+    - QTVER=5.12.0
+    - PPAQTVER=512
+    - QTIFWVER=3.0.6
+    - APPIMAGEVER=11
 
 matrix:
   include:
@@ -16,56 +19,56 @@ matrix:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=debian:stretch
+      - DOCKERSYS=debian DOCKERIMG=debian:testing
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=debian DOCKERIMG=debian:stretch
+      - DOCKERSYS=debian DOCKERIMG=debian:testing
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:24 FEDORAVER=24
+      - DOCKERSYS=fedora DOCKERIMG=fedora:27 FEDORAVER=27
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:24 FEDORAVER=24
+      - DOCKERSYS=fedora DOCKERIMG=fedora:27 FEDORAVER=27
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:25 FEDORAVER=25
+      - DOCKERSYS=fedora DOCKERIMG=fedora:28 FEDORAVER=28
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:25 FEDORAVER=25
+      - DOCKERSYS=fedora DOCKERIMG=fedora:28 FEDORAVER=28
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=opensuse DOCKERIMG=opensuse:42.2
+      - DOCKERSYS=fedora DOCKERIMG=fedora:rawhide FEDORAVER=rawhide
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=opensuse DOCKERIMG=opensuse:42.2
+      - DOCKERSYS=fedora DOCKERIMG=fedora:rawhide FEDORAVER=rawhide
   - os: linux
     sudo: required
     services:
@@ -86,20 +89,6 @@ matrix:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:trusty
-  - os: linux
-    sudo: required
-    services:
-      - docker
-    compiler: clang
-    env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:trusty
-  - os: linux
-    sudo: required
-    services:
-      - docker
-    compiler: gcc
-    env:
       - DOCKERSYS=debian DOCKERIMG=ubuntu:xenial
   - os: linux
     sudo: required
@@ -114,33 +103,61 @@ matrix:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:yakkety
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:bionic
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:yakkety
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:bionic
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:zesty
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:cosmic
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:zesty
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:cosmic
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:disco
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian DOCKERIMG=ubuntu:disco
   - os: osx
-    osx_image: xcode8.3
+    osx_image: xcode9.1
     compiler: clang
   - os: osx
-    osx_image: xcode9
+    osx_image: xcode9.2
+    compiler: clang
+  - os: osx
+    osx_image: xcode9.3
+    compiler: clang
+  - os: osx
+    osx_image: xcode9.4
+    compiler: clang
+    env:
+      - DISABLE_CCACHE=1
+  - os: osx
+    osx_image: xcode10
+    compiler: clang
+  - os: osx
+    osx_image: xcode10.1
     compiler: clang
   - language: android
     jdk: oraclejdk8
@@ -148,14 +165,14 @@ matrix:
       components:
         - tools
         - platform-tools
-        - build-tools-22.0.1
+        - build-tools-28.0.3
         - android-22
-        - sys-img-armeabi-v7a-android-22
+        - sys-img-armeabi-v7a-android-24
     env:
       - ANDROID_BUILD=1
-      - COMPILER=g++
-      - QTVER=5.8.0
-      - NDKVER=r14b
+      - COMPILER=clang
+      - QTVER=5.12.0
+      - NDKVER=r18b
       - TARGET_ARCH=armv7
   - language: android
     jdk: oraclejdk8
@@ -163,14 +180,29 @@ matrix:
       components:
         - tools
         - platform-tools
-        - build-tools-22.0.1
+        - build-tools-28.0.3
         - android-22
-        - sys-img-x86-android-22
+        - sys-img-arm64-v8a-android-24
     env:
       - ANDROID_BUILD=1
-      - COMPILER=g++
-      - QTVER=5.8.0
-      - NDKVER=r14b
+      - COMPILER=clang
+      - QTVER=5.12.0
+      - NDKVER=r18b
+      - TARGET_ARCH=arm64_v8a
+  - language: android
+    jdk: oraclejdk8
+    android:
+      components:
+        - tools
+        - platform-tools
+        - build-tools-28.0.3
+        - android-22
+        - sys-img-x86-android-24
+    env:
+      - ANDROID_BUILD=1
+      - COMPILER=clang
+      - QTVER=5.12.0
+      - NDKVER=r18b
       - TARGET_ARCH=x86
 
 before_install: |
@@ -180,12 +212,15 @@ before_install: |
       docker ps -a
       docker run -it -d -v ${PWD}:/sources -v $HOME/.ccache:/ccache -e CCACHE_DIR=/ccache -w /sources --name ${DOCKERSYS} ${DOCKERIMG} /bin/sh
     elif [ "${TRAVIS_OS_NAME}" = osx ]; then
+      brew unlink python
       brew update
       brew upgrade
+      brew link --overwrite numpy
     fi
   fi
 
 install:
+  - chmod +x ports/ci/travis/install_deps.sh
   - ports/ci/travis/install_deps.sh
 
 before_script: |
@@ -207,9 +242,11 @@ before_script: |
   fi
 
 script:
+  - chmod +x ports/ci/travis/build.sh
   - ports/ci/travis/build.sh
 
 after_success:
+  - chmod +x ports/ci/travis/deploy.sh
   - ports/ci/travis/deploy.sh
 
 branches:

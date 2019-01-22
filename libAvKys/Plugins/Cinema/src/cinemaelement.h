@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,10 @@
 #ifndef CINEMAELEMENT_H
 #define CINEMAELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <qrgb.h>
+#include <akelement.h>
+
+class CinemaElementPrivate;
 
 class CinemaElement: public AkElement
 {
@@ -38,14 +40,14 @@ class CinemaElement: public AkElement
                NOTIFY stripColorChanged)
 
     public:
-        explicit CinemaElement();
+        CinemaElement();
+        ~CinemaElement();
 
         Q_INVOKABLE qreal stripSize() const;
         Q_INVOKABLE QRgb stripColor() const;
 
     private:
-        qreal m_stripSize;
-        QRgb m_stripColor;
+        CinemaElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

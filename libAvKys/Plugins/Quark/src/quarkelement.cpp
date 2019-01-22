@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,33 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QImage>
+#include <QQmlContext>
+#include <akvideopacket.h>
+
 #include "quarkelement.h"
+
+class QuarkElementPrivate
+{
+    public:
+        QVector<QImage> m_frames;
+        QSize m_frameSize;
+        int m_nFrames {16};
+};
 
 QuarkElement::QuarkElement(): AkElement()
 {
-    this->m_nFrames = 16;
+    this->d = new QuarkElementPrivate;
+}
+
+QuarkElement::~QuarkElement()
+{
+    delete this->d;
 }
 
 int QuarkElement::nFrames() const
 {
-    return this->m_nFrames;
+    return this->d->m_nFrames;
 }
 
 QString QuarkElement::controlInterfaceProvide(const QString &controlId) const
@@ -46,10 +63,10 @@ void QuarkElement::controlInterfaceConfigure(QQmlContext *context, const QString
 
 void QuarkElement::setNFrames(int nFrames)
 {
-    if (this->m_nFrames == nFrames)
+    if (this->d->m_nFrames == nFrames)
         return;
 
-    this->m_nFrames = nFrames;
+    this->d->m_nFrames = nFrames;
     emit this->nFramesChanged(nFrames);
 }
 
@@ -60,7 +77,8 @@ void QuarkElement::resetNFrames()
 
 AkPacket QuarkElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -68,27 +86,29 @@ AkPacket QuarkElement::iStream(const AkPacket &packet)
     src = src.convertToFormat(QImage::Format_ARGB32);
     QImage oFrame(src.size(), src.format());
 
-    if (src.size() != this->m_frameSize) {
-        this->m_frames.clear();
-        this->m_frameSize = src.size();
+    if (src.size() != this->d->m_frameSize) {
+        this->d->m_frames.clear();
+        this->d->m_frameSize = src.size();
     }
 
-    int nFrames = this->m_nFrames > 0? this->m_nFrames: 1;
-    this->m_frames << src.copy();
-    int diff = this->m_frames.size() - nFrames;
+    int nFrames = this->d->m_nFrames > 0? this->d->m_nFrames: 1;
+    this->d->m_frames << src.copy();
+    int diff = this->d->m_frames.size() - nFrames;
 
     for (int i = 0; i < diff; i++)
-        this->m_frames.removeFirst();
+        this->d->m_frames.removeFirst();
 
     for (int y = 0; y < src.height(); y++) {
         QRgb *dstLine = reinterpret_cast<QRgb *>(oFrame.scanLine(y));
 
         for (int x = 0; x < src.width(); x++) {
-            int frame = qrand() % this->m_frames.size();
-            dstLine[x] = this->m_frames[frame].pixel(x, y);
+            int frame = qrand() % this->d->m_frames.size();
+            dstLine[x] = this->d->m_frames[frame].pixel(x, y);
         }
     }
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_quarkelement.cpp"

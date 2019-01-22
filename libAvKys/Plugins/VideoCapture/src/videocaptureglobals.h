@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class VideoCaptureGlobals : public QObject
                NOTIFY captureLibChanged)
 
     public:
-        explicit VideoCaptureGlobals(QObject *parent=nullptr);
+        VideoCaptureGlobals(QObject *parent=nullptr);
 
         Q_INVOKABLE QString codecLib() const;
         Q_INVOKABLE QString captureLib() const;

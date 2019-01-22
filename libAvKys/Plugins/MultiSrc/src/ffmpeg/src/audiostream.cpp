@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,22 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QSharedPointer>
+#include <QVariant>
+#include <QMap>
+#include <akelement.h>
+#include <akcaps.h>
+#include <akaudiocaps.h>
+#include <akpacket.h>
+#include <akaudiopacket.h>
+
+extern "C"
+{
+    #include <libavutil/channel_layout.h>
+}
+
 #include "audiostream.h"
+#include "clock.h"
 
 // No AV correction is done if too big error.
 #define AV_NOSYNC_THRESHOLD 10.0
@@ -28,7 +43,7 @@
 // We use about AUDIO_DIFF_AVG_NB A-V differences to make the average
 #define AUDIO_DIFF_AVG_NB 20
 
-typedef QMap<AVSampleFormat, AkAudioCaps::SampleFormat> SampleFormatMap;
+using SampleFormatMap = QMap<AVSampleFormat, AkAudioCaps::SampleFormat>;
 
 inline SampleFormatMap initSampleFormatMap()
 {
@@ -55,7 +70,7 @@ inline SampleFormatMap initSampleFormatMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(SampleFormatMap, sampleFormats, (initSampleFormatMap()))
 
-typedef QMap<AkAudioCaps::ChannelLayout, uint64_t> ChannelLayoutsMap;
+using ChannelLayoutsMap = QMap<AkAudioCaps::ChannelLayout, uint64_t>;
 
 inline ChannelLayoutsMap initChannelFormatsMap()
 {
@@ -97,27 +112,50 @@ inline ChannelLayoutsMap initChannelFormatsMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(ChannelLayoutsMap, channelLayouts, (initChannelFormatsMap()))
 
+class AudioStreamPrivate
+{
+    public:
+        AudioStream *self;
+        qint64 m_pts;
+        AkElementPtr m_audioConvert;
+        qreal audioDiffCum; // used for AV difference average computation
+        qreal audioDiffAvgCoef;
+        int audioDiffAvgCount;
+
+        AudioStreamPrivate(AudioStream *self):
+            self(self),
+            m_pts(0),
+            audioDiffCum(0.0),
+            audioDiffAvgCoef(exp(log(0.01) / AUDIO_DIFF_AVG_NB)),
+            audioDiffAvgCount(0)
+        {
+        }
+
+        inline bool compensate(AVFrame *oFrame, AVFrame *iFrame, int wantedSamples);
+        inline AkPacket frameToPacket(AVFrame *iFrame);
+        inline AkPacket convert(AVFrame *iFrame);
+        inline AVFrame *copyFrame(AVFrame *frame) const;
+};
+
 AudioStream::AudioStream(const AVFormatContext *formatContext,
                          uint index, qint64 id, Clock *globalClock,
                          bool noModify, QObject *parent):
     AbstractStream(formatContext, index, id, globalClock, noModify, parent)
 {
+    this->d = new AudioStreamPrivate(this);
     this->m_maxData = 9;
-    this->m_pts = 0;
-    this->audioDiffCum = 0.0;
-    this->audioDiffAvgCoef = exp(log(0.01) / AUDIO_DIFF_AVG_NB);
-    this->audioDiffAvgCount = 0;
-    this->m_audioConvert = AkElement::create("ACapsConvert");
+    this->d->m_audioConvert = AkElement::create("ACapsConvert");
 }
 
 AudioStream::~AudioStream()
 {
+    delete this->d;
 }
 
 AkCaps AudioStream::caps() const
 {
-    AVSampleFormat iFormat = AVSampleFormat(this->codecContext()->sample_fmt);
-    AVSampleFormat oFormat = av_get_packed_sample_fmt(iFormat);
+    auto iFormat = AVSampleFormat(this->codecContext()->sample_fmt);
+    auto oFormat = av_get_packed_sample_fmt(iFormat);
     oFormat = sampleFormats->contains(oFormat)? oFormat: AV_SAMPLE_FMT_FLT;
 
     AkAudioCaps::ChannelLayout layout = channelLayouts->key(this->codecContext()->channel_layout,
@@ -132,7 +170,6 @@ AkCaps AudioStream::caps() const
     caps.channels() = av_get_channel_layout_nb_channels(channelLayout);
     caps.rate() = this->codecContext()->sample_rate;
     caps.layout() = layout;
-    caps.align() = false;
 
     return caps.toCaps();
 }
@@ -151,56 +188,41 @@ void AudioStream::processPacket(AVPacket *packet)
 #ifdef HAVE_SENDRECV
     if (avcodec_send_packet(this->codecContext(), packet) >= 0)
         forever {
-    #ifdef HAVE_FRAMEALLOC
             auto iFrame = av_frame_alloc();
-    #else
-            auto iFrame = avcodec_alloc_frame();
-    #endif
             int r = avcodec_receive_frame(this->codecContext(), iFrame);
 
             if (r >= 0)
-                this->dataEnqueue(this->copyFrame(iFrame));
-    #ifdef HAVE_FRAMEALLOC
+                this->dataEnqueue(this->d->copyFrame(iFrame));
+
             av_frame_free(&iFrame);
-    #else
-            avcodec_free_frame(&iFrame);
-    #endif
 
             if (r < 0)
                 break;
         }
 #else
-    #ifdef HAVE_FRAMEALLOC
         auto iFrame = av_frame_alloc();
-    #else
-        auto iFrame = avcodec_alloc_frame();
-    #endif
         int gotFrame;
         avcodec_decode_audio4(this->codecContext(), iFrame, &gotFrame, packet);
 
         if (gotFrame)
-            this->dataEnqueue(this->copyFrame(iFrame));
+            this->dataEnqueue(this->d->copyFrame(iFrame));
 
-    #ifdef HAVE_FRAMEALLOC
         av_frame_free(&iFrame);
-    #else
-        avcodec_free_frame(&iFrame);
-    #endif
 #endif
 }
 
 void AudioStream::processData(AVFrame *frame)
 {
-    frame->pts = frame->pts != AV_NOPTS_VALUE? frame->pts: this->m_pts;
-    AkPacket oPacket = this->convert(frame);
+    frame->pts = frame->pts != AV_NOPTS_VALUE? frame->pts: this->d->m_pts;
+    AkPacket oPacket = this->d->convert(frame);
     emit this->oStream(oPacket);
     emit this->frameSent();
-    this->m_pts = frame->pts + frame->nb_samples;
+    this->d->m_pts = frame->pts + frame->nb_samples;
 }
 
-bool AudioStream::compensate(AVFrame *oFrame,
-                             AVFrame *iFrame,
-                             int wantedSamples)
+bool AudioStreamPrivate::compensate(AVFrame *oFrame,
+                                    AVFrame *iFrame,
+                                    int wantedSamples)
 {
     if (wantedSamples == iFrame->nb_samples)
         return false;
@@ -223,12 +245,8 @@ bool AudioStream::compensate(AVFrame *oFrame,
                         qMin(wantedSamples, iFrame->nb_samples),
                         iChannels,
                         AVSampleFormat(iFrame->format)) < 0) {
-#ifdef HAVE_FRAMEALLOC
         av_freep(&oFrame->data[0]);
         av_frame_unref(oFrame);
-#else
-        avcodec_free_frame(&oFrame);
-#endif
 
         return false;
     }
@@ -242,7 +260,7 @@ bool AudioStream::compensate(AVFrame *oFrame,
     return true;
 }
 
-AkPacket AudioStream::frameToPacket(AVFrame *iFrame)
+AkPacket AudioStreamPrivate::frameToPacket(AVFrame *iFrame)
 {
     int iChannels = av_get_channel_layout_nb_channels(iFrame->channel_layout);
 
@@ -283,18 +301,17 @@ AkPacket AudioStream::frameToPacket(AVFrame *iFrame)
                                 iFrame->sample_rate);
     packet.caps().layout() = channelLayouts->key(iFrame->channel_layout);
     packet.caps().samples() = iFrame->nb_samples;
-    packet.caps().align() = false;
 
     packet.buffer() = iBuffer;
     packet.pts() = iFrame->pts;
-    packet.timeBase() = this->timeBase();
-    packet.index() = int(this->index());
-    packet.id() = this->id();
+    packet.timeBase() = self->timeBase();
+    packet.index() = int(self->index());
+    packet.id() = self->id();
 
     return packet.toPacket();
 }
 
-AkPacket AudioStream::convert(AVFrame *iFrame)
+AkPacket AudioStreamPrivate::convert(AVFrame *iFrame)
 {
     if (this->m_audioConvert->state() != AkElement::ElementStatePlaying) {
         auto format = sampleFormats->value(AVSampleFormat(iFrame->format),
@@ -317,8 +334,8 @@ AkPacket AudioStream::convert(AVFrame *iFrame)
     auto packet = this->frameToPacket(iFrame);
 
     // Synchronize audio
-    qreal pts = iFrame->pts * this->timeBase().value();
-    qreal diff = pts - this->globalClock()->clock();
+    qreal pts = iFrame->pts * self->timeBase().value();
+    qreal diff = pts - self->globalClock()->clock();
     int wantedSamples = iFrame->nb_samples;
 
     if (!qIsNaN(diff) && qAbs(diff) < AV_NOSYNC_THRESHOLD) {
@@ -347,9 +364,7 @@ AkPacket AudioStream::convert(AVFrame *iFrame)
                 if (this->compensate(&oFrame, iFrame, wantedSamples)) {
                     packet = this->frameToPacket(&oFrame);
                     av_freep(&oFrame.data[0]);
-#ifdef HAVE_FRAMEALLOC
                     av_frame_unref(&oFrame);
-#endif
                 }
             }
         }
@@ -361,20 +376,16 @@ AkPacket AudioStream::convert(AVFrame *iFrame)
     }
 
     if (qAbs(diff) >= AV_NOSYNC_THRESHOLD)
-        this->globalClock()->setClock(pts);
+        self->globalClock()->setClock(pts);
 
-    this->m_clockDiff = diff;
+    self->clockDiff() = diff;
 
     return this->m_audioConvert->iStream(packet);
 }
 
-AVFrame *AudioStream::copyFrame(AVFrame *frame) const
+AVFrame *AudioStreamPrivate::copyFrame(AVFrame *frame) const
 {
-#ifdef HAVE_FRAMEALLOC
     auto oFrame = av_frame_alloc();
-#else
-    auto oFrame = avcodec_alloc_frame();
-#endif
     oFrame->format = frame->format;
     oFrame->channel_layout = frame->channel_layout;
     oFrame->sample_rate = frame->sample_rate;
@@ -398,3 +409,5 @@ AVFrame *AudioStream::copyFrame(AVFrame *frame) const
 
     return oFrame;
 }
+
+#include "moc_audiostream.cpp"

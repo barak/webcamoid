@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QVariantMap>
+#include <akcaps.h>
+#include <akpacket.h>
+
 #include "mediawriter.h"
 
 MediaWriter::MediaWriter(QObject *parent):
     QObject(parent)
-{
-}
-
-MediaWriter::~MediaWriter()
 {
 }
 
@@ -265,3 +265,5 @@ bool MediaWriter::init()
 void MediaWriter::uninit()
 {
 }
+
+#include "moc_mediawriter.cpp"

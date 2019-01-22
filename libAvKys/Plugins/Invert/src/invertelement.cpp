@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QImage>
+#include <akvideopacket.h>
+
 #include "invertelement.h"
 
 InvertElement::InvertElement(): AkElement()
@@ -25,7 +28,8 @@ InvertElement::InvertElement(): AkElement()
 
 AkPacket InvertElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -33,6 +37,8 @@ AkPacket InvertElement::iStream(const AkPacket &packet)
     QImage oFrame = src.convertToFormat(QImage::Format_ARGB32);
     oFrame.invertPixels();
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_invertelement.cpp"

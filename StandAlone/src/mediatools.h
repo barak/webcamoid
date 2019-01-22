@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2015  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,21 +20,11 @@
 #ifndef MEDIATOOLS_H
 #define MEDIATOOLS_H
 
-#include <QSize>
-#include <QMutex>
-#include <QQuickItem>
-#include <QQmlProperty>
-#include <QQmlApplicationEngine>
-#include <QSystemTrayIcon>
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
 
-#include "pluginconfigs.h"
-#include "mediasource.h"
-#include "audiolayer.h"
-#include "videoeffects.h"
-#include "recording.h"
-#include "updates.h"
+class MediaToolsPrivate;
+class QQmlApplicationEngine;
+class AkCaps;
 
 class MediaTools: public QObject
 {
@@ -61,7 +51,7 @@ class MediaTools: public QObject
                NOTIFY virtualCameraStateChanged)
 
     public:
-        explicit MediaTools(QObject *parent=nullptr);
+        MediaTools(QObject *parent=nullptr);
         ~MediaTools();
 
         Q_INVOKABLE int windowWidth() const;
@@ -94,22 +84,7 @@ class MediaTools: public QObject
         static QString convertToAbsolute(const QString &path);
 
     private:
-        QQmlApplicationEngine *m_engine;
-        PluginConfigsPtr m_pluginConfigs;
-        MediaSourcePtr m_mediaSource;
-        AudioLayerPtr m_audioLayer;
-        VideoEffectsPtr m_videoEffects;
-        RecordingPtr m_recording;
-        UpdatesPtr m_updates;
-        int m_windowWidth;
-        int m_windowHeight;
-        bool m_enableVirtualCamera;
-        AkElementPtr m_virtualCamera;
-        QSystemTrayIcon *m_trayIcon;
-
-        bool embedInterface(QQmlApplicationEngine *engine,
-                            QObject *ctrlInterface,
-                            const QString &where) const;
+        MediaToolsPrivate *d;
 
     signals:
         void windowWidthChanged(int windowWidth);
@@ -129,9 +104,6 @@ class MediaTools: public QObject
         void resetEnableVirtualCamera();
         void resetVirtualCameraState();
         void loadConfigs();
-        void saveVirtualCameraConvertLib(const QString &convertLib);
-        void saveVirtualCameraOutputLib(const QString &outputLib);
-        void saveVirtualCameraRootMethod(const QString &rootMethod);
         void saveConfigs();
         void show();
 

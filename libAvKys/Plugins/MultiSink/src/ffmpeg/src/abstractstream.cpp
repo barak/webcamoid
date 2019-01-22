@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,19 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QQueue>
 #include <QAbstractEventDispatcher>
+#include <QtConcurrent>
+#include <QThread>
+#include <QThreadPool>
+#include <QFuture>
+#include <QWaitCondition>
+#include <akpacket.h>
+
+extern "C"
+{
+    #include <libavutil/mathematics.h>
+}
 
 #include "abstractstream.h"
 #include "mediawriterffmpeg.h"
@@ -33,6 +45,40 @@ inline void waitLoop(const QFuture<T> &loop)
     }
 }
 
+class AbstractStreamPrivate
+{
+    public:
+        AbstractStream *self;
+        uint m_index {0};
+        int m_streamIndex {-1};
+        AVMediaType m_mediaType {AVMEDIA_TYPE_UNKNOWN};
+        AVFormatContext *m_formatContext {nullptr};
+        AVCodecContext *m_codecContext {nullptr};
+        AVStream *m_stream {nullptr};
+        QThreadPool m_threadPool;
+        AVDictionary *m_codecOptions {nullptr};
+
+        // Packet queue and convert loop.
+        QQueue<AkPacket> m_packetQueue;
+        QMutex m_convertMutex;
+        QWaitCondition m_packetQueueNotFull;
+        QWaitCondition m_packetQueueNotEmpty;
+        QFuture<void> m_convertLoopResult;
+        bool m_runConvertLoop {false};
+
+        // Frame queue and encoding loop.
+        QFuture<void> m_encodeLoopResult;
+        bool m_runEncodeLoop {false};
+
+        AbstractStreamPrivate(AbstractStream *self):
+            self(self)
+        {
+        }
+
+        void convertLoop();
+        void encodeLoop();
+};
+
 AbstractStream::AbstractStream(const AVFormatContext *formatContext,
                                uint index,
                                int streamIndex,
@@ -44,27 +90,25 @@ AbstractStream::AbstractStream(const AVFormatContext *formatContext,
 {
     Q_UNUSED(mediaWriter)
 
+    this->d = new AbstractStreamPrivate(this);
     this->m_maxPacketQueueSize = 9;
-    this->m_runConvertLoop = false;
-    this->m_runEncodeLoop = false;
-    this->m_index = index;
-    this->m_streamIndex = streamIndex;
-    this->m_mediaType = AVMEDIA_TYPE_UNKNOWN;
-    this->m_codecOptions = nullptr;
-    this->m_formatContext = const_cast<AVFormatContext *>(formatContext);
+    this->d->m_index = index;
+    this->d->m_streamIndex = streamIndex;
+    this->d->m_formatContext = const_cast<AVFormatContext *>(formatContext);
 
-    this->m_stream = (formatContext && index < formatContext->nb_streams)?
-                         formatContext->streams[index]: nullptr;
+    this->d->m_stream =
+            (formatContext && index < formatContext->nb_streams)?
+                formatContext->streams[index]: nullptr;
 
     QString codecName = configs["codec"].toString();
     AVCodec *codec = avcodec_find_encoder_by_name(codecName.toStdString().c_str());
-    this->m_codecContext = avcodec_alloc_context3(codec);
+    this->d->m_codecContext = avcodec_alloc_context3(codec);
 
     // Some formats want stream headers to be separate.
     if (formatContext->oformat->flags & AVFMT_GLOBALHEADER)
-        this->m_codecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        this->d->m_codecContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-    this->m_codecContext->strict_std_compliance = CODEC_COMPLIANCE;
+    this->d->m_codecContext->strict_std_compliance = CODEC_COMPLIANCE;
 
     // Set codec options.
     auto optKey = QString("%1/%2/%3").arg(formatContext->oformat->name)
@@ -83,81 +127,79 @@ AbstractStream::AbstractStream(const AVFormatContext *formatContext,
             options["preset"] = "ultrafast";
     }
 
-    for (const QString &key: options.keys()) {
-        QString value = options[key].toString();
+    for (auto it = options.begin();
+         it != options.end();
+         it++) {
+        QString value = it.value().toString();
 
-        av_dict_set(&this->m_codecOptions,
-                    key.toStdString().c_str(),
+        av_dict_set(&this->d->m_codecOptions,
+                    it.key().toStdString().c_str(),
                     value.toStdString().c_str(),
                     0);
     }
 
-    if (this->m_threadPool.maxThreadCount() < 2)
-        this->m_threadPool.setMaxThreadCount(2);
+    if (this->d->m_threadPool.maxThreadCount() < 2)
+        this->d->m_threadPool.setMaxThreadCount(2);
 }
 
 AbstractStream::~AbstractStream()
 {
     this->uninit();
 
-    if (this->m_codecContext) {
-#ifdef HAVE_FREECONTEXT
-        avcodec_free_context(&this->m_codecContext);
-#else
-        avcodec_close(this->m_codecContext);
-        av_free(this->m_codecContext);
-#endif
-    }
+    if (this->d->m_codecContext)
+        avcodec_free_context(&this->d->m_codecContext);
+
+    delete this->d;
 }
 
 uint AbstractStream::index() const
 {
-    return this->m_index;
+    return this->d->m_index;
 }
 
 int AbstractStream::streamIndex() const
 {
-    return this->m_streamIndex;
+    return this->d->m_streamIndex;
 }
 
 AVMediaType AbstractStream::mediaType() const
 {
-    return this->m_mediaType;
+    return this->d->m_mediaType;
 }
 
 AVStream *AbstractStream::stream() const
 {
-    return this->m_stream;
+    return this->d->m_stream;
 }
 
 AVFormatContext *AbstractStream::formatContext() const
 {
-    return this->m_formatContext;
+    return this->d->m_formatContext;
 }
 
 AVCodecContext *AbstractStream::codecContext() const
 {
-    return this->m_codecContext;
+    return this->d->m_codecContext;
 }
 
 void AbstractStream::packetEnqueue(const AkPacket &packet)
 {
-    if (!this->m_runConvertLoop)
+    if (!this->d->m_runConvertLoop)
         return;
 
-    this->m_convertMutex.lock();
+    this->d->m_convertMutex.lock();
     bool enqueue = true;
 
-    if (this->m_packetQueue.size() >= this->m_maxPacketQueueSize)
-        enqueue = this->m_packetQueueNotFull.wait(&this->m_convertMutex,
-                                                  THREAD_WAIT_LIMIT);
+    if (this->d->m_packetQueue.size() >= this->m_maxPacketQueueSize)
+        enqueue = this->d->m_packetQueueNotFull.wait(&this->d->m_convertMutex,
+                                                     THREAD_WAIT_LIMIT);
 
     if (enqueue) {
-        this->m_packetQueue << packet;
-        this->m_packetQueueNotEmpty.wakeAll();
+        this->d->m_packetQueue << packet;
+        this->d->m_packetQueueNotEmpty.wakeAll();
     }
 
-    this->m_convertMutex.unlock();
+    this->d->m_convertMutex.unlock();
 }
 
 void AbstractStream::convertPacket(const AkPacket &packet)
@@ -179,18 +221,7 @@ AVFrame *AbstractStream::dequeueFrame()
 
 void AbstractStream::rescaleTS(AVPacket *pkt, AVRational src, AVRational dst)
 {
-#ifdef HAVE_RESCALETS
     av_packet_rescale_ts(pkt, src, dst);
-#else
-    if (pkt->pts != AV_NOPTS_VALUE)
-        pkt->pts = av_rescale_q(pkt->pts, src, dst);
-
-    if (pkt->dts != AV_NOPTS_VALUE)
-        pkt->dts = av_rescale_q(pkt->dts, src, dst);
-
-    if (pkt->duration > 0)
-        pkt->duration = av_rescale_q(pkt->duration, src, dst);
-#endif
 }
 
 void AbstractStream::deleteFrame(AVFrame **frame)
@@ -200,15 +231,11 @@ void AbstractStream::deleteFrame(AVFrame **frame)
         (*frame)->data[0] = nullptr;
     }
 
-#ifdef HAVE_FRAMEALLOC
     av_frame_unref(*frame);
     av_frame_free(frame);
-#else
-    avcodec_free_frame(frame);
-#endif
 }
 
-void AbstractStream::convertLoop()
+void AbstractStreamPrivate::convertLoop()
 {
     while (this->m_runConvertLoop) {
         this->m_convertMutex.lock();
@@ -228,54 +255,53 @@ void AbstractStream::convertLoop()
         this->m_convertMutex.unlock();
 
         if (packet)
-            this->convertPacket(packet);
+            self->convertPacket(packet);
     }
 }
 
-void AbstractStream::encodeLoop()
+void AbstractStreamPrivate::encodeLoop()
 {
     while (this->m_runEncodeLoop) {
-        if (auto frame = this->dequeueFrame()) {
-            this->encodeData(frame);
-            this->deleteFrame(&frame);
+        if (auto frame = self->dequeueFrame()) {
+            self->encodeData(frame);
+            self->deleteFrame(&frame);
         }
     }
 
     // Flush encoders
-    while (this->encodeData(nullptr) == AVERROR(EAGAIN)) {
+    while (self->encodeData(nullptr) == AVERROR(EAGAIN)) {
     }
 }
 
 bool AbstractStream::init()
 {
-    if (!this->m_codecContext)
+    if (!this->d->m_codecContext)
         return false;
 
-    if (avcodec_open2(this->m_codecContext,
-                      this->m_codecContext->codec,
-                      &this->m_codecOptions) < 0)
+    if (avcodec_open2(this->d->m_codecContext,
+                      this->d->m_codecContext->codec,
+                      &this->d->m_codecOptions) < 0)
         return false;
 
 #ifdef HAVE_CODECPAR
-        avcodec_parameters_from_context(this->m_stream->codecpar,
-                                        this->m_codecContext);
+    avcodec_parameters_from_context(this->d->m_stream->codecpar,
+                                    this->d->m_codecContext);
 #else
-        avcodec_copy_context(this->m_stream->codec, this->m_codecContext);
+    avcodec_copy_context(this->d->m_stream->codec, this->d->m_codecContext);
 #endif
 
-    this->m_runEncodeLoop = true;
+    this->d->m_runEncodeLoop = true;
+    this->d->m_encodeLoopResult =
+            QtConcurrent::run(&this->d->m_threadPool,
+                              this->d,
+                              &AbstractStreamPrivate::encodeLoop);
 
-    this->m_encodeLoopResult =
-            QtConcurrent::run(&this->m_threadPool,
-                              this,
-                              &AbstractStream::encodeLoop);
+    this->d->m_runConvertLoop = true;
 
-    this->m_runConvertLoop = true;
-
-    this->m_convertLoopResult =
-            QtConcurrent::run(&this->m_threadPool,
-                              this,
-                              &AbstractStream::convertLoop);
+    this->d->m_convertLoopResult =
+            QtConcurrent::run(&this->d->m_threadPool,
+                              this->d,
+                              &AbstractStreamPrivate::convertLoop);
 
     return true;
 }
@@ -283,14 +309,18 @@ bool AbstractStream::init()
 void AbstractStream::uninit()
 {
 
-    this->m_runConvertLoop = false;
-    waitLoop(this->m_convertLoopResult);
+    this->d->m_runConvertLoop = false;
+    waitLoop(this->d->m_convertLoopResult);
 
-    this->m_runEncodeLoop = false;
-    waitLoop(this->m_encodeLoopResult);
+    this->d->m_runEncodeLoop = false;
+    waitLoop(this->d->m_encodeLoopResult);
 
-    if (this->m_codecOptions)
-        av_dict_free(&this->m_codecOptions);
+    avcodec_close(this->d->m_codecContext);
 
-    this->m_packetQueue.clear();
+    if (this->d->m_codecOptions)
+        av_dict_free(&this->d->m_codecOptions);
+
+    this->d->m_packetQueue.clear();
 }
+
+#include "moc_abstractstream.cpp"

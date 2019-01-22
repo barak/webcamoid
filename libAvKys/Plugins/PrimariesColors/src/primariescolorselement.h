@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef PRIMARIESCOLORSELEMENT_H
 #define PRIMARIESCOLORSELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class PrimariesColorsElementPrivate;
 
 class PrimariesColorsElement: public AkElement
 {
@@ -33,12 +34,13 @@ class PrimariesColorsElement: public AkElement
                NOTIFY factorChanged)
 
     public:
-        explicit PrimariesColorsElement();
+        PrimariesColorsElement();
+        ~PrimariesColorsElement();
 
         Q_INVOKABLE int factor() const;
 
     private:
-        int m_factor;
+        PrimariesColorsElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

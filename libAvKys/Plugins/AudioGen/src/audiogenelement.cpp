@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,20 @@
  */
 
 #include <random>
+#include <QSharedPointer>
+#include <QMap>
+#include <QtConcurrent>
+#include <QThreadPool>
+#include <QFuture>
+#include <QMutex>
+#include <QTime>
 #include <QtMath>
+#include <ak.h>
+#include <akelement.h>
+#include <akcaps.h>
+#include <akfrac.h>
+#include <akaudiocaps.h>
+#include <akaudiopacket.h>
 
 #include "audiogenelement.h"
 
@@ -33,7 +46,7 @@
 // We use about AUDIO_DIFF_AVG_NB A-V differences to make the average
 #define AUDIO_DIFF_AVG_NB 20
 
-typedef QMap<AudioGenElement::WaveType, QString> WaveTypeMap;
+using WaveTypeMap = QMap<AudioGenElement::WaveType, QString>;
 
 inline WaveTypeMap initWaveTypeMap()
 {
@@ -51,51 +64,238 @@ inline WaveTypeMap initWaveTypeMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(WaveTypeMap, waveTypeToStr, (initWaveTypeMap()))
 
-AudioGenElement::AudioGenElement(): AkElement()
+class AudioGenElementPrivate
 {
-    this->m_caps = "audio/x-raw,format=flt,bps=4,channels=1,rate=44100,layout=mono,align=false";
-    this->m_waveType = WaveTypeSilence;
-    this->m_frequency = 1000;
-    this->m_volume = 1.;
-    this->m_sampleDuration = 25.;
-    this->m_audioConvert = AkElement::create("ACapsConvert");
-    this->m_readFramesLoop = false;
-    this->m_pause = false;
+    public:
+        AkCaps m_caps {"audio/x-raw,format=flt,bps=4,channels=1,rate=44100,layout=mono,align=false"};
+        AkElementPtr m_audioConvert {AkElement::create("ACapsConvert")};
+        QThreadPool m_threadPool;
+        QFuture<void> m_readFramesLoopResult;
+        QMutex m_mutex;
+        qreal m_frequency {1000};
+        qreal m_volume {1.0};
+        qreal m_sampleDuration {25.0};
+        qint64 m_id {-1};
+        AudioGenElement::WaveType m_waveType {AudioGenElement::WaveTypeSilence};
+        bool m_readFramesLoop {false};
+        bool m_pause {false};
 
-    QObject::connect(this->m_audioConvert.data(),
-                     SIGNAL(oStream(const AkPacket &)),
-                     this,
-                     SIGNAL(oStream(const AkPacket &)),
-                     Qt::DirectConnection);
+        void readFramesLoop();
+};
+
+AudioGenElement::AudioGenElement():
+    AkElement()
+{
+    this->d = new AudioGenElementPrivate;
+
+    if (this->d->m_audioConvert)
+        QObject::connect(this->d->m_audioConvert.data(),
+                         SIGNAL(oStream(const AkPacket &)),
+                         this,
+                         SIGNAL(oStream(const AkPacket &)),
+                         Qt::DirectConnection);
+}
+
+AudioGenElement::~AudioGenElement()
+{
+    delete this->d;
 }
 
 QString AudioGenElement::caps() const
 {
-    return this->m_caps.toString();
+    return this->d->m_caps.toString();
 }
 
 QString AudioGenElement::waveType() const
 {
-    return waveTypeToStr->value(this->m_waveType);
+    return waveTypeToStr->value(this->d->m_waveType);
 }
 
 qreal AudioGenElement::frequency() const
 {
-    return this->m_frequency;
+    return this->d->m_frequency;
 }
 
 qreal AudioGenElement::volume() const
 {
-    return this->m_volume;
+    return this->d->m_volume;
 }
 
 qreal AudioGenElement::sampleDuration() const
 {
-    return this->m_sampleDuration;
+    return this->d->m_sampleDuration;
 }
 
-void AudioGenElement::readFramesLoop()
+void AudioGenElement::setCaps(const QString &caps)
 {
+    if (this->d->m_caps == caps)
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_caps = caps;
+    this->d->m_mutex.unlock();
+
+    if (this->d->m_audioConvert)
+        this->d->m_audioConvert->setProperty("caps", caps);
+
+    emit this->capsChanged(caps);
+}
+
+void AudioGenElement::setWaveType(const QString &waveType)
+{
+    WaveType waveTypeEnum = waveTypeToStr->key(waveType,
+                                                WaveTypeSilence);
+
+    if (this->d->m_waveType == waveTypeEnum)
+        return;
+
+    this->d->m_waveType = waveTypeEnum;
+    emit this->waveTypeChanged(waveType);
+}
+
+void AudioGenElement::setFrequency(qreal frequency)
+{
+    if (qFuzzyCompare(this->d->m_frequency, frequency))
+        return;
+
+    this->d->m_frequency = frequency;
+    emit this->frequencyChanged(frequency);
+}
+
+void AudioGenElement::setVolume(qreal volume)
+{
+    if (qFuzzyCompare(this->d->m_volume, volume))
+        return;
+
+    this->d->m_volume = volume;
+    emit this->volumeChanged(volume);
+}
+
+void AudioGenElement::setSampleDuration(qreal sampleDuration)
+{
+    if (qFuzzyCompare(this->d->m_sampleDuration, sampleDuration))
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_sampleDuration = sampleDuration;
+    this->d->m_mutex.unlock();
+    emit this->sampleDurationChanged(sampleDuration);
+}
+
+void AudioGenElement::resetCaps()
+{
+    this->setCaps("audio/x-raw,format=flt,bps=4,channels=1,rate=44100,layout=mono,align=false");
+}
+
+void AudioGenElement::resetWaveType()
+{
+    this->setWaveType("silence");
+}
+
+void AudioGenElement::resetFrequency()
+{
+    this->setFrequency(1000);
+}
+
+void AudioGenElement::resetVolume()
+{
+    this->setVolume(1.);
+}
+
+void AudioGenElement::resetSampleDuration()
+{
+    this->setSampleDuration(25.);
+}
+
+bool AudioGenElement::setState(AkElement::ElementState state)
+{
+    if (!this->d->m_audioConvert)
+        return false;
+
+    AkElement::ElementState curState = this->state();
+
+    switch (curState) {
+    case AkElement::ElementStateNull: {
+        switch (state) {
+        case AkElement::ElementStatePaused: {
+            this->d->m_audioConvert->setState(state);
+            this->d->m_pause = true;
+            this->d->m_readFramesLoop = true;
+            this->d->m_readFramesLoopResult =
+                    QtConcurrent::run(&this->d->m_threadPool,
+                                      this->d,
+                                      &AudioGenElementPrivate::readFramesLoop);
+
+            return AkElement::setState(state);
+        }
+        case AkElement::ElementStatePlaying: {
+            this->d->m_audioConvert->setState(state);
+            this->d->m_id = Ak::id();
+            this->d->m_pause = false;
+            this->d->m_readFramesLoop = true;
+            this->d->m_readFramesLoopResult =
+                    QtConcurrent::run(&this->d->m_threadPool,
+                                      this->d,
+                                      &AudioGenElementPrivate::readFramesLoop);
+
+            return AkElement::setState(state);
+        }
+        case AkElement::ElementStateNull:
+            break;
+        }
+
+        break;
+    }
+    case AkElement::ElementStatePaused: {
+        switch (state) {
+        case AkElement::ElementStateNull:
+            this->d->m_pause = false;
+            this->d->m_readFramesLoop = false;
+            this->d->m_readFramesLoopResult.waitForFinished();
+            this->d->m_audioConvert->setState(state);
+
+            return AkElement::setState(state);
+        case AkElement::ElementStatePlaying:
+            this->d->m_audioConvert->setState(state);
+            this->d->m_pause = false;
+
+            return AkElement::setState(state);
+        case AkElement::ElementStatePaused:
+            break;
+        }
+
+        break;
+    }
+    case AkElement::ElementStatePlaying: {
+        switch (state) {
+        case AkElement::ElementStateNull:
+            this->d->m_pause = false;
+            this->d->m_readFramesLoop = false;
+            this->d->m_readFramesLoopResult.waitForFinished();
+            this->d->m_audioConvert->setState(state);
+
+            return AkElement::setState(state);
+        case AkElement::ElementStatePaused:
+            this->d->m_pause = true;
+            this->d->m_audioConvert->setState(state);
+
+            return AkElement::setState(state);
+        case AkElement::ElementStatePlaying:
+            break;
+        }
+
+        break;
+    }
+    }
+
+    return false;
+}
+
+void AudioGenElementPrivate::readFramesLoop()
+{
+    if (!this->m_audioConvert)
+        return;
+
     qint64 pts = 0;
     int t0 = QTime::currentTime().msecsSinceStartOfDay();
     static const qreal coeff = qExp(qLn(0.01) / AUDIO_DIFF_AVG_NB);
@@ -115,7 +315,6 @@ void AudioGenElement::readFramesLoop()
         this->m_mutex.unlock();
 
         AkAudioCaps oAudioCaps(oCaps);
-
         qreal clock = 0.;
         qreal diff = 0.;
 
@@ -157,38 +356,38 @@ void AudioGenElement::readFramesLoop()
         qreal time = QTime::currentTime().msecsSinceStartOfDay() / 1.e3;
         qreal tdiff = 1. / oAudioCaps.rate();
 
-        if (this->m_waveType == WaveTypeSilence) {
+        if (this->m_waveType == AudioGenElement::WaveTypeSilence) {
             iBuffer.fill(0);
-        } else if (this->m_waveType == WaveTypeWhiteNoise) {
+        } else if (this->m_waveType == AudioGenElement::WaveTypeWhiteNoise) {
             static std::default_random_engine engine;
             static std::uniform_int_distribution<int> distribution(-128, 127);
 
-            for (int i = 0; i < iBuffer.size(); i++)
-                iBuffer[i] = char(distribution(engine));
+            for (auto &c: iBuffer)
+                c = char(distribution(engine));
         } else {
-            qint32 ampMax = qint32(this->m_volume * std::numeric_limits<qint32>::max());
-            qint32 ampMin = qint32(this->m_volume * std::numeric_limits<qint32>::min());
-            qreal t = time;
-            qint32 *buff = reinterpret_cast<qint32 *>(iBuffer.data());
+            auto ampMax = qint32(this->m_volume * std::numeric_limits<qint32>::max());
+            auto ampMin = qint32(this->m_volume * std::numeric_limits<qint32>::min());
+            auto t = time;
+            auto buff = reinterpret_cast<qint32 *>(iBuffer.data());
 
-            if (this->m_waveType == WaveTypeSine) {
+            if (this->m_waveType == AudioGenElement::WaveTypeSine) {
                 for  (int i = 0; i < nSamples; i++, time += tdiff)
                     buff[i] = qRound(ampMax * qSin(2 * M_PI * this->m_frequency * t));
-            } else if (this->m_waveType == WaveTypeSquare) {
+            } else if (this->m_waveType == AudioGenElement::WaveTypeSquare) {
                 for  (int i = 0; i < nSamples; i++, time += tdiff)
                     buff[i] = qRound(2 * this->m_frequency * t) & 0x1?
                                   ampMin: ampMax;
             } else {
                 qint32 mod = qRound(oAudioCaps.rate() / this->m_frequency);
 
-                if (this->m_waveType == WaveTypeSawtooth) {
+                if (this->m_waveType == AudioGenElement::WaveTypeSawtooth) {
                     qreal k = (qreal(ampMax) - ampMin) / (mod - 1);
 
                     for  (int i = 0; i < nSamples; i++, time += tdiff) {
                         qint32 nsample = qRound(t / tdiff);
                         buff[i] = qRound(k * (nsample % mod) + ampMin);
                     }
-                } else if (this->m_waveType == WaveTypeTriangle) {
+                } else if (this->m_waveType == AudioGenElement::WaveTypeTriangle) {
                     mod /= 2;
                     qreal k = (qreal(ampMax) - ampMin) / (mod - 1);
 
@@ -205,13 +404,12 @@ void AudioGenElement::readFramesLoop()
 
         AkAudioCaps iAudioCaps(oAudioCaps);
         iAudioCaps.format() = AkAudioCaps::SampleFormat_s32;
-        iAudioCaps.bps() = sizeof(qint32);
+        iAudioCaps.bps() = AkAudioCaps::bitsPerSample(iAudioCaps.format());
         iAudioCaps.channels() = 1;
         iAudioCaps.layout() = AkAudioCaps::Layout_mono;
         iAudioCaps.samples() = nSamples;
 
         AkAudioPacket iPacket(iAudioCaps, iBuffer);
-
         iPacket.pts() = pts;
         iPacket.timeBase() = AkFrac(1, iAudioCaps.rate());
         iPacket.index() = 0;
@@ -223,159 +421,4 @@ void AudioGenElement::readFramesLoop()
     }
 }
 
-void AudioGenElement::setCaps(const QString &caps)
-{
-    if (this->m_caps == caps)
-        return;
-
-    this->m_mutex.lock();
-    this->m_caps = caps;
-    this->m_mutex.unlock();
-    this->m_audioConvert->setProperty("caps", caps);
-    emit this->capsChanged(caps);
-}
-
-void AudioGenElement::setWaveType(const QString &waveType)
-{
-    WaveType waveTypeEnum = waveTypeToStr->key(waveType,
-                                                WaveTypeSilence);
-
-    if (this->m_waveType == waveTypeEnum)
-        return;
-
-    this->m_waveType = waveTypeEnum;
-    emit this->waveTypeChanged(waveType);
-}
-
-void AudioGenElement::setFrequency(qreal frequency)
-{
-    if (qFuzzyCompare(this->m_frequency, frequency))
-        return;
-
-    this->m_frequency = frequency;
-    emit this->frequencyChanged(frequency);
-}
-
-void AudioGenElement::setVolume(qreal volume)
-{
-    if (qFuzzyCompare(this->m_volume, volume))
-        return;
-
-    this->m_volume = volume;
-    emit this->volumeChanged(volume);
-}
-
-void AudioGenElement::setSampleDuration(qreal sampleDuration)
-{
-    if (qFuzzyCompare(this->m_sampleDuration, sampleDuration))
-        return;
-
-    this->m_mutex.lock();
-    this->m_sampleDuration = sampleDuration;
-    this->m_mutex.unlock();
-    emit this->sampleDurationChanged(sampleDuration);
-}
-
-void AudioGenElement::resetCaps()
-{
-    this->setCaps("audio/x-raw,format=flt,bps=4,channels=1,rate=44100,layout=mono,align=false");
-}
-
-void AudioGenElement::resetWaveType()
-{
-    this->setWaveType("silence");
-}
-
-void AudioGenElement::resetFrequency()
-{
-    this->setFrequency(1000);
-}
-
-void AudioGenElement::resetVolume()
-{
-    this->setVolume(1.);
-}
-
-void AudioGenElement::resetSampleDuration()
-{
-    this->setSampleDuration(25.);
-}
-
-bool AudioGenElement::setState(AkElement::ElementState state)
-{
-    AkElement::ElementState curState = this->state();
-
-    switch (curState) {
-    case AkElement::ElementStateNull: {
-        switch (state) {
-        case AkElement::ElementStatePaused: {
-            this->m_audioConvert->setState(state);
-            this->m_pause = true;
-            this->m_readFramesLoop = true;
-            this->m_readFramesLoopResult = QtConcurrent::run(&this->m_threadPool,
-                                                             this,
-                                                             &AudioGenElement::readFramesLoop);
-
-            return AkElement::setState(state);
-        }
-        case AkElement::ElementStatePlaying: {
-            this->m_audioConvert->setState(state);
-            this->m_id = Ak::id();
-            this->m_pause = false;
-            this->m_readFramesLoop = true;
-            this->m_readFramesLoopResult = QtConcurrent::run(&this->m_threadPool,
-                                                             this,
-                                                             &AudioGenElement::readFramesLoop);
-
-            return AkElement::setState(state);
-        }
-        case AkElement::ElementStateNull:
-            break;
-        }
-
-        break;
-    }
-    case AkElement::ElementStatePaused: {
-        switch (state) {
-        case AkElement::ElementStateNull:
-            this->m_pause = false;
-            this->m_readFramesLoop = false;
-            this->m_readFramesLoopResult.waitForFinished();
-            this->m_audioConvert->setState(state);
-
-            return AkElement::setState(state);
-        case AkElement::ElementStatePlaying:
-            this->m_audioConvert->setState(state);
-            this->m_pause = false;
-
-            return AkElement::setState(state);
-        case AkElement::ElementStatePaused:
-            break;
-        }
-
-        break;
-    }
-    case AkElement::ElementStatePlaying: {
-        switch (state) {
-        case AkElement::ElementStateNull:
-            this->m_pause = false;
-            this->m_readFramesLoop = false;
-            this->m_readFramesLoopResult.waitForFinished();
-            this->m_audioConvert->setState(state);
-
-            return AkElement::setState(state);
-        case AkElement::ElementStatePaused:
-            this->m_pause = true;
-            this->m_audioConvert->setState(state);
-
-            return AkElement::setState(state);
-        case AkElement::ElementStatePlaying:
-            break;
-        }
-
-        break;
-    }
-    }
-
-    return false;
-}
+#include "moc_audiogenelement.cpp"

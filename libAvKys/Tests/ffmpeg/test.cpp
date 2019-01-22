@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 extern "C"
 {
     #include <libavcodec/avcodec.h>
-    #include <libavdevice/avdevice.h>
     #include <libavformat/avformat.h>
     #include <libavutil/avutil.h>
     #include <libswscale/swscale.h>

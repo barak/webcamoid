@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ typedef QVector<HaarStage> HaarStageVector;
 class HaarStageHID
 {
     public:
-        explicit HaarStageHID(const HaarStage &stage,
-                              int oWidth,
-                              const quint32 *integral,
-                              const quint32 *tiltedIntegral,
-                              qreal invArea,
-                              qreal scale);
+        HaarStageHID(const HaarStage &stage,
+                     int oWidth,
+                     const quint32 *integral,
+                     const quint32 *tiltedIntegral,
+                     qreal invArea,
+                     qreal scale);
         ~HaarStageHID();
 
         int m_count;
@@ -60,9 +60,9 @@ class HaarStage: public QObject
     Q_OBJECT
 
     public:
-        explicit HaarStage(QObject *parent=nullptr);
+        HaarStage(QObject *parent=nullptr);
         HaarStage(const HaarStage &other);
-        ~HaarStage();
+        ~HaarStage() = default;
 
         Q_INVOKABLE HaarTreeVector trees() const;
         Q_INVOKABLE HaarTreeVector &trees();

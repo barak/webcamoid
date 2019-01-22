@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,8 @@ struct Pixel
                      this->a + other.a);
     }
 
-    void clear() {
+    void clear()
+    {
         this->r = 0;
         this->g = 0;
         this->b = 0;

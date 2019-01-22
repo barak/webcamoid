@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
+import QtQuick 2.7
 import QtQuick.Window 2.2
+import QtQuick.Controls 2.0
 
-Window {
+ApplicationWindow {
     id: wndFlash
     color: "white"
     flags: Qt.Dialog

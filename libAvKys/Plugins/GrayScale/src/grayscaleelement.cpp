@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QImage>
+#include <akvideopacket.h>
+
 #include "grayscaleelement.h"
 
 GrayScaleElement::GrayScaleElement(): AkElement()
@@ -25,12 +28,10 @@ GrayScaleElement::GrayScaleElement(): AkElement()
 
 AkPacket GrayScaleElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
-
-    if (src.isNull())
-        return AkPacket();
-
-    QImage oFrame = src.convertToFormat(QImage::Format_Grayscale8);
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket(packet)
+                   .convert(AkVideoCaps::Format_gray)
+                   .toPacket();;
     akSend(oPacket)
 }
+
+#include "moc_grayscaleelement.cpp"

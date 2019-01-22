@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -248,7 +248,7 @@ bool JackServer::setValue(jackctl_parameter_t *parameter, const QVariant &value)
         break;
     }
     case JackParamBool:
-        jvalue.b = value.value<decltype(jvalue.b)>();
+        jvalue.b = value.toBool();
 
         break;
     }

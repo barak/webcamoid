@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,13 @@
 #ifndef CAPTURE_H
 #define CAPTURE_H
 
-#include <akpacket.h>
+#include <QObject>
+
+class Capture;
+class AkCaps;
+class AkPacket;
+
+typedef QSharedPointer<Capture> CapturePtr;
 
 class Capture: public QObject
 {
@@ -45,12 +51,12 @@ class Capture: public QObject
                NOTIFY nBuffersChanged)
 
     public:
-        explicit Capture(QObject *parent=nullptr);
-        virtual ~Capture();
+        Capture(QObject *parent=nullptr);
+        virtual ~Capture() = default;
 
         Q_INVOKABLE virtual QStringList webcams() const;
         Q_INVOKABLE virtual QString device() const;
-        Q_INVOKABLE virtual QList<int> streams() const;
+        Q_INVOKABLE virtual QList<int> streams();
         Q_INVOKABLE virtual QList<int> listTracks(const QString &mimeType);
         Q_INVOKABLE virtual QString ioMethod() const;
         Q_INVOKABLE virtual int nBuffers() const;

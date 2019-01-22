@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,15 @@
  *
  * Web-Site: http://webcamoid.github.io/
  */
+
+#include <QVariant>
+#include <akcaps.h>
+#include <akpacket.h>
+
+extern "C"
+{
+    #include <libavutil/imgutils.h>
+}
 
 #include "subtitlestream.h"
 
@@ -44,7 +53,7 @@ void SubtitleStream::processPacket(AVPacket *packet)
         return;
     }
 
-    AVSubtitle *subtitle = new AVSubtitle();
+    auto subtitle = new AVSubtitle;
     int gotSubtitle;
 
     avcodec_decode_subtitle2(this->codecContext(),
@@ -167,3 +176,5 @@ void SubtitleStream::processData(AVSubtitle *subtitle)
         emit this->oStream(oPacket);
     }
 }
+
+#include "moc_subtitlestream.cpp"

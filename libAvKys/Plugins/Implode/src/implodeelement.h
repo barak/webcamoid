@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef IMPLODEELEMENT_H
 #define IMPLODEELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class ImplodeElementPrivate;
 
 class ImplodeElement: public AkElement
 {
@@ -33,7 +34,8 @@ class ImplodeElement: public AkElement
                NOTIFY amountChanged)
 
     public:
-        explicit ImplodeElement();
+        ImplodeElement();
+        ~ImplodeElement();
 
         Q_INVOKABLE qreal amount() const;
 
@@ -43,7 +45,7 @@ class ImplodeElement: public AkElement
                                        const QString &controlId) const;
 
     private:
-        qreal m_amount;
+        ImplodeElementPrivate *d;
 
     signals:
         void amountChanged(qreal amount);

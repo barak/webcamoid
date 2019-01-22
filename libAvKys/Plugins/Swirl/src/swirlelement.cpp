@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,18 +17,32 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QImage>
+#include <QQmlContext>
 #include <QtMath>
+#include <akvideopacket.h>
 
 #include "swirlelement.h"
 
+class SwirlElementPrivate
+{
+    public:
+        qreal m_degrees {60.0};
+};
+
 SwirlElement::SwirlElement(): AkElement()
 {
-    this->m_degrees = 0;
+    this->d = new SwirlElementPrivate;
+}
+
+SwirlElement::~SwirlElement()
+{
+    delete this->d;
 }
 
 qreal SwirlElement::degrees() const
 {
-    return this->m_degrees;
+    return this->d->m_degrees;
 }
 
 QString SwirlElement::controlInterfaceProvide(const QString &controlId) const
@@ -49,21 +63,22 @@ void SwirlElement::controlInterfaceConfigure(QQmlContext *context,
 
 void SwirlElement::setDegrees(qreal degrees)
 {
-    if (qFuzzyCompare(this->m_degrees, degrees))
+    if (qFuzzyCompare(this->d->m_degrees, degrees))
         return;
 
-    this->m_degrees = degrees;
+    this->d->m_degrees = degrees;
     emit this->degreesChanged(degrees);
 }
 
 void SwirlElement::resetDegrees()
 {
-    this->setDegrees(0);
+    this->setDegrees(60);
 }
 
 AkPacket SwirlElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -78,15 +93,15 @@ AkPacket SwirlElement::iStream(const AkPacket &packet)
     qreal radius = qMax(xCenter, yCenter);
 
     if (src.width() > src.height())
-        yScale = qreal(src.width() / src.height());
+        yScale = qreal(src.width()) / src.height();
     else if (src.width() < src.height())
-        xScale = qreal(src.height() / src.width());
+        xScale = qreal(src.height()) / src.width();
 
-    qreal degrees = M_PI * this->m_degrees / 180.0;
+    qreal degrees = M_PI * this->d->m_degrees / 180.0;
 
     for (int y = 0; y < src.height(); y++) {
-        const QRgb *iLine = reinterpret_cast<const QRgb *>(src.constScanLine(y));
-        QRgb *oLine = reinterpret_cast<QRgb *>(oFrame.scanLine(y));
+        auto iLine = reinterpret_cast<const QRgb *>(src.constScanLine(y));
+        auto oLine = reinterpret_cast<QRgb *>(oFrame.scanLine(y));
         qreal yDistance = yScale * (y - yCenter);
 
         for (int x = 0; x < src.width(); x++) {
@@ -106,12 +121,14 @@ AkPacket SwirlElement::iStream(const AkPacket &packet)
                 if (!oFrame.rect().contains(xp, yp))
                     continue;
 
-                const QRgb *line = reinterpret_cast<const QRgb *>(src.constScanLine(yp));
+                auto line = reinterpret_cast<const QRgb *>(src.constScanLine(yp));
                 oLine[x] = line[xp];
             }
         }
     }
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_swirlelement.cpp"

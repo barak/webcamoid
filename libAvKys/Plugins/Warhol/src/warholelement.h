@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef WARHOLELEMENT_H
 #define WARHOLELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class WarholElementPrivate;
 
 class WarholElement: public AkElement
 {
@@ -33,13 +34,13 @@ class WarholElement: public AkElement
                NOTIFY nFramesChanged)
 
     public:
-        explicit WarholElement();
+        WarholElement();
+        ~WarholElement();
 
         Q_INVOKABLE int nFrames() const;
 
     private:
-        int m_nFrames;
-        QVector<quint32> m_colorTable;
+        WarholElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

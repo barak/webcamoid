@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QVariant>
+#include <akcaps.h>
+#include <akpacket.h>
+
 #include "capture.h"
 
 Capture::Capture(QObject *parent):
     QObject(parent)
-{
-}
-
-Capture::~Capture()
 {
 }
 
@@ -38,7 +38,7 @@ QString Capture::device() const
     return QString();
 }
 
-QList<int> Capture::streams() const
+QList<int> Capture::streams()
 {
     return QList<int>();
 }
@@ -168,3 +168,5 @@ void Capture::resetNBuffers()
 void Capture::reset()
 {
 }
+
+#include "moc_capture.cpp"

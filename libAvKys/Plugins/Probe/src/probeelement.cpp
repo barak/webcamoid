@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,24 +17,38 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QDebug>
+#include <akpacket.h>
+
 #include "probeelement.h"
+
+class ProbeElementPrivate
+{
+    public:
+        bool m_log {false};
+};
 
 ProbeElement::ProbeElement(): AkElement()
 {
-    this->m_log = false;
+    this->d = new ProbeElementPrivate;
+}
+
+ProbeElement::~ProbeElement()
+{
+    delete this->d;
 }
 
 bool ProbeElement::log() const
 {
-    return this->m_log;
+    return this->d->m_log;
 }
 
 void ProbeElement::setLog(bool log)
 {
-    if (this->m_log == log)
+    if (this->d->m_log == log)
         return;
 
-    this->m_log = log;
+    this->d->m_log = log;
     emit this->logChanged(log);
 }
 
@@ -45,7 +59,7 @@ void ProbeElement::resetLog()
 
 AkPacket ProbeElement::iStream(const AkPacket &packet)
 {
-    if (this->m_log) {
+    if (this->d->m_log) {
         qDebug().nospace() << "\"" << this->objectName().toStdString().c_str() << "\"";
 
         for (const QString &line: packet.toString().split('\n'))
@@ -55,3 +69,5 @@ AkPacket ProbeElement::iStream(const AkPacket &packet)
 
     akSend(packet);
 }
+
+#include "moc_probeelement.cpp"

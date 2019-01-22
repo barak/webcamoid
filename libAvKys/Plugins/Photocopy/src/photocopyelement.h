@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef PHOTOCOPYELEMENT_H
 #define PHOTOCOPYELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class PhotocopyElementPrivate;
 
 class PhotocopyElement: public AkElement
 {
@@ -38,30 +39,14 @@ class PhotocopyElement: public AkElement
                NOTIFY contrastChanged)
 
     public:
-        explicit PhotocopyElement();
+        PhotocopyElement();
+        ~PhotocopyElement();
 
         Q_INVOKABLE qreal brightness() const;
         Q_INVOKABLE qreal contrast() const;
 
     private:
-        qreal m_brightness;
-        qreal m_contrast;
-
-        inline int rgbToLuma(int red, int green, int blue)
-        {
-            int min;
-            int max;
-
-            if (red > green) {
-                max = qMax(red, blue);
-                min = qMin(green, blue);
-            } else {
-                max = qMax(green, blue);
-                min = qMin(red, blue);
-            }
-
-            return qRound((max + min) / 2.0);
-        }
+        PhotocopyElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    exists(../commons.pri) {
-        include(../commons.pri)
+    exists(../akcommons.pri) {
+        include(../akcommons.pri)
     } else {
-        error("commons.pri file not found.")
+        error("akcommons.pri file not found.")
     }
 }
 
@@ -30,13 +30,11 @@ CONFIG += qt
 !isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0): CONFIG += static
 
 DEFINES += \
-    QT_DEPRECATED_WARNINGS \
     AKCOMMONS_LIBRARY \
     QT_INSTALL_QML=\"\\\"$$[QT_INSTALL_QML]\\\"\"
 
 HEADERS = \
     src/ak.h \
-    src/akutils.h \
     src/akcaps.h \
     src/akcommons.h \
     src/akelement.h \
@@ -53,12 +51,10 @@ QT += qml
 
 SOURCES = \
     src/ak.cpp \
-    src/akutils.cpp \
     src/akcaps.cpp \
     src/akelement.cpp \
     src/akfrac.cpp \
     src/akpacket.cpp \
-    src/akplugin.cpp \
     src/akmultimediasourceelement.cpp \
     src/akvideocaps.cpp \
     src/akaudiocaps.cpp \
@@ -67,7 +63,7 @@ SOURCES = \
 
 win32: LIBS += -lole32
 
-DESTDIR = $${PWD}
+DESTDIR = $${OUT_PWD}/$${BIN_DIR}
 
 TARGET = $${COMMONS_TARGET}
 
@@ -77,8 +73,7 @@ CODECFORTR = UTF-8
 CODECFORSRC = UTF-8
 
 INSTALLS += target
-unix:target.path = $${LIBDIR}
-!unix:target.path = $${BINDIR}
+target.path = $${LIBDIR}
 
 !isEmpty(INSTALLDEVHEADERS):!isEqual(INSTALLDEVHEADERS, 0) {
     INSTALLS += headers

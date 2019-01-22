@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,17 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <cstdlib>
+
 #include "scratch.h"
 
-Scratch::Scratch(QObject *parent):
-    QObject(parent),
+Scratch::Scratch():
+    m_life0(0.0),
     m_life(0.0),
     m_dlife(0.0),
     m_x(0.0),
     m_dx(0.0),
-    m_y(0),
-    m_life0(0.0)
+    m_y(0)
 {
 }
 
@@ -51,17 +52,6 @@ Scratch::Scratch(qreal minLife, qreal maxLife,
 //    this->m_dx *= (qrand() & 0x1? 1.0: -1.0);
 
     this->m_y = int(qrand() * (maxY - minY) / RAND_MAX) + minY;
-}
-
-Scratch::Scratch(const Scratch &other):
-    QObject(other.parent()),
-    m_life(other.m_life),
-    m_dlife(other.m_dlife),
-    m_x(other.m_x),
-    m_dx(other.m_dx),
-    m_y(other.m_y),
-    m_life0(other.m_life0)
-{
 }
 
 Scratch &Scratch::operator =(const Scratch &other)
@@ -138,12 +128,9 @@ int &Scratch::y()
 
 bool Scratch::isAboutToDie() const
 {
-    qreal threshold = 0.75;
+    const qreal threshold = 0.75;
 
-    if (this->m_life <= this->m_dlife * (1.0 + threshold))
-        return true;
-
-    return false;
+    return this->m_life <= this->m_dlife * (1.0 + threshold);
 }
 
 void Scratch::setLife(qreal life)

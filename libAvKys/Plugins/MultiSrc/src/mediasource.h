@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,15 @@
 
 #include <akelement.h>
 
+class AkCaps;
+
 class MediaSource: public QObject
 {
     Q_OBJECT
 
     public:
-        explicit MediaSource(QObject *parent=nullptr);
-        virtual ~MediaSource();
+        MediaSource(QObject *parent=nullptr);
+        virtual ~MediaSource() = default;
 
         Q_INVOKABLE virtual QStringList medias() const;
         Q_INVOKABLE virtual QString media() const;

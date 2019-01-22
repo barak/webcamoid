@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class UsbIds: public QObject
     Q_OBJECT
 
     public:
-        explicit UsbIds(QObject *parent=nullptr);
+        UsbIds(QObject *parent=nullptr);
 
         const UsbIdsElement *operator [](quint16 vendorId) const;
         QString description(quint16 vendorId, quint16 productId) const;

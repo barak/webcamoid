@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,22 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
+
+    Connections {
+        target: Swirl
+
+        onDegreesChanged: {
+            sldDegrees.value = degrees
+            spbDegrees.rvalue = degrees
+        }
+    }
 
     Label {
         text: qsTr("Degrees")
@@ -31,16 +41,19 @@ GridLayout {
         id: sldDegrees
         value: Swirl.degrees
         stepSize: 1
-        minimumValue: -360
-        maximumValue: 360
+        from: -360
+        to: 360
+        Layout.fillWidth: true
 
         onValueChanged: Swirl.degrees = value
     }
-    SpinBox {
-        value: sldDegrees.value
-        maximumValue: sldDegrees.maximumValue
-        stepSize: sldDegrees.stepSize
+    AkSpinBox {
+        id: spbDegrees
+        rvalue: Swirl.degrees
+        minimumValue: sldDegrees.from
+        maximumValue: sldDegrees.to
+        step: sldDegrees.stepSize
 
-        onValueChanged: sldDegrees.value = value
+        onRvalueChanged: Swirl.degrees = rvalue
     }
 }

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,19 +20,16 @@
 #ifndef AUDIODEVJACK_H
 #define AUDIODEVJACK_H
 
-#include <QWaitCondition>
-#include <QMutex>
-#include <ak.h>
-#include <jack/jack.h>
-
 #include "audiodev.h"
+
+class AudioDevJackPrivate;
 
 class AudioDevJack: public AudioDev
 {
     Q_OBJECT
 
     public:
-        explicit AudioDevJack(QObject *parent=nullptr);
+        AudioDevJack(QObject *parent=nullptr);
         ~AudioDevJack();
 
         Q_INVOKABLE QString error() const;
@@ -51,24 +48,9 @@ class AudioDevJack: public AudioDev
         Q_INVOKABLE bool uninit();
 
     private:
-        QString m_error;
-        QMap<QString, QString> m_descriptions;
-        QMap<QString, AkAudioCaps> m_caps;
-        QMap<QString, QStringList> m_devicePorts;
-        QList<jack_port_t *> m_appPorts;
-        QString m_curDevice;
-        int m_sampleRate;
-        int m_curChannels;
-        int m_maxBufferSize;
-        bool m_isInput;
-        QByteArray m_buffer;
-        jack_client_t *m_client;
-        QMutex m_mutex;
-        QWaitCondition m_canWrite;
-        QWaitCondition m_samplesAvailable;
+        AudioDevJackPrivate *d;
 
-        static int onProcessCallback(jack_nframes_t nframes, void *userData);
-        static void onShutdownCallback(void *userData);
+        friend class AudioDevJackPrivate;
 };
 
 #endif // AUDIODEVJACK_H

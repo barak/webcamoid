@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,11 @@
 #define AKQML_H
 
 #include <QQuickItem>
-#include <ak.h>
+#include <akaudiocaps.h>
+
+class AkFrac;
+class AkCaps;
+class AkVideoCaps;
 
 class AkQml: public QQuickItem
 {
@@ -30,7 +34,7 @@ class AkQml: public QQuickItem
 
     public:
         AkQml(QQuickItem *parent=nullptr);
-        ~AkQml();
+        ~AkQml() = default;
 
         Q_INVOKABLE qint64 id() const;
 
@@ -62,9 +66,11 @@ class AkQml: public QQuickItem
         Q_INVOKABLE QObject *newElement(const QString &pluginId,
                                         const QString &elementName={}) const;
 
+        Q_INVOKABLE QVariant varFrac(QObject *frac) const;
         Q_INVOKABLE QVariant varFrac(AkFrac *frac) const;
         Q_INVOKABLE QVariant varFrac(qint64 num, qint64 den) const;
 
+        Q_INVOKABLE QVariant varCaps(QObject *caps) const;
         Q_INVOKABLE QVariant varCaps(AkCaps *caps) const;
 };
 

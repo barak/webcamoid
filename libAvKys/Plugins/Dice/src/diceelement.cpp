@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,19 +17,37 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <QtMath>
+#include <QImage>
 #include <QPainter>
+#include <QQmlContext>
+#include <QMutex>
+#include <QtMath>
+#include <akvideopacket.h>
 
 #include "diceelement.h"
 
+class DiceElementPrivate
+{
+    public:
+        QMutex m_mutex;
+        QImage m_diceMap;
+        QSize m_frameSize;
+        int m_diceSize {24};
+};
+
 DiceElement::DiceElement(): AkElement()
 {
-    this->m_diceSize = 24;
+    this->d = new DiceElementPrivate;
+}
+
+DiceElement::~DiceElement()
+{
+    delete this->d;
 }
 
 int DiceElement::diceSize() const
 {
-    return this->m_diceSize;
+    return this->d->m_diceSize;
 }
 
 QString DiceElement::controlInterfaceProvide(const QString &controlId) const
@@ -50,10 +68,10 @@ void DiceElement::controlInterfaceConfigure(QQmlContext *context,
 
 void DiceElement::setDiceSize(int diceSize)
 {
-    if (this->m_diceSize == diceSize)
+    if (this->d->m_diceSize == diceSize)
         return;
 
-    this->m_diceSize = diceSize;
+    this->d->m_diceSize = diceSize;
     emit this->diceSizeChanged(diceSize);
 }
 
@@ -64,7 +82,8 @@ void DiceElement::resetDiceSize()
 
 AkPacket DiceElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -72,14 +91,14 @@ AkPacket DiceElement::iStream(const AkPacket &packet)
     src = src.convertToFormat(QImage::Format_ARGB32);
     QImage oFrame = src.copy();
 
-    static int diceSize = this->m_diceSize;
+    static int diceSize = this->d->m_diceSize;
 
-    if (src.size() != this->m_frameSize
-        || this->m_diceSize != diceSize) {
-        diceSize = this->m_diceSize;
-        this->m_frameSize = src.size();
+    if (src.size() != this->d->m_frameSize
+        || this->d->m_diceSize != diceSize) {
+        diceSize = this->d->m_diceSize;
+        this->d->m_frameSize = src.size();
         this->updateDiceMap();
-        emit this->frameSizeChanged(this->m_frameSize);
+        emit this->frameSizeChanged(this->d->m_frameSize);
     }
 
     QTransform rotateLeft;
@@ -93,13 +112,14 @@ AkPacket DiceElement::iStream(const AkPacket &packet)
     QPainter painter;
     painter.begin(&oFrame);
 
-    for (int y = 0; y < this->m_diceMap.height(); y++) {
-        const quint8 *diceLine = reinterpret_cast<const quint8 *>(this->m_diceMap.constScanLine(y));
+    for (int y = 0; y < this->d->m_diceMap.height(); y++) {
+        auto diceLine = reinterpret_cast<const quint8 *>(this->d->m_diceMap.constScanLine(y));
 
-        for (int x = 0; x < this->m_diceMap.width(); x++) {
-            int xp = this->m_diceSize * x;
-            int yp = this->m_diceSize * y;
-            QImage dice = src.copy(xp, yp, this->m_diceSize, this->m_diceSize);
+        for (int x = 0; x < this->d->m_diceMap.width(); x++) {
+            int xp = this->d->m_diceSize * x;
+            int yp = this->d->m_diceSize * y;
+            QImage dice = src.copy(xp, yp,
+                                   this->d->m_diceSize, this->d->m_diceSize);
             quint8 direction = diceLine[x];
 
             if (direction == 0)
@@ -115,23 +135,25 @@ AkPacket DiceElement::iStream(const AkPacket &packet)
 
     painter.end();
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
 
 void DiceElement::updateDiceMap()
 {
-    int width = qCeil(this->m_frameSize.width() / qreal(this->m_diceSize));
-    int height = qCeil(this->m_frameSize.height() / qreal(this->m_diceSize));
+    int width = qCeil(this->d->m_frameSize.width() / qreal(this->d->m_diceSize));
+    int height = qCeil(this->d->m_frameSize.height() / qreal(this->d->m_diceSize));
 
     QImage diceMap(width, height, QImage::Format_Grayscale8);
 
     for (int y = 0; y < diceMap.height(); y++) {
-        quint8 *oLine = reinterpret_cast<quint8 *>(diceMap.scanLine(y));
+        auto oLine = reinterpret_cast<quint8 *>(diceMap.scanLine(y));
 
         for (int x = 0; x < diceMap.width(); x++)
             oLine[x] = qrand() % 4;
     }
 
-    this->m_diceMap = diceMap;
+    this->d->m_diceMap = diceMap;
 }
+
+#include "moc_diceelement.cpp"

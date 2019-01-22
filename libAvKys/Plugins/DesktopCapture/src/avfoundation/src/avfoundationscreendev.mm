@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,15 @@
  */
 
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QScreen>
-#include <QTime>
-#include <akutils.h>
+#include <QThreadPool>
+#include <QtConcurrent>
+#include <QMutex>
+#include <ak.h>
+#include <akcaps.h>
+#include <akvideopacket.h>
+#include <CoreGraphics/CoreGraphics.h>
 
 #include "avfoundationscreendev.h"
 #import "framegrabber.h"
@@ -28,48 +34,38 @@
 class AVFoundationScreenDevPrivate
 {
     public:
-        AVCaptureScreenInput *m_screenInput;
-        AVCaptureSession *m_captureSession;
-        AVCaptureVideoDataOutput *m_videoOutput;
-        id m_frameGrabber;
+        AVCaptureScreenInput *m_screenInput {nil};
+        AVCaptureSession *m_captureSession {nil};
+        AVCaptureVideoDataOutput *m_videoOutput {nil};
+        id m_frameGrabber {nil};
+        AkFrac m_fps {30000, 1001};
+        QString m_curScreen;
+        int m_curScreenNumber {-1};
 
-        explicit AVFoundationScreenDevPrivate()
-        {
-            this->m_screenInput = nil;
-            this->m_captureSession = nil;
-            this->m_videoOutput = nil;
-            this->m_frameGrabber = nil;
-        }
-
-        ~AVFoundationScreenDevPrivate()
-        {
-            [this->m_captureSession stopRunning];
-            [this->m_frameGrabber release];
-            [this->m_videoOutput release];
-            [this->m_captureSession release];
-            [this->m_screenInput release];
-        }
+        ~AVFoundationScreenDevPrivate();
 };
 
 AVFoundationScreenDev::AVFoundationScreenDev():
     ScreenDev()
 {
     this->d = new AVFoundationScreenDevPrivate();
-    this->m_fps = AkFrac(30000, 1001);
-    this->m_curScreenNumber = -1;
+    size_t i = 0;
+
+    for (auto screen: QGuiApplication::screens()) {
+        QObject::connect(screen,
+                         &QScreen::geometryChanged,
+                         [=]() { this->srceenResized(int(i)); });
+        i++;
+    }
 
     QObject::connect(qApp,
                      &QGuiApplication::screenAdded,
                      this,
-                     &AVFoundationScreenDev::screenCountChanged);
+                     &AVFoundationScreenDev::screenAdded);
     QObject::connect(qApp,
                      &QGuiApplication::screenRemoved,
                      this,
-                     &AVFoundationScreenDev::screenCountChanged);
-    QObject::connect(QApplication::desktop(),
-                     &QDesktopWidget::resized,
-                     this,
-                     &AVFoundationScreenDev::srceenResized);
+                     &AVFoundationScreenDev::screenRemoved);
 }
 
 AVFoundationScreenDev::~AVFoundationScreenDev()
@@ -80,7 +76,7 @@ AVFoundationScreenDev::~AVFoundationScreenDev()
 
 AkFrac AVFoundationScreenDev::fps() const
 {
-    return this->m_fps;
+    return this->d->m_fps;
 }
 
 QStringList AVFoundationScreenDev::medias()
@@ -95,8 +91,8 @@ QStringList AVFoundationScreenDev::medias()
 
 QString AVFoundationScreenDev::media() const
 {
-    if (!this->m_curScreen.isEmpty())
-        return this->m_curScreen;
+    if (!this->d->m_curScreen.isEmpty())
+        return this->d->m_curScreen;
 
     int screen = QGuiApplication::screens().indexOf(QGuiApplication::primaryScreen());
 
@@ -130,11 +126,11 @@ QString AVFoundationScreenDev::description(const QString &media)
 
 AkCaps AVFoundationScreenDev::caps(int stream)
 {
-    if (this->m_curScreenNumber < 0
+    if (this->d->m_curScreenNumber < 0
         || stream != 0)
         return AkCaps();
 
-    QScreen *screen = QGuiApplication::screens()[this->m_curScreenNumber];
+    auto screen = QGuiApplication::screens()[this->d->m_curScreenNumber];
 
     if (!screen)
         return QString();
@@ -145,7 +141,7 @@ AkCaps AVFoundationScreenDev::caps(int stream)
     caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
     caps.width() = screen->size().width();
     caps.height() = screen->size().height();
-    caps.fps() = this->m_fps;
+    caps.fps() = this->d->m_fps;
 
     return caps.toCaps();
 }
@@ -157,31 +153,22 @@ void AVFoundationScreenDev::frameReceived(CGDirectDisplayID screen,
                                           qint64 id)
 {
     CGImageRef image = CGDisplayCreateImage(screen);
-    QImage frameImg(int(CGImageGetWidth(image)),
-                    int(CGImageGetHeight(image)),
-                    QImage::Format_RGB32);
-    auto bufferSize = size_t(qMin(buffer.size(), frameImg.byteCount()));
-    memcpy(frameImg.bits(), buffer.constData(), bufferSize);
 
     AkVideoCaps caps;
     caps.isValid() = true;
     caps.format() = AkVideoCaps::Format_argb;
     caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
-    caps.width() = frameImg.width();
-    caps.height() = frameImg.height();
+    caps.width() = int(CGImageGetWidth(image));
+    caps.height() = int(CGImageGetHeight(image));
     caps.fps() = fps;
 
-    AkPacket packet = AkUtils::imageToPacket(frameImg, caps.toCaps());
+    AkVideoPacket videoPacket(caps, buffer);
+    videoPacket.setPts(pts);
+    videoPacket.setTimeBase(fps.invert());
+    videoPacket.setIndex(0);
+    videoPacket.setId(id);
 
-    if (!packet)
-        return;
-
-    packet.setPts(pts);
-    packet.setTimeBase(fps.invert());
-    packet.setIndex(0);
-    packet.setId(id);
-
-    emit this->oStream(packet);
+    emit this->oStream(videoPacket.toPacket());
 }
 
 void AVFoundationScreenDev::sendPacket(const AkPacket &packet)
@@ -191,10 +178,10 @@ void AVFoundationScreenDev::sendPacket(const AkPacket &packet)
 
 void AVFoundationScreenDev::setFps(const AkFrac &fps)
 {
-    if (this->m_fps == fps)
+    if (this->d->m_fps == fps)
         return;
 
-    this->m_fps = fps;
+    this->d->m_fps = fps;
     emit this->fpsChanged(fps);
 }
 
@@ -209,11 +196,11 @@ void AVFoundationScreenDev::setMedia(const QString &media)
         QString screen = QString("screen://%1").arg(i);
 
         if (screen == media) {
-            if (this->m_curScreenNumber == i)
+            if (this->d->m_curScreenNumber == i)
                 break;
 
-            this->m_curScreen = screen;
-            this->m_curScreenNumber = i;
+            this->d->m_curScreen = screen;
+            this->d->m_curScreenNumber = i;
 
             emit this->mediaChanged(media);
 
@@ -226,13 +213,13 @@ void AVFoundationScreenDev::resetMedia()
 {
     int screen = QGuiApplication::screens().indexOf(QGuiApplication::primaryScreen());
 
-    if (this->m_curScreenNumber == screen)
+    if (this->d->m_curScreenNumber == screen)
         return;
 
-    this->m_curScreen = QString("screen://%1").arg(screen);
-    this->m_curScreenNumber = screen;
+    this->d->m_curScreen = QString("screen://%1").arg(screen);
+    this->d->m_curScreenNumber = screen;
 
-    emit this->mediaChanged(this->m_curScreen);
+    emit this->mediaChanged(this->d->m_curScreen);
 }
 
 void AVFoundationScreenDev::setStreams(const QList<int> &streams)
@@ -248,16 +235,16 @@ void AVFoundationScreenDev::resetStreams()
 bool AVFoundationScreenDev::init()
 {
     uint32_t nScreens = 0;
-    CGGetActiveDisplayList(0, NULL, &nScreens);
+    CGGetActiveDisplayList(0, nullptr, &nScreens);
     QVector<CGDirectDisplayID> screens;
     screens.resize(int(nScreens));
     CGGetActiveDisplayList(nScreens, screens.data(), &nScreens);
 
-    if (this->m_curScreenNumber >= screens.size())
+    if (this->d->m_curScreenNumber >= screens.size())
         return false;
 
-    CGDirectDisplayID screen = screens[this->m_curScreenNumber < 0?
-                                       0: this->m_curScreenNumber];
+    CGDirectDisplayID screen = screens[this->d->m_curScreenNumber < 0?
+                                       0: this->d->m_curScreenNumber];
 
     this->d->m_screenInput = [[AVCaptureScreenInput alloc]
                               initWithDisplayID: screen];
@@ -265,7 +252,7 @@ bool AVFoundationScreenDev::init()
     if (!this->d->m_screenInput)
         return false;
 
-    auto fps = this->m_fps;
+    auto fps = this->d->m_fps;
 
     this->d->m_screenInput.minFrameDuration = CMTimeMake(int(fps.den()),
                                                          int(fps.num()));
@@ -296,7 +283,7 @@ bool AVFoundationScreenDev::init()
                                initWithScreenDev: this
                                onScreen: screen
                                withFps: fps];
-    auto queue = dispatch_queue_create("frame_queue", NULL);
+    auto queue = dispatch_queue_create("frame_queue", nullptr);
     [this->d->m_videoOutput setSampleBufferDelegate: this->d->m_frameGrabber queue: queue];
     dispatch_release(queue);
 
@@ -334,7 +321,24 @@ bool AVFoundationScreenDev::uninit()
     return true;
 }
 
-void AVFoundationScreenDev::screenCountChanged(QScreen *screen)
+void AVFoundationScreenDev::screenAdded(QScreen *screen)
+{
+    Q_UNUSED(screen)
+    size_t i = 0;
+
+    for (auto screen_: QGuiApplication::screens()) {
+        if (screen_ == screen)
+            QObject::connect(screen_,
+                             &QScreen::geometryChanged,
+                             [=]() { this->srceenResized(int(i)); });
+
+        i++;
+    }
+
+    emit this->mediasChanged(this->medias());
+}
+
+void AVFoundationScreenDev::screenRemoved(QScreen *screen)
 {
     Q_UNUSED(screen)
 
@@ -343,8 +347,19 @@ void AVFoundationScreenDev::screenCountChanged(QScreen *screen)
 
 void AVFoundationScreenDev::srceenResized(int screen)
 {
-    QString media = QString("screen://%1").arg(screen);
-    QWidget *widget = QApplication::desktop()->screen(screen);
+    auto media = QString("screen://%1").arg(screen);
+    auto widget = QGuiApplication::screens()[screen];
 
     emit this->sizeChanged(media, widget->size());
 }
+
+AVFoundationScreenDevPrivate::~AVFoundationScreenDevPrivate()
+{
+    [this->m_captureSession stopRunning];
+    [this->m_frameGrabber release];
+    [this->m_videoOutput release];
+    [this->m_captureSession release];
+    [this->m_screenInput release];
+}
+
+#include "moc_avfoundationscreendev.cpp"

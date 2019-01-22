@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,9 @@
 #ifndef VIDEOSTREAM_H
 #define VIDEOSTREAM_H
 
-#include <akvideopacket.h>
-
-extern "C"
-{
-    #include <libswscale/swscale.h>
-}
-
 #include "abstractstream.h"
+
+class VideoStreamPrivate;
 
 class VideoStream: public AbstractStream
 {
@@ -43,14 +38,7 @@ class VideoStream: public AbstractStream
         ~VideoStream();
 
     private:
-        AVFrame *m_frame;
-        SwsContext *m_scaleContext;
-        QMutex m_frameMutex;
-        int64_t m_lastPts;
-        int64_t m_refPts;
-        QWaitCondition m_frameReady;
-
-        QImage swapChannels(const QImage &image) const;
+        VideoStreamPrivate *d;
 
     protected:
         void convertPacket(const AkPacket &packet);

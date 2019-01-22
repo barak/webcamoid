@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,13 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <akcaps.h>
+#include <akpacket.h>
+
 #include "convertvideo.h"
 
 ConvertVideo::ConvertVideo(QObject *parent):
     QObject(parent)
-{
-}
-
-ConvertVideo::~ConvertVideo()
 {
 }
 
@@ -43,3 +42,5 @@ bool ConvertVideo::init(const AkCaps &caps)
 void ConvertVideo::uninit()
 {
 }
+
+#include "moc_convertvideo.cpp"

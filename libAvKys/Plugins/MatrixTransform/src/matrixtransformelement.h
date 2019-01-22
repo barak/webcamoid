@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
 #ifndef MATRIXTRANSFORMELEMENT_H
 #define MATRIXTRANSFORMELEMENT_H
 
-#include <QMutex>
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class MatrixTransformElementPrivate;
 
 class MatrixTransformElement: public AkElement
 {
@@ -34,13 +34,13 @@ class MatrixTransformElement: public AkElement
                NOTIFY kernelChanged)
 
     public:
-        explicit MatrixTransformElement();
+        MatrixTransformElement();
+        ~MatrixTransformElement();
 
         Q_INVOKABLE QVariantList kernel() const;
 
     private:
-        QVector<qreal> m_kernel;
-        QMutex m_mutex;
+        MatrixTransformElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,10 @@
 #ifndef LIFEELEMENT_H
 #define LIFEELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <qrgb.h>
+#include <akelement.h>
+
+class LifeElementPrivate;
 
 class LifeElement: public AkElement
 {
@@ -43,26 +45,15 @@ class LifeElement: public AkElement
                NOTIFY lumaThresholdChanged)
 
     public:
-        explicit LifeElement();
+        LifeElement();
+        ~LifeElement();
 
         Q_INVOKABLE QRgb lifeColor() const;
         Q_INVOKABLE int threshold() const;
         Q_INVOKABLE int lumaThreshold() const;
 
     private:
-        QRgb m_lifeColor;
-        int m_threshold;
-        int m_lumaThreshold;
-
-        QSize m_frameSize;
-        QImage m_prevFrame;
-        QImage m_lifeBuffer;
-
-        QImage imageDiff(const QImage &img1,
-                         const QImage &img2,
-                         int threshold,
-                         int lumaThreshold);
-        void updateLife();
+        LifeElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

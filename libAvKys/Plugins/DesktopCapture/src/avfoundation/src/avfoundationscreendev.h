@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,18 +20,12 @@
 #ifndef AVFOUNDATIONSCREENDEV_H
 #define AVFOUNDATIONSCREENDEV_H
 
-#include <QTimer>
-#include <QThreadPool>
-#include <QtConcurrent>
-#include <QMutex>
-#include <QDesktopWidget>
-#include <ak.h>
-#include <akvideopacket.h>
-#include <CoreGraphics/CoreGraphics.h>
+#include <CoreGraphics/CGDirectDisplay.h>
 
 #include "screendev.h"
 
 class AVFoundationScreenDevPrivate;
+class QScreen;
 
 class AVFoundationScreenDev: public ScreenDev
 {
@@ -56,7 +50,7 @@ class AVFoundationScreenDev: public ScreenDev
                NOTIFY fpsChanged)
 
     public:
-        explicit AVFoundationScreenDev();
+        AVFoundationScreenDev();
         ~AVFoundationScreenDev();
 
         Q_INVOKABLE AkFrac fps() const;
@@ -75,9 +69,6 @@ class AVFoundationScreenDev: public ScreenDev
 
     private:
         AVFoundationScreenDevPrivate *d;
-        AkFrac m_fps;
-        QString m_curScreen;
-        int m_curScreenNumber;
 
         void sendPacket(const AkPacket &packet);
 
@@ -101,7 +92,8 @@ class AVFoundationScreenDev: public ScreenDev
         bool uninit();
 
     private slots:
-        void screenCountChanged(QScreen *screen);
+        void screenAdded(QScreen *screen);
+        void screenRemoved(QScreen *screen);
         void srceenResized(int screen);
 };
 

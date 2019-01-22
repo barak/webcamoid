@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2012  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,10 +16,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-COMMONS_APPNAME = "Webcamoid"
-COMMONS_TARGET = $$lower($${COMMONS_APPNAME})
 VER_MAJ = 8
-VER_MIN = 1
+VER_MIN = 5
 VER_PAT = 0
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
 
@@ -32,29 +30,55 @@ isEmpty(QMAKE_LRELEASE) {
     unix: QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease
     !unix: QMAKE_LRELEASE = $$[QT_INSTALL_LIBEXECS]/lrelease
 }
+isEmpty(QMAKE_LUPDATE) {
+    unix: QMAKE_LUPDATE = $$[QT_INSTALL_BINS]/lupdate
+    !unix: QMAKE_LUPDATE = $$[QT_INSTALL_LIBEXECS]/lupdate
+}
+
+isEmpty(BUNDLENAME): BUNDLENAME = webcamoid
 
 win32 {
     host_name = $$lower($$QMAKE_HOST.os)
 
     !isEmpty(ProgramW6432) {
-        DEFAULT_PREFIX = $(ProgramW6432)/$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = $(ProgramW6432)/$${BUNDLENAME}
     } else: !isEmpty(ProgramFiles) {
-        DEFAULT_PREFIX = $(ProgramFiles)/$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = $(ProgramFiles)/$${BUNDLENAME}
     } else: contains(host_name, linux) {
-        DEFAULT_PREFIX = /$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = /$${BUNDLENAME}
     } else {
-        DEFAULT_PREFIX = C:/$${COMMONS_APPNAME}
+        DEFAULT_PREFIX = C:/$${BUNDLENAME}
     }
+} else: macx: isEmpty(NOAPPBUNDLE) {
+    DEFAULT_PREFIX = /Applications
 } else {
     DEFAULT_PREFIX = /usr
 }
 
 isEmpty(PREFIX): PREFIX = $${DEFAULT_PREFIX}
-isEmpty(EXECPREFIX): EXECPREFIX = $${PREFIX}
-isEmpty(BINDIR): BINDIR = $${EXECPREFIX}/bin
+isEmpty(EXECPREFIX) {
+    macx: isEmpty(NOAPPBUNDLE) {
+        EXECPREFIX = $${PREFIX}/$${BUNDLENAME}.app/Contents
+    } else {
+        EXECPREFIX = $${PREFIX}
+    }
+}
+isEmpty(BINDIR) {
+    macx: isEmpty(NOAPPBUNDLE) {
+        BINDIR = $${EXECPREFIX}/MacOS
+    } else {
+        BINDIR = $${EXECPREFIX}/bin
+    }
+}
 isEmpty(SBINDIR): SBINDIR = $${EXECPREFIX}/sbin
 isEmpty(LIBEXECDIR): LIBEXECDIR = $${EXECPREFIX}/libexec
-isEmpty(DATAROOTDIR): DATAROOTDIR = $${PREFIX}/share
+isEmpty(DATAROOTDIR) {
+    macx: isEmpty(NOAPPBUNDLE) {
+        DATAROOTDIR = $${EXECPREFIX}/Resources
+    } else {
+        DATAROOTDIR = $${PREFIX}/share
+    }
+}
 isEmpty(DATDIR): DATDIR = $${DATAROOTDIR}/$${COMMONS_TARGET}
 isEmpty(SYSCONFDIR): SYSCONFDIR = $${PREFIX}/etc
 isEmpty(SHAREDSTATEDIR): SHAREDSTATEDIR = $${PREFIX}/com
@@ -66,13 +90,40 @@ isEmpty(HTMLDIR): HTMLDIR = $${DOCDIR}/html
 isEmpty(DVIDIR): DVIDIR = $${DOCDIR}/dvi
 isEmpty(PDFDIR): PDFDIR = $${DOCDIR}/pdf
 isEmpty(PSDIR): PSDIR = $${DOCDIR}/ps
-isEmpty(LIBDIR): LIBDIR = $${EXECPREFIX}/lib
+isEmpty(LIBDIR) {
+    macx: isEmpty(NOAPPBUNDLE) {
+        LIBDIR = $${EXECPREFIX}/Frameworks
+    } else: win32 {
+        LIBDIR = $${BINDIR}
+    } else {
+        LIBDIR = $${EXECPREFIX}/lib
+    }
+}
 isEmpty(LOCALEDIR): LOCALEDIR = $${DATAROOTDIR}/locale
 isEmpty(MANDIR): MANDIR = $${DATAROOTDIR}/man
 isEmpty(LICENSEDIR): LICENSEDIR = $${DATAROOTDIR}/licenses/$${COMMONS_TARGET}
 isEmpty(LOCALDIR): LOCALDIR = $${PREFIX}/local
 isEmpty(LOCALLIBDIR): LOCALLIBDIR = $${LOCALDIR}/lib
-isEmpty(INSTALLQMLDIR): INSTALLQMLDIR = $${LIBDIR}/qt/qml
+isEmpty(INSTALLQMLDIR) {
+    macx: isEmpty(NOAPPBUNDLE) {
+        INSTALLQMLDIR = $${DATAROOTDIR}/qml
+    } else: win32 {
+        INSTALLQMLDIR = $${EXECPREFIX}/lib/qt/qml
+    } else {
+        INSTALLQMLDIR = $${LIBDIR}/qt/qml
+    }
+}
+isEmpty(INSTALLPLUGINSDIR) {
+    macx: isEmpty(NOAPPBUNDLE) {
+        INSTALLPLUGINSDIR = $${EXECPREFIX}/Plugins/$${COMMONS_TARGET}
+    } else: win32 {
+        INSTALLPLUGINSDIR = $${EXECPREFIX}/lib/$${COMMONS_TARGET}
+    } else {
+        INSTALLPLUGINSDIR = $${LIBDIR}/$${COMMONS_TARGET}
+    }
+}
+
+macx: !isEmpty(NOAPPBUNDLE): DEFINES += NOAPPBUNDLE
 
 DEFINES += \
     COMMONS_APPNAME=\"\\\"$$COMMONS_APPNAME\\\"\" \
@@ -102,25 +153,48 @@ DEFINES += \
     LICENSEDIR=\"\\\"$$LICENSEDIR\\\"\" \
     LOCALDIR=\"\\\"$$LOCALDIR\\\"\" \
     LOCALLIBDIR=\"\\\"$$LOCALLIBDIR\\\"\" \
-    INSTALLQMLDIR=\"\\\"$$INSTALLQMLDIR\\\"\"
+    INSTALLQMLDIR=\"\\\"$$INSTALLQMLDIR\\\"\" \
+    INSTALLPLUGINSDIR=\"\\\"$$INSTALLPLUGINSDIR\\\"\"
 
-CONFIG(debug, debug|release) {
-    COMMONS_BUILD_PATH = build/Qt$${QT_VERSION}/$${QMAKE_CC}/debug
-    DEFINES += QT_DEBUG
-} else {
-    COMMONS_BUILD_PATH = build/Qt$${QT_VERSION}/$${QMAKE_CC}/release
+TARGET_ARCH = $${QMAKE_TARGET.arch}
+
+mingw {
+    TARGET_ARCH = $$system($${QMAKE_CC} -dumpmachine)
+    TARGET_ARCH = $$split(TARGET_ARCH, -)
+    TARGET_ARCH = $$first(TARGET_ARCH)
 }
 
+msvc {
+    TARGET_ARCH = $$basename(TARGET_ARCH)
+    TARGET_ARCH = $$replace(TARGET_ARCH, x64, x86_64)
+}
+
+CONFIG(debug, debug|release) {
+    COMMONS_BUILD_PATH = debug/Qt$${QT_VERSION}/$$basename(QMAKE_CC)/$${TARGET_ARCH}
+    DEFINES += QT_DEBUG
+} else {
+    COMMONS_BUILD_PATH = release/Qt$${QT_VERSION}/$$basename(QMAKE_CC)/$${TARGET_ARCH}
+}
+
+BIN_DIR = $${COMMONS_BUILD_PATH}/bin
 MOC_DIR = $${COMMONS_BUILD_PATH}/moc
 OBJECTS_DIR = $${COMMONS_BUILD_PATH}/obj
 RCC_DIR = $${COMMONS_BUILD_PATH}/rcc
 UI_DIR = $${COMMONS_BUILD_PATH}/ui
+
+# Update translations.
+isEmpty(NOLUPDATE): !isEmpty(TRANSLATIONS_PRI): CONFIG(debug, debug|release) {
+    updatetr.commands = $$QMAKE_LUPDATE -no-obsolete $$TRANSLATIONS_PRI
+    QMAKE_EXTRA_TARGETS += updatetr
+    PRE_TARGETDEPS += updatetr
+}
 
 # Compile translations files.
 isEmpty(NOLRELEASE): !isEmpty(TRANSLATIONS): CONFIG(debug, debug|release) {
     compiletr.input = TRANSLATIONS
     compiletr.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
     compiletr.commands = $$QMAKE_LRELEASE -removeidentical -compress ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
+    compiletr.clean = dummy_file
     compiletr.CONFIG += no_link
     QMAKE_EXTRA_COMPILERS += compiletr
     PRE_TARGETDEPS += compiler_compiletr_make_all
@@ -147,3 +221,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+lessThan(QT_MAJOR_VERSION, 5) | lessThan(QT_MINOR_VERSION, 9) {
+    QT_VER_STR = $${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION}.$${QT_PATCH_VERSION}
+    error("Qt 5.9.0 or higher required, current installed version is $${QT_VER_STR}")
+}
+
+!qtHaveModule(quickcontrols2) {
+    error("QtQuick Controls 2 required.")
+}
+
+CMD_SEP = $$escape_expand(\n\t)

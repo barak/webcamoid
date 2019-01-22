@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
 #ifndef HALFTONEELEMENT_H
 #define HALFTONEELEMENT_H
 
-#include <QMutex>
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class HalftoneElementPrivate;
 
 class HalftoneElement: public AkElement
 {
@@ -54,7 +54,8 @@ class HalftoneElement: public AkElement
                NOTIFY interceptChanged)
 
     public:
-        explicit HalftoneElement();
+        HalftoneElement();
+        ~HalftoneElement();
 
         Q_INVOKABLE QString pattern() const;
         Q_INVOKABLE QSize patternSize() const;
@@ -63,16 +64,7 @@ class HalftoneElement: public AkElement
         Q_INVOKABLE qreal intercept() const;
 
     private:
-        QString m_pattern;
-        QSize m_patternSize;
-        qreal m_lightness;
-        qreal m_slope;
-        qreal m_intercept;
-        QMutex m_mutex;
-        QSize m_frameSize;
-        QImage m_patternImage;
-
-        void updatePattern();
+        HalftoneElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

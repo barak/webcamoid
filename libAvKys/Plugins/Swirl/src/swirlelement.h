@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef SWIRLELEMENT_H
 #define SWIRLELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class SwirlElementPrivate;
 
 class SwirlElement: public AkElement
 {
@@ -33,12 +34,13 @@ class SwirlElement: public AkElement
                NOTIFY degreesChanged)
 
     public:
-        explicit SwirlElement();
+        SwirlElement();
+        ~SwirlElement();
 
         Q_INVOKABLE qreal degrees() const;
 
     private:
-        qreal m_degrees;
+        SwirlElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

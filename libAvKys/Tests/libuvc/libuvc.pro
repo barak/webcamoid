@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,19 +23,14 @@ macx: QT_CONFIG -= no-pkg-config
 SOURCES = \
     test.cpp
 
+isEmpty(LIBUSBLIBS) | isEmpty(LIBUVCLIBS): CONFIG += link_pkgconfig
+
 !isEmpty(LIBUSBINCLUDES): INCLUDEPATH += $${LIBUSBINCLUDES}
 !isEmpty(LIBUSBLIBS): LIBS += $${LIBUSBLIBS}
-
-isEmpty(LIBUSBLIBS) {
-    CONFIG += link_pkgconfig
-    PKGCONFIG += libusb-1.0
-}
+isEmpty(LIBUSBLIBS): PKGCONFIG += libusb-1.0
 
 !isEmpty(LIBUVCINCLUDES): INCLUDEPATH += $${LIBUVCINCLUDES}
 !isEmpty(LIBUVCLIBS): LIBS += $${LIBUVCLIBS}
-
-isEmpty(LIBUVCLIBS) {
-    LIBS += -luvc
-}
+isEmpty(LIBUVCLIBS): PKGCONFIG += libuvc
 
 TARGET = test_auto

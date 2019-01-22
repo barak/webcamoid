@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,8 @@ HaarStageHID::~HaarStageHID()
     delete [] this->m_trees;
 }
 
-HaarStage::HaarStage(QObject *parent): QObject(parent)
+HaarStage::HaarStage(QObject *parent):
+    QObject(parent)
 {
     this->m_threshold = 0;
     this->m_parentStage = -1;
@@ -108,10 +109,6 @@ HaarStage::HaarStage(const HaarStage &other):
     this->m_parentStage = other.m_parentStage;
     this->m_nextStage = other.m_nextStage;
     this->m_childStage = other.m_childStage;
-}
-
-HaarStage::~HaarStage()
-{
 }
 
 HaarTreeVector HaarStage::trees() const
@@ -179,14 +176,11 @@ HaarStage &HaarStage::operator =(const HaarStage &other)
 
 bool HaarStage::operator ==(const HaarStage &other) const
 {
-    if (this->m_trees == other.m_trees
-        && qFuzzyCompare(this->m_threshold, other.m_threshold)
-        && this->m_parentStage == other.m_parentStage
-        && this->m_nextStage == other.m_nextStage
-        && this->m_childStage == other.m_childStage)
-        return true;
-
-    return false;
+    return this->m_trees == other.m_trees
+           && qFuzzyCompare(this->m_threshold, other.m_threshold)
+           && this->m_parentStage == other.m_parentStage
+           && this->m_nextStage == other.m_nextStage
+           && this->m_childStage == other.m_childStage;
 }
 
 bool HaarStage::operator !=(const HaarStage &other) const

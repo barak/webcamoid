@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2015  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,15 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-TRANSLATIONS = $$files(share/ts/*.ts)
+TRANSLATIONS_PRI = $${PWD}/../translations.pri
+
+exists(translations.qrc) {
+    TRANSLATIONS = $$files(share/ts/*.ts)
+    RESOURCES += translations.qrc
+}
+
+COMMONS_APPNAME = Webcamoid
+COMMONS_TARGET = $$lower($${COMMONS_APPNAME})
 
 exists(commons.pri) {
     include(commons.pri)
@@ -28,7 +36,7 @@ exists(commons.pri) {
     }
 }
 
-!isEmpty(BUILDDOCS):!isEqual(BUILDDOCS, 0) {
+!isEmpty(BUILDDOCS): !isEqual(BUILDDOCS, 0) {
     DOCSOURCES = ../$${COMMONS_APPNAME}.qdocconf
 
     builddocs.input = DOCSOURCES
@@ -42,19 +50,20 @@ exists(commons.pri) {
     PRE_TARGETDEPS += compiler_builddocs_make_all
 }
 
-unix {
+unix: CONFIG(debug, debug|release) {
     MANPAGESOURCES = share/man/man1/$${COMMONS_TARGET}.1
 
     buildmanpage.input = MANPAGESOURCES
     buildmanpage.output = ${QMAKE_FILE_IN}.gz
     buildmanpage.commands = gzip -c9 ${QMAKE_FILE_IN} > ${QMAKE_FILE_IN}.gz
+    buildmanpage.clean = dummy_file
     buildmanpage.CONFIG += no_link
-
     QMAKE_EXTRA_COMPILERS += buildmanpage
     PRE_TARGETDEPS += compiler_buildmanpage_make_all
 }
 
 CONFIG += qt
+macx: CONFIG -= app_bundle
 !isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0): CONFIG += static
 
 HEADERS = \
@@ -72,19 +81,18 @@ HEADERS = \
 INCLUDEPATH += \
     ../libAvKys/Lib/src
 
-LIBS += -L$${PWD}/../libAvKys/Lib -lavkys
+LIBS += -L$${OUT_PWD}/../libAvKys/Lib/$${BIN_DIR} -lavkys
 win32: LIBS += -lole32
 
-OTHER_FILES = \
-    share/effects.xml
+OTHER_FILES += share/effects.xml
 unix: OTHER_FILES += $${MANPAGESOURCES}
+macx: OTHER_FILES += Info.plist
 
 QT += qml quick opengl widgets svg
 
 RESOURCES += \
     Webcamoid.qrc \
     qml.qrc \
-    translations.qrc \
     share/icons/icons.qrc
 
 SOURCES = \
@@ -104,7 +112,7 @@ lupdate_only {
     SOURCES += $$files(share/qml/*.qml)
 }
 
-DESTDIR = $${OUT_PWD}
+DESTDIR = $${OUT_PWD}/$${BIN_DIR}
 
 TARGET = $${COMMONS_TARGET}
 
@@ -113,26 +121,28 @@ macx: ICON = share/icons/webcamoid.icns
 
 TEMPLATE = app
 
-# http://www.loc.gov/standards/iso639-2/php/code_list.php
-
 CODECFORTR = UTF-8
 CODECFORSRC = UTF-8
 
 INSTALLS += target
-
 target.path = $${BINDIR}
 
-!unix {
-    INSTALLS += \
-        appIcon
-
-    appIcon.files = share/icons/hicolor/256x256/webcamoid.ico
-    appIcon.path = $${PREFIX}
+unix: !isEmpty(NOAPPBUNDLE) {
+    INSTALLS += manpage
+    manpage.files = share/man/man1/webcamoid.1.gz
+    manpage.path = $${MANDIR}/man1
 }
 
-unix:!macx {
+win32 {
+    INSTALLS += appIcon
+    appIcon.files = share/icons/hicolor/256x256/webcamoid.ico
+    appIcon.path = $${PREFIX}
+} else: macx: isEmpty(NOAPPBUNDLE) {
+    INSTALLS += appIcon
+    appIcon.files = share/icons/webcamoid.icns
+    appIcon.path = $${DATAROOTDIR}
+} else: unix: !macx {
     INSTALLS += \
-        manpage \
         appIcon8x8 \
         appIcon16x16 \
         appIcon22x22 \
@@ -142,10 +152,6 @@ unix:!macx {
         appIcon128x128 \
         appIcon256x256 \
         appIconScalable
-
-    manpage.files = share/man/man1/webcamoid.1.gz
-    manpage.path = $${MANDIR}/man1
-    manpage.CONFIG += no_check_exist
 
     appIcon8x8.files = share/icons/hicolor/8x8/webcamoid.png
     appIcon8x8.path = $${DATAROOTDIR}/icons/hicolor/8x8/apps
@@ -175,10 +181,27 @@ unix:!macx {
     appIconScalable.path = $${DATAROOTDIR}/icons/hicolor/scalable/apps
 }
 
-!isEmpty(BUILDDOCS):!isEqual(BUILDDOCS, 0) {
+!isEmpty(BUILDDOCS): !isEqual(BUILDDOCS, 0) {
     INSTALLS += docs
-
     docs.files = share/docs_auto/html
     docs.path = $${HTMLDIR}
     docs.CONFIG += no_check_exist
+}
+
+!macx | !isEmpty(NOAPPBUNDLE) {
+    INSTALLS += license
+    license.files = ../COPYING
+    license.path = $${LICENSEDIR}
+}
+
+unix: !macx {
+    INSTALLS += desktop
+    desktop.files = ../$${COMMONS_TARGET}.desktop
+    desktop.path = $${DATAROOTDIR}/applications
+}
+
+macx: isEmpty(NOAPPBUNDLE) {
+    INSTALLS += infoPlist
+    infoPlist.files = Info.plist
+    infoPlist.path = $${EXECPREFIX}
 }

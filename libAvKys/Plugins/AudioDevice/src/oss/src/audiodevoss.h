@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,17 +20,6 @@
 #ifndef AUDIODEVPULSEAUDIO_H
 #define AUDIODEVPULSEAUDIO_H
 
-#include <QMutex>
-#include <QFile>
-#include <QFileSystemWatcher>
-#include <akaudiocaps.h>
-
-#ifdef HAVE_OSS_LINUX
-#include <linux/soundcard.h>
-#else
-#include <sys/soundcard.h>
-#endif
-
 #include "audiodev.h"
 
 /* In GNU/Linux load the OSS drivers as:
@@ -38,12 +27,14 @@
  * sudo modprobe snd_pcm_oss snd_mixer_oss snd_seq_oss
  */
 
+class AudioDevOSSPrivate;
+
 class AudioDevOSS: public AudioDev
 {
     Q_OBJECT
 
     public:
-        explicit AudioDevOSS(QObject *parent=nullptr);
+        AudioDevOSS(QObject *parent=nullptr);
         ~AudioDevOSS();
 
         Q_INVOKABLE QString error() const;
@@ -62,28 +53,12 @@ class AudioDevOSS: public AudioDev
         Q_INVOKABLE bool uninit();
 
     private:
-        QString m_error;
-        QString m_defaultSink;
-        QString m_defaultSource;
-        QStringList m_sinks;
-        QStringList m_sources;
-        QMap<QString, QString> m_pinDescriptionMap;
-        QMap<QString, QList<AkAudioCaps::SampleFormat>> m_supportedFormats;
-        QMap<QString, QList<int>> m_supportedChannels;
-        QMap<QString, QList<int>> m_supportedSampleRates;
-        AkAudioCaps m_curCaps;
-        QFile m_deviceFile;
-        QFileSystemWatcher *m_fsWatcher;
-        QMutex m_mutex;
-
-        int fragmentSize(const QString &device, const AkAudioCaps &caps);
-        void fillDeviceInfo(const QString &device,
-                            QList<AkAudioCaps::SampleFormat> *supportedFormats,
-                            QList<int> *supportedChannels,
-                            QList<int> *supportedSampleRates) const;
+        AudioDevOSSPrivate *d;
 
     private slots:
         void updateDevices();
+
+        friend class AudioDevOSSPrivate;
 };
 
 #endif // AUDIODEVPULSEAUDIO_H

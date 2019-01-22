@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,37 +22,23 @@
 
 #include <QCommandLineParser>
 
+class CliOptionsPrivate;
+
 class CliOptions: public QCommandLineParser
 {
-    Q_PROPERTY(QCommandLineOption configPathOpt
-               READ configPathOpt)
-    Q_PROPERTY(QCommandLineOption qmlPathOpt
-               READ qmlPathOpt)
-    Q_PROPERTY(QCommandLineOption recursiveOpt
-               READ recursiveOpt)
-    Q_PROPERTY(QCommandLineOption pluginPathsOpt
-               READ pluginPathsOpt)
-    Q_PROPERTY(QCommandLineOption blackListOpt
-               READ blackListOpt)
-
     public:
-        explicit CliOptions();
+        CliOptions();
         ~CliOptions();
 
-        Q_INVOKABLE QCommandLineOption configPathOpt() const;
-        Q_INVOKABLE QCommandLineOption qmlPathOpt() const;
-        Q_INVOKABLE QCommandLineOption recursiveOpt() const;
-        Q_INVOKABLE QCommandLineOption pluginPathsOpt() const;
-        Q_INVOKABLE QCommandLineOption blackListOpt() const;
+        QCommandLineOption configPathOpt() const;
+        QCommandLineOption qmlPathOpt() const;
+        QCommandLineOption recursiveOpt() const;
+        QCommandLineOption pluginPathsOpt() const;
+        QCommandLineOption blackListOpt() const;
+        QCommandLineOption vcamPathOpt() const;
 
     private:
-        QCommandLineOption *m_configPathOpt;
-        QCommandLineOption *m_qmlPathOpt;
-        QCommandLineOption *m_recursiveOpt;
-        QCommandLineOption *m_pluginPathsOpt;
-        QCommandLineOption *m_blackListOpt;
-
-        QString convertToAbsolute(const QString &path) const;
+        CliOptionsPrivate *d;
 };
 
 #endif // CLIOPTIONS_H

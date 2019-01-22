@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef EmbossELEMENT_H
 #define EmbossELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class EmbossElementPrivate;
 
 class EmbossElement: public AkElement
 {
@@ -38,14 +39,14 @@ class EmbossElement: public AkElement
                NOTIFY biasChanged)
 
     public:
-        explicit EmbossElement();
+        EmbossElement();
+        ~EmbossElement();
 
         Q_INVOKABLE qreal factor() const;
         Q_INVOKABLE qreal bias() const;
 
     private:
-        qreal m_factor;
-        qreal m_bias;
+        EmbossElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

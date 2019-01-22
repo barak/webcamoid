@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +20,10 @@
 #ifndef DESKTOPCAPTUREELEMENT_H
 #define DESKTOPCAPTUREELEMENT_H
 
-#include <QThreadPool>
-#include <QtConcurrent>
 #include <akmultimediasourceelement.h>
 
-#include "screendev.h"
-
-typedef QSharedPointer<ScreenDev> ScreenDevPtr;
+class DesktopCaptureElementPrivate;
+class AkFrac;
 
 class DesktopCaptureElement: public AkMultimediaSourceElement
 {
@@ -61,20 +58,20 @@ class DesktopCaptureElement: public AkMultimediaSourceElement
                NOTIFY captureLibChanged)
 
     public:
-        explicit DesktopCaptureElement();
+        DesktopCaptureElement();
         ~DesktopCaptureElement();
 
         Q_INVOKABLE AkFrac fps() const;
         Q_INVOKABLE QStringList medias();
         Q_INVOKABLE QString media() const;
-        Q_INVOKABLE QList<int> streams() const;
+        Q_INVOKABLE QList<int> streams();
         Q_INVOKABLE int defaultStream(const QString &mimeType);
         Q_INVOKABLE QString description(const QString &media);
         Q_INVOKABLE AkCaps caps(int stream);
         Q_INVOKABLE QString captureLib() const;
 
     private:
-        ScreenDevPtr m_screenCapture;
+        DesktopCaptureElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

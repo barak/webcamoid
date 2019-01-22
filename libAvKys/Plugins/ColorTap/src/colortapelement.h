@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
 #ifndef COLORTAPELEMENT_H
 #define COLORTAPELEMENT_H
 
-#include <QMutex>
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class ColorTapElementPrivate;
 
 class ColorTapElement: public AkElement
 {
@@ -34,14 +34,13 @@ class ColorTapElement: public AkElement
                NOTIFY tableChanged)
 
     public:
-        explicit ColorTapElement();
+        ColorTapElement();
+        ~ColorTapElement();
 
         Q_INVOKABLE QString table() const;
 
     private:
-        QImage m_table;
-        QString m_tableName;
-        QMutex m_mutex;
+        ColorTapElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

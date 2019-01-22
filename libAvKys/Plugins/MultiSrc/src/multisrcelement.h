@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,9 @@
 #ifndef MULTISRCELEMENT_H
 #define MULTISRCELEMENT_H
 
-#include <QMutex>
 #include <akmultimediasourceelement.h>
 
-#include "mediasource.h"
-
-typedef QSharedPointer<MediaSource> MediaSourcePtr;
+class MultiSrcElementPrivate;
 
 class MultiSrcElement: public AkMultimediaSourceElement
 {
@@ -65,12 +62,12 @@ class MultiSrcElement: public AkMultimediaSourceElement
                NOTIFY codecLibChanged)
 
     public:
-        explicit MultiSrcElement();
+        MultiSrcElement();
         ~MultiSrcElement();
 
         Q_INVOKABLE QStringList medias();
         Q_INVOKABLE QString media() const;
-        Q_INVOKABLE QList<int> streams() const;
+        Q_INVOKABLE QList<int> streams();
         Q_INVOKABLE bool loop() const;
         Q_INVOKABLE QList<int> listTracks(const QString &type="");
         Q_INVOKABLE QString streamLanguage(int stream);
@@ -82,8 +79,7 @@ class MultiSrcElement: public AkMultimediaSourceElement
         Q_INVOKABLE QString codecLib() const;
 
     private:
-        MediaSourcePtr m_mediaSource;
-        QMutex m_mutexLib;
+        MultiSrcElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;
