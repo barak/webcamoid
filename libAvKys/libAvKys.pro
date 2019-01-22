@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,10 +16,10 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    error("commons.pri file not found.")
+    error("akcommons.pri file not found.")
 }
 
 !isEmpty(BUILDDOCS):!isEqual(BUILDDOCS, 0) {
@@ -41,6 +41,7 @@ load(configure)
 QMAKE_CONFIG_TESTS_DIR=$$PWD/Tests
 isEmpty(NOALSA): qtCompileTest(alsa)
 isEmpty(NOAVFOUNDATION): qtCompileTest(avfoundation)
+isEmpty(NOCOREMEDIAIO): qtCompileTest(cmio)
 isEmpty(NOCOREAUDIO): qtCompileTest(coreaudio)
 isEmpty(NODSHOW): qtCompileTest(dshow)
 
@@ -49,18 +50,10 @@ isEmpty(NOFFMPEG) {
     !isEmpty(FFMPEGINCLUDES): cache(FFMPEGINCLUDES)
     !isEmpty(FFMPEGLIBS): cache(FFMPEGLIBS)
     qtCompileTest(ffmpeg)
-    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_contextframerate)
-    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_extracodecformats)
-    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_freecontext)
-    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_packetref)
-    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_rescalets)
     CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_sendrecv)
     CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avcodec_subtitledata)
-    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avformat_allocoutputcontext)
     CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avformat_codecpar)
     CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avutil_extraoptions)
-    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avutil_extrapixformats)
-    CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avutil_framealloc)
     CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avutil_sampleformat64)
     CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_avresample)
     CONFIG(config_ffmpeg): qtCompileTest(ffmpeg_swresample)
@@ -80,8 +73,9 @@ isEmpty(NOLIBUVC) {
     !isEmpty(LIBUVCINCLUDES): cache(LIBUVCINCLUDES)
     !isEmpty(LIBUVCLIBS): cache(LIBUVCLIBS)
     qtCompileTest(libuvc)
-    qtCompileTest(libuvcdev)
 }
+
+isEmpty(NOMEDIAFOUNDATION): qtCompileTest(mediafoundation)
 
 isEmpty(NOOSS) {
     cache(INCLUDEDIR)
@@ -91,19 +85,12 @@ isEmpty(NOOSS) {
 isEmpty(NOPULSEAUDIO): qtCompileTest(pulseaudio)
 isEmpty(NOQTAUDIO): qtCompileTest(qtaudio)
 
-isEmpty(NOSYPHON) {
-    !isEmpty(SYPHONINCLUDES): cache(SYPHONINCLUDES)
-    !isEmpty(SYPHONLIBS): cache(SYPHONLIBS)
-    qtCompileTest(syphon)
-}
-
 isEmpty(NOV4L2) {
     qtCompileTest(v4l2)
     CONFIG(config_v4l2): qtCompileTest(v4l2_extendedcontrols)
     isEmpty(NOV4LUTILS): CONFIG(config_v4l2): qtCompileTest(v4lutils)
 }
 
-isEmpty(NOVCAMWIN): qtCompileTest(vcamwin)
 isEmpty(NOWASAPI): qtCompileTest(wasapi)
 
 TEMPLATE = subdirs
@@ -117,15 +104,14 @@ SUBDIRS += \
 
 # Install rules
 
-INSTALLS += \
-    license
+!macx | !isEmpty(NOAPPBUNDLE) {
+    INSTALLS += license
+    license.files = ../COPYING
+    license.path = $${LICENSEDIR}
+}
 
-license.files = ../COPYING
-license.path = $${LICENSEDIR}
-
-!isEmpty(BUILDDOCS):!isEqual(BUILDDOCS, 0) {
+!isEmpty(BUILDDOCS): !isEqual(BUILDDOCS, 0) {
     INSTALLS += docs
-
     docs.files = share/docs_auto/html
     docs.path = $${HTMLDIR}
     docs.CONFIG += no_check_exist

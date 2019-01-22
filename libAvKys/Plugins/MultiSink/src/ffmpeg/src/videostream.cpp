@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,25 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <akutils.h>
+#include <QDebug>
+#include <QDateTime>
+#include <QImage>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QtMath>
+#include <akcaps.h>
+#include <akfrac.h>
+#include <akpacket.h>
+#include <akvideopacket.h>
 
-#include "mediawriterffmpeg.h"
+extern "C"
+{
+    #include <libavutil/imgutils.h>
+    #include <libswscale/swscale.h>
+}
+
 #include "videostream.h"
+#include "mediawriterffmpeg.h"
 
 struct XRGB
 {
@@ -38,6 +53,19 @@ struct BGRX
     quint8 x;
 };
 
+class VideoStreamPrivate
+{
+    public:
+        AVFrame *m_frame {nullptr};
+        SwsContext *m_scaleContext {nullptr};
+        QMutex m_frameMutex;
+        int64_t m_lastPts {AV_NOPTS_VALUE};
+        int64_t m_refPts {AV_NOPTS_VALUE};
+        QWaitCondition m_frameReady;
+
+        QImage swapChannels(const QImage &image) const;
+};
+
 VideoStream::VideoStream(const AVFormatContext *formatContext,
                          uint index,
                          int streamIndex,
@@ -52,10 +80,7 @@ VideoStream::VideoStream(const AVFormatContext *formatContext,
                    mediaWriter,
                    parent)
 {
-    this->m_frame = nullptr;
-    this->m_scaleContext = nullptr;
-    this->m_lastPts = AV_NOPTS_VALUE;
-    this->m_refPts = AV_NOPTS_VALUE;
+    this->d = new VideoStreamPrivate;
     auto codecContext = this->codecContext();
     auto codec = codecContext->codec;
     auto defaultCodecParams = mediaWriter->defaultCodecParams(codec->name);
@@ -125,12 +150,10 @@ VideoStream::VideoStream(const AVFormatContext *formatContext,
     case AV_CODEC_ID_AMV:
         videoCaps.height() = 16 * qRound(videoCaps.height() / 16.);
         break;
-#ifdef HAVE_EXTRACODECFORMATS
     case AV_CODEC_ID_XFACE:
         videoCaps.width() = 48;
         videoCaps.height() = 48;
         break;
-#endif
     default:
         break;
     }
@@ -157,11 +180,12 @@ VideoStream::VideoStream(const AVFormatContext *formatContext,
 VideoStream::~VideoStream()
 {
     this->uninit();
-    this->deleteFrame(&this->m_frame);
-    sws_freeContext(this->m_scaleContext);
+    this->deleteFrame(&this->d->m_frame);
+    sws_freeContext(this->d->m_scaleContext);
+    delete this->d;
 }
 
-QImage VideoStream::swapChannels(const QImage &image) const
+QImage VideoStreamPrivate::swapChannels(const QImage &image) const
 {
     QImage swapped(image.size(), image.format());
 
@@ -187,29 +211,25 @@ void VideoStream::convertPacket(const AkPacket &packet)
 
     auto codecContext = this->codecContext();
 
-#ifdef HAVE_FRAMEALLOC
     auto oFrame = av_frame_alloc();
-#else
-    auto oFrame = avcodec_alloc_frame();
-#endif
-
     oFrame->format = codecContext->pix_fmt;
     oFrame->width = codecContext->width;
     oFrame->height = codecContext->height;
     oFrame->pts = packet.pts();
 
-    QImage image = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket = packet;
+    auto image = videoPacket.toImage();
     image = image.convertToFormat(QImage::Format_ARGB32);
-    image = this->swapChannels(image);
-    AkVideoPacket videoPacket(AkUtils::imageToPacket(image, packet));
+    image = this->d->swapChannels(image);
+    videoPacket = AkVideoPacket::fromImage(image, videoPacket);
 
     QString format = AkVideoCaps::pixelFormatToString(videoPacket.caps().format());
     AVPixelFormat iFormat = av_get_pix_fmt(format.toStdString().c_str());
     int iWidth = videoPacket.caps().width();
     int iHeight = videoPacket.caps().height();
 
-    this->m_scaleContext =
-            sws_getCachedContext(this->m_scaleContext,
+    this->d->m_scaleContext =
+            sws_getCachedContext(this->d->m_scaleContext,
                                  iWidth,
                                  iHeight,
                                  iFormat,
@@ -221,7 +241,7 @@ void VideoStream::convertPacket(const AkPacket &packet)
                                  nullptr,
                                  nullptr);
 
-    if (!this->m_scaleContext)
+    if (!this->d->m_scaleContext)
         return;
 
     AVFrame iFrame;
@@ -254,7 +274,7 @@ void VideoStream::convertPacket(const AkPacket &packet)
                        4) < 0)
         return;
 
-    sws_scale(this->m_scaleContext,
+    sws_scale(this->d->m_scaleContext,
               iFrame.data,
               iFrame.linesize,
               0,
@@ -262,19 +282,21 @@ void VideoStream::convertPacket(const AkPacket &packet)
               oFrame->data,
               oFrame->linesize);
 
-    this->m_frameMutex.lock();
-    this->deleteFrame(&this->m_frame);
-    this->m_frame = oFrame;
-    this->m_frameReady.wakeAll();
-    this->m_frameMutex.unlock();
+    this->d->m_frameMutex.lock();
+    this->deleteFrame(&this->d->m_frame);
+    this->d->m_frame = oFrame;
+    this->d->m_frameReady.wakeAll();
+    this->d->m_frameMutex.unlock();
 }
 
 int VideoStream::encodeData(AVFrame *frame)
 {
+#ifdef AVFMT_RAWPICTURE
     auto formatContext = this->formatContext();
 
     if (!frame && formatContext->oformat->flags & AVFMT_RAWPICTURE)
         return AVERROR_EOF;
+#endif
 
     auto codecContext = this->codecContext();
 
@@ -286,20 +308,21 @@ int VideoStream::encodeData(AVFrame *frame)
                               / outTimeBase.value()
                               / 1000);
 
-        if (this->m_refPts == AV_NOPTS_VALUE)
-            this->m_lastPts = this->m_refPts = pts;
-        else if (this->m_lastPts != pts)
-            this->m_lastPts = pts;
+        if (this->d->m_refPts == AV_NOPTS_VALUE)
+            this->d->m_lastPts = this->d->m_refPts = pts;
+        else if (this->d->m_lastPts != pts)
+            this->d->m_lastPts = pts;
         else
             return AVERROR(EAGAIN);
 
-        frame->pts = this->m_lastPts - this->m_refPts;
+        frame->pts = this->d->m_lastPts - this->d->m_refPts;
     } else {
-        this->m_lastPts++;
+        this->d->m_lastPts++;
     }
 
     auto stream = this->stream();
 
+#ifdef AVFMT_RAWPICTURE
     if (formatContext->oformat->flags & AVFMT_RAWPICTURE) {
         // Raw video case - directly store the picture in the packet
         AVPacket pkt;
@@ -307,7 +330,7 @@ int VideoStream::encodeData(AVFrame *frame)
         pkt.flags |= AV_PKT_FLAG_KEY;
         pkt.data = frame? frame->data[0]: nullptr;
         pkt.size = sizeof(AVPicture);
-        pkt.pts = frame? frame->pts: this->m_lastPts;
+        pkt.pts = frame? frame->pts: this->d->m_lastPts;
         pkt.stream_index = this->streamIndex();
 
         this->rescaleTS(&pkt, codecContext->time_base, stream->time_base);
@@ -315,6 +338,7 @@ int VideoStream::encodeData(AVFrame *frame)
 
         return 0;
     }
+#endif
 
     // encode the image
 #ifdef HAVE_SENDRECV
@@ -322,7 +346,8 @@ int VideoStream::encodeData(AVFrame *frame)
 
     if (result == AVERROR_EOF || result == AVERROR(EAGAIN))
         return result;
-    else if (result < 0) {
+
+    if (result < 0) {
         char errorStr[1024];
         av_strerror(AVERROR(result), errorStr, 1024);
         qDebug() << "Error encoding packets: " << errorStr;
@@ -382,18 +407,21 @@ int VideoStream::encodeData(AVFrame *frame)
 
 AVFrame *VideoStream::dequeueFrame()
 {
-    this->m_frameMutex.lock();
+    this->d->m_frameMutex.lock();
 
-    if (!this->m_frame)
-        if (!this->m_frameReady.wait(&this->m_frameMutex, THREAD_WAIT_LIMIT)) {
-            this->m_frameMutex.unlock();
+    if (!this->d->m_frame)
+        if (!this->d->m_frameReady.wait(&this->d->m_frameMutex,
+                                        THREAD_WAIT_LIMIT)) {
+            this->d->m_frameMutex.unlock();
 
             return nullptr;
         }
 
-    auto frame = this->m_frame;
-    this->m_frame = nullptr;
-    this->m_frameMutex.unlock();
+    auto frame = this->d->m_frame;
+    this->d->m_frame = nullptr;
+    this->d->m_frameMutex.unlock();
 
     return frame;
 }
+
+#include "moc_videostream.cpp"

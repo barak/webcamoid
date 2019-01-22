@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,20 @@
 #ifndef VIRTUALCAMERAELEMENT_H
 #define VIRTUALCAMERAELEMENT_H
 
-#include <QMutex>
+#include <QVariantMap>
+#include <akelement.h>
 
-#include <akmultimediasourceelement.h>
-
-#include "convertvideo.h"
-#include "cameraout.h"
-
-typedef QSharedPointer<ConvertVideo> ConvertVideoPtr;
-typedef QSharedPointer<CameraOut> CameraOutPtr;
+class VirtualCameraElementPrivate;
+class AkCaps;
 
 class VirtualCameraElement: public AkElement
 {
     Q_OBJECT
-    Q_PROPERTY(QString driverPath
-               READ driverPath
-               WRITE setDriverPath
-               RESET resetDriverPath
-               NOTIFY driverPathChanged)
+    Q_PROPERTY(QStringList driverPaths
+               READ driverPaths
+               WRITE setDriverPaths
+               RESET resetDriverPaths
+               NOTIFY driverPathsChanged)
     Q_PROPERTY(QStringList medias
                READ medias
                NOTIFY mediasChanged)
@@ -52,14 +48,14 @@ class VirtualCameraElement: public AkElement
     Q_PROPERTY(int maxCameras
                READ maxCameras
                NOTIFY maxCamerasChanged)
-    Q_PROPERTY(bool needRoot
-               READ needRoot
-               NOTIFY needRootChanged)
-    Q_PROPERTY(int passwordTimeout
-               READ passwordTimeout
-               WRITE setPasswordTimeout
-               RESET resetPasswordTimeout
-               NOTIFY passwordTimeoutChanged)
+    Q_PROPERTY(QString driver
+               READ driver
+               WRITE setDriver
+               RESET resetDriver
+               NOTIFY driverChanged)
+    Q_PROPERTY(QStringList availableDrivers
+               READ availableDrivers
+               NOTIFY availableDriversChanged)
     Q_PROPERTY(QString rootMethod
                READ rootMethod
                WRITE setRootMethod
@@ -68,59 +64,37 @@ class VirtualCameraElement: public AkElement
     Q_PROPERTY(QStringList availableMethods
                READ availableMethods
                NOTIFY availableMethodsChanged)
-    Q_PROPERTY(QString convertLib
-               READ convertLib
-               WRITE setConvertLib
-               RESET resetConvertLib
-               NOTIFY convertLibChanged)
-    Q_PROPERTY(QString outputLib
-               READ outputLib
-               WRITE setOutputLib
-               RESET resetOutputLib
-               NOTIFY outputLibChanged)
 
     public:
-        explicit VirtualCameraElement();
+        VirtualCameraElement();
         ~VirtualCameraElement();
 
-        Q_INVOKABLE QString driverPath() const;
+        Q_INVOKABLE QStringList driverPaths() const;
         Q_INVOKABLE QStringList medias() const;
         Q_INVOKABLE QString media() const;
         Q_INVOKABLE QList<int> streams() const;
         Q_INVOKABLE int maxCameras() const;
-        Q_INVOKABLE bool needRoot() const;
-        Q_INVOKABLE int passwordTimeout() const;
+        Q_INVOKABLE QString driver() const;
+        Q_INVOKABLE QStringList availableDrivers() const;
         Q_INVOKABLE QString rootMethod() const;
         Q_INVOKABLE QStringList availableMethods() const;
-        Q_INVOKABLE QString convertLib() const;
-        Q_INVOKABLE QString outputLib() const;
 
         Q_INVOKABLE int defaultStream(const QString &mimeType) const;
         Q_INVOKABLE QString description(const QString &media) const;
         Q_INVOKABLE AkCaps caps(int stream) const;
         Q_INVOKABLE QVariantMap addStream(int streamIndex,
                                           const AkCaps &streamCaps,
-                                          const QVariantMap &streamParams=QVariantMap());
+                                          const QVariantMap &streamParams={});
         Q_INVOKABLE QVariantMap updateStream(int streamIndex,
-                                             const QVariantMap &streamParams=QVariantMap());
-        Q_INVOKABLE QString createWebcam(const QString &description="",
-                                         const QString &password="");
+                                             const QVariantMap &streamParams={});
+        Q_INVOKABLE QString createWebcam(const QString &description={});
         Q_INVOKABLE bool changeDescription(const QString &webcam,
-                                           const QString &description="",
-                                           const QString &password="") const;
-        Q_INVOKABLE bool removeWebcam(const QString &webcam,
-                                      const QString &password="");
-        Q_INVOKABLE bool removeAllWebcams(const QString &password="");
+                                           const QString &description={}) const;
+        Q_INVOKABLE bool removeWebcam(const QString &webcam);
+        Q_INVOKABLE bool removeAllWebcams();
 
     private:
-        ConvertVideoPtr m_convertVideo;
-        CameraOutPtr m_cameraOut;
-        int m_streamIndex;
-        AkCaps m_streamCaps;
-        QMutex m_mutex;
-        QMutex m_mutexLib;
-
-        QImage swapChannels(const QImage &image) const;
+        VirtualCameraElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;
@@ -128,40 +102,36 @@ class VirtualCameraElement: public AkElement
                                        const QString &controlId) const;
 
     signals:
-        void driverPathChanged(const QString &driverPath);
+        void driverPathsChanged(const QStringList &driverPaths);
         void mediasChanged(const QStringList &medias) const;
         void mediaChanged(const QString &media);
         void streamsChanged(const QList<int> &streams);
         void maxCamerasChanged(int maxCameras);
-        void needRootChanged(bool needRoot);
-        void passwordTimeoutChanged(int passwordTimeout);
+        void driverChanged(const QString &driver);
+        void availableDriversChanged(const QStringList &availableDrivers);
         void rootMethodChanged(const QString &rootMethod);
         void availableMethodsChanged(const QStringList &availableMethods);
-        void convertLibChanged(const QString &convertLib);
-        void outputLibChanged(const QString &outputLib);
         void error(const QString &message);
 
     public slots:
-        void setDriverPath(const QString &driverPath);
+        void setDriverPaths(const QStringList &driverPaths);
+        void addDriverPath(const QString &driverPath);
+        void addDriverPaths(const QStringList &driverPaths);
+        void removeDriverPath(const QString &driverPath);
+        void removeDriverPaths(const QStringList &driverPaths);
         void setMedia(const QString &media);
-        void setPasswordTimeout(int passwordTimeout);
+        void setDriver(const QString &driver);
         void setRootMethod(const QString &rootMethod);
-        void setConvertLib(const QString &convertLib);
-        void setOutputLib(const QString &outputLib);
-        void resetDriverPath();
+        void resetDriverPaths();
         void resetMedia();
-        void resetPasswordTimeout();
+        void resetDriver();
         void resetRootMethod();
-        void resetConvertLib();
-        void resetOutputLib();
         void clearStreams();
 
         bool setState(AkElement::ElementState state);
         AkPacket iStream(const AkPacket &packet);
 
     private slots:
-        void convertLibUpdated(const QString &convertLib);
-        void outputLibUpdated(const QString &outputLib);
         void rootMethodUpdated(const QString &rootMethod);
 };
 

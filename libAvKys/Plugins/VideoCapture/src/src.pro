@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,15 +16,18 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-TRANSLATIONS = $$files(../share/ts/*.ts)
+exists(../translations.qrc) {
+    TRANSLATIONS = $$files(../share/ts/*.ts)
+    RESOURCES += ../translations.qrc
+}
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    exists(../../../commons.pri) {
-        include(../../../commons.pri)
+    exists(../../../akcommons.pri) {
+        include(../../../akcommons.pri)
     } else {
-        error("commons.pri file not found.")
+        error("akcommons.pri file not found.")
     }
 }
 
@@ -40,7 +43,7 @@ HEADERS = \
 INCLUDEPATH += \
     ../../../Lib/src
 
-LIBS += -L$${PWD}/../../../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${OUT_PWD}/../../../Lib/$${BIN_DIR} -l$${COMMONS_TARGET}
 win32: LIBS += -lole32
 
 OTHER_FILES += ../pspec.json
@@ -48,8 +51,7 @@ OTHER_FILES += ../pspec.json
 QT += qml concurrent
 
 RESOURCES = \
-    ../VideoCapture.qrc \
-    ../translations.qrc
+    ../VideoCapture.qrc
 
 SOURCES = \
     videocapture.cpp \
@@ -62,11 +64,10 @@ lupdate_only {
     SOURCES += $$files(../share/qml/*.qml)
 }
 
-DESTDIR = $${OUT_PWD}/..
+DESTDIR = $${OUT_PWD}/../$${BIN_DIR}
 TARGET = VideoCapture
 
 TEMPLATE = lib
 
 INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}
+target.path = $${INSTALLPLUGINSDIR}

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,47 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QDebug>
+#include <QVariant>
+#include <QMap>
+#include <QMutex>
+#include <QVector>
 #include <QDir>
+#include <QFileSystemWatcher>
+#include <ak.h>
+#include <akfrac.h>
+#include <akcaps.h>
+#include <akpacket.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <linux/videodev2.h>
+
+#ifdef HAVE_V4LUTILS
+#include <libv4l2.h>
+
+#define x_ioctl v4l2_ioctl
+#define x_open v4l2_open
+#define x_close v4l2_close
+#define x_read v4l2_read
+#define x_mmap v4l2_mmap
+#define x_munmap v4l2_munmap
+#else
+#include <unistd.h>
+#include <sys/ioctl.h>
+
+#define x_ioctl ioctl
+#define x_open open
+#define x_close close
+#define x_read read
+#define x_mmap mmap
+#define x_munmap munmap
+#endif
 
 #include "capturev4l2.h"
+#include "capturebuffer.h"
 
-typedef QMap<v4l2_ctrl_type, QString> V4l2CtrlTypeMap;
+using V4l2CtrlTypeMap = QMap<v4l2_ctrl_type, QString>;
 
 inline V4l2CtrlTypeMap initV4l2CtrlTypeMap()
 {
@@ -45,7 +81,7 @@ inline V4l2CtrlTypeMap initV4l2CtrlTypeMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(V4l2CtrlTypeMap, ctrlTypeToStr, (initV4l2CtrlTypeMap()))
 
-typedef QMap<CaptureV4L2::IoMethod, QString> IoMethodMap;
+using IoMethodMap = QMap<CaptureV4L2::IoMethod, QString>;
 
 inline IoMethodMap initIoMethodMap()
 {
@@ -60,19 +96,83 @@ inline IoMethodMap initIoMethodMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(IoMethodMap, ioMethodToStr, (initIoMethodMap()))
 
+class CaptureV4L2Private
+{
+    public:
+        CaptureV4L2 *self;
+        QString m_device;
+        QList<int> m_streams;
+        QStringList m_devices;
+        QMap<QString, QString> m_descriptions;
+        QMap<QString, QVariantList> m_devicesCaps;
+        QMutex m_controlsMutex;
+        QVariantList m_globalImageControls;
+        QVariantList m_globalCameraControls;
+        QVariantMap m_localImageControls;
+        QVariantMap m_localCameraControls;
+        QFileSystemWatcher *m_fsWatcher {nullptr};
+        AkFrac m_fps;
+        AkFrac m_timeBase;
+        AkCaps m_caps;
+        qint64 m_id {-1};
+        QVector<CaptureBuffer> m_buffers;
+        CaptureV4L2::IoMethod m_ioMethod {CaptureV4L2::IoMethodUnknown};
+        int m_nBuffers {32};
+        int m_fd {-1};
+
+        CaptureV4L2Private(CaptureV4L2 *self):
+            self(self)
+        {
+        }
+
+        QVariantList capsFps(int fd,
+                             const v4l2_fmtdesc &format,
+                             __u32 width,
+                             __u32 height) const;
+        QVariantList caps(int fd) const;
+        AkFrac fps(int fd) const;
+        void setFps(int fd, const AkFrac &fps);
+        QVariantList controls(int fd, quint32 controlClass) const;
+        bool setControls(int fd,
+                         quint32 controlClass,
+                         const QVariantMap &controls) const;
+        QVariantList queryControl(int handle,
+                                  quint32 controlClass,
+                                  v4l2_queryctrl *queryctrl) const;
+        QMap<QString, quint32> findControls(int handle,
+                                            quint32 controlClass) const;
+        bool initReadWrite(quint32 bufferSize);
+        bool initMemoryMap();
+        bool initUserPointer(quint32 bufferSize);
+        bool startCapture();
+        void stopCapture();
+        QString fourccToStr(quint32 format) const;
+        quint32 strToFourCC(const QString &format) const;
+        AkPacket processFrame(const char *buffer,
+                              size_t bufferSize,
+                              qint64 pts) const;
+        QVariantList imageControls(int fd) const;
+        bool setImageControls(int fd,
+                              const QVariantMap &imageControls) const;
+        QVariantList cameraControls(int fd) const;
+        bool setCameraControls(int fd,
+                               const QVariantMap &cameraControls) const;
+        QVariantMap controlStatus(const QVariantList &controls) const;
+        QVariantMap mapDiff(const QVariantMap &map1,
+                            const QVariantMap &map2) const;
+};
+
 CaptureV4L2::CaptureV4L2(QObject *parent):
     Capture(parent)
 {
-    this->m_id = -1;
-    this->m_ioMethod = IoMethodUnknown;
-    this->m_nBuffers = 32;
-    this->m_fsWatcher = new QFileSystemWatcher({"/dev"}, this);
+    this->d = new CaptureV4L2Private(this);
+    this->d->m_fsWatcher = new QFileSystemWatcher({"/dev"}, this);
 
-    QObject::connect(this->m_fsWatcher,
+    QObject::connect(this->d->m_fsWatcher,
                      &QFileSystemWatcher::directoryChanged,
                      this,
                      &CaptureV4L2::onDirectoryChanged);
-    QObject::connect(this->m_fsWatcher,
+    QObject::connect(this->d->m_fsWatcher,
                      &QFileSystemWatcher::fileChanged,
                      this,
                      &CaptureV4L2::onFileChanged);
@@ -82,25 +182,26 @@ CaptureV4L2::CaptureV4L2(QObject *parent):
 
 CaptureV4L2::~CaptureV4L2()
 {
-    delete this->m_fsWatcher;
+    delete this->d->m_fsWatcher;
+    delete this->d;
 }
 
 QStringList CaptureV4L2::webcams() const
 {
-    return this->m_devices;
+    return this->d->m_devices;
 }
 
 QString CaptureV4L2::device() const
 {
-    return this->m_device;
+    return this->d->m_device;
 }
 
-QList<int> CaptureV4L2::streams() const
+QList<int> CaptureV4L2::streams()
 {
-    if (!this->m_streams.isEmpty())
-        return this->m_streams;
+    if (!this->d->m_streams.isEmpty())
+        return this->d->m_streams;
 
-    QVariantList caps = this->caps(this->m_device);
+    QVariantList caps = this->caps(this->d->m_device);
 
     if (caps.isEmpty())
         return QList<int>();
@@ -114,7 +215,7 @@ QList<int> CaptureV4L2::listTracks(const QString &mimeType)
         && !mimeType.isEmpty())
         return QList<int>();
 
-    QVariantList caps = this->caps(this->m_device);
+    QVariantList caps = this->caps(this->d->m_device);
     QList<int> streams;
 
     for (int i = 0; i < caps.count(); i++)
@@ -125,22 +226,22 @@ QList<int> CaptureV4L2::listTracks(const QString &mimeType)
 
 QString CaptureV4L2::ioMethod() const
 {
-    return ioMethodToStr->value(this->m_ioMethod, "any");
+    return ioMethodToStr->value(this->d->m_ioMethod, "any");
 }
 
 int CaptureV4L2::nBuffers() const
 {
-    return this->m_nBuffers;
+    return this->d->m_nBuffers;
 }
 
 QString CaptureV4L2::description(const QString &webcam) const
 {
-    return this->m_descriptions.value(webcam);
+    return this->d->m_descriptions.value(webcam);
 }
 
 QVariantList CaptureV4L2::caps(const QString &webcam) const
 {
-    return this->m_devicesCaps.value(webcam);
+    return this->d->m_devicesCaps.value(webcam);
 }
 
 QString CaptureV4L2::capsDescription(const AkCaps &caps) const
@@ -151,61 +252,45 @@ QString CaptureV4L2::capsDescription(const AkCaps &caps) const
     AkFrac fps = caps.property("fps").toString();
 
     return QString("%1, %2x%3, %4 FPS")
-                .arg(caps.property("fourcc").toString())
-                .arg(caps.property("width").toString())
-                .arg(caps.property("height").toString())
+                .arg(caps.property("fourcc").toString(),
+                     caps.property("width").toString(),
+                     caps.property("height").toString())
                 .arg(qRound(fps.value()));
 }
 
 QVariantList CaptureV4L2::imageControls() const
 {
-    return this->m_imageControls.value(this->m_device);
+    return this->d->m_globalImageControls;
 }
 
 bool CaptureV4L2::setImageControls(const QVariantMap &imageControls)
 {
-    QVariantMap imageControlsDiff;
+    this->d->m_controlsMutex.lock();
+    auto globalImageControls = this->d->m_globalImageControls;
+    this->d->m_controlsMutex.unlock();
 
-    for (const QVariant &control: this->imageControls()) {
-        auto params = control.toList();
-        auto ctrlName = params[0].toString();
+    for (int i = 0; i < globalImageControls.count(); i++) {
+        QVariantList control = globalImageControls[i].toList();
+        QString controlName = control[0].toString();
 
-        if (imageControls.contains(ctrlName)
-            && imageControls[ctrlName] != params[6]) {
-            imageControlsDiff[ctrlName] = imageControls[ctrlName];
+        if (imageControls.contains(controlName)) {
+            control[6] = imageControls[controlName];
+            globalImageControls[i] = control;
         }
     }
 
-    if (imageControlsDiff.isEmpty())
+    this->d->m_controlsMutex.lock();
+
+    if (this->d->m_globalImageControls == globalImageControls) {
+        this->d->m_controlsMutex.unlock();
+
         return false;
-
-    int fd = -1;
-
-    if (this->m_fd >= 0)
-        fd = this->m_fd;
-    else
-        fd = x_open(this->m_device.toStdString().c_str(), O_RDWR | O_NONBLOCK, 0);
-
-    if (!setControls(fd, V4L2_CTRL_CLASS_USER, imageControlsDiff))
-        return false;
-
-    if (this->m_fd < 0)
-        x_close(fd);
-
-    QVariantList controls;
-
-    for (const auto &control: this->m_imageControls.value(this->m_device)) {
-        auto controlParams = control.toList();
-        auto controlName = controlParams[0].toString();
-
-        if (imageControlsDiff.contains(controlName))
-            controlParams[6] = imageControlsDiff[controlName];
-
-        controls << QVariant(controlParams);
     }
 
-    this->m_imageControls[this->m_device] = controls;
-    emit this->imageControlsChanged(imageControlsDiff);
+    this->d->m_globalImageControls = globalImageControls;
+    this->d->m_controlsMutex.unlock();
+
+    emit this->imageControlsChanged(imageControls);
 
     return true;
 }
@@ -225,55 +310,36 @@ bool CaptureV4L2::resetImageControls()
 
 QVariantList CaptureV4L2::cameraControls() const
 {
-    return this->m_cameraControls.value(this->m_device);
+    return this->d->m_globalCameraControls;
 }
 
 bool CaptureV4L2::setCameraControls(const QVariantMap &cameraControls)
 {
-    QVariantMap cameraControlsDiff;
+    this->d->m_controlsMutex.lock();
+    auto globalCameraControls = this->d->m_globalCameraControls;
+    this->d->m_controlsMutex.unlock();
 
-    for (const QVariant &control: this->cameraControls()) {
-        auto params = control.toList();
-        auto ctrlName = params[0].toString();
+    for (int i = 0; i < globalCameraControls.count(); i++) {
+        QVariantList control = globalCameraControls[i].toList();
+        QString controlName = control[0].toString();
 
-        if (cameraControls.contains(ctrlName)
-            && cameraControls[ctrlName] != params[6]) {
-            cameraControlsDiff[ctrlName] = cameraControls[ctrlName];
+        if (cameraControls.contains(controlName)) {
+            control[6] = cameraControls[controlName];
+            globalCameraControls[i] = control;
         }
     }
 
-    if (cameraControlsDiff.isEmpty())
+    this->d->m_controlsMutex.lock();
+
+    if (this->d->m_globalCameraControls == globalCameraControls) {
+        this->d->m_controlsMutex.unlock();
+
         return false;
-
-    int fd = -1;
-
-    if (this->m_fd >= 0)
-        fd = this->m_fd;
-    else
-        fd = x_open(this->m_device.toStdString().c_str(), O_RDWR | O_NONBLOCK, 0);
-
-#ifdef V4L2_CTRL_CLASS_CAMERA
-    if (!setControls(fd, V4L2_CTRL_CLASS_CAMERA, cameraControlsDiff))
-        return false;
-#endif
-
-    if (this->m_fd < 0)
-        x_close(fd);
-
-    QVariantList controls;
-
-    for (const auto &control: this->m_cameraControls.value(this->m_device)) {
-        auto controlParams = control.toList();
-        auto controlName = controlParams[0].toString();
-
-        if (cameraControlsDiff.contains(controlName))
-            controlParams[6] = cameraControlsDiff[controlName];
-
-        controls << QVariant(controlParams);
     }
 
-    this->m_cameraControls[this->m_device] = controls;
-    emit this->cameraControlsChanged(cameraControlsDiff);
+    this->d->m_globalCameraControls = globalCameraControls;
+    this->d->m_controlsMutex.unlock();
+    emit this->cameraControlsChanged(cameraControls);
 
     return true;
 }
@@ -293,55 +359,75 @@ bool CaptureV4L2::resetCameraControls()
 
 AkPacket CaptureV4L2::readFrame()
 {
-    if (this->m_buffers.isEmpty())
+    if (this->d->m_buffers.isEmpty())
         return AkPacket();
 
-    if (this->m_fd < 0)
+    if (this->d->m_fd < 0)
         return AkPacket();
 
-    if (this->m_ioMethod == IoMethodReadWrite) {
-        if (x_read(this->m_fd,
-                   this->m_buffers[0].start,
-                   this->m_buffers[0].length) < 0)
+    this->d->m_controlsMutex.lock();
+    auto imageControls = this->d->controlStatus(this->d->m_globalImageControls);
+    this->d->m_controlsMutex.unlock();
+
+    if (this->d->m_localImageControls != imageControls) {
+        auto controls = this->d->mapDiff(this->d->m_localImageControls,
+                                         imageControls);
+        this->d->setImageControls(this->d->m_fd, controls);
+        this->d->m_localImageControls = imageControls;
+    }
+
+    this->d->m_controlsMutex.lock();
+    auto cameraControls = this->d->controlStatus(this->d->m_globalCameraControls);
+    this->d->m_controlsMutex.unlock();
+
+    if (this->d->m_localCameraControls != cameraControls) {
+        auto controls = this->d->mapDiff(this->d->m_localCameraControls,
+                                         cameraControls);
+        this->d->setCameraControls(this->d->m_fd, controls);
+        this->d->m_localCameraControls = cameraControls;
+    }
+
+    if (this->d->m_ioMethod == IoMethodReadWrite) {
+        if (x_read(this->d->m_fd,
+                   this->d->m_buffers[0].start,
+                   this->d->m_buffers[0].length) < 0)
             return AkPacket();
 
-        timeval timestamp;
+        timeval timestamp {};
         gettimeofday(&timestamp, nullptr);
 
-        qint64 pts = qint64((timestamp.tv_sec
-                             + 1e-6 * timestamp.tv_usec)
-                            * this->m_fps.value());
+        auto pts = qint64((timestamp.tv_sec + 1e-6 * timestamp.tv_usec)
+                          * this->d->m_fps.value());
 
-        return this->processFrame(this->m_buffers[0].start,
-                                  this->m_buffers[0].length,
-                                  pts);
-    } else if (this->m_ioMethod == IoMethodMemoryMap
-               || this->m_ioMethod == IoMethodUserPointer) {
-        v4l2_buffer buffer;
-        memset(&buffer, 0, sizeof(buffer));
+        return this->d->processFrame(this->d->m_buffers[0].start,
+                                     this->d->m_buffers[0].length,
+                                     pts);
+    }
+
+    if (this->d->m_ioMethod == IoMethodMemoryMap
+        || this->d->m_ioMethod == IoMethodUserPointer) {
+        v4l2_buffer buffer {};
         buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buffer.memory = (this->m_ioMethod == IoMethodMemoryMap)?
+        buffer.memory = (this->d->m_ioMethod == IoMethodMemoryMap)?
                             V4L2_MEMORY_MMAP:
                             V4L2_MEMORY_USERPTR;
 
-        if (this->xioctl(this->m_fd,
-                         VIDIOC_DQBUF,
-                         &buffer) < 0)
+        if (x_ioctl(this->d->m_fd, VIDIOC_DQBUF, &buffer) < 0)
             return AkPacket();
 
-        if (buffer.index >= quint32(this->m_buffers.size()))
+        if (buffer.index >= quint32(this->d->m_buffers.size()))
             return AkPacket();
 
-        qint64 pts = qint64((buffer.timestamp.tv_sec
-                             + 1e-6 * buffer.timestamp.tv_usec)
-                            * this->m_fps.value());
+        auto pts = qint64((buffer.timestamp.tv_sec
+                           + 1e-6 * buffer.timestamp.tv_usec)
+                          * this->d->m_fps.value());
 
         AkPacket packet =
-                this->processFrame(this->m_buffers[int(buffer.index)].start,
-                                   buffer.bytesused,
-                                   pts);
+                this->d->processFrame(this->d->m_buffers[int(buffer.index)].start,
+                                      buffer.bytesused,
+                                      pts);
 
-        if (this->xioctl(this->m_fd, VIDIOC_QBUF, &buffer) < 0)
+        if (x_ioctl(this->d->m_fd, VIDIOC_QBUF, &buffer) < 0)
             return AkPacket();
 
         return packet;
@@ -350,22 +436,21 @@ AkPacket CaptureV4L2::readFrame()
     return AkPacket();
 }
 
-QVariantList CaptureV4L2::capsFps(int fd,
-                                  const struct v4l2_fmtdesc &format,
-                                  __u32 width,
-                                  __u32 height) const
+QVariantList CaptureV4L2Private::capsFps(int fd,
+                                         const struct v4l2_fmtdesc &format,
+                                         __u32 width,
+                                         __u32 height) const
 {
     QVariantList caps;
 
 #ifdef VIDIOC_ENUM_FRAMEINTERVALS
-    struct v4l2_frmivalenum frmival;
-    memset(&frmival, 0, sizeof(frmival));
+    v4l2_frmivalenum frmival {};
     frmival.pixel_format = format.pixelformat;
     frmival.width = width;
     frmival.height = height;
 
     for (frmival.index = 0;
-         this->xioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0;
+         x_ioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0;
          frmival.index++) {
         if (!frmival.discrete.numerator
             || !frmival.discrete.denominator)
@@ -379,28 +464,29 @@ QVariantList CaptureV4L2::capsFps(int fd,
         AkFrac fps;
 
         if (frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE)
-            fps = AkFrac(frmival.discrete.denominator, frmival.discrete.numerator);
+            fps = AkFrac(frmival.discrete.denominator,
+                         frmival.discrete.numerator);
         else
-            fps = AkFrac(frmival.stepwise.min.denominator, frmival.stepwise.max.numerator);
+            fps = AkFrac(frmival.stepwise.min.denominator,
+                         frmival.stepwise.max.numerator);
 
         videoCaps.setProperty("fps", fps.toString());
         caps << QVariant::fromValue(videoCaps);
     }
 #else
-    struct v4l2_standard standard;
-    memset(&standard, 0, sizeof(v4l2_standard));
+    struct v4l2_streamparm params;
+    memset(&params, 0, sizeof(v4l2_streamparm));
+    params.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    for (standard.index = 0;
-         this->xioctl(fd, VIDIOC_ENUMSTD, &standard) >= 0;
-         standard.index++) {
-
+    if (x_ioctl(fd, VIDIOC_G_PARM, &params) >= 0) {
         AkCaps videoCaps;
+        auto timeperframe = &params.parm.capture.timeperframe;
         videoCaps.setMimeType("video/unknown");
         videoCaps.setProperty("fourcc", this->fourccToStr(format.pixelformat));
         videoCaps.setProperty("width", width);
         videoCaps.setProperty("height", height);
-        videoCaps.setProperty("fps", AkFrac(standard.frameperiod.denominator,
-                                            standard.frameperiod.numerator).toString());
+        videoCaps.setProperty("fps", AkFrac(timeperframe->denominator,
+                                            timeperframe->numerator).toString());
         caps << QVariant::fromValue(videoCaps);
     }
 #endif
@@ -408,32 +494,75 @@ QVariantList CaptureV4L2::capsFps(int fd,
     return caps;
 }
 
-AkFrac CaptureV4L2::fps(int fd) const
+QVariantList CaptureV4L2Private::caps(int fd) const
 {
-    AkFrac fps;
-    v4l2_std_id stdId;
+    QVariantList caps;
 
-    if (this->xioctl(fd, VIDIOC_G_STD, &stdId) >= 0) {
-        v4l2_standard standard;
-        memset(&standard, 0, sizeof(standard));
+#ifndef VIDIOC_ENUM_FRAMESIZES
+    v4l2_format fmt;
+    memset(&fmt, 0, sizeof(v4l2_format));
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    uint width = 0;
+    uint height = 0;
 
-        for (standard.index = 0;
-             this->xioctl(fd, VIDIOC_ENUMSTD, &standard) == 0;
-             standard.index++) {
-            if (standard.id & stdId) {
-                fps = AkFrac(standard.frameperiod.denominator,
-                             standard.frameperiod.numerator);
-
-                break;
-            }
-        }
+    // Check if it has at least a default format.
+    if (x_ioctl(fd, VIDIOC_G_FMT, &fmt) >= 0) {
+        width = fmt.fmt.pix.width;
+        height = fmt.fmt.pix.height;
     }
 
-    v4l2_streamparm streamparm;
-    memset(&streamparm, 0, sizeof(streamparm));
+    if (width <= 0 || height <= 0)
+        return {};
+#endif
+
+    // Enumerate all supported formats.
+    v4l2_fmtdesc fmtdesc {};
+    fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    for (fmtdesc.index = 0;
+         x_ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) >= 0;
+         fmtdesc.index++) {
+#ifdef VIDIOC_ENUM_FRAMESIZES
+        v4l2_frmsizeenum frmsize {};
+        frmsize.pixel_format = fmtdesc.pixelformat;
+
+        // Enumerate frame sizes.
+        for (frmsize.index = 0;
+             x_ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) >= 0;
+             frmsize.index++) {
+            if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
+                caps << this->capsFps(fd,
+                                      fmtdesc,
+                                      frmsize.discrete.width,
+                                      frmsize.discrete.height);
+            } else {
+#if 0
+                for (uint height = frmsize.stepwise.min_height;
+                     height < frmsize.stepwise.max_height;
+                     height += frmsize.stepwise.step_height)
+                    for (uint width = frmsize.stepwise.min_width;
+                         width < frmsize.stepwise.max_width;
+                         width += frmsize.stepwise.step_width) {
+                        caps << this->capsFps(fd, fmtdesc, width, height);
+                    }
+#endif
+            }
+        }
+#else
+        caps << this->capsFps(fd, fmtdesc, width, height);
+#endif
+    }
+
+    return caps;
+}
+
+AkFrac CaptureV4L2Private::fps(int fd) const
+{
+    AkFrac fps(30, 1);
+    v4l2_streamparm streamparm {};
     streamparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    if (this->xioctl(fd, VIDIOC_G_PARM, &streamparm) >= 0) {
+    if (x_ioctl(fd, VIDIOC_G_PARM, &streamparm) >= 0) {
         if (streamparm.parm.capture.capability & V4L2_CAP_TIMEPERFRAME)
             fps = AkFrac(streamparm.parm.capture.timeperframe.denominator,
                          streamparm.parm.capture.timeperframe.numerator);
@@ -442,49 +571,31 @@ AkFrac CaptureV4L2::fps(int fd) const
     return fps;
 }
 
-void CaptureV4L2::setFps(int fd, const AkFrac &fps)
+void CaptureV4L2Private::setFps(int fd, const AkFrac &fps)
 {
-    v4l2_standard standard;
-    memset(&standard, 0, sizeof(standard));
-
-    for (standard.index = 0;
-         this->xioctl(fd, VIDIOC_ENUMSTD, &standard) == 0;
-         standard.index++) {
-        AkFrac stdFps(standard.frameperiod.denominator,
-                      standard.frameperiod.numerator);
-
-        if (stdFps == fps) {
-            this->xioctl(fd, VIDIOC_S_STD, &standard.id);
-
-            break;
-        }
-    }
-
-    v4l2_streamparm streamparm;
-    memset(&streamparm, 0, sizeof(streamparm));
+    v4l2_streamparm streamparm {};
     streamparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    if (this->xioctl(fd, VIDIOC_G_PARM, &streamparm) >= 0)
+    if (x_ioctl(fd, VIDIOC_G_PARM, &streamparm) >= 0)
         if (streamparm.parm.capture.capability & V4L2_CAP_TIMEPERFRAME) {
             streamparm.parm.capture.timeperframe.numerator = __u32(fps.den());
             streamparm.parm.capture.timeperframe.denominator = __u32(fps.num());
-            this->xioctl(fd, VIDIOC_S_PARM, &streamparm);
+            x_ioctl(fd, VIDIOC_S_PARM, &streamparm);
         }
 }
 
-QVariantList CaptureV4L2::controls(int fd, quint32 controlClass) const
+QVariantList CaptureV4L2Private::controls(int fd, quint32 controlClass) const
 {
     QVariantList controls;
 
     if (fd < 0)
         return controls;
 
-    v4l2_queryctrl queryctrl;
-    memset(&queryctrl, 0, sizeof(v4l2_queryctrl));
+    v4l2_queryctrl queryctrl {};
     queryctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
 
-    while (this->xioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) == 0) {
-        QVariantList control = this->queryControl(fd, controlClass, &queryctrl);
+    while (x_ioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) == 0) {
+        auto control = this->queryControl(fd, controlClass, &queryctrl);
 
         if (!control.isEmpty())
             controls << QVariant(control);
@@ -498,8 +609,8 @@ QVariantList CaptureV4L2::controls(int fd, quint32 controlClass) const
     for (__u32 id = V4L2_CID_USER_BASE; id < V4L2_CID_LASTP1; id++) {
         queryctrl.id = id;
 
-        if (this->xioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) == 0) {
-            QVariantList control = this->queryControl(fd, controlClass, &queryctrl);
+        if (x_ioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) == 0) {
+            auto control = this->queryControl(fd, controlClass, &queryctrl);
 
             if (!control.isEmpty())
                 controls << QVariant(control);
@@ -507,9 +618,9 @@ QVariantList CaptureV4L2::controls(int fd, quint32 controlClass) const
     }
 
     for (queryctrl.id = V4L2_CID_PRIVATE_BASE;
-         this->xioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) == 0;
+         x_ioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) == 0;
          queryctrl.id++) {
-        QVariantList control = this->queryControl(fd, controlClass, &queryctrl);
+        auto control = this->queryControl(fd, controlClass, &queryctrl);
 
         if (!control.isEmpty())
             controls << QVariant(control);
@@ -518,9 +629,9 @@ QVariantList CaptureV4L2::controls(int fd, quint32 controlClass) const
     return controls;
 }
 
-bool CaptureV4L2::setControls(int fd,
-                              quint32 controlClass,
-                              const QVariantMap &controls) const
+bool CaptureV4L2Private::setControls(int fd,
+                                     quint32 controlClass,
+                                     const QVariantMap &controls) const
 {
     if (fd < 0)
         return false;
@@ -530,7 +641,7 @@ bool CaptureV4L2::setControls(int fd,
     QVector<v4l2_ext_control> userCtrls;
 
     for (const QString &control: controls.keys()) {
-        v4l2_ext_control ctrl;
+        v4l2_ext_control ctrl {};
         ctrl.id = ctrl2id[control];
         ctrl.value = controls[control].toInt();
 
@@ -541,62 +652,56 @@ bool CaptureV4L2::setControls(int fd,
     }
 
     for (const v4l2_ext_control &user_ctrl: userCtrls) {
-        v4l2_control ctrl;
-        memset(&ctrl, 0, sizeof(v4l2_control));
+        v4l2_control ctrl {};
         ctrl.id = user_ctrl.id;
         ctrl.value = user_ctrl.value;
-        this->xioctl(fd, VIDIOC_S_CTRL, &ctrl);
+        x_ioctl(fd, VIDIOC_S_CTRL, &ctrl);
     }
 
     if (!mpegCtrls.isEmpty()) {
-        v4l2_ext_controls ctrls;
-        memset(&ctrls, 0, sizeof(v4l2_ext_control));
+        v4l2_ext_controls ctrls {};
         ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG;
         ctrls.count = __u32(mpegCtrls.size());
         ctrls.controls = &mpegCtrls[0];
-        this->xioctl(fd, VIDIOC_S_EXT_CTRLS, &ctrls);
+        x_ioctl(fd, VIDIOC_S_EXT_CTRLS, &ctrls);
     }
 
     return true;
 }
 
-QVariantList CaptureV4L2::queryControl(int handle,
-                                       quint32 controlClass,
-                                       v4l2_queryctrl *queryctrl) const
+QVariantList CaptureV4L2Private::queryControl(int handle,
+                                              quint32 controlClass,
+                                              v4l2_queryctrl *queryctrl) const
 {
     if (queryctrl->flags & V4L2_CTRL_FLAG_DISABLED)
-        return QVariantList();
+        return {};
 
     if (V4L2_CTRL_ID2CLASS(queryctrl->id) != controlClass)
-        return QVariantList();
+        return {};
 
-    v4l2_ext_control ext_ctrl;
-    memset(&ext_ctrl, 0, sizeof(v4l2_ext_control));
+    v4l2_ext_control ext_ctrl {};
     ext_ctrl.id = queryctrl->id;
 
-    v4l2_ext_controls ctrls;
-    memset(&ctrls, 0, sizeof(v4l2_ext_controls));
+    v4l2_ext_controls ctrls {};
     ctrls.ctrl_class = V4L2_CTRL_ID2CLASS(queryctrl->id);
     ctrls.count = 1;
     ctrls.controls = &ext_ctrl;
 
     if (V4L2_CTRL_ID2CLASS(queryctrl->id) != V4L2_CTRL_CLASS_USER &&
         queryctrl->id < V4L2_CID_PRIVATE_BASE) {
-        if (this->xioctl(handle, VIDIOC_G_EXT_CTRLS, &ctrls))
-            return QVariantList();
+        if (x_ioctl(handle, VIDIOC_G_EXT_CTRLS, &ctrls))
+            return {};
     } else {
-        v4l2_control ctrl;
-        memset(&ctrl, 0, sizeof(v4l2_control));
+        v4l2_control ctrl {};
         ctrl.id = queryctrl->id;
 
-        if (this->xioctl(handle, VIDIOC_G_CTRL, &ctrl))
+        if (x_ioctl(handle, VIDIOC_G_CTRL, &ctrl))
             return QVariantList();
 
         ext_ctrl.value = ctrl.value;
     }
 
-    v4l2_querymenu qmenu;
-    memset(&qmenu, 0, sizeof(v4l2_querymenu));
+    v4l2_querymenu qmenu {};
     qmenu.id = queryctrl->id;
     QStringList menu;
 
@@ -604,13 +709,13 @@ QVariantList CaptureV4L2::queryControl(int handle,
         for (int i = 0; i < queryctrl->maximum + 1; i++) {
             qmenu.index = __u32(i);
 
-            if (this->xioctl(handle, VIDIOC_QUERYMENU, &qmenu))
+            if (x_ioctl(handle, VIDIOC_QUERYMENU, &qmenu))
                 continue;
 
             menu << QString(reinterpret_cast<const char *>(qmenu.name));
         }
 
-    v4l2_ctrl_type type = static_cast<v4l2_ctrl_type>(queryctrl->type);
+    auto type = static_cast<v4l2_ctrl_type>(queryctrl->type);
 
     return QVariantList {
         QString(reinterpret_cast<const char *>(queryctrl->name)),
@@ -624,15 +729,14 @@ QVariantList CaptureV4L2::queryControl(int handle,
     };
 }
 
-QMap<QString, quint32> CaptureV4L2::findControls(int handle,
-                                                 quint32 controlClass) const
+QMap<QString, quint32> CaptureV4L2Private::findControls(int handle,
+                                                        quint32 controlClass) const
 {
-    v4l2_queryctrl qctrl;
-    memset(&qctrl, 0, sizeof(v4l2_queryctrl));
+    v4l2_queryctrl qctrl {};
     qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
     QMap<QString, quint32> controls;
 
-    while (this->xioctl(handle, VIDIOC_QUERYCTRL, &qctrl) == 0) {
+    while (x_ioctl(handle, VIDIOC_QUERYCTRL, &qctrl) == 0) {
         if (!(qctrl.flags & V4L2_CTRL_FLAG_DISABLED)
             && V4L2_CTRL_ID2CLASS(qctrl.id) == controlClass)
             controls[QString(reinterpret_cast<const char *>(qctrl.name))] = qctrl.id;
@@ -646,7 +750,7 @@ QMap<QString, quint32> CaptureV4L2::findControls(int handle,
     for (__u32 id = V4L2_CID_USER_BASE; id < V4L2_CID_LASTP1; id++) {
         qctrl.id = id;
 
-        if (this->xioctl(handle, VIDIOC_QUERYCTRL, &qctrl) == 0
+        if (x_ioctl(handle, VIDIOC_QUERYCTRL, &qctrl) == 0
             && !(qctrl.flags & V4L2_CTRL_FLAG_DISABLED)
             && V4L2_CTRL_ID2CLASS(qctrl.id) == controlClass)
             controls[QString(reinterpret_cast<const char *>(qctrl.name))] = qctrl.id;
@@ -654,7 +758,7 @@ QMap<QString, quint32> CaptureV4L2::findControls(int handle,
 
     qctrl.id = V4L2_CID_PRIVATE_BASE;
 
-    while (this->xioctl(handle, VIDIOC_QUERYCTRL, &qctrl) == 0) {
+    while (x_ioctl(handle, VIDIOC_QUERYCTRL, &qctrl) == 0) {
         if (!(qctrl.flags & V4L2_CTRL_FLAG_DISABLED)
             && V4L2_CTRL_ID2CLASS(qctrl.id) == controlClass)
             controls[QString(reinterpret_cast<const char *>(qctrl.name))] = qctrl.id;
@@ -665,7 +769,7 @@ QMap<QString, quint32> CaptureV4L2::findControls(int handle,
     return controls;
 }
 
-bool CaptureV4L2::initReadWrite(quint32 bufferSize)
+bool CaptureV4L2Private::initReadWrite(quint32 bufferSize)
 {
     this->m_buffers.resize(1);
 
@@ -683,16 +787,14 @@ bool CaptureV4L2::initReadWrite(quint32 bufferSize)
     return true;
 }
 
-bool CaptureV4L2::initMemoryMap()
+bool CaptureV4L2Private::initMemoryMap()
 {
-    v4l2_requestbuffers requestBuffers;
-    memset(&requestBuffers, 0, sizeof(requestBuffers));
-
+    v4l2_requestbuffers requestBuffers {};
     requestBuffers.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     requestBuffers.memory = V4L2_MEMORY_MMAP;
     requestBuffers.count = __u32(this->m_nBuffers);
 
-    if (this->xioctl(this->m_fd, VIDIOC_REQBUFS, &requestBuffers) < 0)
+    if (x_ioctl(this->m_fd, VIDIOC_REQBUFS, &requestBuffers) < 0)
         return false;
 
     if (requestBuffers.count < 1)
@@ -702,27 +804,25 @@ bool CaptureV4L2::initMemoryMap()
     bool error = false;
 
     for (int i = 0; i < int(requestBuffers.count); i++) {
-        v4l2_buffer buffer;
-        memset(&buffer, 0, sizeof(buffer));
-
+        v4l2_buffer buffer {};
         buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buffer.memory = V4L2_MEMORY_MMAP;
         buffer.index = __u32(i);
 
-        if (this->xioctl(this->m_fd, VIDIOC_QUERYBUF, &buffer) < 0) {
+        if (x_ioctl(this->m_fd, VIDIOC_QUERYBUF, &buffer) < 0) {
             error = true;
 
             break;
         }
 
         this->m_buffers[i].length = buffer.length;
-
-        this->m_buffers[i].start = reinterpret_cast<char *>(x_mmap(nullptr,
-                                                                   buffer.length,
-                                                                   PROT_READ | PROT_WRITE,
-                                                                   MAP_SHARED,
-                                                                   this->m_fd,
-                                                                   buffer.m.offset));
+        this->m_buffers[i].start =
+                reinterpret_cast<char *>(x_mmap(nullptr,
+                                                buffer.length,
+                                                PROT_READ | PROT_WRITE,
+                                                MAP_SHARED,
+                                                this->m_fd,
+                                                buffer.m.offset));
 
         if (this->m_buffers[i].start == MAP_FAILED) {
             error = true;
@@ -732,8 +832,8 @@ bool CaptureV4L2::initMemoryMap()
     }
 
     if (error) {
-        for (qint32 i = 0; i < this->m_buffers.size(); i++)
-            x_munmap(this->m_buffers[i].start, this->m_buffers[i].length);
+        for (auto &buffer: this->m_buffers)
+            x_munmap(buffer.start, buffer.length);
 
         this->m_buffers.clear();
 
@@ -743,18 +843,14 @@ bool CaptureV4L2::initMemoryMap()
     return true;
 }
 
-bool CaptureV4L2::initUserPointer(quint32 bufferSize)
+bool CaptureV4L2Private::initUserPointer(quint32 bufferSize)
 {
-    v4l2_requestbuffers requestBuffers;
-    memset(&requestBuffers, 0, sizeof(requestBuffers));
-
+    v4l2_requestbuffers requestBuffers {};
     requestBuffers.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     requestBuffers.memory = V4L2_MEMORY_USERPTR;
     requestBuffers.count = __u32(this->m_nBuffers);
 
-    if (this->xioctl(this->m_fd,
-                     VIDIOC_REQBUFS,
-                     &requestBuffers) < 0)
+    if (x_ioctl(this->m_fd, VIDIOC_REQBUFS, &requestBuffers) < 0)
         return false;
 
     this->m_buffers.resize(int(requestBuffers.count));
@@ -774,8 +870,8 @@ bool CaptureV4L2::initUserPointer(quint32 bufferSize)
     }
 
     if (error) {
-        for (qint32 i = 0; i < this->m_buffers.size(); i++)
-            delete [] this->m_buffers[i].start;
+        for (auto &buffer: this->m_buffers)
+            delete [] buffer.start;
 
         this->m_buffers.clear();
 
@@ -785,82 +881,172 @@ bool CaptureV4L2::initUserPointer(quint32 bufferSize)
     return true;
 }
 
-bool CaptureV4L2::startCapture()
+bool CaptureV4L2Private::startCapture()
 {
     bool error = false;
 
-    if (this->m_ioMethod == IoMethodMemoryMap) {
+    if (this->m_ioMethod == CaptureV4L2::IoMethodMemoryMap) {
         for (int i = 0; i < this->m_buffers.size(); i++) {
-            v4l2_buffer buffer;
-            memset(&buffer, 0, sizeof(buffer));
-
+            v4l2_buffer buffer {};
             buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buffer.memory = V4L2_MEMORY_MMAP;
             buffer.index = __u32(i);
 
-            if (this->xioctl(this->m_fd, VIDIOC_QBUF, &buffer) < 0)
+            if (x_ioctl(this->m_fd, VIDIOC_QBUF, &buffer) < 0)
                 error = true;
         }
 
         v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-        if (this->xioctl(this->m_fd, VIDIOC_STREAMON, &type) < 0)
+        if (x_ioctl(this->m_fd, VIDIOC_STREAMON, &type) < 0)
             error = true;
-    } else if (this->m_ioMethod == IoMethodUserPointer) {
+    } else if (this->m_ioMethod == CaptureV4L2::IoMethodUserPointer) {
         for (int i = 0; i < this->m_buffers.size(); i++) {
-            v4l2_buffer buffer;
-            memset(&buffer, 0, sizeof(buffer));
-
+            v4l2_buffer buffer {};
             buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buffer.memory = V4L2_MEMORY_USERPTR;
             buffer.index = __u32(i);
             buffer.m.userptr = ulong(this->m_buffers[i].start);
             buffer.length = __u32(this->m_buffers[i].length);
 
-            if (this->xioctl(this->m_fd, VIDIOC_QBUF, &buffer) < 0)
+            if (x_ioctl(this->m_fd, VIDIOC_QBUF, &buffer) < 0)
                 error = true;
         }
 
         v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-        if (this->xioctl(this->m_fd, VIDIOC_STREAMON, &type) < 0)
+        if (x_ioctl(this->m_fd, VIDIOC_STREAMON, &type) < 0)
             error = true;
     }
 
     if (error)
-        this->uninit();
+        self->uninit();
 
     this->m_id = Ak::id();
 
     return !error;
 }
 
-void CaptureV4L2::stopCapture()
+void CaptureV4L2Private::stopCapture()
 {
-    if (this->m_ioMethod == IoMethodMemoryMap
-        || this->m_ioMethod == IoMethodUserPointer) {
+    if (this->m_ioMethod == CaptureV4L2::IoMethodMemoryMap
+        || this->m_ioMethod == CaptureV4L2::IoMethodUserPointer) {
         v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
-        this->xioctl(this->m_fd, VIDIOC_STREAMOFF, &type);
+        x_ioctl(this->m_fd, VIDIOC_STREAMOFF, &type);
     }
+}
+
+QString CaptureV4L2Private::fourccToStr(quint32 format) const
+{
+    char fourcc[5];
+    memcpy(fourcc, &format, sizeof(quint32));
+    fourcc[4] = 0;
+
+    return QString(fourcc);
+}
+
+quint32 CaptureV4L2Private::strToFourCC(const QString &format) const
+{
+    quint32 fourcc;
+    memcpy(&fourcc, format.toStdString().c_str(), sizeof(quint32));
+
+    return fourcc;
+}
+
+AkPacket CaptureV4L2Private::processFrame(const char *buffer,
+                                          size_t bufferSize,
+                                          qint64 pts) const
+{
+    AkPacket oPacket(this->m_caps, {buffer, int(bufferSize)});
+    oPacket.setPts(pts);
+    oPacket.setTimeBase(this->m_timeBase);
+    oPacket.setIndex(0);
+    oPacket.setId(this->m_id);
+
+    return oPacket;
+}
+
+QVariantList CaptureV4L2Private::imageControls(int fd) const
+{
+    return this->controls(fd, V4L2_CTRL_CLASS_USER);
+}
+
+bool CaptureV4L2Private::setImageControls(int fd,
+                                          const QVariantMap &imageControls) const
+{
+    return this->setControls(fd, V4L2_CTRL_CLASS_USER, imageControls);
+}
+
+QVariantList CaptureV4L2Private::cameraControls(int fd) const
+{
+#ifdef V4L2_CTRL_CLASS_CAMERA
+    return this->controls(fd, V4L2_CTRL_CLASS_CAMERA);
+#else
+    Q_UNUSED(fd)
+
+    return {};
+#endif
+}
+
+bool CaptureV4L2Private::setCameraControls(int fd,
+                                           const QVariantMap &cameraControls) const
+{
+#ifdef V4L2_CTRL_CLASS_CAMERA
+    return this->setControls(fd, V4L2_CTRL_CLASS_CAMERA, cameraControls);
+#else
+    Q_UNUSED(fd)
+    Q_UNUSED(cameraControls)
+
+    return false;
+#endif
+}
+
+QVariantMap CaptureV4L2Private::controlStatus(const QVariantList &controls) const
+{
+    QVariantMap controlStatus;
+
+    for (auto &control: controls) {
+        QVariantList params = control.toList();
+        QString controlName = params[0].toString();
+        controlStatus[controlName] = params[6];
+    }
+
+    return controlStatus;
+}
+
+QVariantMap CaptureV4L2Private::mapDiff(const QVariantMap &map1,
+                                        const QVariantMap &map2) const
+{
+    QVariantMap map;
+
+    for (auto &control: map2.keys())
+        if (!map1.contains(control)
+            || map1[control] != map2[control]) {
+            map[control] = map2[control];
+        }
+
+    return map;
 }
 
 bool CaptureV4L2::init()
 {
-    // Frames read must be blocking so we does not waste CPU time.
-    this->m_fd = x_open(this->m_device.toStdString().c_str(),
-                        O_RDWR, // | O_NONBLOCK,
-                        0);
+    this->d->m_localImageControls.clear();
+    this->d->m_localCameraControls.clear();
 
-    if (this->m_fd < 0)
+    // Frames read must be blocking so we does not waste CPU time.
+    this->d->m_fd =
+            x_open(this->d->m_device.toStdString().c_str(),
+                   O_RDWR, // | O_NONBLOCK,
+                   0);
+
+    if (this->d->m_fd < 0)
         return false;
 
-    v4l2_capability capabilities;
-    memset(&capabilities, 0, sizeof(v4l2_capability));
+    v4l2_capability capabilities {};
 
-    if (this->xioctl(this->m_fd, VIDIOC_QUERYCAP, &capabilities) < 0) {
+    if (x_ioctl(this->d->m_fd, VIDIOC_QUERYCAP, &capabilities) < 0) {
         qDebug() << "VideoCapture: Can't query capabilities.";
-        x_close(this->m_fd);
+        x_close(this->d->m_fd);
 
         return false;
     }
@@ -869,107 +1055,126 @@ bool CaptureV4L2::init()
 
     if (streams.isEmpty()) {
         qDebug() << "VideoCapture: No streams available.";
-        x_close(this->m_fd);
+        x_close(this->d->m_fd);
 
         return false;
     }
 
-    QVariantList supportedCaps = this->caps(this->m_device);
+    QVariantList supportedCaps = this->caps(this->d->m_device);
     AkCaps caps = supportedCaps[streams[0]].value<AkCaps>();
-    v4l2_format fmt;
-    memset(&fmt, 0, sizeof(v4l2_format));
+    v4l2_format fmt {};
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    if (this->xioctl(this->m_fd, VIDIOC_G_FMT, &fmt) == 0) {
-        fmt.fmt.pix.pixelformat = this->strToFourCC(caps.property("fourcc").toString());
-        fmt.fmt.pix.width = caps.property("width").toUInt();
-        fmt.fmt.pix.height = caps.property("height").toUInt();
+    x_ioctl(this->d->m_fd, VIDIOC_G_FMT, &fmt);
+    fmt.fmt.pix.pixelformat =
+            this->d->strToFourCC(caps.property("fourcc").toString());
+    fmt.fmt.pix.width = caps.property("width").toUInt();
+    fmt.fmt.pix.height = caps.property("height").toUInt();
 
-        if (this->xioctl(this->m_fd, VIDIOC_S_FMT, &fmt) < 0) {
-            qDebug() << "VideoCapture: Can't set format:"
-                     << this->fourccToStr(fmt.fmt.pix.pixelformat);
-            x_close(this->m_fd);
-
-            return false;
-        }
-    }
-
-    this->setFps(this->m_fd, caps.property("fps").toString());
-
-    if (this->xioctl(this->m_fd, VIDIOC_S_FMT, &fmt) < 0) {
+    if (x_ioctl(this->d->m_fd, VIDIOC_S_FMT, &fmt) < 0) {
         qDebug() << "VideoCapture: Can't set format:"
-                 << this->fourccToStr(fmt.fmt.pix.pixelformat);
-        x_close(this->m_fd);
+                 << this->d->fourccToStr(fmt.fmt.pix.pixelformat);
+        x_close(this->d->m_fd);
 
         return false;
     }
 
-    this->m_caps = caps;
-    this->m_fps = caps.property("fps").toString();
-    this->m_timeBase = this->m_fps.invert();
+    this->d->setFps(this->d->m_fd, caps.property("fps").toString());
+    this->d->m_caps = caps;
+    this->d->m_fps = caps.property("fps").toString();
+    this->d->m_timeBase = this->d->m_fps.invert();
 
-    if (this->m_ioMethod == IoMethodReadWrite
+    if (this->d->m_ioMethod == IoMethodReadWrite
         && capabilities.capabilities & V4L2_CAP_READWRITE
-        && this->initReadWrite(fmt.fmt.pix.sizeimage)) {
-    } else if (this->m_ioMethod == IoMethodMemoryMap
+        && this->d->initReadWrite(fmt.fmt.pix.sizeimage)) {
+    } else if (this->d->m_ioMethod == IoMethodMemoryMap
              && capabilities.capabilities & V4L2_CAP_STREAMING
-             && this->initMemoryMap()) {
-    } else if (this->m_ioMethod == IoMethodUserPointer
+             && this->d->initMemoryMap()) {
+    } else if (this->d->m_ioMethod == IoMethodUserPointer
              && capabilities.capabilities & V4L2_CAP_STREAMING
-             && this->initUserPointer(fmt.fmt.pix.sizeimage)) {
+             && this->d->initUserPointer(fmt.fmt.pix.sizeimage)) {
     } else
-        this->m_ioMethod = IoMethodUnknown;
+        this->d->m_ioMethod = IoMethodUnknown;
 
-    if (this->m_ioMethod != IoMethodUnknown)
-        return this->startCapture();
+    if (this->d->m_ioMethod != IoMethodUnknown)
+        return this->d->startCapture();
 
-    if (capabilities.capabilities & V4L2_CAP_READWRITE && this->initReadWrite(fmt.fmt.pix.sizeimage))
-        this->m_ioMethod = IoMethodReadWrite;
-    else if (capabilities.capabilities & V4L2_CAP_STREAMING) {
-        if (this->initMemoryMap())
-            this->m_ioMethod = IoMethodMemoryMap;
-        else if (this->initUserPointer(fmt.fmt.pix.sizeimage))
-            this->m_ioMethod = IoMethodUserPointer;
-        else {
-            this->m_ioMethod = IoMethodUnknown;
+    if (capabilities.capabilities & V4L2_CAP_STREAMING) {
+        if (this->d->initMemoryMap())
+            this->d->m_ioMethod = IoMethodMemoryMap;
+        else if (this->d->initUserPointer(fmt.fmt.pix.sizeimage))
+            this->d->m_ioMethod = IoMethodUserPointer;
+    }
 
+    if (this->d->m_ioMethod == IoMethodUnknown) {
+        if (capabilities.capabilities & V4L2_CAP_READWRITE
+            && this->d->initReadWrite(fmt.fmt.pix.sizeimage))
+            this->d->m_ioMethod = IoMethodReadWrite;
+        else
             return false;
-        }
-    } else
-        return false;
+    }
 
-    return this->startCapture();
+    if (this->d->startCapture())
+        return true;
+
+    return false;
 }
 
 void CaptureV4L2::uninit()
 {
-    this->stopCapture();
+    this->d->stopCapture();
 
-    if (!this->m_buffers.isEmpty()) {
-        if (this->m_ioMethod == IoMethodReadWrite)
-            delete [] this->m_buffers[0].start;
-        else if (this->m_ioMethod == IoMethodMemoryMap)
-            for (qint32 i = 0; i < this->m_buffers.size(); i++)
-                x_munmap(this->m_buffers[i].start, this->m_buffers[i].length);
-        else if (this->m_ioMethod == IoMethodUserPointer)
-            for (qint32 i = 0; i < this->m_buffers.size(); i++)
-                delete [] this->m_buffers[i].start;
+    if (!this->d->m_buffers.isEmpty()) {
+        if (this->d->m_ioMethod == IoMethodReadWrite)
+            delete [] this->d->m_buffers[0].start;
+        else if (this->d->m_ioMethod == IoMethodMemoryMap)
+            for (auto &buffer: this->d->m_buffers)
+                x_munmap(buffer.start, buffer.length);
+        else if (this->d->m_ioMethod == IoMethodUserPointer)
+            for (auto &buffer: this->d->m_buffers)
+                delete [] buffer.start;
     }
 
-    x_close(this->m_fd);
-    this->m_caps.clear();
-    this->m_fps = AkFrac();
-    this->m_timeBase = AkFrac();
-    this->m_buffers.clear();
+    x_close(this->d->m_fd);
+    this->d->m_caps.clear();
+    this->d->m_fps = AkFrac();
+    this->d->m_timeBase = AkFrac();
+    this->d->m_buffers.clear();
 }
 
 void CaptureV4L2::setDevice(const QString &device)
 {
-    if (this->m_device == device)
+    if (this->d->m_device == device)
         return;
 
-    this->m_device = device;
+    this->d->m_device = device;
+
+    if (device.isEmpty()) {
+        this->d->m_controlsMutex.lock();
+        this->d->m_globalImageControls.clear();
+        this->d->m_globalCameraControls.clear();
+        this->d->m_controlsMutex.unlock();
+    } else {
+        this->d->m_controlsMutex.lock();
+        int fd = x_open(device.toStdString().c_str(), O_RDWR | O_NONBLOCK, 0);
+
+        if (fd >= 0) {
+            this->d->m_globalImageControls = this->d->imageControls(fd);
+            this->d->m_globalCameraControls = this->d->cameraControls(fd);
+            x_close(fd);
+        }
+
+        this->d->m_controlsMutex.unlock();
+    }
+
+    this->d->m_controlsMutex.lock();
+    auto imageStatus = this->d->controlStatus(this->d->m_globalImageControls);
+    auto cameraStatus = this->d->controlStatus(this->d->m_globalCameraControls);
+    this->d->m_controlsMutex.unlock();
+
     emit this->deviceChanged(device);
+    emit this->imageControlsChanged(imageStatus);
+    emit this->cameraControlsChanged(cameraStatus);
 }
 
 void CaptureV4L2::setStreams(const QList<int> &streams)
@@ -982,7 +1187,7 @@ void CaptureV4L2::setStreams(const QList<int> &streams)
     if (stream < 0)
         return;
 
-    QVariantList supportedCaps = this->caps(this->m_device);
+    auto supportedCaps = this->caps(this->d->m_device);
 
     if (stream >= supportedCaps.length())
         return;
@@ -993,30 +1198,30 @@ void CaptureV4L2::setStreams(const QList<int> &streams)
     if (this->streams() == inputStreams)
         return;
 
-    this->m_streams = inputStreams;
+    this->d->m_streams = inputStreams;
     emit this->streamsChanged(inputStreams);
 }
 
 void CaptureV4L2::setIoMethod(const QString &ioMethod)
 {
-    if (this->m_fd >= 0)
+    if (this->d->m_fd >= 0)
         return;
 
     IoMethod ioMethodEnum = ioMethodToStr->key(ioMethod, IoMethodUnknown);
 
-    if (this->m_ioMethod == ioMethodEnum)
+    if (this->d->m_ioMethod == ioMethodEnum)
         return;
 
-    this->m_ioMethod = ioMethodEnum;
+    this->d->m_ioMethod = ioMethodEnum;
     emit this->ioMethodChanged(ioMethod);
 }
 
 void CaptureV4L2::setNBuffers(int nBuffers)
 {
-    if (this->m_nBuffers == nBuffers)
+    if (this->d->m_nBuffers == nBuffers)
         return;
 
-    this->m_nBuffers = nBuffers;
+    this->d->m_nBuffers = nBuffers;
     emit this->nBuffersChanged(nBuffers);
 }
 
@@ -1027,7 +1232,7 @@ void CaptureV4L2::resetDevice()
 
 void CaptureV4L2::resetStreams()
 {
-    QVariantList supportedCaps = this->caps(this->m_device);
+    QVariantList supportedCaps = this->caps(this->d->m_device);
     QList<int> streams;
 
     if (!supportedCaps.isEmpty())
@@ -1055,18 +1260,9 @@ void CaptureV4L2::reset()
 
 void CaptureV4L2::updateDevices()
 {
-    decltype(this->m_devices) devices;
-    decltype(this->m_descriptions) descriptions;
-    decltype(this->m_devicesCaps) devicesCaps;
-    decltype(this->m_imageControls) imageControls;
-    decltype(this->m_cameraControls) cameraControls;
-
-    QList<v4l2_buf_type> bufType = {
-        V4L2_BUF_TYPE_VIDEO_CAPTURE,
-        V4L2_BUF_TYPE_VIDEO_OUTPUT,
-        V4L2_BUF_TYPE_VIDEO_OVERLAY
-    };
-
+    decltype(this->d->m_devices) devices;
+    decltype(this->d->m_descriptions) descriptions;
+    decltype(this->d->m_devicesCaps) devicesCaps;
     QDir devicesDir("/dev");
 
     auto devicesFiles = devicesDir.entryList(QStringList() << "video*",
@@ -1078,113 +1274,43 @@ void CaptureV4L2::updateDevices()
                                              | QDir::CaseSensitive,
                                              QDir::Name);
 
-    v4l2_capability capability;
-    memset(&capability, 0, sizeof(v4l2_capability));
-
     for (const QString &devicePath: devicesFiles) {
         auto fileName = devicesDir.absoluteFilePath(devicePath);
         int fd = x_open(fileName.toStdString().c_str(), O_RDWR | O_NONBLOCK, 0);
 
-        if (fd >= 0) {
-            // Check if this is a video capture device.
-            if (this->xioctl(fd, VIDIOC_QUERYCAP, &capability) >= 0
-                && capability.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
-                v4l2_format fmt;
-                memset(&fmt, 0, sizeof(v4l2_format));
-                fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        if (fd < 0)
+            continue;
 
-                // Check if it has at least a default format.
-                if (this->xioctl(fd, VIDIOC_G_FMT, &fmt) >= 0) {
-                    devices << fileName;
-                    descriptions[fileName] = reinterpret_cast<const char *>(capability.card);
-                    QVariantList caps;
+        auto caps = this->d->caps(fd);
 
-#ifndef VIDIOC_ENUM_FRAMESIZES
-                    uint width = 0;
-                    uint height = 0;
-                    v4l2_format curFmt;
-                    memset(&curFmt, 0, sizeof(v4l2_format));
+        if (!caps.empty()) {
+            v4l2_capability capability {};
+            QString description;
 
-                    if (this->xioctl(fd, VIDIOC_G_FMT, &curFmt) >= 0) {
-                        width = curFmt.fmt.pix.width;
-                        height = curFmt.fmt.pix.height;
-                    }
-#endif
+            if (x_ioctl(fd, VIDIOC_QUERYCAP, &capability) >= 0)
+                description = reinterpret_cast<const char *>(capability.card);
 
-                    // Enumerate all supported formats.
-                    for (const v4l2_buf_type &type: bufType) {
-                        v4l2_fmtdesc fmt;
-                        memset(&fmt, 0, sizeof(v4l2_fmtdesc));
-                        fmt.type = type;
-
-                        for (fmt.index = 0;
-                             this->xioctl(fd, VIDIOC_ENUM_FMT, &fmt) >= 0;
-                             fmt.index++) {
-#ifdef VIDIOC_ENUM_FRAMESIZES
-                            v4l2_frmsizeenum frmsize;
-                            memset(&frmsize, 0, sizeof(v4l2_frmsizeenum));
-                            frmsize.pixel_format = fmt.pixelformat;
-
-                            // Eenumerate frame sizes.
-                            for (frmsize.index = 0;
-                                 this->xioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) >= 0;
-                                 frmsize.index++) {
-                                if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
-                                    caps << this->capsFps(fd,
-                                                          fmt,
-                                                          frmsize.discrete.width,
-                                                          frmsize.discrete.height);
-                                } else {/*
-                                    for (uint height = frmsize.stepwise.min_height;
-                                         height < frmsize.stepwise.max_height;
-                                         height += frmsize.stepwise.step_height)
-                                        for (uint width = frmsize.stepwise.min_width;
-                                             width < frmsize.stepwise.max_width;
-                                             width += frmsize.stepwise.step_width) {
-                                            caps << this->capsFps(fd,
-                                                                  fmt,
-                                                                  width,
-                                                                  height);
-                                        }*/
-                                }
-                            }
-#else
-                            if (width > 0 && height > 0)
-                                caps << this->capsFps(fd,
-                                                      fmt,
-                                                      width,
-                                                      height);
-#endif
-                        }
-                    }
-
-                    devicesCaps[fileName] = caps;
-                    imageControls[fileName] = this->controls(fd, V4L2_CTRL_CLASS_USER);
-#ifdef V4L2_CTRL_CLASS_CAMERA
-                    cameraControls[fileName] = this->controls(fd, V4L2_CTRL_CLASS_CAMERA);
-#endif
-                }
-            }
-
-            x_close(fd);
+            devices << fileName;
+            descriptions[fileName] = description;
+            devicesCaps[fileName] = caps;
         }
+
+        x_close(fd);
     }
 
-    this->m_descriptions = descriptions;
-    this->m_devicesCaps = devicesCaps;
-    this->m_imageControls = imageControls;
-    this->m_cameraControls = cameraControls;
+    this->d->m_descriptions = descriptions;
+    this->d->m_devicesCaps = devicesCaps;
 
-    if (this->m_devices != devices) {
-        if (!this->m_devices.isEmpty())
-            this->m_fsWatcher->removePaths(this->m_devices);
+    if (this->d->m_devices != devices) {
+        if (!this->d->m_devices.isEmpty())
+            this->d->m_fsWatcher->removePaths(this->d->m_devices);
 
-        this->m_devices = devices;
+        this->d->m_devices = devices;
 
-        if (!this->m_devices.isEmpty())
-            this->m_fsWatcher->addPaths(this->m_devices);
+        if (!this->d->m_devices.isEmpty())
+            this->d->m_fsWatcher->addPaths(this->d->m_devices);
 
-        emit this->webcamsChanged(this->m_devices);
+        emit this->webcamsChanged(this->d->m_devices);
     }
 }
 
@@ -1199,3 +1325,5 @@ void CaptureV4L2::onFileChanged(const QString &fileName)
 {
     Q_UNUSED(fileName)
 }
+
+#include "moc_capturev4l2.cpp"

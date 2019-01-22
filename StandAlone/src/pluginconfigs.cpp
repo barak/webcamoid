@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,23 +19,36 @@
 
 #include <QDir>
 #include <QSettings>
+#include <QQmlContext>
+#include <QQmlApplicationEngine>
 #include <ak.h>
+#include <akelement.h>
 
 #include "pluginconfigs.h"
+#include "clioptions.h"
+
+class PluginConfigsPrivate
+{
+    public:
+        QQmlApplicationEngine *m_engine {nullptr};
+        QStringList m_plugins;
+
+        QString convertToAbsolute(const QString &path) const;
+};
 
 PluginConfigs::PluginConfigs(QQmlApplicationEngine *engine, QObject *parent):
-    QObject(parent),
-    m_engine(nullptr)
+    QObject(parent)
 {
+    this->d = new PluginConfigsPrivate;
     this->setQmlEngine(engine);
 }
 
 PluginConfigs::PluginConfigs(const CliOptions &cliOptions,
                              QQmlApplicationEngine *engine,
                              QObject *parent):
-    QObject(parent),
-    m_engine(nullptr)
+    QObject(parent)
 {
+    this->d = new PluginConfigsPrivate;
     this->setQmlEngine(engine);
     this->loadProperties(cliOptions);
 }
@@ -43,9 +56,10 @@ PluginConfigs::PluginConfigs(const CliOptions &cliOptions,
 PluginConfigs::~PluginConfigs()
 {
     this->saveProperties();
+    delete this->d;
 }
 
-QString PluginConfigs::convertToAbsolute(const QString &path) const
+QString PluginConfigsPrivate::convertToAbsolute(const QString &path) const
 {
     if (!QDir::isRelativePath(path))
         return QDir::cleanPath(path);
@@ -58,10 +72,10 @@ QString PluginConfigs::convertToAbsolute(const QString &path) const
 
 void PluginConfigs::setQmlEngine(QQmlApplicationEngine *engine)
 {
-    if (this->m_engine == engine)
+    if (this->d->m_engine == engine)
         return;
 
-    this->m_engine = engine;
+    this->d->m_engine = engine;
 
     if (engine)
         engine->rootContext()->setContextProperty("PluginConfigs", this);
@@ -80,7 +94,7 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
 
         for (QString &path: blackListPaths) {
 #ifdef Q_OS_WIN32
-            path = this->convertToAbsolute(path);
+            path = this->d->convertToAbsolute(path);
 #endif
 
             path = QDir::toNativeSeparators(path);
@@ -96,7 +110,7 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
             auto path = config.value("path").toString();
 
 #ifdef Q_OS_WIN32
-            path = this->convertToAbsolute(path);
+            path = this->d->convertToAbsolute(path);
 #endif
 
             path = QDir::toNativeSeparators(path);
@@ -116,9 +130,11 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
     // Set Qml plugins search path.
     QStringList qmlImportPaths;
 
-    if (cliOptions.isSet(cliOptions.qmlPathOpt()))
-        qmlImportPaths = cliOptions.value(cliOptions.qmlPathOpt()).split(';');
-    else {
+    if (cliOptions.isSet(cliOptions.qmlPathOpt())) {
+        for (auto &path: cliOptions.value(cliOptions.qmlPathOpt()).split(';'))
+            if (QFileInfo::exists(path))
+                qmlImportPaths << path;
+    } else {
         int size = config.beginReadArray("qmlPaths");
 
         for (int i = 0; i < size; i++) {
@@ -126,12 +142,12 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
             auto path = config.value("path").toString();
 
 #ifdef Q_OS_WIN32
-            path = this->convertToAbsolute(path);
+            path = this->d->convertToAbsolute(path);
 #endif
 
             path = QDir::toNativeSeparators(path);
 
-            if (!qmlImportPaths.contains(path))
+            if (!qmlImportPaths.contains(path) && QFileInfo::exists(path))
                 qmlImportPaths << path;
         }
 
@@ -155,7 +171,7 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
 
         for (QString &path: pluginPaths) {
 #ifdef Q_OS_WIN32
-            path = this->convertToAbsolute(path);
+            path = this->d->convertToAbsolute(path);
 #endif
 
             path = QDir::toNativeSeparators(path);
@@ -172,7 +188,7 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
             auto path = config.value("path").toString();
 
 #ifdef Q_OS_WIN32
-            path = this->convertToAbsolute(path);
+            path = this->d->convertToAbsolute(path);
 #endif
 
             path = QDir::toNativeSeparators(path);
@@ -216,7 +232,7 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
         cacheConfig.endGroup();
     }
 
-    this->m_plugins = AkElement::listPluginPaths();
+    this->d->m_plugins = AkElement::listPluginPaths();
 }
 
 void PluginConfigs::saveProperties()
@@ -310,14 +326,16 @@ void PluginConfigs::saveProperties()
         cacheConfig.beginGroup(QString("Plugin_%1").arg(pluginId));
         auto pluginInfo = AkElement::pluginInfo(pluginId);
 
-        for (auto &key: pluginInfo.keys())
-            cacheConfig.setValue(key, pluginInfo[key]);
+        for (auto it = pluginInfo.begin(); it != pluginInfo.end(); it++)
+            cacheConfig.setValue(it.key(), it.value());
 
         cacheConfig.endGroup();
     }
 
-    if (this->m_plugins != pluginsPaths) {
-        this->m_plugins = pluginsPaths;
+    if (this->d->m_plugins != pluginsPaths) {
+        this->d->m_plugins = pluginsPaths;
         emit this->pluginsChanged(pluginsPaths);
     }
 }
+
+#include "moc_pluginconfigs.cpp"

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 
 #include <akelement.h>
 
+class MultiplexElementPrivate;
+
 class MultiplexElement: public AkElement
 {
     Q_OBJECT
@@ -30,21 +32,20 @@ class MultiplexElement: public AkElement
     Q_PROPERTY(QString caps READ caps WRITE setCaps RESET resetCaps)
 
     public:
-        explicit MultiplexElement();
+        MultiplexElement();
+        ~MultiplexElement();
 
         Q_INVOKABLE int inputIndex() const;
         Q_INVOKABLE int outputIndex() const;
         Q_INVOKABLE QString caps() const;
 
     private:
-        int m_inputIndex;
-        int m_outputIndex;
-        QString m_caps;
+        MultiplexElementPrivate *d;
 
     public slots:
         void setInputIndex(int inputIndex);
         void setOutputIndex(int outputIndex);
-        void setCaps(QString caps);
+        void setCaps(const QString &caps);
         void resetInputIndex();
         void resetOutputIndex();
         void resetCaps();

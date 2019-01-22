@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,7 @@
 
 TEMPLATE = subdirs
 
-CONFIG += ordered
-
-win32: SUBDIRS += VirtualCamera/src/dshow/VirtualCameraFilter
+CONFIG(debug, debug|release): CONFIG += ordered
 
 # Base plugins
 SUBDIRS += \
@@ -33,10 +31,14 @@ SUBDIRS += \
     MultiSink \
     MultiSrc \
     Probe \
-    VideoCapture \
-    VirtualCamera
+    VideoCapture
 
-CONFIG(config_syphon): SUBDIRS += SyphonIO
+isEmpty(NOVCAM): {
+    CONFIG(config_cmio) \
+    | CONFIG(config_dshow) \
+    | CONFIG(config_v4l2): SUBDIRS += \
+        VirtualCamera
+}
 
 # Video effects
 isEmpty(NOVIDEOEFFECTS): SUBDIRS += \

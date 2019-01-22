@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,23 +20,16 @@
 #ifndef AUDIODEVPULSEAUDIO_H
 #define AUDIODEVPULSEAUDIO_H
 
-#include <QMutex>
-#include <akaudiocaps.h>
-#include <pulse/simple.h>
-#include <pulse/context.h>
-#include <pulse/introspect.h>
-#include <pulse/subscribe.h>
-#include <pulse/thread-mainloop.h>
-#include <pulse/error.h>
-
 #include "audiodev.h"
+
+class AudioDevPulseAudioPrivate;
 
 class AudioDevPulseAudio: public AudioDev
 {
     Q_OBJECT
 
     public:
-        explicit AudioDevPulseAudio(QObject *parent=nullptr);
+        AudioDevPulseAudio(QObject *parent=nullptr);
         ~AudioDevPulseAudio();
 
         Q_INVOKABLE QString error() const;
@@ -55,37 +48,9 @@ class AudioDevPulseAudio: public AudioDev
         Q_INVOKABLE bool uninit();
 
     private:
-        QString m_error;
-        pa_simple *m_paSimple;
-        pa_threaded_mainloop *m_mainLoop;
-        pa_context *m_context;
-        QString m_defaultSink;
-        QString m_defaultSource;
-        QMap<uint32_t, QString> m_sinks;
-        QMap<uint32_t, QString> m_sources;
-        QMap<QString, AkAudioCaps> m_pinCapsMap;
-        QMap<QString, QString> m_pinDescriptionMap;
-        QMutex m_mutex;
-        int m_curBps;
-        int m_curChannels;
+        AudioDevPulseAudioPrivate *d;
 
-        static void deviceUpdateCallback(pa_context *context,
-                                         pa_subscription_event_type_t eventType,
-                                         uint32_t index,
-                                         void *userData);
-        static void contextStateCallbackInit(pa_context *context,
-                                             void *userdata);
-        static void serverInfoCallback(pa_context *context,
-                                       const pa_server_info *info,
-                                       void *userdata);
-        static void sourceInfoCallback(pa_context *context,
-                                       const pa_source_info *info,
-                                       int isLast,
-                                       void *userdata);
-        static void sinkInfoCallback(pa_context *context,
-                                     const pa_sink_info *info,
-                                     int isLast,
-                                     void *userdata);
+        friend class AudioDevPulseAudioPrivate;
 };
 
 #endif // AUDIODEVPULSEAUDIO_H

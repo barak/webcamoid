@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,6 @@
 #define FRAMEGRABBER_H
 
 #include <QObject>
-#include <dshow.h>
-#include <dbt.h>
-#include <usbiodef.h>
 
 #include "samplegrabber.h"
 
@@ -32,7 +29,7 @@ class FrameGrabber: public QObject, public ISampleGrabberCB
     Q_OBJECT
 
     public:
-        explicit FrameGrabber();
+        FrameGrabber();
         virtual ~FrameGrabber();
         STDMETHODIMP_(ULONG) AddRef();
         STDMETHODIMP_(ULONG) Release();

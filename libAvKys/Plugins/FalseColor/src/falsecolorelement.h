@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef FALSECOLORELEMENT_H
 #define FALSECOLORELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class FalseColorElementPrivate;
 
 class FalseColorElement: public AkElement
 {
@@ -38,14 +39,14 @@ class FalseColorElement: public AkElement
                NOTIFY softChanged)
 
     public:
-        explicit FalseColorElement();
+        FalseColorElement();
+        ~FalseColorElement();
 
         Q_INVOKABLE QVariantList table() const;
         Q_INVOKABLE bool soft() const;
 
     private:
-        QList<QRgb> m_table;
-        bool m_soft;
+        FalseColorElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

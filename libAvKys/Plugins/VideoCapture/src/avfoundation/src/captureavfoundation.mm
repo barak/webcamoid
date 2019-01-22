@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,14 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QMap>
+#include <QVariant>
+#include <QWaitCondition>
+#include <QMutex>
+#include <ak.h>
+#include <akfrac.h>
+#include <akcaps.h>
+#include <akpacket.h>
 #include <sys/time.h>
 #import <AVFoundation/AVFoundation.h>
 
@@ -56,35 +64,6 @@ inline FourCharCodeToStrMap initFourCharCodeToStrMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(FourCharCodeToStrMap, fourccToStrMap, (initFourCharCodeToStrMap()))
 
-typedef QMap<OSType, QString> PixelFormatToStrMap;
-
-inline PixelFormatToStrMap initPixelFormatToStrMap()
-{
-    FourCharCodeToStrMap pixelFormatToStrMap = {
-        {kCVPixelFormatType_1Monochrome                 , "B0W1"},
-        {kCVPixelFormatType_16BE555                     , "RGBQ"},
-        {kCVPixelFormatType_16LE555                     , "RGBO"},
-        {kCVPixelFormatType_16LE5551                    , "AR15"},
-        {kCVPixelFormatType_16BE565                     , "RGBR"},
-        {kCVPixelFormatType_16LE565                     , "RGBP"},
-        {kCVPixelFormatType_24RGB                       , "RGB3"},
-        {kCVPixelFormatType_24BGR                       , "BGR3"},
-        {kCVPixelFormatType_32ARGB                      , "BGRA"},
-        {kCVPixelFormatType_32BGRA                      , "RGB4"},
-        {kCVPixelFormatType_32RGBA                      , "BGR4"},
-        {kCVPixelFormatType_422YpCbCr8                  , "UYVY"},
-        {kCVPixelFormatType_444YpCbCr8                  , "Y444"},
-        {kCVPixelFormatType_420YpCbCr8Planar            , "YV12"},
-        {kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, "NV12"},
-        {kCVPixelFormatType_422YpCbCr8_yuvs             , "YUY2"},
-        {kCVPixelFormatType_OneComponent8               , "Y800"}
-    };
-
-    return pixelFormatToStrMap;
-}
-
-Q_GLOBAL_STATIC_WITH_ARGS(PixelFormatToStrMap, pixelFormatToStrMap, (initPixelFormatToStrMap()))
-
 class CaptureAvFoundationPrivate
 {
     public:
@@ -93,6 +72,38 @@ class CaptureAvFoundationPrivate
         AVCaptureVideoDataOutput *m_dataOutput;
         AVCaptureSession *m_session;
         CMSampleBufferRef m_curFrame;
+        QString m_device;
+        QList<int> m_streams;
+        QStringList m_devices;
+        QMap<QString, quint32> m_modelId;
+        QMap<QString, QString> m_descriptions;
+        QMap<QString, QVariantList> m_devicesCaps;
+        CaptureAvFoundation::IoMethod m_ioMethod;
+        int m_nBuffers;
+        QMutex m_mutex;
+        QMutex m_controlsMutex;
+        QWaitCondition m_frameReady;
+        AkFrac m_fps;
+        AkFrac m_timeBase;
+        AkCaps m_caps;
+        qint64 m_id;
+        QVariantList m_globalImageControls;
+        QVariantList m_globalCameraControls;
+        QVariantMap m_localImageControls;
+        QVariantMap m_localCameraControls;
+
+        CaptureAvFoundationPrivate():
+            m_deviceObserver(nil),
+            m_deviceInput(nil),
+            m_dataOutput(nil),
+            m_session(nil),
+            m_curFrame(nil),
+            m_ioMethod(CaptureAvFoundation::IoMethodUnknown),
+            m_nBuffers(32),
+            m_id(-1)
+        {
+
+        }
 
         static inline QString fourccToStr(FourCharCode format)
         {
@@ -182,19 +193,14 @@ class CaptureAvFoundationPrivate
 
             return nil;
         }
+
+        AkCaps capsFromFrameSampleBuffer(const CMSampleBufferRef sampleBuffer) const;
 };
 
 CaptureAvFoundation::CaptureAvFoundation(QObject *parent):
     Capture(parent)
 {
-    this->m_id = -1;
-    this->m_ioMethod = IoMethodUnknown;
-    this->m_nBuffers = 32;
     this->d = new CaptureAvFoundationPrivate();
-    this->d->m_deviceInput = nil;
-    this->d->m_dataOutput = nil;
-    this->d->m_session = nil;
-    this->d->m_curFrame = nil;
     this->d->m_deviceObserver = [[DeviceObserver alloc]
                                  initWithCaptureObject: this];
 
@@ -228,20 +234,20 @@ CaptureAvFoundation::~CaptureAvFoundation()
 
 QStringList CaptureAvFoundation::webcams() const
 {
-    return this->m_devices;
+    return this->d->m_devices;
 }
 
 QString CaptureAvFoundation::device() const
 {
-    return this->m_device;
+    return this->d->m_device;
 }
 
-QList<int> CaptureAvFoundation::streams() const
+QList<int> CaptureAvFoundation::streams()
 {
-    if (!this->m_streams.isEmpty())
-        return this->m_streams;
+    if (!this->d->m_streams.isEmpty())
+        return this->d->m_streams;
 
-    auto caps = this->caps(this->m_device);
+    auto caps = this->caps(this->d->m_device);
 
     if (caps.isEmpty())
         return QList<int>();
@@ -255,7 +261,7 @@ QList<int> CaptureAvFoundation::listTracks(const QString &mimeType)
         && !mimeType.isEmpty())
         return QList<int>();
 
-    auto caps = this->caps(this->m_device);
+    auto caps = this->caps(this->d->m_device);
     QList<int> streams;
 
     for (int i = 0; i < caps.count(); i++)
@@ -271,17 +277,17 @@ QString CaptureAvFoundation::ioMethod() const
 
 int CaptureAvFoundation::nBuffers() const
 {
-    return this->m_nBuffers;
+    return this->d->m_nBuffers;
 }
 
 QString CaptureAvFoundation::description(const QString &webcam) const
 {
-    return this->m_descriptions.value(webcam);
+    return this->d->m_descriptions.value(webcam);
 }
 
 QVariantList CaptureAvFoundation::caps(const QString &webcam) const
 {
-    return this->m_devicesCaps.value(webcam);
+    return this->d->m_devicesCaps.value(webcam);
 }
 
 QString CaptureAvFoundation::capsDescription(const AkCaps &caps) const
@@ -300,14 +306,14 @@ QString CaptureAvFoundation::capsDescription(const AkCaps &caps) const
 
 QVariantList CaptureAvFoundation::imageControls() const
 {
-    return this->m_globalImageControls;
+    return this->d->m_globalImageControls;
 }
 
 bool CaptureAvFoundation::setImageControls(const QVariantMap &imageControls)
 {
-    this->m_controlsMutex.lock();
-    auto globalImageControls = this->m_globalImageControls;
-    this->m_controlsMutex.unlock();
+    this->d->m_controlsMutex.lock();
+    auto globalImageControls = this->d->m_globalImageControls;
+    this->d->m_controlsMutex.unlock();
 
     for (int i = 0; i < globalImageControls.count(); i++) {
         QVariantList control = globalImageControls[i].toList();
@@ -319,16 +325,16 @@ bool CaptureAvFoundation::setImageControls(const QVariantMap &imageControls)
         }
     }
 
-    this->m_controlsMutex.lock();
+    this->d->m_controlsMutex.lock();
 
-    if (this->m_globalImageControls == globalImageControls) {
-        this->m_controlsMutex.unlock();
+    if (this->d->m_globalImageControls == globalImageControls) {
+        this->d->m_controlsMutex.unlock();
 
         return false;
     }
 
-    this->m_globalImageControls = globalImageControls;
-    this->m_controlsMutex.unlock();
+    this->d->m_globalImageControls = globalImageControls;
+    this->d->m_controlsMutex.unlock();
 
     emit this->imageControlsChanged(imageControls);
 
@@ -349,14 +355,14 @@ bool CaptureAvFoundation::resetImageControls()
 
 QVariantList CaptureAvFoundation::cameraControls() const
 {
-    return this->m_globalCameraControls;
+    return this->d->m_globalCameraControls;
 }
 
 bool CaptureAvFoundation::setCameraControls(const QVariantMap &cameraControls)
 {
-    this->m_controlsMutex.lock();
-    auto globalCameraControls = this->m_globalCameraControls;
-    this->m_controlsMutex.unlock();
+    this->d->m_controlsMutex.lock();
+    auto globalCameraControls = this->d->m_globalCameraControls;
+    this->d->m_controlsMutex.unlock();
 
     for (int i = 0; i < globalCameraControls.count(); i++) {
         QVariantList control = globalCameraControls[i].toList();
@@ -368,16 +374,16 @@ bool CaptureAvFoundation::setCameraControls(const QVariantMap &cameraControls)
         }
     }
 
-    this->m_controlsMutex.lock();
+    this->d->m_controlsMutex.lock();
 
-    if (this->m_globalCameraControls == globalCameraControls) {
-        this->m_controlsMutex.unlock();
+    if (this->d->m_globalCameraControls == globalCameraControls) {
+        this->d->m_controlsMutex.unlock();
 
         return false;
     }
 
-    this->m_globalCameraControls = globalCameraControls;
-    this->m_controlsMutex.unlock();
+    this->d->m_globalCameraControls = globalCameraControls;
+    this->d->m_controlsMutex.unlock();
 
     emit this->cameraControlsChanged(cameraControls);
 
@@ -399,21 +405,20 @@ bool CaptureAvFoundation::resetCameraControls()
 
 AkPacket CaptureAvFoundation::readFrame()
 {
-    this->m_mutex.lock();
+    this->d->m_mutex.lock();
 
     if (!this->d->m_curFrame)
-        if (!this->m_frameReady.wait(&this->m_mutex, 1000)) {
-            this->m_mutex.unlock();
+        if (!this->d->m_frameReady.wait(&this->d->m_mutex, 1000)) {
+            this->d->m_mutex.unlock();
 
             return AkPacket();
         }
 
     // Read frame data.
     QByteArray oBuffer;
-
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(this->d->m_curFrame);
     CMBlockBufferRef dataBuffer = CMSampleBufferGetDataBuffer(this->d->m_curFrame);
-    QString fourcc;
+    auto caps = this->d->capsFromFrameSampleBuffer(this->d->m_curFrame);
 
     if (imageBuffer) {
         size_t dataSize = CVPixelBufferGetDataSize(imageBuffer);
@@ -422,16 +427,12 @@ AkPacket CaptureAvFoundation::readFrame()
         void *data = CVPixelBufferGetBaseAddress(imageBuffer);
         memcpy(oBuffer.data(), data, dataSize);
         CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-
-        OSType format = CVPixelBufferGetPixelFormatType(imageBuffer);
-        fourcc = pixelFormatToStrMap->value(format,
-                                            CaptureAvFoundationPrivate::fourccToStr(format));
     } else if (dataBuffer) {
         size_t dataSize = 0;
-        char *data = NULL;
+        char *data = nullptr;
         CMBlockBufferGetDataPointer(dataBuffer,
                                     0,
-                                    NULL,
+                                    nullptr,
                                     &dataSize,
                                     &data);
         oBuffer.resize(int(dataSize));
@@ -452,46 +453,41 @@ AkPacket CaptureAvFoundation::readFrame()
         timeBase = AkFrac(1, timingInfo.presentationTimeStamp.timescale);
     } else {
         timeval timestamp;
-        gettimeofday(&timestamp, NULL);
+        gettimeofday(&timestamp, nullptr);
         pts = qint64((timestamp.tv_sec
                       + 1e-6 * timestamp.tv_usec)
-                     * this->m_timeBase.invert().value());
-        timeBase = this->m_timeBase;
+                     * this->d->m_timeBase.invert().value());
+        timeBase = this->d->m_timeBase;
     }
-
-    AkCaps caps(this->m_caps);
-
-    if (!fourcc.isEmpty())
-        caps.setProperty("fourcc", fourcc);
 
     // Create package.
     AkPacket packet(caps, oBuffer);
     packet.setPts(pts);
-    packet.setTimeBase(this->m_timeBase);
+    packet.setTimeBase(this->d->m_timeBase);
     packet.setIndex(0);
-    packet.setId(this->m_id);
+    packet.setId(this->d->m_id);
 
     CFRelease(this->d->m_curFrame);
     this->d->m_curFrame = nil;
 
-    this->m_mutex.unlock();
+    this->d->m_mutex.unlock();
 
     return packet;
 }
 
 quint32 CaptureAvFoundation::modelId(const QString &webcam) const
 {
-    return this->m_modelId.value(webcam);
+    return this->d->m_modelId.value(webcam);
 }
 
 QMutex &CaptureAvFoundation::mutex()
 {
-    return this->m_mutex;
+    return this->d->m_mutex;
 }
 
 QWaitCondition &CaptureAvFoundation::frameReady()
 {
-    return this->m_frameReady;
+    return this->d->m_frameReady;
 }
 
 void *CaptureAvFoundation::curFrame()
@@ -514,7 +510,7 @@ QVariantMap CaptureAvFoundation::controlStatus(const QVariantList &controls) con
 
 bool CaptureAvFoundation::init()
 {
-    QString webcam = this->m_device;
+    QString webcam = this->d->m_device;
 
     if (webcam.isEmpty())
         return false;
@@ -568,7 +564,7 @@ bool CaptureAvFoundation::init()
     this->d->m_dataOutput.videoSettings = nil;
     this->d->m_dataOutput.alwaysDiscardsLateVideoFrames = YES;
 
-    dispatch_queue_t queue = dispatch_queue_create("frameQueue", NULL);
+    dispatch_queue_t queue = dispatch_queue_create("frameQueue", nullptr);
     [this->d->m_dataOutput
      setSampleBufferDelegate: this->d->m_deviceObserver
      queue: queue];
@@ -613,9 +609,9 @@ bool CaptureAvFoundation::init()
     [camera unlockForConfiguration];
     [this->d->m_deviceInput retain];
 
-    this->m_caps = caps;
-    this->m_timeBase = fps.invert();
-    this->m_id = Ak::id();
+    this->d->m_caps = caps;
+    this->d->m_timeBase = fps.invert();
+    this->d->m_id = Ak::id();
 
     return true;
 }
@@ -647,22 +643,22 @@ void CaptureAvFoundation::uninit()
         this->d->m_dataOutput = nil;
     }
 
-    this->m_mutex.lock();
+    this->d->m_mutex.lock();
 
     if (this->d->m_curFrame) {
         CFRelease(this->d->m_curFrame);
         this->d->m_curFrame = nil;
     }
 
-    this->m_mutex.unlock();
+    this->d->m_mutex.unlock();
 }
 
 void CaptureAvFoundation::setDevice(const QString &device)
 {
-    if (this->m_device == device)
+    if (this->d->m_device == device)
         return;
 
-    this->m_device = device;
+    this->d->m_device = device;
     emit this->deviceChanged(device);
 }
 
@@ -676,7 +672,7 @@ void CaptureAvFoundation::setStreams(const QList<int> &streams)
     if (stream < 0)
         return;
 
-    auto supportedCaps = this->caps(this->m_device);
+    auto supportedCaps = this->caps(this->d->m_device);
 
     if (stream >= supportedCaps.length())
         return;
@@ -687,7 +683,7 @@ void CaptureAvFoundation::setStreams(const QList<int> &streams)
     if (this->streams() == inputStreams)
         return;
 
-    this->m_streams = inputStreams;
+    this->d->m_streams = inputStreams;
     emit this->streamsChanged(inputStreams);
 }
 
@@ -698,21 +694,21 @@ void CaptureAvFoundation::setIoMethod(const QString &ioMethod)
 
 void CaptureAvFoundation::setNBuffers(int nBuffers)
 {
-    if (this->m_nBuffers == nBuffers)
+    if (this->d->m_nBuffers == nBuffers)
         return;
 
-    this->m_nBuffers = nBuffers;
+    this->d->m_nBuffers = nBuffers;
     emit this->nBuffersChanged(nBuffers);
 }
 
 void CaptureAvFoundation::resetDevice()
 {
-    this->setDevice(this->m_devices.value(0, ""));
+    this->setDevice(this->d->m_devices.value(0, ""));
 }
 
 void CaptureAvFoundation::resetStreams()
 {
-    QVariantList supportedCaps = this->caps(this->m_device);
+    QVariantList supportedCaps = this->caps(this->d->m_device);
     QList<int> streams;
 
     if (!supportedCaps.isEmpty())
@@ -750,10 +746,10 @@ void CaptureAvFoundation::cameraDisconnected()
 
 void CaptureAvFoundation::updateDevices()
 {
-    decltype(this->m_devices) devices;
-    decltype(this->m_modelId) modelId;
-    decltype(this->m_descriptions) descriptions;
-    decltype(this->m_devicesCaps) devicesCaps;
+    decltype(this->d->m_devices) devices;
+    decltype(this->d->m_modelId) modelId;
+    decltype(this->d->m_descriptions) descriptions;
+    decltype(this->d->m_devicesCaps) devicesCaps;
 
     NSArray *cameras = [AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo];
 
@@ -804,13 +800,36 @@ void CaptureAvFoundation::updateDevices()
         }
     }
 
-    if (this->m_devices != devices) {
-        this->m_devices = devices;
+    if (this->d->m_devices != devices) {
+        this->d->m_devices = devices;
         emit this->webcamsChanged(devices);
     }
 
-    this->m_devices = devices;
-    this->m_modelId = modelId;
-    this->m_descriptions = descriptions;
-    this->m_devicesCaps = devicesCaps;
+    this->d->m_devices = devices;
+    this->d->m_modelId = modelId;
+    this->d->m_descriptions = descriptions;
+    this->d->m_devicesCaps = devicesCaps;
 }
+
+AkCaps CaptureAvFoundationPrivate::capsFromFrameSampleBuffer(const CMSampleBufferRef sampleBuffer) const
+{
+    auto formatDesc = CMSampleBufferGetFormatDescription(sampleBuffer);
+
+    AkCaps videoCaps;
+    videoCaps.setMimeType("video/unknown");
+
+    auto fourCC = CMFormatDescriptionGetMediaSubType(formatDesc);
+    videoCaps.setProperty("fourcc", fourccToStrMap->value(fourCC,
+                                                          CaptureAvFoundationPrivate::fourccToStr(fourCC)));
+
+    auto size = CMVideoFormatDescriptionGetDimensions(formatDesc);
+    videoCaps.setProperty("width", size.width);
+    videoCaps.setProperty("height", size.height);
+
+    auto time = CMSampleBufferGetDuration(sampleBuffer);
+    videoCaps.setProperty("fps", AkFrac(time.timescale, time.value).toString());
+
+    return videoCaps;
+}
+
+#include "moc_captureavfoundation.cpp"

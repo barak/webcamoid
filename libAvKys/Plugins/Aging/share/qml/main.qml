@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,22 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
+
+    Connections {
+        target: Aging
+
+        onNScratchesChanged: {
+            sldNScratches.value = nScratches
+            spbNScratches.rvalue = nScratches
+        }
+    }
 
     // Configure the number of scratches to show.
     Label {
@@ -32,18 +42,19 @@ GridLayout {
     Slider {
         id: sldNScratches
         value: Aging.nScratches
+        to: 255
         stepSize: 1
-        maximumValue: 255
+        Layout.fillWidth: true
 
         onValueChanged: Aging.nScratches = value
     }
-    SpinBox {
+    AkSpinBox {
         id: spbNScratches
-        value: sldNScratches.value
-        maximumValue: sldNScratches.maximumValue
-        stepSize: sldNScratches.stepSize
+        rvalue: Aging.nScratches
+        maximumValue: sldNScratches.to
+        step: sldNScratches.stepSize
 
-        onValueChanged: sldNScratches.value = value
+        onRvalueChanged: Aging.nScratches = rvalue
     }
 
     // Aging mode.

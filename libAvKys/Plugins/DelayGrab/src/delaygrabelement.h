@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
 #ifndef DELAYGRABELEMENT_H
 #define DELAYGRABELEMENT_H
 
-#include <QMutex>
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class DelayGrabElementPrivate;
 
 class DelayGrabElement: public AkElement
 {
@@ -57,21 +57,15 @@ class DelayGrabElement: public AkElement
             DelayGrabModeRingsIncrease
         };
 
-        explicit DelayGrabElement();
+        DelayGrabElement();
+        ~DelayGrabElement();
 
         Q_INVOKABLE QString mode() const;
         Q_INVOKABLE int blockSize() const;
         Q_INVOKABLE int nFrames() const;
 
     private:
-        DelayGrabMode m_mode;
-        int m_blockSize;
-        int m_nFrames;
-
-        QMutex m_mutex;
-        QSize m_frameSize;
-        QVector<QImage> m_frames;
-        QVector<int> m_delayMap;
+        DelayGrabElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

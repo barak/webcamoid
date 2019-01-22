@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    exists(../../../../commons.pri) {
-        include(../../../../commons.pri)
+    exists(../../../../akcommons.pri) {
+        include(../../../../akcommons.pri)
     } else {
-        error("commons.pri file not found.")
+        error("akcommons.pri file not found.")
     }
 }
 
@@ -42,7 +42,7 @@ INCLUDEPATH += \
     ../../../../Lib/src \
     ../
 
-LIBS += -L$${PWD}/../../../../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${OUT_PWD}/../../../../Lib/$${BIN_DIR} -l$${COMMONS_TARGET}
 
 OTHER_FILES += pspec.json
 
@@ -61,18 +61,12 @@ isEmpty(FFMPEGLIBS) {
         libavutil
 }
 
-CONFIG(config_ffmpeg_avcodec_freecontext): \
-    DEFINES += HAVE_FREECONTEXT
-CONFIG(config_ffmpeg_avcodec_packetref): \
-    DEFINES += HAVE_PACKETREF
 CONFIG(config_ffmpeg_avcodec_sendrecv): \
     DEFINES += HAVE_SENDRECV
 CONFIG(config_ffmpeg_avcodec_subtitledata): \
     DEFINES += HAVE_SUBTITLEDATA
 CONFIG(config_ffmpeg_avformat_codecpar): \
     DEFINES += HAVE_CODECPAR
-CONFIG(config_ffmpeg_avutil_framealloc): \
-    DEFINES += HAVE_FRAMEALLOC
 CONFIG(config_ffmpeg_avutil_sampleformat64): \
     DEFINES += HAVE_SAMPLEFORMAT64
 
@@ -88,10 +82,9 @@ SOURCES = \
     src/clock.cpp \
     ../mediasource.cpp
 
-DESTDIR = $${OUT_PWD}/../../submodules/MultiSrc
+DESTDIR = $${OUT_PWD}/../../$${BIN_DIR}/submodules/MultiSrc
 
 TEMPLATE = lib
 
 INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}/submodules/MultiSrc
+target.path = $${INSTALLPLUGINSDIR}/submodules/MultiSrc

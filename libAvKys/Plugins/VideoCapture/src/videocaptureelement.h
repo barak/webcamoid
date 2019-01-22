@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,9 @@
 #ifndef VIDEOCAPTUREELEMENT_H
 #define VIDEOCAPTUREELEMENT_H
 
-#include <QThreadPool>
-#include <QtConcurrent>
-
 #include <akmultimediasourceelement.h>
 
-#include "convertvideo.h"
-#include "capture.h"
-
-typedef QSharedPointer<ConvertVideo> ConvertVideoPtr;
-typedef QSharedPointer<Capture> CapturePtr;
+class VideoCaptureElementPrivate;
 
 class VideoCaptureElement: public AkMultimediaSourceElement
 {
@@ -72,14 +65,13 @@ class VideoCaptureElement: public AkMultimediaSourceElement
                NOTIFY captureLibChanged)
 
     public:
-        explicit VideoCaptureElement();
+        VideoCaptureElement();
         ~VideoCaptureElement();
 
         Q_INVOKABLE QStringList medias();
         Q_INVOKABLE QString media() const;
-        Q_INVOKABLE QList<int> streams() const;
+        Q_INVOKABLE QList<int> streams();
         Q_INVOKABLE QList<int> listTracks(const QString &mimeType="");
-
         Q_INVOKABLE int defaultStream(const QString &mimeType);
         Q_INVOKABLE QString description(const QString &media);
         Q_INVOKABLE AkCaps caps(int stream);
@@ -97,17 +89,7 @@ class VideoCaptureElement: public AkMultimediaSourceElement
         Q_INVOKABLE bool resetCameraControls();
 
     private:
-        ConvertVideoPtr m_convertVideo;
-        CapturePtr m_capture;
-        QThreadPool m_threadPool;
-        QFuture<void> m_cameraLoopResult;
-        QMutex m_mutexLib;
-        bool m_runCameraLoop;
-        bool m_pause;
-        bool m_mirror;
-        bool m_swapRgb;
-
-        void cameraLoop();
+        VideoCaptureElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

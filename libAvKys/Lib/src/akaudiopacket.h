@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@
 #define AKAUDIOPACKET_H
 
 #include "akpacket.h"
-#include "akaudiocaps.h"
 
 class AkAudioPacketPrivate;
+class AkAudioCaps;
 
 class AKCOMMONS_EXPORT AkAudioPacket: public AkPacket
 {
@@ -35,7 +35,7 @@ class AKCOMMONS_EXPORT AkAudioPacket: public AkPacket
                NOTIFY capsChanged)
 
     public:
-        explicit AkAudioPacket(QObject *parent=nullptr);
+        AkAudioPacket(QObject *parent=nullptr);
         AkAudioPacket(const AkAudioCaps &caps,
                       const QByteArray &buffer=QByteArray(),
                       qint64 pts=0,

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,9 @@
 #ifndef BINELEMENT_H
 #define BINELEMENT_H
 
-#include "pipeline.h"
+#include <akelement.h>
+
+class BinElementPrivate;
 
 class BinElement: public AkElement
 {
@@ -37,21 +39,17 @@ class BinElement: public AkElement
                NOTIFY blockingChanged)
 
     public:
-        explicit BinElement();
+        BinElement();
+        ~BinElement();
 
         Q_INVOKABLE QString description() const;
         Q_INVOKABLE bool blocking() const;
         Q_INVOKABLE AkElementPtr element(const QString &elementName);
-        Q_INVOKABLE void add(AkElementPtr element);
+        Q_INVOKABLE void add(const AkElementPtr &element);
         Q_INVOKABLE void remove(const QString &elementName);
 
     private:
-        QString m_description;
-        bool m_blocking;
-        QMap<QString, AkElementPtr> m_elements;
-        QList<AkElementPtr> m_inputs;
-        QList<AkElementPtr> m_outputs;
-        Pipeline m_pipelineDescription;
+        BinElementPrivate *d;
 
     signals:
         void descriptionChanged(const QString &description);

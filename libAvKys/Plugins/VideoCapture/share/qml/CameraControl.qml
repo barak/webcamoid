@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,21 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 GridLayout {
     id: grdCameraControl
     columns: 3
-    state: controlParams.length > 1? controlParams[1]: ""
 
     property variant controlParams: []
-    property int value: controlParams.length > 6? controlParams[6]: 0
+    property int value: 0
+    property int minimumValue: 0
+    property int maximumValue: 1
+    property int stepSize: 1
+    property variant model: []
     property int minimumLeftWidth: 0
     property int minimumRightWidth: 0
     readonly property alias leftWidth: lblRange.width
@@ -35,11 +39,14 @@ GridLayout {
 
     signal controlChanged(string controlName, int value)
 
-    onValueChanged: {
-        sldRange.value = value
-        spbRange.value = value
-        chkBool.checked = value !== 0
-        cbxMenu.currentIndex = value
+    onControlParamsChanged: {
+        state = controlParams.length > 1? controlParams[1]: ""
+        minimumValue = controlParams.length > 2? controlParams[2]: 0
+        maximumValue = controlParams.length > 3? controlParams[3]: 1
+        stepSize = controlParams.length > 4? controlParams[4]: 1
+        model = controlParams.length > 7? controlParams[7]: []
+        value = controlParams.length > 6? controlParams[6]: 0
+        spbRange.rvalue = value
     }
 
     Label {
@@ -50,51 +57,59 @@ GridLayout {
 
     Slider {
         id: sldRange
-        minimumValue: controlParams.length > 2? controlParams[2]: 0
-        maximumValue: controlParams.length > 3? controlParams[3]: 0
-        stepSize: controlParams.length > 4? controlParams[4]: 0
+        from: grdCameraControl.minimumValue
+        to: grdCameraControl.maximumValue
+        stepSize: grdCameraControl.stepSize
         value: grdCameraControl.value
         Layout.fillWidth: true
         visible: false
 
         onValueChanged: {
             if (visible) {
-                spbRange.value = value
+                spbRange.rvalue = value
                 grdCameraControl.controlChanged(controlParams.length > 0? controlParams[0]: "", value)
             }
         }
     }
-    SpinBox {
+
+    AkSpinBox {
         id: spbRange
-        minimumValue: controlParams.length > 2? controlParams[2]: 0
-        maximumValue: controlParams.length > 3? controlParams[3]: 0
-        stepSize: controlParams.length > 4? controlParams[4]: 0
-        value: sldRange.value
+        minimumValue: grdCameraControl.minimumValue
+        maximumValue: grdCameraControl.maximumValue
+        step: grdCameraControl.stepSize
+        rvalue: sldRange.value
         Layout.minimumWidth: minimumRightWidth
         visible: false
 
-        onValueChanged: {
+        onRvalueChanged: {
             if (visible)
-                sldRange.value = value
+                sldRange.value = rvalue
         }
     }
 
-    CheckBox {
-        id: chkBool
-        checked: grdCameraControl.value !== 0
+    RowLayout {
+        id: chkBoolContainer
         Layout.columnSpan: 2
         Layout.fillWidth: true
         visible: false
 
-        onCheckedChanged: {
-            if (visible)
-                grdCameraControl.controlChanged(controlParams.length > 0? controlParams[0]: "", checked? 1: 0)
+        CheckBox {
+            id: chkBool
+            checked: grdCameraControl.value !== 0
+
+            onCheckedChanged: {
+                if (visible)
+                    grdCameraControl.controlChanged(controlParams.length > 0? controlParams[0]: "", checked? 1: 0)
+            }
+        }
+        Label {
+            Layout.fillWidth: true
         }
     }
 
     ComboBox {
         id: cbxMenu
-        model: controlParams.length > 7? controlParams[7]: []
+        model: grdCameraControl.model
         currentIndex: grdCameraControl.value
         Layout.fillWidth: true
         Layout.columnSpan: 2
@@ -135,7 +150,7 @@ GridLayout {
             name: "boolean"
 
             PropertyChanges {
-                target: chkBool
+                target: chkBoolContainer
                 visible: true
             }
         },

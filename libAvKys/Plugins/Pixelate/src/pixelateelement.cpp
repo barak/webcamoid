@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,36 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QImage>
+#include <QQmlContext>
+#include <akvideopacket.h>
+
 #include "pixelateelement.h"
+
+class PixelateElementPrivate
+{
+    public:
+        QSize m_blockSize;
+
+        PixelateElementPrivate():
+            m_blockSize(QSize(8, 8))
+        {
+        }
+};
 
 PixelateElement::PixelateElement(): AkElement()
 {
-    this->m_blockSize = QSize(8, 8);
+    this->d = new PixelateElementPrivate;
+}
+
+PixelateElement::~PixelateElement()
+{
+    delete this->d;
 }
 
 QSize PixelateElement::blockSize() const
 {
-    return this->m_blockSize;
+    return this->d->m_blockSize;
 }
 
 QString PixelateElement::controlInterfaceProvide(const QString &controlId) const
@@ -47,10 +67,10 @@ void PixelateElement::controlInterfaceConfigure(QQmlContext *context,
 
 void PixelateElement::setBlockSize(const QSize &blockSize)
 {
-    if (blockSize == this->m_blockSize)
+    if (blockSize == this->d->m_blockSize)
         return;
 
-    this->m_blockSize = blockSize;
+    this->d->m_blockSize = blockSize;
     emit this->blockSizeChanged(blockSize);
 }
 
@@ -61,12 +81,13 @@ void PixelateElement::resetBlockSize()
 
 AkPacket PixelateElement::iStream(const AkPacket &packet)
 {
-    QSize blockSize = this->m_blockSize;
+    QSize blockSize = this->d->m_blockSize;
 
     if (blockSize.isEmpty())
         akSend(packet)
 
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -85,6 +106,8 @@ AkPacket PixelateElement::iStream(const AkPacket &packet)
                            Qt::IgnoreAspectRatio,
                            Qt::FastTransformation);
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_pixelateelement.cpp"

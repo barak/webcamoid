@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    exists(../commons.pri) {
-        include(../commons.pri)
+    exists(../akcommons.pri) {
+        include(../akcommons.pri)
     } else {
-        error("commons.pri file not found.")
+        error("akcommons.pri file not found.")
     }
 }
 
@@ -31,7 +31,7 @@ TEMPLATE = lib
 QT += qml quick
 CONFIG += qt plugin
 
-DESTDIR = $${OUT_PWD}
+DESTDIR = $${OUT_PWD}/$${BIN_DIR}
 
 TARGET = $$qtLibraryTarget(AkQml)
 
@@ -40,6 +40,10 @@ SOURCES = \
     src/akqml.cpp \
     src/akqmlplugin.cpp
 
+lupdate_only {
+    SOURCES += $$files(share/qml/AkQmlControls/*.qml)
+}
+
 HEADERS = \
     src/akqml.h \
     src/akqmlplugin.h
@@ -47,8 +51,11 @@ HEADERS = \
 INCLUDEPATH += \
     ../Lib/src
 
-LIBS += -L$${PWD}/../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${OUT_PWD}/../Lib/$${BIN_DIR} -l$${COMMONS_TARGET}
 win32: LIBS += -lole32
+
+RESOURCES += \
+    qml.qrc
 
 DISTFILES = qmldir
 
@@ -61,3 +68,8 @@ target.path = $$installPath
 
 qmldir.files = qmldir
 qmldir.path = $$installPath
+
+QMAKE_POST_LINK = \
+    $(COPY) $$shell_path($${OUT_PWD}/$${BIN_DIR}/*) $$shell_path($${OUT_PWD}) $${CMD_SEP} \
+    $$sprintf($$QMAKE_CHK_EXISTS, $$shell_path($${OUT_PWD}/qmldir)) \
+    $(COPY) $$shell_path($${PWD}/qmldir) $$shell_path($${OUT_PWD})

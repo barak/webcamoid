@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,12 +35,12 @@ typedef QVector<HaarFeature> HaarFeatureVector;
 class HaarFeatureHID
 {
     public:
-        explicit HaarFeatureHID(const HaarFeature &feature,
-                                int oWidth,
-                                const quint32 *integral,
-                                const quint32 *tiltedIntegral,
-                                qreal invArea,
-                                qreal scale);
+        HaarFeatureHID(const HaarFeature &feature,
+                       int oWidth,
+                       const quint32 *integral,
+                       const quint32 *tiltedIntegral,
+                       qreal invArea,
+                       qreal scale);
 
         int m_count;
         bool m_tilted;
@@ -75,9 +75,9 @@ class HaarFeature: public QObject
     Q_OBJECT
 
     public:
-        explicit HaarFeature(QObject *parent=nullptr);
+        HaarFeature(QObject *parent=nullptr);
         HaarFeature(const HaarFeature &other);
-        ~HaarFeature();
+        ~HaarFeature() = default;
 
         Q_INVOKABLE RectVector rects() const;
         Q_INVOKABLE RealVector weight() const;

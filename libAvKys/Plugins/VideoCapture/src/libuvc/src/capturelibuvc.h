@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,6 @@
 #ifndef CAPTURELIBUVC_H
 #define CAPTURELIBUVC_H
 
-#include <QtConcurrent>
-#include <libuvc/libuvc.h>
-#include <ak.h>
-
 #include "capture.h"
 
 /* libuvc requires RW permissions for opening capturing devices, so you must
@@ -41,6 +37,8 @@
  * http://wiki.ros.org/libuvc_camera#Usage
  */
 
+class CaptureLibUVCPrivate;
+
 class CaptureLibUVC: public Capture
 {
     Q_OBJECT
@@ -54,12 +52,12 @@ class CaptureLibUVC: public Capture
             IoMethodUserPointer
         };
 
-        explicit CaptureLibUVC(QObject *parent=nullptr);
+        CaptureLibUVC(QObject *parent=nullptr);
         ~CaptureLibUVC();
 
         Q_INVOKABLE QStringList webcams() const;
         Q_INVOKABLE QString device() const;
-        Q_INVOKABLE QList<int> streams() const;
+        Q_INVOKABLE QList<int> streams();
         Q_INVOKABLE QList<int> listTracks(const QString &mimeType);
         Q_INVOKABLE QString ioMethod() const;
         Q_INVOKABLE int nBuffers() const;
@@ -76,42 +74,7 @@ class CaptureLibUVC: public Capture
         Q_INVOKABLE QString uvcId(quint16 vendorId, quint16 productId) const;
 
     private:
-        QString m_device;
-        QList<int> m_streams;
-        QMap<quint32, QString> m_devices;
-        QMap<QString, QString> m_descriptions;
-        QMap<QString, QVariantList> m_devicesCaps;
-        QMap<QString, QVariantList> m_imageControls;
-        QMap<QString, QVariantList> m_cameraControls;
-        QString m_curDevice;
-        AkPacket m_curPacket;
-        uvc_context_t *m_uvcContext;
-        uvc_device_handle_t *m_deviceHnd;
-        QThreadPool m_threadPool;
-        QWaitCondition m_packetNotReady;
-        QMutex m_mutex;
-        qint64 m_id;
-        AkFrac m_fps;
-
-        QVariantList controlsList(uvc_device_handle_t *deviceHnd,
-                                  uint8_t unit,
-                                  uint8_t control,
-                                  int controlType) const;
-        void setControls(uvc_device_handle_t *deviceHnd,
-                         uint8_t unit,
-                         uint8_t control,
-                         int controlType,
-                         const QVariantMap &values);
-        static void frameCallback(struct uvc_frame *frame, void *userData);
-
-        inline QString fourccToStr(const uint8_t *format) const
-        {
-            char fourcc[5];
-            memcpy(fourcc, format, sizeof(quint32));
-            fourcc[4] = 0;
-
-            return QString(fourcc);
-        }
+        CaptureLibUVCPrivate *d;
 
     public slots:
         bool init();
@@ -128,6 +91,8 @@ class CaptureLibUVC: public Capture
 
     private slots:
         void updateDevices();
+
+        friend class CaptureLibUVCPrivate;
 };
 
 #endif // CAPTURELIBUVC_H

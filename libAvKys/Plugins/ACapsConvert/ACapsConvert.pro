@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
 
 TEMPLATE = subdirs
 
-CONFIG += ordered
+CONFIG(debug, debug|release): CONFIG += ordered
 
 SUBDIRS = src
 CONFIG(config_ffmpeg_avresample): SUBDIRS += src/ffmpegav
 CONFIG(config_ffmpeg_swresample): SUBDIRS += src/ffmpegsw
-CONFIG(config_ffmpeg_gstreamer): SUBDIRS += src/gstreamer
+CONFIG(config_gstreamer): SUBDIRS += src/gstreamer

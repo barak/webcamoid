@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef FIREELEMENT_H
 #define FIREELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class FireElementPrivate;
 
 class FireElement: public AkElement
 {
@@ -37,11 +38,11 @@ class FireElement: public AkElement
                WRITE setCool
                RESET resetCool
                NOTIFY coolChanged)
-    Q_PROPERTY(qreal disolve
-               READ disolve
-               WRITE setDisolve
-               RESET resetDisolve
-               NOTIFY disolveChanged)
+    Q_PROPERTY(qreal dissolve
+               READ dissolve
+               WRITE setDissolve
+               RESET resetDissolve
+               NOTIFY dissolveChanged)
     Q_PROPERTY(int blur
                READ blur
                WRITE setBlur
@@ -85,11 +86,12 @@ class FireElement: public AkElement
             FireModeHard
         };
 
-        explicit FireElement();
+        FireElement();
+        ~FireElement();
 
         Q_INVOKABLE QString mode() const;
         Q_INVOKABLE int cool() const;
-        Q_INVOKABLE qreal disolve() const;
+        Q_INVOKABLE qreal dissolve() const;
         Q_INVOKABLE int blur() const;
         Q_INVOKABLE qreal zoom() const;
         Q_INVOKABLE int threshold() const;
@@ -99,35 +101,7 @@ class FireElement: public AkElement
         Q_INVOKABLE int nColors() const;
 
     private:
-        FireMode m_mode;
-        int m_cool;
-        qreal m_disolve;
-        qreal m_zoom;
-        int m_threshold;
-        int m_lumaThreshold;
-        int m_alphaDiff;
-        int m_alphaVariation;
-        int m_nColors;
-
-        QSize m_framSize;
-        QImage m_prevFrame;
-        QImage m_fireBuffer;
-        QVector<QRgb> m_palette;
-        AkElementPtr m_blurFilter;
-
-        QImage imageDiff(const QImage &img1,
-                         const QImage &img2,
-                         int colors,
-                         int threshold,
-                         int lumaThreshold, int alphaVariation,
-                         FireMode mode);
-
-        QImage zoomImage(const QImage &src, qreal factor);
-        void coolImage(QImage &src, int colorDiff);
-        void imageAlphaDiff(QImage &src, int alphaDiff);
-        void disolveImage(QImage &src, qreal amount);
-        QImage burn(const QImage &src, const QVector<QRgb> &palette);
-        QVector<QRgb> createPalette();
+        FireElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;
@@ -137,7 +111,7 @@ class FireElement: public AkElement
     signals:
         void modeChanged(const QString &mode);
         void coolChanged(int cool);
-        void disolveChanged(qreal disolve);
+        void dissolveChanged(qreal dissolve);
         void blurChanged(int blur);
         void zoomChanged(qreal zoom);
         void thresholdChanged(int threshold);
@@ -149,7 +123,7 @@ class FireElement: public AkElement
     public slots:
         void setMode(const QString &mode);
         void setCool(int cool);
-        void setDisolve(qreal disolve);
+        void setDissolve(qreal dissolve);
         void setBlur(int blur);
         void setZoom(qreal zoom);
         void setThreshold(int threshold);
@@ -159,7 +133,7 @@ class FireElement: public AkElement
         void setNColors(int nColors);
         void resetMode();
         void resetCool();
-        void resetDisolve();
+        void resetDissolve();
         void resetBlur();
         void resetZoom();
         void resetThreshold();

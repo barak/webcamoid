@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,12 @@
 #ifndef UPDATES_H
 #define UPDATES_H
 
-#include <QTimer>
-#include <QDateTime>
-#include <QQmlApplicationEngine>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
+#include <QObject>
 
+class UpdatesPrivate;
 class Updates;
+class QQmlApplicationEngine;
+class QNetworkReply;
 
 typedef QSharedPointer<Updates> UpdatesPtr;
 
@@ -62,8 +60,8 @@ class Updates: public QObject
             VersionTypeDevelopment
         };
 
-        explicit Updates(QQmlApplicationEngine *engine=nullptr,
-                         QObject *parent=nullptr);
+        Updates(QQmlApplicationEngine *engine=nullptr,
+                QObject *parent=nullptr);
         ~Updates();
 
         Q_INVOKABLE bool notifyNewVersion() const;
@@ -73,39 +71,7 @@ class Updates: public QObject
         Q_INVOKABLE QDateTime lastUpdate() const;
 
     private:
-        QQmlApplicationEngine *m_engine;
-        QNetworkAccessManager m_manager;
-        bool m_notifyNewVersion;
-        VersionType m_versionType;
-        QString m_latestVersion;
-        int m_checkInterval;
-        QDateTime m_lastUpdate;
-        QTimer m_timer;
-
-        QVariantList vectorize(const QString &version) const;
-        void normalize(QVariantList &vector1, QVariantList &vector2) const;
-        template<typename Functor>
-        inline bool compare(const QString &version1,
-                            const QString &version2,
-                            Functor func) const {
-            auto v1 = this->vectorize(version1);
-            auto v2 = this->vectorize(version2);
-            this->normalize(v1, v2);
-            QString sv1;
-            QString sv2;
-
-            for (int i = 0; i < v1.size(); i++) {
-                auto fillChar = v1[i].type() == QVariant::String? ' ': '0';
-                auto a = v1[i].toString();
-                auto b = v2[i].toString();
-                auto width = qMax(a.size(), b.size());
-
-                sv1 += QString("%1").arg(a, width, fillChar);
-                sv2 += QString("%1").arg(b, width, fillChar);
-            }
-
-            return func(sv1, sv2);
-        }
+        UpdatesPrivate *d;
 
     signals:
         void notifyNewVersionChanged(bool notifyNewVersion);

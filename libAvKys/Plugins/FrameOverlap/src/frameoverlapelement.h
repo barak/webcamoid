@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef FRAMEOVERLAPELEMENT_H
 #define FRAMEOVERLAPELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class FrameOverlapElementPrivate;
 
 class FrameOverlapElement: public AkElement
 {
@@ -38,16 +39,14 @@ class FrameOverlapElement: public AkElement
                NOTIFY strideChanged)
 
     public:
-        explicit FrameOverlapElement();
+        FrameOverlapElement();
+        ~FrameOverlapElement();
 
         Q_INVOKABLE int nFrames() const;
         Q_INVOKABLE int stride() const;
 
     private:
-        int m_nFrames;
-        int m_stride;
-        QVector<QImage> m_frames;
-        QSize m_frameSize;
+        FrameOverlapElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

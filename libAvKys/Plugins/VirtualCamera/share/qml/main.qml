@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 GridLayout {
     id: recCameraControls
@@ -49,10 +50,7 @@ GridLayout {
         onMediasChanged: updateDevices()
     }
     Component.onCompleted: {
-        if (OsName == "linux")
-            recCameraControls.state = VirtualCamera.maxCameras > 0? "": "missing"
-        else
-            recCameraControls.state = VirtualCamera.maxCameras > 0? "": "unsupported"
+        recCameraControls.state = VirtualCamera.maxCameras > 0? "": "unsupported"
 
         if (recCameraControls.state == "")
             updateDevices()
@@ -76,10 +74,10 @@ GridLayout {
         Label {
             Layout.fillWidth: true
         }
-        Button {
-            text: qsTr("Add")
-            iconName: "add"
-            enabled: cbxDevices.count < VirtualCamera.maxCameras
+        AkButton {
+            label: qsTr("Add")
+            iconRc: "image://icons/add"
+            enabled: VirtualCamera.medias.length < VirtualCamera.maxCameras
 
             onClicked: {
                 glyCommitChanges.operation = "add"
@@ -87,10 +85,10 @@ GridLayout {
                 recCameraControls.state = "commitChanges"
             }
         }
-        Button {
-            text: qsTr("Edit")
-            iconName: "edit"
-            enabled: cbxDevices.count > 0
+        AkButton {
+            label: qsTr("Edit")
+            iconRc: "image://icons/edit"
+            enabled: VirtualCamera.medias.length > 0
 
             onClicked: {
                 glyCommitChanges.operation = "edit"
@@ -100,10 +98,10 @@ GridLayout {
         }
         Label {
         }
-        Button {
-            text: qsTr("Remove")
-            iconName: "remove"
-            enabled: cbxDevices.count > 0
+        AkButton {
+            label: qsTr("Remove")
+            iconRc: "image://icons/remove"
+            enabled: VirtualCamera.medias.length > 0
 
             onClicked: {
                 glyCommitChanges.operation = "remove"
@@ -111,10 +109,10 @@ GridLayout {
                 recCameraControls.state = "commitChanges"
             }
         }
-        Button {
-            text: qsTr("Remove All")
-            iconName: "remove"
-            enabled: cbxDevices.count > 0
+        AkButton {
+            label: qsTr("Remove All")
+            iconRc: "image://icons/remove"
+            enabled: VirtualCamera.medias.length > 0
 
             onClicked: {
                 glyCommitChanges.operation = "removeAll"
@@ -142,17 +140,6 @@ GridLayout {
             placeholderText: qsTr("Camera name (optional)")
             visible: false
         }
-        Label {
-            text: qsTr("Password")
-            visible: VirtualCamera.needRoot
-        }
-        TextField {
-            id: txtPassword
-            echoMode: 2
-            Layout.fillWidth: true
-            placeholderText: qsTr("Write root password")
-            visible: VirtualCamera.needRoot
-        }
 
         RowLayout {
             Layout.columnSpan: 2
@@ -160,10 +147,10 @@ GridLayout {
             Label {
                 Layout.fillWidth: true
             }
-            Button {
+            AkButton {
                 id: btnOk
-                text: qsTr("Ok")
-                iconName: "ok"
+                label: qsTr("Ok")
+                iconRc: "image://icons/ok"
 
                 function commitChanges()
                 {
@@ -179,44 +166,38 @@ GridLayout {
                     }
 
                     if (glyCommitChanges.operation == "add") {
-                        newWebcam = VirtualCamera.createWebcam(txtDescription.text,
-                                                               txtPassword.text)
+                        newWebcam = VirtualCamera.createWebcam(txtDescription.text)
                         result = newWebcam != ""
                     } else if (glyCommitChanges.operation == "edit") {
                         result = VirtualCamera.changeDescription(webcam,
-                                                                 txtDescription.text,
-                                                                 txtPassword.text)
+                                                                 txtDescription.text)
                     } else if (glyCommitChanges.operation == "remove") {
-                        result = VirtualCamera.removeWebcam(webcam,
-                                                            txtPassword.text)
+                        result = VirtualCamera.removeWebcam(webcam)
                     } else if (glyCommitChanges.operation == "removeAll") {
-                        result = VirtualCamera.removeAllWebcams(txtPassword.text)
+                        result = VirtualCamera.removeAllWebcams()
                     } else
                         return
 
                     if (result) {
                         recCameraControls.state = ""
                         txtDescription.text = ""
-                        txtPassword.text = ""
 
                         if (newWebcam != "")
                             cbxDevices.currentIndex = VirtualCamera.medias.indexOf(newWebcam)
                     } else {
-                        recCameraControls.state = "passwordError"
-                        txtPassword.text = ""
+                        recCameraControls.state = "driverError"
                     }
                 }
 
                 onClicked: commitChanges()
             }
-            Button {
-                text: qsTr("Cancel")
-                iconName: "cancel"
+            AkButton {
+                label: qsTr("Cancel")
+                iconRc: "image://icons/cancel"
 
                 onClicked: {
                     recCameraControls.state = ""
                     txtDescription.text = ""
-                    txtPassword.text = ""
                 }
             }
         }
@@ -270,29 +251,7 @@ GridLayout {
             }
         },
         State {
-            name: "missing"
-
-            PropertyChanges {
-                target: txtDevices
-                visible: false
-            }
-            PropertyChanges {
-                target: cbxDevices
-                visible: false
-            }
-            PropertyChanges {
-                target: glyOptions
-                visible: false
-            }
-            PropertyChanges {
-                target: message
-                visible: true
-                text: qsTr("Please, install <b>v4l2loopback</b> for using this option")
-                enabled: false
-            }
-        },
-        State {
-            name: "passwordError"
+            name: "driverError"
 
             PropertyChanges {
                 target: glyCommitChanges
@@ -301,7 +260,7 @@ GridLayout {
             PropertyChanges {
                 target: message
                 visible: true
-                text: qsTr("Wrong password")
+                text: qsTr("Error creating camera")
                 color: "#ff0000"
                 style: Text.Raised
             }

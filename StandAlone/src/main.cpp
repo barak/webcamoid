@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2015  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,24 +18,36 @@
  */
 
 #include <QApplication>
-#include <QCommandLineParser>
-#include <QQmlApplicationEngine>
-#include <QWindow>
 #include <QTranslator>
-#include <QSettings>
-#include <QDir>
-#include <QProcessEnvironment>
+#include <QPalette>
+#include <QIcon>
 
 #include "mediatools.h"
 
 int main(int argc, char *argv[])
 {
+    /* Force a default theme and color scheme for all platforms for UI
+       consistency. */
+    qputenv("QT_QUICK_CONTROLS_STYLE", "Universal");
+    qputenv("QT_QUICK_CONTROLS_UNIVERSAL_THEME", "Dark");
+    qputenv("QT_QUICK_CONTROLS_UNIVERSAL_ACCENT", "#472F8E");
+    qputenv("QT_QUICK_CONTROLS_UNIVERSAL_FOREGROUND", "#FFFFFF");
+    qputenv("QT_QUICK_CONTROLS_UNIVERSAL_BACKGROUND", "#262626");
+
     QApplication app(argc, argv);
-/*
+
     QPalette palette = app.palette();
+    palette.setColor(QPalette::Window, QColor(31, 31, 31));
     palette.setColor(QPalette::WindowText, QColor(255, 255, 255));
+    palette.setColor(QPalette::Base, QColor(38, 38, 38));
+    palette.setColor(QPalette::AlternateBase, QColor(31, 31, 31));
+    palette.setColor(QPalette::Text, QColor(255, 255, 255));
+    palette.setColor(QPalette::Highlight, QColor(71, 47, 142));
+    palette.setColor(QPalette::HighlightedText, QColor(255, 255, 255));
+    palette.setColor(QPalette::Button, QColor(71, 47, 142));
+    palette.setColor(QPalette::ButtonText, QColor(255, 255, 255));
     app.setPalette(palette);
-*/
+
     QCoreApplication::setApplicationName(COMMONS_APPNAME);
     QCoreApplication::setApplicationVersion(COMMONS_VERSION);
     QCoreApplication::setOrganizationName(COMMONS_APPNAME);
@@ -58,18 +70,24 @@ int main(int argc, char *argv[])
     QIcon fallbackIcon(":/icons/hicolor/scalable/webcamoid.svg");
 #endif
 
-    app.setWindowIcon(QIcon::fromTheme("webcamoid", fallbackIcon));
+    QApplication::setWindowIcon(QIcon::fromTheme("webcamoid", fallbackIcon));
 
-// OpenGL detection in Qt is quite buggy, so use software render by default.
-#if defined(Q_OS_WIN32) || 0
+#if defined(Q_OS_WIN32) || defined(Q_OS_OSX)
+    // NOTE: OpenGL detection in Qt is quite buggy, so use software render by default.
     auto quickBackend = qgetenv("QT_QUICK_BACKEND");
 
     if (quickBackend.isEmpty())
         qputenv("QT_QUICK_BACKEND", "software");
+#elif defined(Q_OS_BSD4)
+    // NOTE: Text is not rendered with QQC2 in FreeBSD, use native rendering.
+    auto distanceField = qgetenv("QML_DISABLE_DISTANCEFIELD");
+
+    if (distanceField.isEmpty())
+        qputenv("QML_DISABLE_DISTANCEFIELD", "1");
 #endif
 
     MediaTools mediaTools;
     mediaTools.show();
 
-    return app.exec();
+    return QApplication::exec();
 }

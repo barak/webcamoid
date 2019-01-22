@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,7 @@
 #ifndef OUTPUTPARAMS_H
 #define OUTPUTPARAMS_H
 
-#include <ak.h>
-#include <gst/gst.h>
-#include <gst/app/gstappsrc.h>
-#include <gst/pbutils/encoding-profile.h>
+#include <QObject>
 
 class OutputParams: public QObject
 {
@@ -40,7 +37,7 @@ class OutputParams: public QObject
                NOTIFY nFrameChanged)
 
     public:
-        explicit OutputParams(int inputIndex=0, QObject *parent=nullptr);
+        OutputParams(int inputIndex=0, QObject *parent=nullptr);
         OutputParams(const OutputParams &other);
         ~OutputParams();
 
@@ -55,7 +52,6 @@ class OutputParams: public QObject
     private:
         int m_inputIndex;
         quint64 m_nFrame;
-
         qint64 m_id;
         qint64 m_pts;
         qint64 m_ptsDiff;

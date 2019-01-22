@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,14 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QDataStream>
+#include <QDebug>
 #include <QRegExp>
 #include <QStringList>
-#include <QDataStream>
 
 #include "akfrac.h"
 
-#define SIGN(n) ((n < 0)? -1: 1)
+#define SIGN(n) (((n) < 0)? -1: 1)
 
 class AkFracPrivate
 {
@@ -115,7 +116,13 @@ AkFrac &AkFrac::operator =(const AkFrac &other)
 
 bool AkFrac::operator ==(const AkFrac &other) const
 {
-    return this->toString() == other.toString();
+    if (this->d->m_den == 0 && other.d->m_den != 0)
+        return false;
+
+    if (this->d->m_den != 0 && other.d->m_den == 0)
+        return false;
+
+    return this->d->m_num * other.d->m_den == this->d->m_den * other.d->m_num;
 }
 
 bool AkFrac::operator !=(const AkFrac &other) const
@@ -156,15 +163,12 @@ bool AkFrac::isValid() const
 
 QString AkFrac::toString() const
 {
-    return QString("%1/%2")
-            .arg(this->d->m_num)
-            .arg(this->d->m_den);
+    return QString("%1/%2").arg(this->d->m_num).arg(this->d->m_den);
 }
 
 AkFrac AkFrac::invert() const
 {
-    return AkFrac(this->d->m_den,
-                  this->d->m_num);
+    return AkFrac(this->d->m_den, this->d->m_num);
 }
 
 void AkFrac::setNumDen(qint64 num, qint64 den)
@@ -186,7 +190,7 @@ void AkFrac::setNumDen(qint64 num, qint64 den)
             emit this->denChanged();
         }
 
-        if (this->d->m_isValid != false) {
+        if (this->d->m_isValid) {
             this->d->m_isValid = false;
             changed = true;
 
@@ -219,7 +223,7 @@ void AkFrac::setNumDen(qint64 num, qint64 den)
         emit this->denChanged();
     }
 
-    if (this->d->m_isValid != true) {
+    if (!this->d->m_isValid) {
         this->d->m_isValid = true;
         changed = true;
 
@@ -246,7 +250,6 @@ void AkFrac::setNumDen(const QString &fracString)
 
     QStringList fracChunks = fracString.split(QRegExp("\\s*/\\s*"),
                                               QString::SkipEmptyParts);
-
     qint64 num = fracChunks[0].trimmed().toInt();
     qint64 den = fracChunks[1].trimmed().toInt();
 
@@ -328,3 +331,5 @@ AkFrac operator -(const AkFrac &frac1, const AkFrac &frac2)
                   - frac2.d->m_num * frac1.d->m_den,
                   frac1.d->m_den * frac2.d->m_den);
 }
+
+#include "moc_akfrac.cpp"

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,24 +17,45 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include "blurelement.h"
+#include <QImage>
+#include <QQmlContext>
+#include <akvideopacket.h>
 
-BlurElement::BlurElement(): AkElement()
+#include "blurelement.h"
+#include "pixel.h"
+
+class BlurElementPrivate
 {
-    this->m_radius = 5;
+    public:
+        int m_radius {5};
+
+        void integralImage(const QImage &image,
+                           int oWidth, int oHeight,
+                           PixelU32 *integral);
+};
+
+BlurElement::BlurElement():
+    AkElement()
+{
+    this->d = new BlurElementPrivate;
+}
+
+BlurElement::~BlurElement()
+{
+    delete this->d;
 }
 
 int BlurElement::radius() const
 {
-    return this->m_radius;
+    return this->d->m_radius;
 }
 
-void BlurElement::integralImage(const QImage &image,
-                                int oWidth, int oHeight,
-                                PixelU32 *integral)
+void BlurElementPrivate::integralImage(const QImage &image,
+                                       int oWidth, int oHeight,
+                                       PixelU32 *integral)
 {
     for (int y = 1; y < oHeight; y++) {
-        const QRgb *line = reinterpret_cast<const QRgb *>(image.constScanLine(y - 1));
+        auto line = reinterpret_cast<const QRgb *>(image.constScanLine(y - 1));
 
         // Reset current line summation.
         PixelU32 sum;
@@ -76,10 +97,10 @@ void BlurElement::controlInterfaceConfigure(QQmlContext *context,
 
 void BlurElement::setRadius(int radius)
 {
-    if (this->m_radius == radius)
+    if (this->d->m_radius == radius)
         return;
 
-    this->m_radius = radius;
+    this->d->m_radius = radius;
     emit this->radiusChanged(radius);
 }
 
@@ -90,7 +111,8 @@ void BlurElement::resetRadius()
 
 AkPacket BlurElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -100,10 +122,10 @@ AkPacket BlurElement::iStream(const AkPacket &packet)
 
     int oWidth = src.width() + 1;
     int oHeight = src.height() + 1;
-    PixelU32 *integral = new PixelU32[oWidth * oHeight];
-    this->integralImage(src, oWidth, oHeight, integral);
+    auto integral = new PixelU32[oWidth * oHeight];
+    this->d->integralImage(src, oWidth, oHeight, integral);
 
-    int radius = this->m_radius;
+    int radius = this->d->m_radius;
 
     for (int y = 0; y < src.height(); y++) {
         QRgb *oLine = reinterpret_cast<QRgb *>(oFrame.scanLine(y));
@@ -123,6 +145,8 @@ AkPacket BlurElement::iStream(const AkPacket &packet)
 
     delete [] integral;
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_blurelement.cpp"

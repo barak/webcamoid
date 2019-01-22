@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 GroupBox {
     id: gbxStreamOptions
@@ -120,11 +121,10 @@ GroupBox {
             }
         }
 
-        Button {
+        AkButton {
             id: advancedOptions
-            text: qsTr("Advanced Codec Options")
-            iconName: "configure"
-            iconSource: "image://icons/configure"
+            label: qsTr("Advanced Codec Options")
+            iconRc: "image://icons/configure"
             Layout.fillWidth: true
             Layout.columnSpan: 2
             enabled: MultiSink.codecOptions(outputIndex).length > 0

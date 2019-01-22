@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,17 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
 import AkQml 1.0
+import AkQmlControls 1.0
 
 GridLayout {
     id: recCameraControls
     columns: 3
 
-    property bool locked: false
+    property int lock: 0
     property var caps: []
 
     function filterBy(prop, filters)
@@ -35,11 +36,9 @@ GridLayout {
 
         for (var i in recCameraControls.caps) {
             var videoCaps = recCameraControls.caps[i]
-
             var caps = {fourcc: videoCaps.fourcc,
                         size: Qt.size(videoCaps.width, videoCaps.height),
                         fps: videoCaps.fps}
-
             var pass = false
 
             for (var filterProp in filters)
@@ -54,10 +53,8 @@ GridLayout {
 
             var val = caps[prop]
 
-            if (vals.indexOf(val) >= 0)
-                continue
-
-            vals.push(val)
+            if (vals.indexOf(val) < 0)
+                vals.push(val)
         }
 
         return vals
@@ -87,18 +84,20 @@ GridLayout {
 
     function createModel(list, prop)
     {
-        var maps = {fourcc: function (value) {
-                        return {description: value,
-                                value: value}
-                    },
-                    size: function (value) {
-                        return {description: value.width + "x" + value.height,
-                                value: value}
-                    },
-                    fps: function (value) {
-                        return {description: Number(Ak.newFrac(value).value.toFixed(2)),
-                                value: value}
-                    }}
+        var maps = {
+            fourcc: function (value) {
+                return {description: value,
+                        value: value}
+            },
+            size: function (value) {
+                return {description: value.width + "x" + value.height,
+                        value: value}
+            },
+            fps: function (value) {
+                return {description: Number(Ak.newFrac(value).value.toFixed(2)),
+                        value: value}
+            }
+        }
 
         return list.map(maps[prop])
     }
@@ -111,19 +110,6 @@ GridLayout {
                                                cbxResolution.model[cbxResolution.currentIndex].value: Qt.size(-1, -1),
                                          fps: cbxFps.model[cbxFps.currentIndex]?
                                               cbxFps.model[cbxFps.currentIndex].value: Ak.newFrac()})]
-    }
-
-    function controlsUpdated(controls)
-    {
-        var controlsCont = [clyImageControls, clyCameraControls]
-
-        for (var where in controlsCont)
-            for (var child in controlsCont[where].children) {
-                var controlName = controlsCont[where].children[child].controlParams[0]
-
-                if (controlName in controls)
-                    controlsCont[where].children[child].value = controls[controlName]
-            }
     }
 
     function createControls(controls, where)
@@ -144,6 +130,8 @@ GridLayout {
 
             var obj = component.createObject(where)
             obj.controlParams = controls[control]
+
+
             obj.onControlChanged.connect(function (controlName, value)
             {
                 var ctrl = {}
@@ -188,28 +176,7 @@ GridLayout {
             rawCaps.push(Ak.newCaps(VideoCapture.rawCaps(i)).toMap())
 
         caps = rawCaps
-    }
-
-    function updateParams(streams)
-    {
-        if (streams.length > 0) {
-            var videoCaps = recCameraControls.caps[streams[0] < 0? 0: streams[0]]
-
-            if (typeof videoCaps == "undefined")
-                return
-
-            cbxFormat.currentIndex = indexBy(cbxFormat.model,
-                                             videoCaps.fourcc)
-            cbxResolution.currentIndex = indexBy(cbxResolution.model,
-                                                 Qt.size(videoCaps.width,
-                                                         videoCaps.height))
-            cbxFps.currentIndex = indexBy(cbxFps.model,
-                                          videoCaps.fps)
-        } else {
-            cbxFormat.currentIndex = -1
-            cbxResolution.currentIndex = -1
-            cbxFps.currentIndex = -1
-        }
+        cbxFormat.update()
     }
 
     Component.onCompleted: createInterface()
@@ -217,10 +184,7 @@ GridLayout {
     Connections {
         target: VideoCapture
 
-        onImageControlsChanged: controlsUpdated(imageControls)
-        onCameraControlsChanged: controlsUpdated(cameraControls)
         onMediaChanged: createInterface()
-        onStreamsChanged: updateParams(streams)
     }
 
     Label {
@@ -232,39 +196,26 @@ GridLayout {
     }
     ComboBox {
         id: cbxFormat
-        model: createModel(filterBy("fourcc"), "fourcc")
+        model: []
         textRole: "description"
         Layout.fillWidth: true
         Layout.columnSpan: 2
 
-        onCurrentIndexChanged: {
-            if (locked)
-                return
+        function update()
+        {
+            lock++;
+            model = []
+            model = createModel(filterBy("fourcc"), "fourcc")
+            currentIndex = -1
 
-            locked = true
+            if (model.length > 0)
+                currentIndex = 0
 
-            cbxResolution.model = model.length < 1?
-                        []: createModel(filterBy("size",
-                                                 {fourcc: model[currentIndex < 0?
-                                                             0: currentIndex].value}),
-                                        "size")
-
-            cbxFps.model = model.length < 1?
-                        []: createModel(filterBy("fps",
-                                                 {fourcc: model[currentIndex < 0?
-                                                             0: currentIndex].value,
-                                                  size: cbxResolution.model[0].value}),
-                                        "fps")
-
-            updateStreams()
-            locked = false
+            lock--;
         }
-        onModelChanged: {
-            cbxResolution.model = model.length < 1?
-                        []: createModel(filterBy("size",
-                                                 {fourcc: model[0].value}),
-                                        "size")
-        }
+
+        onCurrentIndexChanged: cbxResolution.lockedUpdate()
+        onModelChanged: cbxResolution.update()
     }
     Label {
         id: lblResolution
@@ -280,31 +231,33 @@ GridLayout {
         Layout.fillWidth: true
         Layout.columnSpan: 2
 
-        onCurrentIndexChanged: {
-            if (locked)
+        function update()
+        {
+            lock++;
+            model = []
+            model = cbxFormat.model.length < 1?
+                        []: createModel(filterBy("size",
+                                                 {fourcc: cbxFormat.model[cbxFormat.currentIndex < 0?
+                                                             0: cbxFormat.currentIndex].value}),
+                                        "size")
+            currentIndex = -1
+
+            if (model.length > 0)
+                currentIndex = 0
+
+            lock--;
+        }
+
+        function lockedUpdate()
+        {
+            if (lock > 0)
                 return
 
-            locked = true
-
-            cbxFps.model = model.length < 1?
-                        []: createModel(filterBy("fps",
-                                                 {fourcc: cbxFormat.model[cbxFormat.currentIndex < 0?
-                                                                            0: cbxFormat.currentIndex].value,
-                                                  size: model[currentIndex < 0?
-                                                                0: currentIndex].value}),
-                                        "fps")
-
-            updateStreams()
-            locked = false
+            update()
         }
-        onModelChanged: {
-            cbxFps.model = model.length < 1?
-                        []: createModel(filterBy("fps",
-                                                 {fourcc: cbxFormat.model[cbxFormat.currentIndex < 0?
-                                                                            0: cbxFormat.currentIndex].value,
-                                                  size: model[0].value}),
-                                        "fps")
-        }
+
+        onCurrentIndexChanged: cbxFps.lockedUpdate()
+        onModelChanged: cbxFps.update()
     }
     Label {
         id: lblFps
@@ -320,28 +273,58 @@ GridLayout {
         Layout.fillWidth: true
         Layout.columnSpan: 2
 
-        onCurrentIndexChanged: {
-            if (locked)
+        function update()
+        {
+            lock++;
+            model = []
+            model = cbxResolution.model.length < 1?
+                 []: createModel(filterBy("fps",
+                                          {fourcc: cbxFormat.model[cbxFormat.currentIndex < 0?
+                                                      0: cbxFormat.currentIndex].value,
+                                           size: cbxResolution.model[cbxResolution.currentIndex < 0?
+                                                      0: cbxResolution.currentIndex].value}),
+                                 "fps")
+            currentIndex = -1
+
+            if (model.length > 0)
+                currentIndex = 0
+
+            lock--;
+
+            updateStreams()
+        }
+
+        function lockedUpdate()
+        {
+            if (lock > 0)
                 return
 
-            locked = true
+            update()
+        }
+
+        onCurrentIndexChanged: {
+            if (lock > 0)
+                return
+
             updateStreams()
-            locked = false
         }
     }
     Label {
         Layout.fillWidth: true
         Layout.columnSpan: 2
     }
-    Button {
+    AkButton {
         id: btnReset
-        text: qsTr("Reset")
-        iconName: "reset"
+        label: qsTr("Reset")
+        iconRc: "image://icons/reset"
         Layout.minimumWidth: minimumWidth
 
-        property int minimumWidth: 0
+        property int minimumWidth: 75
 
-        onClicked: VideoCapture.reset()
+        onClicked: {
+            VideoCapture.reset()
+            createInterface()
+        }
     }
 
     ColumnLayout {

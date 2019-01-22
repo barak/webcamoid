@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    exists(../../../../commons.pri) {
-        include(../../../../commons.pri)
+    exists(../../../../akcommons.pri) {
+        include(../../../../akcommons.pri)
     } else {
-        error("commons.pri file not found.")
+        error("akcommons.pri file not found.")
     }
 }
 
@@ -39,26 +39,19 @@ INCLUDEPATH += \
     ../../../../Lib/src \
     ../
 
-LIBS += -L$${PWD}/../../../../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${OUT_PWD}/../../../../Lib/$${BIN_DIR} -l$${COMMONS_TARGET}
 
 OTHER_FILES += pspec.json
 
+isEmpty(LIBUSBLIBS) | isEmpty(LIBUVCLIBS): CONFIG += link_pkgconfig
+
 !isEmpty(LIBUSBINCLUDES): INCLUDEPATH += $${LIBUSBINCLUDES}
 !isEmpty(LIBUSBLIBS): LIBS += $${LIBUSBLIBS}
-
-isEmpty(LIBUSBLIBS) {
-    CONFIG += link_pkgconfig
-    PKGCONFIG += libusb-1.0
-}
+isEmpty(LIBUSBLIBS): PKGCONFIG += libusb-1.0
 
 !isEmpty(LIBUVCINCLUDES): INCLUDEPATH += $${LIBUVCINCLUDES}
 !isEmpty(LIBUVCLIBS): LIBS += $${LIBUVCLIBS}
-
-isEmpty(LIBUVCLIBS) {
-    LIBS += -luvc
-}
-
-CONFIG(config_libuvcdev): DEFINES += HAVE_LIBUVCDEV
+isEmpty(LIBUVCLIBS): PKGCONFIG += libuvc
 
 QT += qml concurrent
 
@@ -72,10 +65,9 @@ SOURCES = \
     src/usbids.cpp \
     src/usbglobals.cpp
 
-DESTDIR = $${OUT_PWD}/../../submodules/VideoCapture
+DESTDIR = $${OUT_PWD}/../../$${BIN_DIR}/submodules/VideoCapture
 
 TEMPLATE = lib
 
 INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}/submodules/VideoCapture
+target.path = $${INSTALLPLUGINSDIR}/submodules/VideoCapture

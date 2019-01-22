@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,28 +20,16 @@
 #ifndef AUDIODEVQTAUDIO_H
 #define AUDIODEVQTAUDIO_H
 
-#include <QTimer>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QAudioInput>
-#include <QAudioOutput>
-#include <ak.h>
-
 #include "audiodev.h"
-#include "audiodevicebuffer.h"
 
-inline bool operator <(const QAudioDeviceInfo &info1,
-                       const QAudioDeviceInfo &info2)
-{
-    return info1.deviceName() < info2.deviceName();
-}
+class AudioDevQtAudioPrivate;
 
 class AudioDevQtAudio: public AudioDev
 {
     Q_OBJECT
 
     public:
-        explicit AudioDevQtAudio(QObject *parent=nullptr);
+        AudioDevQtAudio(QObject *parent=nullptr);
         ~AudioDevQtAudio();
 
         Q_INVOKABLE QString error() const;
@@ -61,25 +49,7 @@ class AudioDevQtAudio: public AudioDev
         Q_INVOKABLE bool uninit();
 
     private:
-        QString m_error;
-        QString m_defaultSink;
-        QString m_defaultSource;
-        QMap<QAudioDeviceInfo, QString> m_sinks;
-        QMap<QAudioDeviceInfo, QString> m_sources;
-        QMap<QString, AkAudioCaps> m_pinCapsMap;
-        QMap<QString, QString> m_pinDescriptionMap;
-        QMap<QString, QList<AkAudioCaps::SampleFormat>> m_supportedFormats;
-        QMap<QString, QList<int>> m_supportedChannels;
-        QMap<QString, QList<int>> m_supportedSampleRates;
-        AudioDeviceBuffer m_outputDeviceBuffer;
-        QIODevice *m_inputDeviceBuffer;
-        QAudioInput *m_input;
-        QAudioOutput *m_output;
-        QMutex m_mutex;
-        int m_maxAudioBuffer;
-
-        AkAudioCaps::SampleFormat qtFormatToAk(const QAudioFormat &format) const;
-        QAudioFormat qtFormatFromCaps(const AkAudioCaps &caps) const;
+        AudioDevQtAudioPrivate *d;
 
     private slots:
         void updateDevices();

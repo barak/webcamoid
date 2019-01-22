@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #ifndef FACEDETECT_H
 #define FACEDETECT_H
 
-#include <ak.h>
+#include <akplugin.h>
 
 class FaceDetect: public QObject, public AkPlugin
 {

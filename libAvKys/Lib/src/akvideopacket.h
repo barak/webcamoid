@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,13 @@
 #ifndef AKVIDEOPACKET_H
 #define AKVIDEOPACKET_H
 
+#include <QSize>
+
 #include "akpacket.h"
 #include "akvideocaps.h"
 
 class AkVideoPacketPrivate;
+class AkVideoCaps;
 
 class AKCOMMONS_EXPORT AkVideoPacket: public AkPacket
 {
@@ -35,7 +38,7 @@ class AKCOMMONS_EXPORT AkVideoPacket: public AkPacket
                NOTIFY capsChanged)
 
     public:
-        explicit AkVideoPacket(QObject *parent=nullptr);
+        AkVideoPacket(QObject *parent=nullptr);
         AkVideoPacket(const AkVideoCaps &caps,
                       const QByteArray &buffer=QByteArray(),
                       qint64 pts=0,
@@ -51,9 +54,14 @@ class AKCOMMONS_EXPORT AkVideoPacket: public AkPacket
 
         Q_INVOKABLE AkVideoCaps caps() const;
         Q_INVOKABLE AkVideoCaps &caps();
-
         Q_INVOKABLE QString toString() const;
         Q_INVOKABLE AkPacket toPacket() const;
+        Q_INVOKABLE QImage toImage() const;
+        Q_INVOKABLE static AkVideoPacket fromImage(const QImage &image,
+                                                   const AkVideoPacket &defaultPacket);
+        Q_INVOKABLE AkVideoPacket roundSizeTo(int align) const;
+        Q_INVOKABLE AkVideoPacket convert(AkVideoCaps::PixelFormat format,
+                                          const QSize &size={}) const;
 
     private:
         AkVideoPacketPrivate *d;

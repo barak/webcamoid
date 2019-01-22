@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    exists(../../../../commons.pri) {
-        include(../../../../commons.pri)
+    exists(../../../../akcommons.pri) {
+        include(../../../../akcommons.pri)
     } else {
-        error("commons.pri file not found.")
+        error("akcommons.pri file not found.")
     }
 }
 
@@ -37,7 +37,7 @@ INCLUDEPATH += \
     ../../../../Lib/src \
     ../
 
-LIBS += -L$${PWD}/../../../../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${OUT_PWD}/../../../../Lib/$${BIN_DIR} -l$${COMMONS_TARGET}
 
 OTHER_FILES += pspec.json
 
@@ -51,10 +51,9 @@ SOURCES = \
     src/audiodevpulseaudio.cpp \
     ../audiodev.cpp
 
-DESTDIR = $${OUT_PWD}/../../submodules/AudioDevice
+DESTDIR = $${OUT_PWD}/../../$${BIN_DIR}/submodules/AudioDevice
 
 TEMPLATE = lib
 
 INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}/submodules/AudioDevice
+target.path = $${INSTALLPLUGINSDIR}/submodules/AudioDevice

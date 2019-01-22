@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  */
 
 #include "akmultimediasourceelement.h"
+#include "akcaps.h"
 
 class AkMultimediaSourceElementPrivate
 {
@@ -25,14 +26,13 @@ class AkMultimediaSourceElementPrivate
         QStringList m_medias;
         QString m_media;
         QList<int> m_streams;
-        bool m_loop;
+        bool m_loop {false};
 };
 
 AkMultimediaSourceElement::AkMultimediaSourceElement(QObject *parent):
     AkElement(parent)
 {
     this->d = new AkMultimediaSourceElementPrivate();
-    this->d->m_loop = false;
 }
 
 AkMultimediaSourceElement::~AkMultimediaSourceElement()
@@ -50,7 +50,7 @@ QString AkMultimediaSourceElement::media() const
     return this->d->m_media;
 }
 
-QList<int> AkMultimediaSourceElement::streams() const
+QList<int> AkMultimediaSourceElement::streams()
 {
     return this->d->m_streams;
 }
@@ -110,3 +110,5 @@ void AkMultimediaSourceElement::resetLoop()
 {
     this->setLoop(false);
 }
+
+#include "moc_akmultimediasourceelement.cpp"

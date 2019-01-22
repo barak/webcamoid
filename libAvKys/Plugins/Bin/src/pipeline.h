@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,10 @@
 #ifndef PIPELINE_H
 #define PIPELINE_H
 
-#include <QObject>
-#include <QMetaMethod>
-#include <ak.h>
+#include <akelement.h>
 
 typedef QMap<QString, AkElementPtr> ElementMap;
+class PipelinePrivate;
 
 class Pipeline: public QObject
 {
@@ -54,7 +53,9 @@ class Pipeline: public QObject
                READ outputs)
 
     public:
-        explicit Pipeline(QObject *parent=nullptr);
+        Pipeline(QObject *parent=nullptr);
+        ~Pipeline();
+
         Q_INVOKABLE bool parse(const QString &description);
         Q_INVOKABLE QMap<QString, AkElementPtr> elements() const;
         Q_INVOKABLE QList<QStringList> links() const;
@@ -72,14 +73,7 @@ class Pipeline: public QObject
         Q_INVOKABLE bool disconnectAll();
 
     private:
-        QMap<QString, AkElementPtr> m_elements;
-        QList<QStringList> m_links;
-        QList<QStringList> m_connections;
-        QVariantMap m_properties;
-        QString m_error;
-
-        QMetaMethod methodByName(QObject *object, const QString &methodName, QMetaMethod::MethodType methodType);
-        QVariant solveProperty(const QVariant &property) const;
+        PipelinePrivate *d;
 
     public slots:
         void addLinks(const QStringList &links);

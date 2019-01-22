@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,24 +17,38 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QImage>
+#include <QQmlContext>
 #include <QtMath>
+#include <akvideopacket.h>
 
 #include "embosselement.h"
 
+class EmbossElementPrivate
+{
+    public:
+        qreal m_factor {1.0};
+        qreal m_bias {128.0};
+};
+
 EmbossElement::EmbossElement(): AkElement()
 {
-    this->m_factor = 1.0;
-    this->m_bias = 128.0;
+    this->d = new EmbossElementPrivate;
+}
+
+EmbossElement::~EmbossElement()
+{
+    delete this->d;
 }
 
 qreal EmbossElement::factor() const
 {
-    return this->m_factor;
+    return this->d->m_factor;
 }
 
 qreal EmbossElement::bias() const
 {
-    return this->m_bias;
+    return this->d->m_bias;
 }
 
 QString EmbossElement::controlInterfaceProvide(const QString &controlId) const
@@ -55,19 +69,19 @@ void EmbossElement::controlInterfaceConfigure(QQmlContext *context,
 
 void EmbossElement::setFactor(qreal factor)
 {
-    if (qFuzzyCompare(this->m_factor, factor))
+    if (qFuzzyCompare(this->d->m_factor, factor))
         return;
 
-    this->m_factor = factor;
+    this->d->m_factor = factor;
     emit this->factorChanged(factor);
 }
 
 void EmbossElement::setBias(qreal bias)
 {
-    if (qFuzzyCompare(this->m_bias, bias))
+    if (qFuzzyCompare(this->d->m_bias, bias))
         return;
 
-    this->m_bias = bias;
+    this->d->m_bias = bias;
     emit this->biasChanged(bias);
 }
 
@@ -83,7 +97,8 @@ void EmbossElement::resetBias()
 
 AkPacket EmbossElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -123,11 +138,13 @@ AkPacket EmbossElement::iStream(const AkPacket &packet)
                      - srcLine_p1[x]
                      - srcLine_p1[x_p1] * 2;
 
-            gray = qRound(this->m_factor * gray + this->m_bias);
+            gray = qRound(this->d->m_factor * gray + this->d->m_bias);
             dstLine[x] = quint8(qBound(0, gray, 255));
         }
     }
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_embosselement.cpp"

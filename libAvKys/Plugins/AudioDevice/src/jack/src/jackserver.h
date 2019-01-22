@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@ class JackServer: public QObject
     Q_OBJECT
 
     public:
-        explicit JackServer(on_device_acquire_t onDeviceAcquire=nullptr,
-                            on_device_release_t onDeviceRelease=nullptr,
-                            QObject *parent=nullptr);
+        JackServer(on_device_acquire_t onDeviceAcquire=nullptr,
+                   on_device_release_t onDeviceRelease=nullptr,
+                   QObject *parent=nullptr);
         ~JackServer();
 
         Q_INVOKABLE bool start(jackctl_driver_t *driver);

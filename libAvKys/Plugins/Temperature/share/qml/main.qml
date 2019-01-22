@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,22 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
+
+    Connections {
+        target: Temperature
+
+        onTemperatureChanged: {
+            sldTemperature.value = temperature
+            spbTemperature.rvalue = temperature
+        }
+    }
 
     Label {
         text: qsTr("Temperature")
@@ -31,16 +41,19 @@ GridLayout {
         id: sldTemperature
         value: Temperature.temperature
         stepSize: 1
-        minimumValue: 1000
-        maximumValue: 40000
+        from: 1000
+        to: 40000
+        Layout.fillWidth: true
 
         onValueChanged: Temperature.temperature = value
     }
-    SpinBox {
-        value: sldTemperature.value
-        maximumValue: sldTemperature.maximumValue
-        stepSize: sldTemperature.stepSize
+    AkSpinBox {
+        id: spbTemperature
+        rvalue: Temperature.temperature
+        minimumValue: sldTemperature.from
+        maximumValue: sldTemperature.to
+        step: sldTemperature.stepSize
 
-        onValueChanged: sldTemperature.value = value
+        onRvalueChanged: Temperature.temperature = rvalue
     }
 }

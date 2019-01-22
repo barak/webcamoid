@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,27 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
+
+    Connections {
+        target: Scroll
+
+        onSpeedChanged: {
+            sldSpeed.value = speed
+            spbSpeed.rvalue = speed
+        }
+
+        onNoiseChanged: {
+            sldNoise.value = noise
+            spbNoise.rvalue = noise
+        }
+    }
 
     Label {
         id: lblSpeed
@@ -32,20 +47,21 @@ GridLayout {
         id: sldSpeed
         value: Scroll.speed
         stepSize: 0.01
-        minimumValue: -1
-        maximumValue: 1
+        from: -1
+        to: 1
+        Layout.fillWidth: true
 
         onValueChanged: Scroll.speed = value
     }
-    SpinBox {
+    AkSpinBox {
         id: spbSpeed
         decimals: 2
-        value: sldSpeed.value
-        minimumValue: sldSpeed.minimumValue
-        maximumValue: sldSpeed.maximumValue
-        stepSize: sldSpeed.stepSize
+        rvalue: Scroll.speed
+        minimumValue: sldSpeed.from
+        maximumValue: sldSpeed.to
+        step: sldSpeed.stepSize
 
-        onValueChanged: sldSpeed.value = value
+        onRvalueChanged: Scroll.speed = rvalue
     }
 
     Label {
@@ -56,17 +72,18 @@ GridLayout {
         id: sldNoise
         value: Scroll.noise
         stepSize: 0.01
-        maximumValue: 1
+        to: 1
+        Layout.fillWidth: true
 
         onValueChanged: Scroll.noise = value
     }
-    SpinBox {
+    AkSpinBox {
         id: spbNoise
         decimals: 2
-        value: sldNoise.value
-        maximumValue: sldNoise.maximumValue
-        stepSize: sldNoise.stepSize
+        rvalue: Scroll.noise
+        maximumValue: sldNoise.to
+        step: sldNoise.stepSize
 
-        onValueChanged: sldNoise.value = value
+        onRvalueChanged: Scroll.noise = rvalue
     }
 }

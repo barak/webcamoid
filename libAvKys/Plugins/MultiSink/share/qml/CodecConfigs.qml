@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
  *
- * Web-Site: http://webcamoid.github.io/
+ * Web-Site: https://webcamoid.github.io/
  */
 
-import QtQuick 2.5
-import QtQuick.Window 2.2
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import AkQmlControls 1.0
 
 ApplicationWindow {
     id: recAbout
@@ -89,14 +89,18 @@ ApplicationWindow {
     ColumnLayout {
         anchors.fill: parent
 
-        ScrollView {
+        AkScrollView {
             id: scrollControls
+            clip: true
+            contentHeight: clyCodecOptions.height
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            contentItem: ColumnLayout {
+            ColumnLayout {
                 id: clyCodecOptions
-                width: scrollControls.viewport.width
+                width: scrollControls.width
+                       - (scrollControls.ScrollBar.vertical.visible?
+                              scrollControls.ScrollBar.vertical.width: 0)
             }
         }
 
@@ -118,10 +122,9 @@ ApplicationWindow {
                     }
                 }
             }
-            Button {
-                text: qsTr("Reset")
-                iconName: "reset"
-                iconSource: "image://icons/reset"
+            AkButton {
+                label: qsTr("Reset")
+                iconRc: "image://icons/reset"
                 onClicked: {
                     btnOk.controlValues = {};
 
@@ -134,21 +137,19 @@ ApplicationWindow {
                     updateOptions();
                 }
             }
-            Button {
-                text: qsTr("Cancel")
-                iconName: "cancel"
-                iconSource: "image://icons/cancel"
+            AkButton {
+                label: qsTr("Cancel")
+                iconRc: "image://icons/cancel"
                 onClicked: {
                     optionFilter.text = ""
                     recAbout.close()
                     btnOk.controlValues = {};
                 }
             }
-            Button {
+            AkButton {
                 id: btnOk
-                text: qsTr("Ok")
-                iconName: "ok"
-                iconSource: "image://icons/ok"
+                label: qsTr("OK")
+                iconRc: "image://icons/ok"
 
                 property variant controlValues: ({})
 

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,9 @@
 #ifndef AGINGELEMENT_H
 #define AGINGELEMENT_H
 
-#include <QMutex>
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
 
-#include "scratch.h"
+class AgingElementPrivate;
 
 class AgingElement: public AkElement
 {
@@ -41,21 +39,14 @@ class AgingElement: public AkElement
                NOTIFY addDustChanged)
 
     public:
-        explicit AgingElement();
+        AgingElement();
+        ~AgingElement();
 
         Q_INVOKABLE int nScratches() const;
         Q_INVOKABLE bool addDust() const;
 
     private:
-        QVector<Scratch> m_scratches;
-        bool m_addDust;
-
-        QMutex m_mutex;
-
-        QImage colorAging(const QImage &src);
-        void scratching(QImage &dest);
-        void pits(QImage &dest);
-        void dusts(QImage &dest);
+        AgingElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

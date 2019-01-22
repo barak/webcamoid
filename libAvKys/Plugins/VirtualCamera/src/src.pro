@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,56 +16,76 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-TRANSLATIONS = $$files(../share/ts/*.ts)
+exists(../translations.qrc) {
+    TRANSLATIONS = $$files(../share/ts/*.ts)
+    RESOURCES += ../translations.qrc
+}
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    exists(../../../commons.pri) {
-        include(../../../commons.pri)
+    exists(../../../akcommons.pri) {
+        include(../../../akcommons.pri)
     } else {
-        error("commons.pri file not found.")
+        error("akcommons.pri file not found.")
     }
 }
 
 CONFIG += plugin
 
-HEADERS = \
-    virtualcamera.h \
-    virtualcameraelement.h \
-    cameraout.h \
-    convertvideo.h \
-    virtualcameraglobals.h
-
 INCLUDEPATH += \
     ../../../Lib/src
 
-LIBS += -L$${PWD}/../../../Lib/ -l$${COMMONS_TARGET}
-
-OTHER_FILES += pspec.json
-
-QT += qml concurrent
-
-RESOURCES = \
-    ../VirtualCamera.qrc \
-    ../translations.qrc
+HEADERS = \
+    virtualcamera.h \
+    virtualcameraelement.h \
+    ipcbridge.h
 
 SOURCES = \
     virtualcamera.cpp \
-    virtualcameraelement.cpp \
-    cameraout.cpp \
-    convertvideo.cpp \
-    virtualcameraglobals.cpp
+    virtualcameraelement.cpp
+
+LIBS += \
+    -L$${OUT_PWD}/../../../Lib/$${BIN_DIR} -l$${COMMONS_TARGET}
+win32: LIBS += \
+    -L$${OUT_PWD}/dshow/VCamIPC/$${BIN_DIR} -lVCamIPC \
+    -L$${OUT_PWD}/dshow/PlatformUtils/$${BIN_DIR} -lPlatformUtils \
+    -ladvapi32 \
+    -lgdi32 \
+    -lstrmiids \
+    -luuid \
+    -lole32 \
+    -loleaut32 \
+    -lshell32
+macx: LIBS += \
+    -L$${OUT_PWD}/cmio/VCamIPC/$${BIN_DIR} -lVCamIPC \
+    -framework CoreFoundation \
+    -framework CoreMedia \
+    -framework CoreMediaIO \
+    -framework CoreVideo \
+    -framework Foundation \
+    -framework IOKit \
+    -framework IOSurface
+unix: !macx: LIBS += \
+    -L$${OUT_PWD}/v4l2sys/VCamIPC/$${BIN_DIR} -lVCamIPC
+LIBS += \
+    -L$${OUT_PWD}/VCamUtils/$${BIN_DIR} -lVCamUtils
+
+OTHER_FILES += pspec.json
+
+QT += concurrent qml xml
+
+RESOURCES = ../VirtualCamera.qrc
+unix: !macx: RESOURCES += ../TestFrame.qrc
 
 lupdate_only {
     SOURCES += $$files(../share/qml/*.qml)
 }
 
-DESTDIR = $${OUT_PWD}/..
+DESTDIR = $${OUT_PWD}/../$${BIN_DIR}
 TARGET = VirtualCamera
 
 TEMPLATE = lib
 
 INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}
+target.path = $${INSTALLPLUGINSDIR}

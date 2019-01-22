@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +20,16 @@
 #ifndef CONVERTAUDIOGSTREAMER_H
 #define CONVERTAUDIOGSTREAMER_H
 
-#include <QtConcurrent>
-#include <akaudiopacket.h>
-#include <gst/audio/audio.h>
-#include <gst/app/gstappsrc.h>
-#include <gst/app/gstappsink.h>
-
 #include "convertaudio.h"
+
+class ConvertAudioGStreamerPrivate;
 
 class ConvertAudioGStreamer: public ConvertAudio
 {
     Q_OBJECT
 
     public:
-        explicit ConvertAudioGStreamer(QObject *parent=nullptr);
+        ConvertAudioGStreamer(QObject *parent=nullptr);
         ~ConvertAudioGStreamer();
 
         Q_INVOKABLE bool init(const AkAudioCaps &caps);
@@ -41,19 +37,9 @@ class ConvertAudioGStreamer: public ConvertAudio
         Q_INVOKABLE void uninit();
 
     private:
-        AkAudioCaps m_caps;
-        QThreadPool m_threadPool;
-        GstElement *m_pipeline;
-        GstElement *m_source;
-        GstElement *m_sink;
-        GMainLoop *m_mainLoop;
-        guint m_busWatchId;
-        QMutex m_mutex;
+        ConvertAudioGStreamerPrivate *d;
 
-        void waitState(GstState state);
-        static gboolean busCallback(GstBus *bus,
-                                    GstMessage *message,
-                                    gpointer userData);
+        friend class ConvertAudioGStreamerPrivate;
 };
 
 #endif // CONVERTAUDIOGSTREAMER_H

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QDataStream>
+#include <QDebug>
 #include <QRegExp>
 #include <QStringList>
 #include <QVariant>
@@ -26,30 +28,24 @@
 class AkCapsPrivate
 {
     public:
-        bool m_isValid;
         QString m_mimeType;
+        bool m_isValid {false};
 };
 
 AkCaps::AkCaps(QObject *parent): QObject(parent)
 {
     this->d = new AkCapsPrivate();
-    this->d->m_isValid = false;
-    this->d->m_mimeType = "";
 }
 
 AkCaps::AkCaps(const QVariantMap &caps)
 {
     this->d = new AkCapsPrivate();
-    this->d->m_isValid = false;
-    this->d->m_mimeType = "";
     this->fromMap(caps);
 }
 
 AkCaps::AkCaps(const QString &caps)
 {
     this->d = new AkCapsPrivate();
-    this->d->m_isValid = false;
-    this->d->m_mimeType = "";
     this->fromString(caps);
 }
 
@@ -81,7 +77,9 @@ AkCaps &AkCaps::operator =(const AkCaps &other)
 
 AkCaps &AkCaps::operator =(const QString &other)
 {
-    return this->operator =(AkCaps(other));
+    this->operator =(AkCaps(other));
+
+    return *this;
 }
 
 bool AkCaps::operator ==(const AkCaps &other) const
@@ -138,13 +136,14 @@ AkCaps &AkCaps::fromMap(const QVariantMap &caps)
         return *this;
     }
 
-    for (const QString &key: caps.keys())
-        if (key == "mimeType") {
-            this->d->m_isValid = QRegExp("\\s*[a-z]+/\\w+(?:(?:-|\\+|\\.)\\w+)*\\s*")
-                                 .exactMatch(caps[key].toString());
-            this->d->m_mimeType = caps[key].toString().trimmed();
+    for (auto it = caps.begin(); it != caps.end(); it++)
+        if (it.key() == "mimeType") {
+            this->d->m_isValid = QRegExp(R"(\s*[a-z]+/\w+(?:(?:-|\+|\.)\w+)*\s*)")
+                                 .exactMatch(it.value().toString());
+            this->d->m_mimeType = it.value().toString().trimmed();
         } else
-            this->setProperty(key.trimmed().toStdString().c_str(), caps[key]);
+            this->setProperty(it.key().trimmed().toStdString().c_str(),
+                              it.value());
 
     return *this;
 }
@@ -209,8 +208,8 @@ QString AkCaps::toString() const
     properties.sort();
 
     for (const QString &property: properties)
-        caps.append(QString(",%1=%2").arg(property)
-                                     .arg(this->property(property.toStdString().c_str()).toString()));
+        caps.append(QString(",%1=%2").arg(property,
+                                          this->property(property.toStdString().c_str()).toString()));
 
     return caps;
 }
@@ -247,7 +246,7 @@ bool AkCaps::contains(const QString &property) const
 
 void AkCaps::setMimeType(const QString &mimeType)
 {
-    this->d->m_isValid = QRegExp("\\s*[a-z]+/\\w+(?:(?:-|\\+|\\.)\\w+)*\\s*").exactMatch(mimeType);
+    this->d->m_isValid = QRegExp(R"(\s*[a-z]+/\w+(?:(?:-|\+|\.)\w+)*\s*)").exactMatch(mimeType);
     QString _mimeType = this->d->m_isValid? mimeType.trimmed(): QString("");
 
     if (this->d->m_mimeType == _mimeType)
@@ -295,3 +294,5 @@ QDataStream &operator <<(QDataStream &ostream, const AkCaps &caps)
 
     return ostream;
 }
+
+#include "moc_akcaps.cpp"

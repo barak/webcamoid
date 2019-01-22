@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2012  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,12 +16,6 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
-} else {
-    error("commons.pri file not found.")
-}
-
 TEMPLATE = subdirs
 
 CONFIG += ordered
@@ -32,18 +26,5 @@ SUBDIRS += \
 
 OTHER_FILES = \
     .gitignore \
-    README.md
-
-# Install rules
-
-INSTALLS += \
-    license
-
-license.files = COPYING
-license.path = $${LICENSEDIR}
-
-unix:!macx {
-    INSTALLS += desktop
-    desktop.files = $${COMMONS_TARGET}.desktop
-    desktop.path = $${DATAROOTDIR}/applications
-}
+    README.md \
+    translations.pri

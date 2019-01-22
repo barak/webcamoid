@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +20,11 @@
 #ifndef MULTISINKELEMENT_H
 #define MULTISINKELEMENT_H
 
-#include <QMutex>
-#include <ak.h>
+#include <QVariantMap>
+#include <akelement.h>
 
-#include "mediawriter.h"
-#include "multisinkutils.h"
-
-typedef QSharedPointer<MediaWriter> MediaWriterPtr;
+class MultiSinkElementPrivate;
+class AkCaps;
 
 class MultiSinkElement: public AkElement
 {
@@ -79,7 +77,7 @@ class MultiSinkElement: public AkElement
                NOTIFY codecsBlackListChanged)
 
     public:
-        explicit MultiSinkElement();
+        MultiSinkElement();
         ~MultiSinkElement();
 
         Q_INVOKABLE QString location() const;
@@ -110,22 +108,7 @@ class MultiSinkElement: public AkElement
         Q_INVOKABLE QVariantList codecOptions(int index);
 
     private:
-        QString m_location;
-        bool m_showFormatOptions;
-        QVariantList m_userControls;
-        QVariantMap m_userControlsValues;
-        MediaWriterPtr m_mediaWriter;
-        MultiSinkUtils m_utils;
-        QList<int> m_inputStreams;
-
-        // Formats and codecs info cache.
-        QStringList m_supportedFormats;
-        QMap<QString, QStringList> m_fileExtensions;
-        QMap<QString, QString> m_formatDescription;
-        QStringList m_supportedCodecs;
-        QMap<QString, QString> m_codecDescription;
-        QMap<QString, QString> m_codecType;
-        QMap<QString, QVariantMap> m_defaultCodecParams;
+        MultiSinkElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

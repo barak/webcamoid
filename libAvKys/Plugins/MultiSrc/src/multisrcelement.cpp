@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,24 +17,37 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QSharedPointer>
+#include <QMutex>
+#include <QQmlContext>
+#include <akcaps.h>
+
 #include "multisrcelement.h"
 #include "multisrcglobals.h"
+#include "mediasource.h"
 
 Q_GLOBAL_STATIC(MultiSrcGlobals, globalMultiSrc)
 
 template<typename T>
-inline QSharedPointer<T> ptr_init(QObject *obj=nullptr)
+inline QSharedPointer<T> ptr_cast(QObject *obj=nullptr)
 {
-    if (!obj)
-        return QSharedPointer<T>(new T());
-
     return QSharedPointer<T>(static_cast<T *>(obj));
 }
 
-MultiSrcElement::MultiSrcElement():
-    AkMultimediaSourceElement(),
-    m_mediaSource(ptr_init<MediaSource>())
+using MediaSourcePtr = QSharedPointer<MediaSource>;
+
+class MultiSrcElementPrivate
 {
+    public:
+        MediaSourcePtr m_mediaSource;
+        QMutex m_mutexLib;
+};
+
+MultiSrcElement::MultiSrcElement():
+    AkMultimediaSourceElement()
+{
+    this->d = new MultiSrcElementPrivate;
+
     QObject::connect(globalMultiSrc,
                      SIGNAL(codecLibChanged(const QString &)),
                      this,
@@ -50,61 +63,95 @@ MultiSrcElement::MultiSrcElement():
 MultiSrcElement::~MultiSrcElement()
 {
     this->setState(AkElement::ElementStateNull);
+    delete this->d;
 }
 
 QStringList MultiSrcElement::medias()
 {
-    return this->m_mediaSource->medias();
+    if (!this->d->m_mediaSource)
+        return {};
+
+    return this->d->m_mediaSource->medias();
 }
 
 QString MultiSrcElement::media() const
 {
-    return this->m_mediaSource->media();
+    if (!this->d->m_mediaSource)
+        return {};
+
+    return this->d->m_mediaSource->media();
 }
 
-QList<int> MultiSrcElement::streams() const
+QList<int> MultiSrcElement::streams()
 {
-    return this->m_mediaSource->streams();
+    if (!this->d->m_mediaSource)
+        return {};
+
+    return this->d->m_mediaSource->streams();
 }
 
 bool MultiSrcElement::loop() const
 {
-    return this->m_mediaSource->loop();
+    if (!this->d->m_mediaSource)
+        return false;
+
+    return this->d->m_mediaSource->loop();
 }
 
 QList<int> MultiSrcElement::listTracks(const QString &type)
 {
-    return this->m_mediaSource->listTracks(type);
+    if (!this->d->m_mediaSource)
+        return {};
+
+    return this->d->m_mediaSource->listTracks(type);
 }
 
 QString MultiSrcElement::streamLanguage(int stream)
 {
-    return this->m_mediaSource->streamLanguage(stream);
+    if (!this->d->m_mediaSource)
+        return {};
+
+    return this->d->m_mediaSource->streamLanguage(stream);
 }
 
 int MultiSrcElement::defaultStream(const QString &mimeType)
 {
-    return this->m_mediaSource->defaultStream(mimeType);
+    if (!this->d->m_mediaSource)
+        return -1;
+
+    return this->d->m_mediaSource->defaultStream(mimeType);
 }
 
 QString MultiSrcElement::description(const QString &media)
 {
-    return this->m_mediaSource->description(media);
+    if (!this->d->m_mediaSource)
+        return {};
+
+    return this->d->m_mediaSource->description(media);
 }
 
 AkCaps MultiSrcElement::caps(int stream)
 {
-    return this->m_mediaSource->caps(stream);
+    if (!this->d->m_mediaSource)
+        return AkCaps();
+
+    return this->d->m_mediaSource->caps(stream);
 }
 
 qint64 MultiSrcElement::maxPacketQueueSize() const
 {
-    return this->m_mediaSource->maxPacketQueueSize();
+    if (!this->d->m_mediaSource)
+        return 0;
+
+    return this->d->m_mediaSource->maxPacketQueueSize();
 }
 
 bool MultiSrcElement::showLog() const
 {
-    return this->m_mediaSource->showLog();
+    if (!this->d->m_mediaSource)
+        return false;
+
+    return this->d->m_mediaSource->showLog();
 }
 
 QString MultiSrcElement::codecLib() const
@@ -130,27 +177,32 @@ void MultiSrcElement::controlInterfaceConfigure(QQmlContext *context,
 
 void MultiSrcElement::setMedia(const QString &media)
 {
-    this->m_mediaSource->setMedia(media);
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->setMedia(media);
 }
 
 void MultiSrcElement::setStreams(const QList<int> &streams)
 {
-    this->m_mediaSource->setStreams(streams);
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->setStreams(streams);
 }
 
 void MultiSrcElement::setLoop(bool loop)
 {
-    this->m_mediaSource->setLoop(loop);
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->setLoop(loop);
 }
 
 void MultiSrcElement::setMaxPacketQueueSize(qint64 maxPacketQueueSize)
 {
-    this->m_mediaSource->setMaxPacketQueueSize(maxPacketQueueSize);
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->setMaxPacketQueueSize(maxPacketQueueSize);
 }
 
 void MultiSrcElement::setShowLog(bool showLog)
 {
-    this->m_mediaSource->setShowLog(showLog);
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->setShowLog(showLog);
 }
 
 void MultiSrcElement::setCodecLib(const QString &codecLib)
@@ -160,27 +212,32 @@ void MultiSrcElement::setCodecLib(const QString &codecLib)
 
 void MultiSrcElement::resetMedia()
 {
-    this->m_mediaSource->resetMedia();
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->resetMedia();
 }
 
 void MultiSrcElement::resetStreams()
 {
-    this->m_mediaSource->resetStreams();
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->resetStreams();
 }
 
 void MultiSrcElement::resetLoop()
 {
-    this->m_mediaSource->resetLoop();
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->resetLoop();
 }
 
 void MultiSrcElement::resetMaxPacketQueueSize()
 {
-    this->m_mediaSource->resetMaxPacketQueueSize();
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->resetMaxPacketQueueSize();
 }
 
 void MultiSrcElement::resetShowLog()
 {
-    this->m_mediaSource->resetShowLog();
+    if (this->d->m_mediaSource)
+        this->d->m_mediaSource->resetShowLog();
 }
 
 void MultiSrcElement::resetCodecLib()
@@ -190,7 +247,7 @@ void MultiSrcElement::resetCodecLib()
 
 bool MultiSrcElement::setState(AkElement::ElementState state)
 {
-    if (!this->m_mediaSource->setState(state))
+    if (!this->d->m_mediaSource || !this->d->m_mediaSource->setState(state))
         return false;
 
     return AkElement::setState(state);
@@ -201,57 +258,72 @@ void MultiSrcElement::codecLibUpdated(const QString &codecLib)
     auto state = this->state();
     this->setState(AkElement::ElementStateNull);
 
-    auto media = this->m_mediaSource->media();
-    auto loop = this->m_mediaSource->loop();
-    auto showLog = this->m_mediaSource->showLog();
+    QString media;
+    bool loop = false;
+    bool showLog = false;
 
-    this->m_mutexLib.lock();
+    if (this->d->m_mediaSource) {
+        media = this->d->m_mediaSource->media();
+        loop = this->d->m_mediaSource->loop();
+        showLog = this->d->m_mediaSource->showLog();
+    }
 
-    this->m_mediaSource =
-            ptr_init<MediaSource>(this->loadSubModule("MultiSrc", codecLib));
+    this->d->m_mutexLib.lock();
 
-    QObject::connect(this->m_mediaSource.data(),
+    this->d->m_mediaSource =
+            ptr_cast<MediaSource>(MultiSrcElement::loadSubModule("MultiSrc",
+                                                                 codecLib));
+
+    if (!this->d->m_mediaSource) {
+        this->d->m_mutexLib.unlock();
+
+        return;
+    }
+
+    QObject::connect(this->d->m_mediaSource.data(),
                      SIGNAL(oStream(const AkPacket &)),
                      this,
                      SIGNAL(oStream(const AkPacket &)),
                      Qt::DirectConnection);
-    QObject::connect(this->m_mediaSource.data(),
+    QObject::connect(this->d->m_mediaSource.data(),
                      SIGNAL(error(const QString &)),
                      this,
                      SIGNAL(error(const QString &)));
-    QObject::connect(this->m_mediaSource.data(),
+    QObject::connect(this->d->m_mediaSource.data(),
                      SIGNAL(maxPacketQueueSizeChanged(qint64)),
                      this,
                      SIGNAL(maxPacketQueueSizeChanged(qint64)));
-    QObject::connect(this->m_mediaSource.data(),
+    QObject::connect(this->d->m_mediaSource.data(),
                      SIGNAL(showLogChanged(bool)),
                      this,
                      SIGNAL(showLogChanged(bool)));
-    QObject::connect(this->m_mediaSource.data(),
+    QObject::connect(this->d->m_mediaSource.data(),
                      SIGNAL(loopChanged(bool)),
                      this,
                      SIGNAL(loopChanged(bool)));
-    QObject::connect(this->m_mediaSource.data(),
+    QObject::connect(this->d->m_mediaSource.data(),
                      SIGNAL(mediasChanged(const QStringList &)),
                      this,
                      SIGNAL(mediasChanged(const QStringList &)));
-    QObject::connect(this->m_mediaSource.data(),
+    QObject::connect(this->d->m_mediaSource.data(),
                      SIGNAL(mediaChanged(const QString &)),
                      this,
                      SIGNAL(mediaChanged(const QString &)));
-    QObject::connect(this->m_mediaSource.data(),
+    QObject::connect(this->d->m_mediaSource.data(),
                      SIGNAL(streamsChanged(const QList<int> &)),
                      this,
                      SIGNAL(streamsChanged(const QList<int> &)));
 
-    this->m_mutexLib.unlock();
+    this->d->m_mutexLib.unlock();
 
-    this->m_mediaSource->setMedia(media);
-    this->m_mediaSource->setLoop(loop);
-    this->m_mediaSource->setShowLog(showLog);
+    this->d->m_mediaSource->setMedia(media);
+    this->d->m_mediaSource->setLoop(loop);
+    this->d->m_mediaSource->setShowLog(showLog);
 
     emit this->streamsChanged(this->streams());
     emit this->maxPacketQueueSizeChanged(this->maxPacketQueueSize());
 
     this->setState(state);
 }
+
+#include "moc_multisrcelement.cpp"

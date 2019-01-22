@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,23 +17,41 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QVector>
+#include <QImage>
+#include <QQmlContext>
+#include <akvideopacket.h>
+
 #include "nervouselement.h"
+
+class NervousElementPrivate
+{
+    public:
+        QVector<QImage> m_frames;
+        QSize m_frameSize;
+        int m_nFrames {32};
+        int m_stride {0};
+        bool m_simple {false};
+};
 
 NervousElement::NervousElement(): AkElement()
 {
-    this->m_nFrames = 32;
-    this->m_simple = false;
-    this->m_stride = 0;
+    this->d = new NervousElementPrivate;
+}
+
+NervousElement::~NervousElement()
+{
+    delete this->d;
 }
 
 int NervousElement::nFrames() const
 {
-    return this->m_nFrames;
+    return this->d->m_nFrames;
 }
 
 bool NervousElement::simple() const
 {
-    return this->m_simple;
+    return this->d->m_simple;
 }
 
 QString NervousElement::controlInterfaceProvide(const QString &controlId) const
@@ -54,19 +72,19 @@ void NervousElement::controlInterfaceConfigure(QQmlContext *context,
 
 void NervousElement::setNFrames(int nFrames)
 {
-    if (this->m_nFrames == nFrames)
+    if (this->d->m_nFrames == nFrames)
         return;
 
-    this->m_nFrames = nFrames;
+    this->d->m_nFrames = nFrames;
     this->nFramesChanged(nFrames);
 }
 
 void NervousElement::setSimple(bool simple)
 {
-    if (this->m_simple == simple)
+    if (this->d->m_simple == simple)
         return;
 
-    this->m_simple = simple;
+    this->d->m_simple = simple;
     this->simpleChanged(simple);
 }
 
@@ -82,48 +100,51 @@ void NervousElement::resetSimple()
 
 AkPacket NervousElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
 
-    if (src.size() != this->m_frameSize) {
-        this->m_frames.clear();
-        this->m_stride = 0;
-        this->m_frameSize = src.size();
+    if (src.size() != this->d->m_frameSize) {
+        this->d->m_frames.clear();
+        this->d->m_stride = 0;
+        this->d->m_frameSize = src.size();
     }
 
-    this->m_frames << src.copy();
-    int diff = this->m_frames.size() - this->m_nFrames;
+    this->d->m_frames << src.copy();
+    int diff = this->d->m_frames.size() - this->d->m_nFrames;
 
-    for (int i = 0; i < diff && !this->m_frames.isEmpty(); i++)
-        this->m_frames.removeFirst();
+    for (int i = 0; i < diff && !this->d->m_frames.isEmpty(); i++)
+        this->d->m_frames.removeFirst();
 
-    if (this->m_frames.isEmpty())
+    if (this->d->m_frames.isEmpty())
         akSend(packet)
 
     int timer = 0;
     int nFrame = 0;
 
-    if (!this->m_simple) {
+    if (!this->d->m_simple) {
         if (timer) {
-            nFrame += this->m_stride;
-            nFrame = qBound(0, nFrame, this->m_frames.size() - 1);
+            nFrame += this->d->m_stride;
+            nFrame = qBound(0, nFrame, this->d->m_frames.size() - 1);
             timer--;
         } else {
-            nFrame = qrand() % this->m_frames.size();
-            this->m_stride = qrand() % 5 - 2;
+            nFrame = qrand() % this->d->m_frames.size();
+            this->d->m_stride = qrand() % 5 - 2;
 
-            if (this->m_stride >= 0)
-                this->m_stride++;
+            if (this->d->m_stride >= 0)
+                this->d->m_stride++;
 
             timer = qrand() % 6 + 2;
         }
-    } else if(this->m_frames.size() > 0)
-        nFrame = qrand() % this->m_frames.size();
+    } else if(!this->d->m_frames.isEmpty()) {
+        nFrame = qrand() % this->d->m_frames.size();
+    }
 
-    QImage oFrame = this->m_frames[nFrame];
-
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(this->d->m_frames[nFrame],
+                                            videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_nervouselement.cpp"

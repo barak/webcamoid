@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,10 @@
 #ifndef ACAPSCONVERTELEMENT_H
 #define ACAPSCONVERTELEMENT_H
 
-#include <QMutex>
-#include <ak.h>
+#include <akelement.h>
 
-#include "convertaudio.h"
-
-typedef QSharedPointer<ConvertAudio> ConvertAudioPtr;
+class ACapsConvertElementPrivate;
+class AkCaps;
 
 class ACapsConvertElement: public AkElement
 {
@@ -42,15 +40,14 @@ class ACapsConvertElement: public AkElement
                NOTIFY convertLibChanged)
 
     public:
-        explicit ACapsConvertElement();
+        ACapsConvertElement();
+        ~ACapsConvertElement();
 
         Q_INVOKABLE QString caps() const;
         Q_INVOKABLE QString convertLib() const;
 
     private:
-        AkCaps m_caps;
-        ConvertAudioPtr m_convertAudio;
-        QMutex m_mutex;
+        ACapsConvertElementPrivate *d;
 
     signals:
         void capsChanged(const QString &caps);

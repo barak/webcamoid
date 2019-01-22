@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 
 #include <akelement.h>
 
+class ProbeElementPrivate;
+
 class ProbeElement: public AkElement
 {
     Q_OBJECT
@@ -32,12 +34,13 @@ class ProbeElement: public AkElement
                NOTIFY logChanged)
 
     public:
-        explicit ProbeElement();
+        ProbeElement();
+        ~ProbeElement();
 
         Q_INVOKABLE bool log() const;
 
     private:
-        bool m_log;
+        ProbeElementPrivate *d;
 
     signals:
         void logChanged(bool log);

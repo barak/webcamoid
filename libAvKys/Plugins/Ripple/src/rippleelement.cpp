@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,14 @@
  */
 
 #include <QtMath>
-#include <QColor>
+#include <QImage>
+#include <QQmlContext>
+#include <akcaps.h>
+#include <akvideopacket.h>
 
 #include "rippleelement.h"
 
-typedef QMap<RippleElement::RippleMode, QString> RippleModeToStr;
+using RippleModeToStr = QMap<RippleElement::RippleMode, QString>;
 
 inline RippleModeToStr initRippleModeToStr()
 {
@@ -36,45 +39,77 @@ inline RippleModeToStr initRippleModeToStr()
 
 Q_GLOBAL_STATIC_WITH_ARGS(RippleModeToStr, rippleModeToStr, (initRippleModeToStr()))
 
+class RippleElementPrivate
+{
+    public:
+        RippleElement::RippleMode m_mode {RippleElement::RippleModeMotionDetect};
+        int m_amplitude {256};
+        int m_decay {8};
+        int m_threshold {15};
+        int m_lumaThreshold {15};
+        AkCaps m_caps;
+        QImage m_prevFrame;
+        QVector<QImage> m_rippleBuffer;
+        int m_curRippleBuffer {0};
+        int m_period {0};
+        int m_rainStat {0};
+        uint m_dropProb {0};
+        int m_dropProbIncrement {0};
+        int m_dropsPerFrameMax {0};
+        int m_dropsPerFrame {0};
+        int m_dropPower {0};
+
+        QImage imageDiff(const QImage &img1,
+                         const QImage &img2,
+                         int threshold,
+                         int lumaThreshold, int strength);
+        void addDrops(const QImage &buffer, const QImage &drops);
+        void ripple(const QImage &buffer1, const QImage &buffer2, int decay);
+        QImage applyWater(const QImage &src, const QImage &buffer);
+        QImage rainDrop(int width, int height, int strength);
+        QImage drop(int width, int height, int power);
+};
+
 RippleElement::RippleElement(): AkElement()
 {
-    this->m_mode = RippleModeMotionDetect;
-    this->m_amplitude = 256;
-    this->m_decay = 8;
-    this->m_threshold = 15;
-    this->m_lumaThreshold = 15;
+    this->d = new RippleElementPrivate;
+}
+
+RippleElement::~RippleElement()
+{
+    delete this->d;
 }
 
 QString RippleElement::mode() const
 {
-    return rippleModeToStr->value(this->m_mode);
+    return rippleModeToStr->value(this->d->m_mode);
 }
 
 int RippleElement::amplitude() const
 {
-    return this->m_amplitude;
+    return this->d->m_amplitude;
 }
 
 int RippleElement::decay() const
 {
-    return this->m_decay;
+    return this->d->m_decay;
 }
 
 int RippleElement::threshold() const
 {
-    return this->m_threshold;
+    return this->d->m_threshold;
 }
 
 int RippleElement::lumaThreshold() const
 {
-    return this->m_lumaThreshold;
+    return this->d->m_lumaThreshold;
 }
 
-QImage RippleElement::imageDiff(const QImage &img1,
-                                const QImage &img2,
-                                int threshold,
-                                int lumaThreshold,
-                                int strength)
+QImage RippleElementPrivate::imageDiff(const QImage &img1,
+                                       const QImage &img2,
+                                       int threshold,
+                                       int lumaThreshold,
+                                       int strength)
 {
     int width = qMin(img1.width(), img2.width());
     int height = qMin(img1.height(), img2.height());
@@ -101,7 +136,7 @@ QImage RippleElement::imageDiff(const QImage &img1,
             int db = b1 - b2;
 
             int s = dr * dr + dg * dg + db * db;
-            s = int(sqrt(s / 3));
+            s = int(sqrt(s / 3.0));
             s = s < threshold? 0: s;
 
             int gray = qGray(img2Line[x]);
@@ -114,7 +149,7 @@ QImage RippleElement::imageDiff(const QImage &img1,
     return diff;
 }
 
-void RippleElement::addDrops(const QImage &buffer, const QImage &drops)
+void RippleElementPrivate::addDrops(const QImage &buffer, const QImage &drops)
 {
     for (int y = 0; y < buffer.height(); y++) {
         const int *dropsLine = reinterpret_cast<const int *>(drops.constScanLine(y));
@@ -125,7 +160,9 @@ void RippleElement::addDrops(const QImage &buffer, const QImage &drops)
     }
 }
 
-void RippleElement::ripple(const QImage &buffer1, const QImage &buffer2, int decay)
+void RippleElementPrivate::ripple(const QImage &buffer1,
+                                  const QImage &buffer2,
+                                  int decay)
 {
     QImage buffer3(buffer1.size(), buffer1.format());
     const int *buffer1Bits = reinterpret_cast<const int *>(buffer1.constBits());
@@ -192,7 +229,7 @@ void RippleElement::ripple(const QImage &buffer1, const QImage &buffer2, int dec
     }
 }
 
-QImage RippleElement::applyWater(const QImage &src, const QImage &buffer)
+QImage RippleElementPrivate::applyWater(const QImage &src, const QImage &buffer)
 {
     QImage dest(src.size(), src.format());
     const QRgb *srcBits = reinterpret_cast<const QRgb *>(src.constBits());
@@ -239,7 +276,7 @@ QImage RippleElement::applyWater(const QImage &src, const QImage &buffer)
     return dest;
 }
 
-QImage RippleElement::rainDrop(int width, int height, int strength)
+QImage RippleElementPrivate::rainDrop(int width, int height, int strength)
 {
     if (this->m_period == 0) {
         if (this->m_rainStat == 0) {
@@ -302,6 +339,34 @@ QImage RippleElement::rainDrop(int width, int height, int strength)
     return rain;
 }
 
+QImage RippleElementPrivate::drop(int width, int height, int power)
+{
+    QImage drops(width, height, QImage::Format_ARGB32);
+    auto dropsBits = reinterpret_cast<int *>(drops.bits());
+
+    drops.fill(qRgba(0, 0, 0, 0));
+
+    int widthM1 = width - 1;
+    int widthP1 = width + 1;
+
+    int x = qrand() % (width - 4) + 2;
+    int y = qrand() % (height - 4) + 2;
+
+    int offset = x + y * width;
+
+    dropsBits[offset - widthP1] = power >> 2;
+    dropsBits[offset - width] = power >> 1;
+    dropsBits[offset - widthM1] = power >> 2;
+    dropsBits[offset - 1] = power >> 1;
+    dropsBits[offset] = power;
+    dropsBits[offset + 1] = power >> 1;
+    dropsBits[offset + widthM1] = power >> 2;
+    dropsBits[offset + width] = power >> 1;
+    dropsBits[offset + widthP1] = power >> 2;
+
+    return drops;
+}
+
 QString RippleElement::controlInterfaceProvide(const QString &controlId) const
 {
     Q_UNUSED(controlId)
@@ -322,46 +387,46 @@ void RippleElement::setMode(const QString &mode)
 {
     RippleMode modeEnum = rippleModeToStr->key(mode, RippleModeMotionDetect);
 
-    if (this->m_mode == modeEnum)
+    if (this->d->m_mode == modeEnum)
         return;
 
-    this->m_mode = modeEnum;
+    this->d->m_mode = modeEnum;
     emit this->modeChanged(mode);
 }
 
 void RippleElement::setAmplitude(int amplitude)
 {
-    if (this->m_amplitude == amplitude)
+    if (this->d->m_amplitude == amplitude)
         return;
 
-    this->m_amplitude = amplitude;
+    this->d->m_amplitude = amplitude;
     emit this->amplitudeChanged(amplitude);
 }
 
 void RippleElement::setDecay(int decay)
 {
-    if (this->m_decay == decay)
+    if (this->d->m_decay == decay)
         return;
 
-    this->m_decay = decay;
+    this->d->m_decay = decay;
     emit this->decayChanged(decay);
 }
 
 void RippleElement::setThreshold(int threshold)
 {
-    if (this->m_threshold == threshold)
+    if (this->d->m_threshold == threshold)
         return;
 
-    this->m_threshold = threshold;
+    this->d->m_threshold = threshold;
     emit this->thresholdChanged(threshold);
 }
 
 void RippleElement::setLumaThreshold(int lumaThreshold)
 {
-    if (this->m_lumaThreshold == lumaThreshold)
+    if (this->d->m_lumaThreshold == lumaThreshold)
         return;
 
-    this->m_lumaThreshold = lumaThreshold;
+    this->d->m_lumaThreshold = lumaThreshold;
     emit this->lumaThresholdChanged(lumaThreshold);
 }
 
@@ -392,7 +457,8 @@ void RippleElement::resetLumaThreshold()
 
 AkPacket RippleElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -400,56 +466,58 @@ AkPacket RippleElement::iStream(const AkPacket &packet)
     src = src.convertToFormat(QImage::Format_ARGB32);
     QImage oFrame(src.size(), src.format());
 
-    if (packet.caps() != this->m_caps) {
-        this->m_prevFrame = QImage();
-
-        this->m_period = 0;
-        this->m_rainStat = 0;
-        this->m_dropProb = 0;
-        this->m_dropProbIncrement = 0;
-        this->m_dropsPerFrameMax = 0;
-        this->m_dropsPerFrame = 0;
-        this->m_dropPower = 0;
-
-        this->m_caps = packet.caps();
+    if (packet.caps() != this->d->m_caps) {
+        this->d->m_prevFrame = QImage();
+        this->d->m_period = 0;
+        this->d->m_rainStat = 0;
+        this->d->m_dropProb = 0;
+        this->d->m_dropProbIncrement = 0;
+        this->d->m_dropsPerFrameMax = 0;
+        this->d->m_dropsPerFrame = 0;
+        this->d->m_dropPower = 0;
+        this->d->m_caps = packet.caps();
     }
 
-    if (this->m_prevFrame.isNull()) {
+    if (this->d->m_prevFrame.isNull()) {
         oFrame = src;
-        this->m_rippleBuffer.clear();
-        this->m_rippleBuffer << QImage(src.size(), src.format());
-        this->m_rippleBuffer[0].fill(qRgba(0, 0, 0, 0));
-        this->m_rippleBuffer << QImage(src.size(), src.format());
-        this->m_rippleBuffer[1].fill(qRgba(0, 0, 0, 0));
-        this->m_curRippleBuffer = 0;
+        this->d->m_rippleBuffer.clear();
+        this->d->m_rippleBuffer << QImage(src.size(), src.format());
+        this->d->m_rippleBuffer[0].fill(qRgba(0, 0, 0, 0));
+        this->d->m_rippleBuffer << QImage(src.size(), src.format());
+        this->d->m_rippleBuffer[1].fill(qRgba(0, 0, 0, 0));
+        this->d->m_curRippleBuffer = 0;
     } else {
         QImage drops;
 
-        if (this->m_mode == RippleModeMotionDetect)
+        if (this->d->m_mode == RippleModeMotionDetect)
             // Compute the difference between previous and current frame,
             // and save it to the buffer.
-            drops = this->imageDiff(this->m_prevFrame,
-                                    src,
-                                    this->m_threshold,
-                                    this->m_lumaThreshold,
-                                    this->m_amplitude);
+            drops = this->d->imageDiff(this->d->m_prevFrame,
+                                       src,
+                                       this->d->m_threshold,
+                                       this->d->m_lumaThreshold,
+                                       this->d->m_amplitude);
         else
-            drops = this->rainDrop(src.width(), src.height(), this->m_amplitude);
+            drops = this->d->rainDrop(src.width(),
+                                      src.height(),
+                                      this->d->m_amplitude);
 
-        this->addDrops(this->m_rippleBuffer[this->m_curRippleBuffer], drops);
-        this->addDrops(this->m_rippleBuffer[1 - this->m_curRippleBuffer], drops);
+        this->d->addDrops(this->d->m_rippleBuffer[this->d->m_curRippleBuffer], drops);
+        this->d->addDrops(this->d->m_rippleBuffer[1 - this->d->m_curRippleBuffer], drops);
 
-        this->ripple(this->m_rippleBuffer[this->m_curRippleBuffer],
-                     this->m_rippleBuffer[1 - this->m_curRippleBuffer],
-                     this->m_decay);
+        this->d->ripple(this->d->m_rippleBuffer[this->d->m_curRippleBuffer],
+                        this->d->m_rippleBuffer[1 - this->d->m_curRippleBuffer],
+                        this->d->m_decay);
 
         // Apply buffer.
-        oFrame = this->applyWater(src, this->m_rippleBuffer[this->m_curRippleBuffer]);
-        this->m_curRippleBuffer = 1 - this->m_curRippleBuffer;
+        oFrame = this->d->applyWater(src,
+                                     this->d->m_rippleBuffer[this->d->m_curRippleBuffer]);
+        this->d->m_curRippleBuffer = 1 - this->d->m_curRippleBuffer;
     }
 
-    this->m_prevFrame = src.copy();
-
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    this->d->m_prevFrame = src.copy();
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+#include "moc_rippleelement.cpp"

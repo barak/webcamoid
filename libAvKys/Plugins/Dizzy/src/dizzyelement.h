@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef DIZZYELEMENT_H
 #define DIZZYELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class DizzyElementPrivate;
 
 class DizzyElement: public AkElement
 {
@@ -43,23 +44,15 @@ class DizzyElement: public AkElement
                NOTIFY strengthChanged)
 
     public:
-        explicit DizzyElement();
+        DizzyElement();
+        ~DizzyElement();
 
         Q_INVOKABLE qreal speed() const;
         Q_INVOKABLE qreal zoomRate() const;
         Q_INVOKABLE qreal strength() const;
 
     private:
-        qreal m_speed;
-        qreal m_zoomRate;
-        qreal m_strength;
-
-        QImage m_prevFrame;
-
-        void setParams(int *dx, int *dy,
-                       int *sx, int *sy,
-                       int width, int height,
-                       qreal phase, qreal zoomRate);
+        DizzyElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

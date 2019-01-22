@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,33 +18,73 @@
  */
 
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QScreen>
 #include <QTime>
-#include <akutils.h>
+#include <QTimer>
+#include <QtConcurrent>
+#include <QThreadPool>
+#include <QFuture>
+#include <QMutex>
+#include <ak.h>
+#include <akfrac.h>
+#include <akpacket.h>
+#include <akcaps.h>
+#include <akvideopacket.h>
 
 #include "qtscreendev.h"
+
+class QtScreenDevPrivate
+{
+    public:
+        QtScreenDev *self;
+        AkFrac m_fps;
+        QString m_curScreen;
+        qint64 m_id;
+        QTimer m_timer;
+        QThreadPool m_threadPool;
+        QFuture<void> m_threadStatus;
+        QMutex m_mutex;
+        AkPacket m_curPacket;
+        int m_curScreenNumber;
+        bool m_threadedRead;
+
+        QtScreenDevPrivate(QtScreenDev *self):
+            self(self),
+            m_fps(AkFrac(30000, 1001)),
+            m_id(-1),
+            m_curScreenNumber(-1),
+            m_threadedRead(true)
+        {
+        }
+
+        inline void sendPacket(const AkPacket &packet);
+};
 
 QtScreenDev::QtScreenDev():
     ScreenDev()
 {
-    this->m_fps = AkFrac(30000, 1001);
-    this->m_timer.setInterval(qRound(1.e3 * this->m_fps.invert().value()));
-    this->m_curScreenNumber = -1;
-    this->m_threadedRead = true;
+    this->d = new QtScreenDevPrivate(this);
+    this->d->m_timer.setInterval(qRound(1.e3 *
+                                        this->d->m_fps.invert().value()));
+    size_t i = 0;
+
+    for (auto screen: QGuiApplication::screens()) {
+        QObject::connect(screen,
+                         &QScreen::geometryChanged,
+                         [=]() { this->srceenResized(int(i)); });
+        i++;
+    }
 
     QObject::connect(qApp,
                      &QGuiApplication::screenAdded,
                      this,
-                     &QtScreenDev::screenCountChanged);
+                     &QtScreenDev::screenAdded);
     QObject::connect(qApp,
                      &QGuiApplication::screenRemoved,
                      this,
-                     &QtScreenDev::screenCountChanged);
-    QObject::connect(QApplication::desktop(),
-                     &QDesktopWidget::resized,
-                     this,
-                     &QtScreenDev::srceenResized);
-    QObject::connect(&this->m_timer,
+                     &QtScreenDev::screenRemoved);
+    QObject::connect(&this->d->m_timer,
                      &QTimer::timeout,
                      this,
                      &QtScreenDev::readFrame);
@@ -53,11 +93,12 @@ QtScreenDev::QtScreenDev():
 QtScreenDev::~QtScreenDev()
 {
     this->uninit();
+    delete this->d;
 }
 
 AkFrac QtScreenDev::fps() const
 {
-    return this->m_fps;
+    return this->d->m_fps;
 }
 
 QStringList QtScreenDev::medias()
@@ -72,8 +113,8 @@ QStringList QtScreenDev::medias()
 
 QString QtScreenDev::media() const
 {
-    if (!this->m_curScreen.isEmpty())
-        return this->m_curScreen;
+    if (!this->d->m_curScreen.isEmpty())
+        return this->d->m_curScreen;
 
     int screen = QGuiApplication::screens().indexOf(QGuiApplication::primaryScreen());
 
@@ -107,11 +148,11 @@ QString QtScreenDev::description(const QString &media)
 
 AkCaps QtScreenDev::caps(int stream)
 {
-    if (this->m_curScreenNumber < 0
+    if (this->d->m_curScreenNumber < 0
         || stream != 0)
         return AkCaps();
 
-    QScreen *screen = QGuiApplication::screens()[this->m_curScreenNumber];
+    QScreen *screen = QGuiApplication::screens()[this->d->m_curScreenNumber];
 
     if (!screen)
         return QString();
@@ -122,26 +163,27 @@ AkCaps QtScreenDev::caps(int stream)
     caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
     caps.width() = screen->size().width();
     caps.height() = screen->size().height();
-    caps.fps() = this->m_fps;
+    caps.fps() = this->d->m_fps;
 
     return caps.toCaps();
 }
 
-void QtScreenDev::sendPacket(const AkPacket &packet)
+void QtScreenDevPrivate::sendPacket(const AkPacket &packet)
 {
-    emit this->oStream(packet);
+    emit self->oStream(packet);
 }
 
 void QtScreenDev::setFps(const AkFrac &fps)
 {
-    if (this->m_fps == fps)
+    if (this->d->m_fps == fps)
         return;
 
-    this->m_mutex.lock();
-    this->m_fps = fps;
-    this->m_mutex.unlock();
+    this->d->m_mutex.lock();
+    this->d->m_fps = fps;
+    this->d->m_mutex.unlock();
     emit this->fpsChanged(fps);
-    this->m_timer.setInterval(qRound(1.e3 * this->m_fps.invert().value()));
+    this->d->m_timer.setInterval(qRound(1.e3 *
+                                        this->d->m_fps.invert().value()));
 }
 
 void QtScreenDev::resetFps()
@@ -155,11 +197,11 @@ void QtScreenDev::setMedia(const QString &media)
         QString screen = QString("screen://%1").arg(i);
 
         if (screen == media) {
-            if (this->m_curScreenNumber == i)
+            if (this->d->m_curScreenNumber == i)
                 break;
 
-            this->m_curScreen = screen;
-            this->m_curScreenNumber = i;
+            this->d->m_curScreen = screen;
+            this->d->m_curScreenNumber = i;
 
             emit this->mediaChanged(media);
 
@@ -172,13 +214,13 @@ void QtScreenDev::resetMedia()
 {
     int screen = QGuiApplication::screens().indexOf(QGuiApplication::primaryScreen());
 
-    if (this->m_curScreenNumber == screen)
+    if (this->d->m_curScreenNumber == screen)
         return;
 
-    this->m_curScreen = QString("screen://%1").arg(screen);
-    this->m_curScreenNumber = screen;
+    this->d->m_curScreen = QString("screen://%1").arg(screen);
+    this->d->m_curScreenNumber = screen;
 
-    emit this->mediaChanged(this->m_curScreen);
+    emit this->mediaChanged(this->d->m_curScreen);
 }
 
 void QtScreenDev::setStreams(const QList<int> &streams)
@@ -193,27 +235,28 @@ void QtScreenDev::resetStreams()
 
 bool QtScreenDev::init()
 {
-    this->m_id = Ak::id();
-    this->m_timer.setInterval(qRound(1.e3 * this->m_fps.invert().value()));
-    this->m_timer.start();
+    this->d->m_id = Ak::id();
+    this->d->m_timer.setInterval(qRound(1.e3 *
+                                        this->d->m_fps.invert().value()));
+    this->d->m_timer.start();
 
     return true;
 }
 
 bool QtScreenDev::uninit()
 {
-    this->m_timer.stop();
-    this->m_threadStatus.waitForFinished();
+    this->d->m_timer.stop();
+    this->d->m_threadStatus.waitForFinished();
 
     return true;
 }
 
 void QtScreenDev::readFrame()
 {
-    QScreen *screen = QGuiApplication::screens()[this->m_curScreenNumber];
-    this->m_mutex.lock();
-    auto fps = this->m_fps;
-    this->m_mutex.unlock();
+    auto screen = QGuiApplication::screens()[this->d->m_curScreenNumber];
+    this->d->m_mutex.lock();
+    auto fps = this->d->m_fps;
+    this->d->m_mutex.unlock();
 
     AkVideoCaps caps;
     caps.isValid() = true;
@@ -230,7 +273,7 @@ void QtScreenDev::readFrame()
                                screen->geometry().width(),
                                screen->geometry().height());
     QImage frameImg = frame.toImage().convertToFormat(QImage::Format_RGB888);
-    AkPacket packet = AkUtils::imageToPacket(frameImg, caps.toCaps());
+    auto packet = AkVideoPacket::fromImage(frameImg, caps).toPacket();
 
     if (!packet)
         return;
@@ -241,25 +284,43 @@ void QtScreenDev::readFrame()
     packet.setPts(pts);
     packet.setTimeBase(fps.invert());
     packet.setIndex(0);
-    packet.setId(this->m_id);
+    packet.setId(this->d->m_id);
 
-    if (!this->m_threadedRead) {
+    if (!this->d->m_threadedRead) {
         emit this->oStream(packet);
 
         return;
     }
 
-    if (!this->m_threadStatus.isRunning()) {
-        this->m_curPacket = packet;
+    if (!this->d->m_threadStatus.isRunning()) {
+        this->d->m_curPacket = packet;
 
-        this->m_threadStatus = QtConcurrent::run(&this->m_threadPool,
-                                                 this,
-                                                 &QtScreenDev::sendPacket,
-                                                 this->m_curPacket);
+        this->d->m_threadStatus =
+                QtConcurrent::run(&this->d->m_threadPool,
+                                  this->d,
+                                  &QtScreenDevPrivate::sendPacket,
+                                  this->d->m_curPacket);
     }
 }
 
-void QtScreenDev::screenCountChanged(QScreen *screen)
+void QtScreenDev::screenAdded(QScreen *screen)
+{
+    Q_UNUSED(screen)
+    size_t i = 0;
+
+    for (auto screen_: QGuiApplication::screens()) {
+        if (screen_ == screen)
+            QObject::connect(screen_,
+                             &QScreen::geometryChanged,
+                             [=]() { this->srceenResized(int(i)); });
+
+        i++;
+    }
+
+    emit this->mediasChanged(this->medias());
+}
+
+void QtScreenDev::screenRemoved(QScreen *screen)
 {
     Q_UNUSED(screen)
 
@@ -268,8 +329,10 @@ void QtScreenDev::screenCountChanged(QScreen *screen)
 
 void QtScreenDev::srceenResized(int screen)
 {
-    QString media = QString("screen://%1").arg(screen);
-    QWidget *widget = QApplication::desktop()->screen(screen);
+    auto media = QString("screen://%1").arg(screen);
+    auto widget = QGuiApplication::screens()[screen];
 
     emit this->sizeChanged(media, widget->size());
 }
+
+#include "moc_qtscreendev.cpp"

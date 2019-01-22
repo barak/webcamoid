@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,17 +20,20 @@
 #ifndef SCREENDEV_H
 #define SCREENDEV_H
 
-#include <ak.h>
+#include <QObject>
 
 class DesktopCaptureElement;
+class AkFrac;
+class AkCaps;
+class AkPacket;
 
 class ScreenDev: public QObject
 {
     Q_OBJECT
 
     public:
-        explicit ScreenDev(QObject *parent=nullptr);
-        virtual ~ScreenDev();
+        ScreenDev(QObject *parent=nullptr);
+        virtual ~ScreenDev() = default;
 
         Q_INVOKABLE virtual AkFrac fps() const;
         Q_INVOKABLE virtual QStringList medias();

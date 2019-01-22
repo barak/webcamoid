@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@
 #define AKFRAC_H
 
 #include <QObject>
-#include <QDebug>
 
 #include "akcommons.h"
 
 class AkFracPrivate;
+class QDataStream;
 
 class AKCOMMONS_EXPORT AkFrac: public QObject
 {
@@ -51,7 +51,7 @@ class AKCOMMONS_EXPORT AkFrac: public QObject
                NOTIFY stringChanged)
 
     public:
-        explicit AkFrac(QObject *parent=nullptr);
+        AkFrac(QObject *parent=nullptr);
         AkFrac(qint64 num, qint64 den);
         AkFrac(const QString &fracString);
         AkFrac(const AkFrac &other);

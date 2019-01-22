@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,35 +18,50 @@
  */
 
 #include <QDateTime>
+#include <QReadWriteLock>
 
 #include "clock.h"
 
+class ClockPrivate
+{
+    public:
+        QReadWriteLock m_mutex;
+        qreal m_timeDrift {0.0};
+};
+
 Clock::Clock(QObject *parent): QObject(parent)
 {
-    this->m_timeDrift = 0.0;
+    this->d = new ClockPrivate;
+}
+
+Clock::~Clock()
+{
+    delete this->d;
 }
 
 qreal Clock::clock()
 {
-    this->m_mutex.lockForRead();
+    this->d->m_mutex.lockForRead();
     qreal clock = QDateTime::currentMSecsSinceEpoch() * 1.0e-3
-                  - this->m_timeDrift;
-    this->m_mutex.unlock();
+                  - this->d->m_timeDrift;
+    this->d->m_mutex.unlock();
 
     return clock;
 }
 
 void Clock::setClock(qreal clock)
 {
-    this->m_mutex.lockForWrite();
-    this->m_timeDrift = QDateTime::currentMSecsSinceEpoch() * 1.0e-3
-                        - clock;
-    this->m_mutex.unlock();
+    this->d->m_mutex.lockForWrite();
+    this->d->m_timeDrift = QDateTime::currentMSecsSinceEpoch() * 1.0e-3
+                           - clock;
+    this->d->m_mutex.unlock();
 }
 
 void Clock::resetClock()
 {
-    this->m_mutex.lockForWrite();
-    this->m_timeDrift = 0.0;
-    this->m_mutex.unlock();
+    this->d->m_mutex.lockForWrite();
+    this->d->m_timeDrift = 0.0;
+    this->d->m_mutex.unlock();
 }
+
+#include "moc_clock.cpp"

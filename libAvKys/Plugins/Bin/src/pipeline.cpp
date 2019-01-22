@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,12 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QDebug>
+#include <QSharedPointer>
+#include <QMap>
+#include <QMetaMethod>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QJsonArray>
 #include <QPoint>
 #include <QSize>
@@ -25,35 +30,61 @@
 #include <QLine>
 #include <QDate>
 #include <QColor>
+#include <QUrl>
 #include <QBitArray>
+#include <akfrac.h>
+
 #include "pipeline.h"
 
-Pipeline::Pipeline(QObject *parent): QObject(parent)
+class PipelinePrivate
 {
+    public:
+        QMap<QString, AkElementPtr> m_elements;
+        QList<QStringList> m_links;
+        QList<QStringList> m_connections;
+        QVariantMap m_properties;
+        QString m_error;
+
+        QMetaMethod methodByName(QObject *object,
+                                 const QString &methodName,
+                                 QMetaMethod::MethodType methodType);
+        QVariant solveProperty(const QVariant &property) const;
+};
+
+Pipeline::Pipeline(QObject *parent):
+    QObject(parent)
+{
+    this->d = new PipelinePrivate;
+}
+
+Pipeline::~Pipeline()
+{
+    delete this->d;
 }
 
 bool Pipeline::parse(const QString &description)
 {
     this->cleanAll();
-    QJsonDocument jsonFile = QJsonDocument::fromJson(description.toUtf8());
+    auto jsonFile = QJsonDocument::fromJson(description.toUtf8());
 
     if (!jsonFile.isArray()) {
-        this->m_error = "Error: This is not a parseable input, "
-                        "must be an array of arrays.";
+        this->d->m_error =
+                "Error: This is not a parseable input, "
+                "must be an array of arrays.";
 
         return false;
     }
 
     // Parse main array.
-    for (const QJsonValue &pipe: jsonFile.array()) {
+    for (auto pipe: jsonFile.array()) {
         if (pipe.isArray()) {
-            QJsonArray pipeArray = pipe.toArray();
+            auto pipeArray = pipe.toArray();
             QStringList pipeStr;
 
             // parse a pipe.
             for (int element = 0; element < pipeArray.size(); element++)
                 if (pipeArray[element].isObject()) {
-                    QJsonObject elementObject = pipeArray[element].toObject();
+                    auto elementObject = pipeArray[element].toObject();
 
                     if (elementObject.contains("pluginId")) {
                         if (!elementObject["pluginId"].isString()) {
@@ -64,16 +95,17 @@ bool Pipeline::parse(const QString &description)
                                                "string: "
                                             << elementObject["alias"];
 
-                            this->m_error = error;
+                            this->d->m_error = error;
 
                             return false;
                         }
 
-                        AkElementPtr element = AkElement::create(elementObject["pluginId"].toString());
+                        auto element = AkElement::create(elementObject["pluginId"].toString());
 
                         if (!element) {
-                            this->m_error = QString("Error: Element '%1' doesn't exist.")
-                                            .arg(elementObject["pluginId"].toString());
+                            this->d->m_error =
+                                    QString("Error: Element '%1' doesn't exist.")
+                                    .arg(elementObject["pluginId"].toString());
 
                             return false;
                         }
@@ -87,21 +119,23 @@ bool Pipeline::parse(const QString &description)
                                                    "be an object: "
                                                 << elementObject["properties"];
 
-                                this->m_error = error;
+                                this->d->m_error = error;
 
                                 return false;
                             }
 
-                            QVariantMap properties = elementObject["properties"]
-                                                     .toObject()
-                                                     .toVariantMap();
+                            auto properties = elementObject["properties"]
+                                              .toObject()
+                                              .toVariantMap();
 
-                            for (const QString &key: properties.keys())
-                                element->setProperty(key.toStdString().c_str(),
-                                                     this->solveProperty(properties[key]));
+                            for (auto it = properties.begin();
+                                 it != properties.end();
+                                 it++)
+                                element->setProperty(it.key().toStdString().c_str(),
+                                                     this->d->solveProperty(it.value()));
                         }
 
-                        QString objectName = this->addElement(element);
+                        auto objectName = this->addElement(element);
 
                         if (elementObject.contains("connections")) {
                             if (!elementObject["connections"].isArray()) {
@@ -112,17 +146,17 @@ bool Pipeline::parse(const QString &description)
                                                    "be an array of arrays: "
                                                 << elementObject["connections"];
 
-                                this->m_error = error;
+                                this->d->m_error = error;
 
                                 return false;
                             }
 
-                            QVariantList connections = elementObject["connections"]
-                                                       .toArray()
-                                                       .toVariantList();
+                            auto connections = elementObject["connections"]
+                                               .toArray()
+                                               .toVariantList();
 
-                            for (const QVariant &connection: connections) {
-                                QStringList connectionStr = connection.toStringList();
+                            for (auto &connection: connections) {
+                                auto connectionStr = connection.toStringList();
 
                                 if (connectionStr.size() != 4) {
                                     QString error;
@@ -132,7 +166,7 @@ bool Pipeline::parse(const QString &description)
                                                        "contains four strings: "
                                                     << connection;
 
-                                    this->m_error = error;
+                                    this->d->m_error = error;
 
                                     return false;
                                 }
@@ -141,7 +175,7 @@ bool Pipeline::parse(const QString &description)
                                     if (connectionStr[i] == "")
                                         connectionStr[i] = objectName;
 
-                                this->m_connections.append(connectionStr);
+                                this->d->m_connections.append(connectionStr);
                             }
                         }
 
@@ -156,17 +190,18 @@ bool Pipeline::parse(const QString &description)
                                                "string: "
                                             << elementObject["alias"];
 
-                            this->m_error = error;
+                            this->d->m_error = error;
 
                             return false;
                         }
 
-                        QString ref = elementObject["alias"].toString();
+                        auto ref = elementObject["alias"].toString();
 
                         if (ref == "IN") {
                             if (element != 0) {
-                                this->m_error = "Error: 'IN' alias must be at "
-                                                "the start of a pipe.";
+                                this->d->m_error =
+                                        "Error: 'IN' alias must be at "
+                                        "the start of a pipe.";
 
                                 return false;
                             }
@@ -174,8 +209,9 @@ bool Pipeline::parse(const QString &description)
                             pipeStr << ref + ".";
                         } else if (ref == "OUT") {
                             if (element != pipeArray.size() - 1) {
-                                this->m_error = "Error: 'OUT' alias must be "
-                                                "at the end of a pipe.";
+                                this->d->m_error =
+                                        "Error: 'OUT' alias must be "
+                                        "at the end of a pipe.";
 
                                 return false;
                             }
@@ -191,32 +227,35 @@ bool Pipeline::parse(const QString &description)
                                            "must contain 'pluginId' or "
                                            "'alias' key: " << elementObject;
 
-                        this->m_error = error;
+                        this->d->m_error = error;
 
                         return false;
                     }
                 } else if (pipeArray[element].isString()) {
-                    QString connectionType = pipeArray[element].toString();
+                    auto connectionType = pipeArray[element].toString();
 
                     if (element == pipeArray.size() - 1) {
-                        this->m_error = QString("Error: Connection type to nothing: %1")
-                                        .arg(connectionType);
+                        this->d->m_error =
+                                QString("Error: Connection type to nothing: %1")
+                                .arg(connectionType);
 
                         return false;
                     }
 
                     pipeStr << connectionType + "?";
                 } else {
-                    this->m_error = QString("Error: Must be an object or a"
-                                            " connection type: %1")
-                                    .arg(pipeArray[element].toString());
+                    this->d->m_error =
+                            QString("Error: Must be an object or a"
+                                    " connection type: %1")
+                            .arg(pipeArray[element].toString());
 
                     return false;
                 }
 
             this->addLinks(pipeStr);
         } else {
-            this->m_error = "Error: An pipe must be constructed as an array of objects.";
+            this->d->m_error =
+                    "Error: An pipe must be constructed as an array of objects.";
 
             return false;
         }
@@ -226,39 +265,39 @@ bool Pipeline::parse(const QString &description)
         if (this->connectAll())
             return true;
 
-        this->m_error = "Error connecting signals and slots.";
+        this->d->m_error = "Error connecting signals and slots.";
 
         return false;
     }
 
-    this->m_error = "Error linking pipeline.";
+    this->d->m_error = "Error linking pipeline.";
 
     return false;
 }
 
 QMap<QString, AkElementPtr> Pipeline::elements() const
 {
-    return this->m_elements;
+    return this->d->m_elements;
 }
 
 QList<QStringList> Pipeline::links() const
 {
-    return this->m_links;
+    return this->d->m_links;
 }
 
 QList<QStringList> Pipeline::connections() const
 {
-    return this->m_connections;
+    return this->d->m_connections;
 }
 
 QVariantMap Pipeline::properties() const
 {
-    return this->m_properties;
+    return this->d->m_properties;
 }
 
 QString Pipeline::error() const
 {
-    return this->m_error;
+    return this->d->m_error;
 }
 
 QString Pipeline::addElement(const AkElementPtr &element)
@@ -270,47 +309,51 @@ QString Pipeline::addElement(const AkElementPtr &element)
     else
         name = element->objectName();
 
-    this->m_elements[name] = element;
+    this->d->m_elements[name] = element;
 
     return name;
 }
 
 void Pipeline::removeElement(const QString &elementName)
 {
-    QList<QStringList> connections = this->m_connections;
+    auto connections = this->d->m_connections;
 
-    for (const QStringList &connection: connections)
+    for (auto &connection: connections)
         if (connection[0] == elementName
             || connection[2] == elementName) {
-            AkElement *sender = this->m_elements[connection[0]].data();
-            AkElement *receiver = this->m_elements[connection[2]].data();
+            auto sender = this->d->m_elements[connection[0]].data();
+            auto receiver = this->d->m_elements[connection[2]].data();
 
-            QMetaMethod signal = this->methodByName(sender, connection[1], QMetaMethod::Signal);
-            QMetaMethod slot = this->methodByName(receiver, connection[3], QMetaMethod::Slot);
+            auto signal = this->d->methodByName(sender,
+                                                connection[1],
+                                                QMetaMethod::Signal);
+            auto slot = this->d->methodByName(receiver,
+                                              connection[3],
+                                              QMetaMethod::Slot);
 
             QObject::disconnect(sender, signal, receiver, slot);
-            this->m_connections.removeOne(connection);
+            this->d->m_connections.removeOne(connection);
         }
 
-    QList<QStringList> links = this->m_links;
+    auto links = this->d->m_links;
 
-    for (const QStringList &link: links)
+    for (auto &link: links)
         if (link[0] == elementName
             || link[1] == elementName) {
-            this->m_elements[link[0]]->unlink(this->m_elements[link[1]]);
-            this->m_links.removeOne(link);
+            this->d->m_elements[link[0]]->unlink(this->d->m_elements[link[1]]);
+            this->d->m_links.removeOne(link);
         }
 
-    this->m_elements.remove(elementName);
+    this->d->m_elements.remove(elementName);
 }
 
 QList<AkElementPtr> Pipeline::inputs() const
 {
     QList<AkElementPtr> inputs;
 
-    for (const QStringList &link: this->m_links)
+    for (auto &link: this->d->m_links)
         if (link[0] == "IN.")
-            inputs << this->m_elements[link[1]];
+            inputs << this->d->m_elements[link[1]];
 
     return inputs;
 }
@@ -319,9 +362,9 @@ QList<AkElementPtr> Pipeline::outputs() const
 {
     QList<AkElementPtr> outputs;
 
-    for (const QStringList &link: this->m_links)
+    for (auto &link: this->d->m_links)
         if (link[1] == "OUT.")
-            outputs << this->m_elements[link[0]];
+            outputs << this->d->m_elements[link[0]];
 
     return outputs;
 }
@@ -330,10 +373,10 @@ QList<Qt::ConnectionType> Pipeline::outputConnectionTypes() const
 {
     QList<Qt::ConnectionType> outputoutputConnectionTypes;
 
-    int index = this->staticQtMetaObject.indexOfEnumerator("ConnectionType");
-    QMetaEnum enumerator = this->staticQtMetaObject.enumerator(index);
+    int index = Pipeline::staticQtMetaObject.indexOfEnumerator("ConnectionType");
+    auto enumerator = Pipeline::staticQtMetaObject.enumerator(index);
 
-    for (const QStringList &link: this->m_links)
+    for (auto &link: this->d->m_links)
         if (link[1] == "OUT.") {
             QString connectionTypeString;
 
@@ -357,7 +400,9 @@ QList<Qt::ConnectionType> Pipeline::outputConnectionTypes() const
     return outputoutputConnectionTypes;
 }
 
-QMetaMethod Pipeline::methodByName(QObject *object, const QString &methodName, QMetaMethod::MethodType methodType)
+QMetaMethod PipelinePrivate::methodByName(QObject *object,
+                                          const QString &methodName,
+                                          QMetaMethod::MethodType methodType)
 {
     QMetaMethod rMethod;
 
@@ -376,59 +421,72 @@ QMetaMethod Pipeline::methodByName(QObject *object, const QString &methodName, Q
     return rMethod;
 }
 
-QVariant Pipeline::solveProperty(const QVariant &property) const
+QVariant PipelinePrivate::solveProperty(const QVariant &property) const
 {
     if (property.type() != QVariant::List)
         return property;
 
-    QVariantList propList = property.toList();
+    auto propList = property.toList();
 
-    if (propList.size() < 1)
+    if (propList.isEmpty())
         return QVariant(QVariantList());
 
-    QString type = propList[0].toString();
+    auto type = propList[0].toString();
 
-    if (type == "") {
+    if (type.isEmpty()) {
         QVariantList list;
 
         for (int i = 1; i < propList.size(); i++)
             list << this->solveProperty(propList[i]);
 
         return QVariant(list);
-    } else if (type == "frac") {
+    }
+
+    if (type == "frac") {
         if (propList.size() < 3)
             return QVariant::fromValue(AkFrac());
 
         return QVariant::fromValue(AkFrac(qint64(propList[1].toDouble()),
                                           qint64(propList[2].toDouble())));
-    } else if (type == "size") {
+    }
+
+    if (type == "size") {
         if (propList.size() < 3)
             return QVariant::fromValue(QSize());
 
         return QVariant::fromValue(QSize(int(propList[1].toDouble()),
                                          int(propList[2].toDouble())));
-    } else if (type == "sizeF") {
+    }
+
+    if (type == "sizeF") {
         if (propList.size() < 3)
             return QVariant::fromValue(QSizeF());
 
         return QVariant::fromValue(QSizeF(propList[1].toDouble(),
                                           propList[2].toDouble()));
-    } else if (type == "point") {
+    }
+
+    if (type == "point") {
         if (propList.size() < 3)
             return QVariant::fromValue(QPoint());
 
         return QVariant::fromValue(QPoint(int(propList[1].toDouble()),
                                           int(propList[2].toDouble())));
-    } else if (type == "pointF") {
+    }
+
+    if (type == "pointF") {
         if (propList.size() < 3)
             return QVariant::fromValue(QPointF());
 
         return QVariant::fromValue(QPointF(propList[1].toDouble(),
                                            propList[2].toDouble()));
-    } else if (type == "rect") {
+    }
+
+    if (type == "rect") {
         if (propList.size() < 3)
             return QVariant::fromValue(QRect());
-        else if (propList.size() == 3) {
+
+        if (propList.size() == 3) {
             QVariant arg1 = this->solveProperty(propList[1]);
 
             if (arg1.type() != QVariant::Point)
@@ -437,22 +495,30 @@ QVariant Pipeline::solveProperty(const QVariant &property) const
             QVariant arg2 = this->solveProperty(propList[2]);
 
             if (arg2.type() == QVariant::Point)
-                return QVariant::fromValue(QRect(arg1.toPoint(), arg2.toPoint()));
-            else if (arg2.type() == QVariant::Size)
-                return QVariant::fromValue(QRect(arg1.toPoint(), arg2.toSize()));
+                return QVariant::fromValue(QRect(arg1.toPoint(),
+                                                 arg2.toPoint()));
+
+            if (arg2.type() == QVariant::Size)
+                return QVariant::fromValue(QRect(arg1.toPoint(),
+                                                 arg2.toSize()));
 
             return QVariant::fromValue(QRect());
-        } else if (propList.size() > 4)
+        }
+
+        if (propList.size() > 4)
             return QVariant::fromValue(QRect(int(propList[1].toDouble()),
                                              int(propList[2].toDouble()),
                                              int(propList[3].toDouble()),
                                              int(propList[4].toDouble())));
 
         return QVariant::fromValue(QRect());
-    } else if (type == "rectF") {
+    }
+
+    if (type == "rectF") {
         if (propList.size() < 3)
             return QVariant::fromValue(QRectF());
-        else if (propList.size() == 3) {
+
+        if (propList.size() == 3) {
             QVariant arg1 = this->solveProperty(propList[1]);
 
             if (arg1.type() != QVariant::PointF)
@@ -461,22 +527,30 @@ QVariant Pipeline::solveProperty(const QVariant &property) const
             QVariant arg2 = this->solveProperty(propList[2]);
 
             if (arg2.type() == QVariant::PointF)
-                return QVariant::fromValue(QRectF(arg1.toPointF(), arg2.toPointF()));
-            else if (arg2.type() == QVariant::SizeF)
-                return QVariant::fromValue(QRectF(arg1.toPointF(), arg2.toSizeF()));
+                return QVariant::fromValue(QRectF(arg1.toPointF(),
+                                                  arg2.toPointF()));
+
+            if (arg2.type() == QVariant::SizeF)
+                return QVariant::fromValue(QRectF(arg1.toPointF(),
+                                                  arg2.toSizeF()));
 
             return QVariant::fromValue(QRectF());
-        } else if (propList.size() > 4)
+        }
+
+        if (propList.size() > 4)
             return QVariant::fromValue(QRectF(propList[1].toDouble(),
                                               propList[2].toDouble(),
                                               propList[3].toDouble(),
                                               propList[4].toDouble()));
 
         return QVariant::fromValue(QRectF());
-    } else if (type == "line") {
+    }
+
+    if (type == "line") {
         if (propList.size() < 3)
             return QVariant::fromValue(QLine());
-        else if (propList.size() == 3) {
+
+        if (propList.size() == 3) {
             QVariant arg1 = this->solveProperty(propList[1]);
 
             if (arg1.type() != QVariant::Point)
@@ -485,20 +559,26 @@ QVariant Pipeline::solveProperty(const QVariant &property) const
             QVariant arg2 = this->solveProperty(propList[2]);
 
             if (arg2.type() == QVariant::Point)
-                return QVariant::fromValue(QLine(arg1.toPoint(), arg2.toPoint()));
+                return QVariant::fromValue(QLine(arg1.toPoint(),
+                                                 arg2.toPoint()));
 
             return QVariant::fromValue(QLine());
-        } else if (propList.size() > 4)
+        }
+
+        if (propList.size() > 4)
             return QVariant::fromValue(QLine(int(propList[1].toDouble()),
                                              int(propList[2].toDouble()),
                                              int(propList[3].toDouble()),
                                              int(propList[4].toDouble())));
 
         return QVariant::fromValue(QLine());
-    } else if (type == "lineF") {
+    }
+
+    if (type == "lineF") {
         if (propList.size() < 3)
             return QVariant::fromValue(QLineF());
-        else if (propList.size() == 3) {
+
+        if (propList.size() == 3) {
             QVariant arg1 = this->solveProperty(propList[1]);
 
             if (arg1.type() != QVariant::PointF)
@@ -507,41 +587,53 @@ QVariant Pipeline::solveProperty(const QVariant &property) const
             QVariant arg2 = this->solveProperty(propList[2]);
 
             if (arg2.type() == QVariant::PointF)
-                return QVariant::fromValue(QLineF(arg1.toPointF(), arg2.toPointF()));
+                return QVariant::fromValue(QLineF(arg1.toPointF(),
+                                                  arg2.toPointF()));
 
             return QVariant::fromValue(QLineF());
-        } else if (propList.size() > 4)
+        }
+
+        if (propList.size() > 4)
             return QVariant::fromValue(QLineF(propList[1].toDouble(),
                                               propList[2].toDouble(),
                                               propList[3].toDouble(),
                                               propList[4].toDouble()));
 
         return QVariant::fromValue(QLineF());
-    } else if (type == "date") {
+    }
+
+    if (type == "date") {
         if (propList.size() < 4)
             return QVariant::fromValue(QDate());
 
         return QVariant::fromValue(QDate(int(propList[1].toDouble()),
                                          int(propList[2].toDouble()),
                                          int(propList[3].toDouble())));
-    } else if (type == "time") {
+    }
+
+    if (type == "time") {
         if (propList.size() < 3)
             return QVariant::fromValue(QTime());
-        else if (propList.size() == 3)
+
+        if (propList.size() == 3)
             return QVariant::fromValue(QTime(int(propList[1].toDouble()),
                                              int(propList[2].toDouble())));
-        else if (propList.size() == 4)
+
+        if (propList.size() == 4)
             return QVariant::fromValue(QTime(int(propList[1].toDouble()),
                                              int(propList[2].toDouble()),
                                              int(propList[3].toDouble())));
-        else if (propList.size() > 4)
+
+        if (propList.size() > 4)
             return QVariant::fromValue(QTime(int(propList[1].toDouble()),
                                              int(propList[2].toDouble()),
                                              int(propList[3].toDouble()),
                                              int(propList[4].toDouble())));
 
         return QVariant::fromValue(QTime());
-    } else if (type == "dateTime") {
+    }
+
+    if (type == "dateTime") {
         if (propList.size() < 2)
             return QVariant::fromValue(QDateTime());
 
@@ -554,39 +646,51 @@ QVariant Pipeline::solveProperty(const QVariant &property) const
 
         return QVariant::fromValue(QDateTime(arg1.toDate(),
                                              arg2.toTime()));
-    } else if (type == "rgb") {
+    }
+
+    if (type == "rgb") {
         if (propList.size() < 2)
             return QVariant::fromValue(qRgba(0, 0, 0, 0));
-        else if (propList.size() == 2)
+
+        if (propList.size() == 2)
             return QVariant::fromValue(QColor(propList[1].toString()).rgba());
-        else if (propList.size() == 4)
+
+        if (propList.size() == 4)
             return QVariant::fromValue(qRgb(int(propList[1].toDouble()),
                                             int(propList[2].toDouble()),
                                             int(propList[3].toDouble())));
-        else if (propList.size() > 4)
+
+        if (propList.size() > 4)
             return QVariant::fromValue(qRgba(int(propList[1].toDouble()),
                                              int(propList[2].toDouble()),
                                              int(propList[3].toDouble()),
                                              int(propList[4].toDouble())));
 
         return QVariant::fromValue(qRgba(0, 0, 0, 0));
-    } else if (type == "color") {
+    }
+
+    if (type == "color") {
         if (propList.size() < 2)
             return QVariant::fromValue(QColor());
-        else if (propList.size() == 2)
+
+        if (propList.size() == 2)
             return QVariant::fromValue(QColor(propList[1].toString()));
-        else if (propList.size() == 4)
+
+        if (propList.size() == 4)
             return QVariant::fromValue(QColor(int(propList[1].toDouble()),
                                               int(propList[2].toDouble()),
                                               int(propList[3].toDouble())));
-        else if (propList.size() > 4)
+
+        if (propList.size() > 4)
             return QVariant::fromValue(QColor(int(propList[1].toDouble()),
                                               int(propList[2].toDouble()),
                                               int(propList[3].toDouble()),
                                               int(propList[4].toDouble())));
 
         return QVariant::fromValue(QColor());
-    } else if (type == "bits") {
+    }
+
+    if (type == "bits") {
         if (propList.size() < 2)
             return QVariant::fromValue(QBitArray());
 
@@ -599,13 +703,16 @@ QVariant Pipeline::solveProperty(const QVariant &property) const
             bits.resize(bitsString.length());
 
             for (int i = 0; i < bitsString.length(); i++)
-                bits.setBit(i, (bitsString[i] == '0')? false: true);
+                bits.setBit(i, bitsString[i] != '0');
         }
 
         return QVariant::fromValue(bits);
-    } else if (type == "bytes")
+    }
+
+    if (type == "bytes")
         return QVariant::fromValue(propList[1].toByteArray());
-    else if (type == "url")
+
+    if (type == "url")
         return QVariant::fromValue(propList[1].toUrl());
 
     return QVariant(QVariantList());
@@ -616,7 +723,7 @@ void Pipeline::addLinks(const QStringList &links)
     QStringList link;
     QString connectionType = "AutoConnection";
 
-    for (QString element:  links) {
+    for (auto element:  links) {
         if (element.endsWith("?"))
             connectionType = element.remove("?");
         else
@@ -624,7 +731,7 @@ void Pipeline::addLinks(const QStringList &links)
 
         if (link.length() == 2) {
             link << connectionType;
-            this->m_links << link;
+            this->d->m_links << link;
             link.removeFirst();
             link.removeLast();
         }
@@ -633,39 +740,46 @@ void Pipeline::addLinks(const QStringList &links)
 
 bool Pipeline::linkAll()
 {
-    for (const QStringList &link: this->m_links)
+    for (auto &link: this->d->m_links)
         if (link[0] != "IN." && link[1] != "OUT.") {
-            if (!this->m_elements.contains(link[0])) {
-                this->m_error = QString("No element named '%1'").arg(link[0]);
+            if (!this->d->m_elements.contains(link[0])) {
+                this->d->m_error =
+                        QString("No element named '%1'").arg(link[0]);
 
                 return false;
-            } else if (!this->m_elements.contains(link[1])) {
-                this->m_error = QString("No element named '%1'").arg(link[1]);
-
-                return false;
-            } else {
-                QString connectionTypeString;
-
-                if (link.length() > 2)
-                    connectionTypeString = link[2];
-                else
-                    connectionTypeString = "AutoConnection";
-
-                int index = this->staticQtMetaObject.indexOfEnumerator("ConnectionType");
-                QMetaEnum enumerator = this->staticQtMetaObject.enumerator(index);
-
-                int value = enumerator.keyToValue(connectionTypeString.toStdString().c_str());
-
-                if (value < 0) {
-                    this->m_error = QString("Invalid connection type: '%1'").arg(connectionTypeString);
-
-                    return false;
-                }
-
-                Qt::ConnectionType connectionType = static_cast<Qt::ConnectionType>(value);
-
-                this->m_elements[link[0]]->link(this->m_elements[link[1]], connectionType);
             }
+
+            if (!this->d->m_elements.contains(link[1])) {
+                this->d->m_error =
+                        QString("No element named '%1'").arg(link[1]);
+
+                return false;
+            }
+
+            QString connectionTypeString;
+
+            if (link.length() > 2)
+                connectionTypeString = link[2];
+            else
+                connectionTypeString = "AutoConnection";
+
+            int index = Pipeline::staticQtMetaObject.indexOfEnumerator("ConnectionType");
+            auto enumerator = Pipeline::staticQtMetaObject.enumerator(index);
+
+            int value = enumerator.keyToValue(connectionTypeString.toStdString().c_str());
+
+            if (value < 0) {
+                this->d->m_error =
+                        QString("Invalid connection type: '%1'")
+                        .arg(connectionTypeString);
+
+                return false;
+            }
+
+            auto connectionType = static_cast<Qt::ConnectionType>(value);
+
+            this->d->m_elements[link[0]]->link(this->d->m_elements[link[1]],
+                    connectionType);
         }
 
     return true;
@@ -673,19 +787,24 @@ bool Pipeline::linkAll()
 
 bool Pipeline::unlinkAll()
 {
-    for (const QStringList &link: this->m_links)
+    for (auto &link: this->d->m_links)
         if (link[0] != "IN."
             && link[1] != "OUT.") {
-            if (!this->m_elements.contains(link[0])) {
-                this->m_error = QString("No element named '%1'").arg(link[0]);
+            if (!this->d->m_elements.contains(link[0])) {
+                this->d->m_error =
+                        QString("No element named '%1'").arg(link[0]);
 
                 return false;
-            } else if (!this->m_elements.contains(link[1])) {
-                this->m_error = QString("No element named '%1'").arg(link[1]);
+            }
+
+            if (!this->d->m_elements.contains(link[1])) {
+                this->d->m_error =
+                        QString("No element named '%1'").arg(link[1]);
 
                 return false;
-            } else
-                this->m_elements[link[0]]->unlink(this->m_elements[link[1]]);
+            }
+
+            this->d->m_elements[link[0]]->unlink(this->d->m_elements[link[1]]);
         }
 
     return true;
@@ -693,24 +812,29 @@ bool Pipeline::unlinkAll()
 
 bool Pipeline::connectAll()
 {
-    for (const QStringList &connection: this->m_connections) {
-        AkElement *sender = this->m_elements[connection[0]].data();
-        AkElement *receiver = this->m_elements[connection[2]].data();
+    for (auto &connection: this->d->m_connections) {
+        auto sender = this->d->m_elements[connection[0]].data();
+        auto receiver = this->d->m_elements[connection[2]].data();
 
         if (!sender) {
-            this->m_error = QString("No element named '%1'").arg(connection[0]);
+            this->d->m_error =
+                    QString("No element named '%1'").arg(connection[0]);
 
             return false;
         }
 
         if (!receiver) {
-            this->m_error = QString("No element named '%1'").arg(connection[2]);
+            this->d->m_error = QString("No element named '%1'").arg(connection[2]);
 
             return false;
         }
 
-        QMetaMethod signal = this->methodByName(sender, connection[1], QMetaMethod::Signal);
-        QMetaMethod slot = this->methodByName(receiver, connection[3], QMetaMethod::Slot);
+        auto signal = this->d->methodByName(sender,
+                                            connection[1],
+                                            QMetaMethod::Signal);
+        auto slot = this->d->methodByName(receiver,
+                                          connection[3],
+                                          QMetaMethod::Slot);
 
         QObject::connect(sender, signal, receiver, slot);
     }
@@ -720,24 +844,30 @@ bool Pipeline::connectAll()
 
 bool Pipeline::disconnectAll()
 {
-    for (const QStringList &connection: this->m_connections) {
-        AkElement *sender = this->m_elements[connection[0]].data();
-        AkElement *receiver = this->m_elements[connection[2]].data();
+    for (auto &connection: this->d->m_connections) {
+        auto sender = this->d->m_elements[connection[0]].data();
+        auto receiver = this->d->m_elements[connection[2]].data();
 
         if (!sender) {
-            this->m_error = QString("No element named '%1'.").arg(connection[0]);
+            this->d->m_error =
+                    QString("No element named '%1'.").arg(connection[0]);
 
             return false;
         }
 
         if (!receiver) {
-            this->m_error = QString("No element named '%1'.").arg(connection[2]);
+            this->d->m_error =
+                    QString("No element named '%1'.").arg(connection[2]);
 
             return false;
         }
 
-        QMetaMethod signal = this->methodByName(sender, connection[1], QMetaMethod::Signal);
-        QMetaMethod slot = this->methodByName(receiver, connection[3], QMetaMethod::Slot);
+        auto signal = this->d->methodByName(sender,
+                                            connection[1],
+                                            QMetaMethod::Signal);
+        auto slot = this->d->methodByName(receiver,
+                                          connection[3],
+                                          QMetaMethod::Slot);
 
         QObject::disconnect(sender, signal, receiver, slot);
     }
@@ -751,47 +881,49 @@ void Pipeline::cleanAll()
     this->disconnectAll();
     this->resetElements();
     this->resetLinks();
-    this->m_connections.clear();
+    this->d->m_connections.clear();
     this->resetProperties();
     this->resetError();
 }
 
 void Pipeline::setElements(const QMap<QString, AkElementPtr> &elements)
 {
-    this->m_elements = elements;
+    this->d->m_elements = elements;
 }
 
 void Pipeline::setLinks(const QList<QStringList> &links)
 {
-    this->m_links = links;
+    this->d->m_links = links;
 }
 
 void Pipeline::setProperties(const QVariantMap &properties)
 {
-    this->m_properties = properties;
+    this->d->m_properties = properties;
 }
 
 void Pipeline::setError(const QString &error)
 {
-    this->m_error = error;
+    this->d->m_error = error;
 }
 
 void Pipeline::resetElements()
 {
-    this->setElements(QMap<QString, AkElementPtr>());
+    this->setElements({});
 }
 
 void Pipeline::resetLinks()
 {
-    this->setLinks(QList<QStringList>());
+    this->setLinks({});
 }
 
 void Pipeline::resetProperties()
 {
-    this->setProperties(QVariantMap());
+    this->setProperties({});
 }
 
 void Pipeline::resetError()
 {
-    this->setError("");
+    this->setError({});
 }
+
+#include "moc_pipeline.cpp"

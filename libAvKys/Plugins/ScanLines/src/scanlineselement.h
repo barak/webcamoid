@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,10 @@
 #ifndef SCANLINESELEMENT_H
 #define SCANLINESELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <qrgb.h>
+#include <akelement.h>
+
+class ScanLinesElementPrivate;
 
 class ScanLinesElement: public AkElement
 {
@@ -43,16 +45,15 @@ class ScanLinesElement: public AkElement
                NOTIFY hideColorChanged)
 
     public:
-        explicit ScanLinesElement();
+        ScanLinesElement();
+        ~ScanLinesElement();
 
         Q_INVOKABLE int showSize() const;
         Q_INVOKABLE int hideSize() const;
         Q_INVOKABLE QRgb hideColor() const;
 
     private:
-        int m_showSize;
-        int m_hideSize;
-        QRgb m_hideColor;
+        ScanLinesElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

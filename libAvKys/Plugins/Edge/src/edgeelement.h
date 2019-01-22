@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@
 #ifndef EDGEELEMENT_H
 #define EDGEELEMENT_H
 
-#include <ak.h>
-#include <akutils.h>
+#include <akelement.h>
+
+class EdgeElementPrivate;
 
 class EdgeElement: public AkElement
 {
@@ -53,7 +54,7 @@ class EdgeElement: public AkElement
                NOTIFY invertChanged)
 
     public:
-        explicit EdgeElement();
+        EdgeElement();
         ~EdgeElement();
 
         Q_INVOKABLE bool canny() const;
@@ -63,26 +64,7 @@ class EdgeElement: public AkElement
         Q_INVOKABLE bool invert() const;
 
     private:
-        bool m_canny;
-        int m_thLow;
-        int m_thHi;
-        bool m_equalize;
-        bool m_invert;
-
-        QVector<quint8> equalize(const QImage &image);
-        void sobel(int width, int height, const QVector<quint8> &gray,
-                   QVector<quint16> &gradient, QVector<quint8> &direction) const;
-        QVector<quint16> thinning(int width, int height,
-                                  const QVector<quint16> &gradient,
-                                  const QVector<quint8> &direction) const;
-        QVector<quint8> threshold(int width, int height,
-                                  const QVector<quint16> &image,
-                                  const QVector<int> &thresholds,
-                                  const QVector<int> &map) const;
-        void trace(int width, int height, QVector<quint8> &canny,
-                   int x, int y) const;
-        QVector<quint8> hysteresisThresholding(int width, int height,
-                                               const QVector<quint8> &thresholded) const;
+        EdgeElementPrivate *d;
 
     protected:
         QString controlInterfaceProvide(const QString &controlId) const;

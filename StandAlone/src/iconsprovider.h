@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,18 +22,20 @@
 
 #include <QQuickImageProvider>
 
+class IconsProviderPrivate;
+
 class IconsProvider: public QQuickImageProvider
 {
     public:
         IconsProvider();
-        QPixmap requestPixmap(const QString &id, QSize *size, const QSize &requestedSize);
+        ~IconsProvider();
+
+        QPixmap requestPixmap(const QString &id,
+                              QSize *size,
+                              const QSize &requestedSize);
 
     private:
-        QList<QSize> m_availableSizes;
-
-        QSize nearestSize(const QSize &requestedSize);
-        QSize nearestSize(const QList<QSize> &availableSizes,
-                          const QSize &requestedSize);
+        IconsProviderPrivate *d;
 };
 
 #endif // ICONSPROVIDER_H

@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,10 +21,15 @@ CONFIG += console c++11
 DEFINES += __STDC_CONSTANT_MACROS NO_DSHOW_STRSAFE
 
 LIBS += \
-    -lstrmiids \
-    -luuid \
+    -ladvapi32 \
+    -lkernel32 \
     -lole32 \
-    -loleaut32
+    -loleaut32 \
+    -lshell32 \
+    -lstrmiids \
+    -luser32 \
+    -luuid \
+    -lwinmm
 
 SOURCES = \
     test.cpp

@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +20,9 @@
 #ifndef AKELEMENT_H
 #define AKELEMENT_H
 
-#include <QStringList>
-#include <QQmlEngine>
-#include <QQmlComponent>
-#include <QQmlContext>
+#include <QObject>
 
-#include "akaudiopacket.h"
-#include "akvideopacket.h"
+#include "akcommons.h"
 
 #define akSend(packet) { \
     if (packet) \
@@ -37,6 +33,12 @@
 
 class AkElement;
 class AkElementPrivate;
+class AkPacket;
+class AkAudioPacket;
+class AkVideoPacket;
+class QDataStream;
+class QQmlEngine;
+class QQmlContext;
 
 typedef QSharedPointer<AkElement> AkElementPtr;
 
@@ -63,7 +65,7 @@ class AKCOMMONS_EXPORT AkElement: public QObject
             ElementStatePlaying
         };
 
-        explicit AkElement(QObject *parent=nullptr);
+        AkElement(QObject *parent=nullptr);
         virtual ~AkElement();
 
         Q_INVOKABLE QString pluginId() const;

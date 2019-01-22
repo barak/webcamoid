@@ -1,5 +1,5 @@
 # Webcamoid, webcam capture application.
-# Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+# Copyright (C) 2016  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-exists(commons.pri) {
-    include(commons.pri)
+exists(akcommons.pri) {
+    include(akcommons.pri)
 } else {
-    exists(../../../../commons.pri) {
-        include(../../../../commons.pri)
+    exists(../../../../akcommons.pri) {
+        include(../../../../akcommons.pri)
     } else {
-        error("commons.pri file not found.")
+        error("akcommons.pri file not found.")
     }
 }
 
@@ -40,7 +40,7 @@ INCLUDEPATH += \
     ../../../../Lib/src \
     ../
 
-LIBS += -L$${PWD}/../../../../Lib/ -l$${COMMONS_TARGET}
+LIBS += -L$${OUT_PWD}/../../../../Lib/$${BIN_DIR} -l$${COMMONS_TARGET}
 
 OTHER_FILES += pspec.json
 
@@ -59,24 +59,12 @@ isEmpty(FFMPEGLIBS) {
         libavutil
 }
 
-CONFIG(config_ffmpeg_avcodec_extracodecformats): \
-    DEFINES += HAVE_EXTRACODECFORMATS
-CONFIG(config_ffmpeg_avcodec_freecontext): \
-    DEFINES += HAVE_FREECONTEXT
-CONFIG(config_ffmpeg_avcodec_packetref): \
-    DEFINES += HAVE_PACKETREF
-CONFIG(config_ffmpeg_avcodec_rescalets): \
-    DEFINES += HAVE_RESCALETS
 CONFIG(config_ffmpeg_avcodec_sendrecv): \
     DEFINES += HAVE_SENDRECV
-CONFIG(config_ffmpeg_avformat_allocoutputcontext): \
-    DEFINES += HAVE_ALLOCOUTPUTCONTEXT
 CONFIG(config_ffmpeg_avformat_codecpar): \
     DEFINES += HAVE_CODECPAR
 CONFIG(config_ffmpeg_avutil_extraoptions): \
     DEFINES += HAVE_EXTRAOPTIONS
-CONFIG(config_ffmpeg_avutil_framealloc): \
-    DEFINES += HAVE_FRAMEALLOC
 
 QT += qml concurrent
 
@@ -88,10 +76,9 @@ SOURCES = \
     src/videostream.cpp \
     src/audiostream.cpp
 
-DESTDIR = $${OUT_PWD}/../../submodules/MultiSink
+DESTDIR = $${OUT_PWD}/../../$${BIN_DIR}/submodules/MultiSink
 
 TEMPLATE = lib
 
 INSTALLS += target
-
-target.path = $${LIBDIR}/$${COMMONS_TARGET}/submodules/MultiSink
+target.path = $${INSTALLPLUGINSDIR}/submodules/MultiSink

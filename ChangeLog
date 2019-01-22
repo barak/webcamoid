@@ -1,11 +1,35 @@
+Webcamoid 8.5.0:
+
+- UI ported to QtQuick Controls 2.
+- Reworked virtual camera for GNU/Linux, Mac and Windows.
+- Qt 5.9.0 as minimum requirement.
+- Faster build and smaller binaries.
+- Added build info.
+- Fixed crash and many other bugs in FreeBSD.
+- Added support for Microsoft Media Foundation capture.
+- Fixed shadow build.
+- Added support for FFmpeg 4.0.
+- Fixed bug when reading/setting webcam controls.
+- Added support for akvcam, default in-house virtual camera solution for
+  GNU/Linux.
+- Fixed rendering problems in Mac.
+- Added support for FreeBSD in deploy scripts.
+- Fixed many bugs when recording audio and video.
+- Default recording video bitrate is now 1.5Mbps.
+- Fixed audio support in Windows.
+- Removed 'su' and 'sudo' as root method when installing the virtual camera in
+  GNU/Linux.
+- Removed Syphon support for Mac.
+- Improved translations.
+
 Webcamoid 8.1.0:
 
 - Improved startup time.
-- Deadlock when audio recording is enabled my be solved now. Audio recording
+- Deadlock when audio recording is enabled may be solved now. Audio recording
   enabled by default again.
 - Added Syphon support for Mac.
 - Added AVFoundation support for desktop capture in Mac.
-- Binany packages size shrinked.
+- Binary packages size shrinked.
 - Hopefully, fixed many segfaults in many platforms.
 
 Webcamoid 8.0.0:
@@ -43,7 +67,7 @@ Webcamoid 7.2.0:
 - Added GIF recording support (FFmpeg only).
 - Improved webcam format selection.
 - UI improvements.
-- Included QtQuick software renderer in intallation (Windows).
+- Included QtQuick software renderer in installation (Windows).
 - Added play on start option.
 - Added C++11 support for Clang build.
 

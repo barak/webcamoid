@@ -1,5 +1,5 @@
 /* Webcamoid, webcam capture application.
- * Copyright (C) 2011-2017  Gonzalo Exequiel Pedone
+ * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,46 +17,44 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <QPainter>
 #include <QTime>
+#include <QPainter>
+#include <QQmlContext>
+#include <akvideopacket.h>
 
 #include "scrollelement.h"
 
+class ScrollElementPrivate
+{
+    public:
+        qreal m_speed {0.25};
+        qreal m_noise {0.1};
+        qreal m_offset {0.0};
+        QSize m_curSize;
+
+        QImage generateNoise(const QSize &size, qreal persent) const;
+};
+
 ScrollElement::ScrollElement(): AkElement()
 {
-    this->m_speed = 0.05;
-    this->m_noise = 0.1;
-    this->m_offset = 0.0;
+    this->d = new ScrollElementPrivate;
 
     qsrand(uint(QTime::currentTime().msec()));
 }
 
+ScrollElement::~ScrollElement()
+{
+    delete this->d;
+}
+
 qreal ScrollElement::speed() const
 {
-    return this->m_speed;
+    return this->d->m_speed;
 }
 
 qreal ScrollElement::noise() const
 {
-    return this->m_noise;
-}
-
-QImage ScrollElement::generateNoise(const QSize &size, qreal persent)
-{
-    QImage noise = QImage(size, QImage::Format_ARGB32);
-    noise.fill(0);
-
-    int peper = int(persent * size.width() * size.height());
-
-    for (int i = 0; i < peper; i++) {
-        int gray = qrand() % 256;
-        int alpha = qrand() % 256;
-        int x = qrand() % noise.width();
-        int y = qrand() % noise.height();
-        noise.setPixel(x, y, qRgba(gray, gray, gray, alpha));
-    }
-
-    return noise;
+    return this->d->m_noise;
 }
 
 QString ScrollElement::controlInterfaceProvide(const QString &controlId) const
@@ -77,25 +75,25 @@ void ScrollElement::controlInterfaceConfigure(QQmlContext *context,
 
 void ScrollElement::setSpeed(qreal speed)
 {
-    if (qFuzzyCompare(speed, this->m_speed))
+    if (qFuzzyCompare(speed, this->d->m_speed))
         return;
 
-    this->m_speed = speed;
+    this->d->m_speed = speed;
     emit this->speedChanged(speed);
 }
 
 void ScrollElement::setNoise(qreal noise)
 {
-    if (qFuzzyCompare(this->m_noise, noise))
+    if (qFuzzyCompare(this->d->m_noise, noise))
         return;
 
-    this->m_noise = noise;
+    this->d->m_noise = noise;
     emit this->noiseChanged(noise);
 }
 
 void ScrollElement::resetSpeed()
 {
-    this->setSpeed(0.05);
+    this->setSpeed(0.25);
 }
 
 void ScrollElement::resetNoise()
@@ -105,7 +103,8 @@ void ScrollElement::resetNoise()
 
 AkPacket ScrollElement::iStream(const AkPacket &packet)
 {
-    QImage src = AkUtils::packetToImage(packet);
+    AkVideoPacket videoPacket(packet);
+    auto src = videoPacket.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -113,12 +112,12 @@ AkPacket ScrollElement::iStream(const AkPacket &packet)
     src = src.convertToFormat(QImage::Format_ARGB32);
     QImage oFrame = QImage(src.size(), src.format());
 
-    if (src.size() != this->m_curSize) {
-        this->m_offset = 0.0;
-        this->m_curSize = src.size();
+    if (src.size() != this->d->m_curSize) {
+        this->d->m_offset = 0.0;
+        this->d->m_curSize = src.size();
     }
 
-    int offset = int(this->m_offset);
+    int offset = int(this->d->m_offset);
 
     memcpy(oFrame.scanLine(0),
            src.constScanLine(src.height() - offset - 1),
@@ -130,17 +129,37 @@ AkPacket ScrollElement::iStream(const AkPacket &packet)
 
     QPainter painter;
     painter.begin(&oFrame);
-    QImage noise = this->generateNoise(oFrame.size(), this->m_noise);
+    QImage noise = this->d->generateNoise(oFrame.size(), this->d->m_noise);
     painter.drawImage(0, 0, noise);
     painter.end();
 
-    this->m_offset += this->m_speed * oFrame.height();
+    this->d->m_offset += this->d->m_speed * oFrame.height();
 
-    if (this->m_offset >= qreal(src.height()))
-        this->m_offset = 0.0;
-    else if (this->m_offset < 0.0)
-        this->m_offset = src.height();
+    if (this->d->m_offset >= qreal(src.height()))
+        this->d->m_offset = 0.0;
+    else if (this->d->m_offset < 0.0)
+        this->d->m_offset = src.height();
 
-    AkPacket oPacket = AkUtils::imageToPacket(oFrame, packet);
+    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
     akSend(oPacket)
 }
+
+QImage ScrollElementPrivate::generateNoise(const QSize &size, qreal persent) const
+{
+    QImage noise(size, QImage::Format_ARGB32);
+    noise.fill(0);
+
+    int peper = int(persent * size.width() * size.height());
+
+    for (int i = 0; i < peper; i++) {
+        int gray = qrand() % 256;
+        int alpha = qrand() % 256;
+        int x = qrand() % noise.width();
+        int y = qrand() % noise.height();
+        noise.setPixel(x, y, qRgba(gray, gray, gray, alpha));
+    }
+
+    return noise;
+}
+
+#include "moc_scrollelement.cpp"
