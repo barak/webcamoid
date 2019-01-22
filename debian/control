@@ -3,10 +3,12 @@ Section: video
 Priority: optional
 Maintainer: Herbert Parentes Fortes Neto <hpfn@debian.org>
 Build-Depends: debhelper (>= 11),
+               libasound2-dev,
                libavcodec-dev (>= 4.0),
                libavdevice-dev (>= 4.0),
                libavformat-dev (>= 4.0),
                libavutil-dev (>= 4.0),
+               libgl1-mesa-dev,
                libgstreamer-plugins-base1.0-dev,
                libjack-dev,
                libpulse-dev,
