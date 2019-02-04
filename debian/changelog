@@ -1,3 +1,9 @@
+webcamoid (8.5.0+dfsg-2) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Mon, 04 Feb 2019 18:20:38 -0200
+
 webcamoid (8.5.0+dfsg-1) experimental; urgency=medium
 
   * New upstream version 8.5.0+dfsg
