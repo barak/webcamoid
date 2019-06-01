@@ -30,3 +30,4 @@ override_dh_clean:
 	rm -f ./libAvKys/config.log
 	rm -f ./libAvKys/.qmake.cache
 	rm -f ./libAvKys/.qmake.stash
+	rm -f StandAlone/share/man/webcamoid.1.gz
