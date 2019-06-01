@@ -18,18 +18,52 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-if [ "${TRAVIS_OS_NAME}" = linux ] && [ -z "${ANDROID_BUILD}" ]; then
-    EXEC="docker exec ${DOCKERSYS}"
+if [ "${ARCH_ROOT_BUILD}" = 1 ]; then
+    EXEC='sudo ./root.x86_64/bin/arch-chroot root.x86_64'
+elif [ "${TRAVIS_OS_NAME}" = linux ] && [ -z "${ANDROID_BUILD}" ]; then
+    if [ -z "${DAILY_BUILD}" ]; then
+        EXEC="docker exec ${DOCKERSYS}"
+    else
+        EXEC="docker exec -e DAILY_BUILD=1 ${DOCKERSYS}"
+    fi
 fi
+
+DEPLOYSCRIPT=deployscript.sh
 
 if [ "${ANDROID_BUILD}" = 1 ]; then
     echo "Deploy not supported for Android"
-elif [ "${TRAVIS_OS_NAME}" = linux ]; then
-
-    DEPLOYSCRIPT=dockerbuild.sh
+elif [ "${ARCH_ROOT_BUILD}" = 1 ]; then
+    sudo mount --bind root.x86_64 root.x86_64
+    sudo mount --bind $HOME root.x86_64/$HOME
 
     cat << EOF > ${DEPLOYSCRIPT}
-#!/bin/bash
+#!/bin/sh
+
+export LC_ALL=C
+export HOME=$HOME
+export PATH="\$PWD/.local/bin:\$PATH"
+export WINEPREFIX=/opt/.wine
+cd $TRAVIS_BUILD_DIR
+EOF
+
+    if [ ! -z "${DAILY_BUILD}" ]; then
+        cat << EOF >> ${DEPLOYSCRIPT}
+export DAILY_BUILD=1
+EOF
+    fi
+
+    cat << EOF >> ${DEPLOYSCRIPT}
+python ports/deploy/deploy.py
+EOF
+    chmod +x ${DEPLOYSCRIPT}
+    sudo cp -vf ${DEPLOYSCRIPT} root.x86_64/$HOME/
+
+    ${EXEC} bash $HOME/${DEPLOYSCRIPT}
+    sudo umount root.x86_64/$HOME
+    sudo umount root.x86_64
+elif [ "${TRAVIS_OS_NAME}" = linux ]; then
+    cat << EOF > ${DEPLOYSCRIPT}
+#!/bin/sh
 
 export PATH="\$PWD/.local/bin:\$PATH"
 xvfb-run --auto-servernum python3 ports/deploy/deploy.py

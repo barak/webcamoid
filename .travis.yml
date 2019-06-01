@@ -6,139 +6,234 @@ cache:
 
 env:
   global:
-    - QTVER=5.12.0
+    - QTVER=5.12.1
     - PPAQTVER=512
     - QTIFWVER=3.0.6
     - APPIMAGEVER=11
+    - ARCH_ROOT_DATE=2019.02.01
+    - ARCH_ROOT_URL=https://mirror.rackspace.com/archlinux
+    - FFMPEG_VERSION=4.1.1
+    # BT_KEY
+    - secure: "sFnbUeX1mP/G4LVT56VDFyDgWS8KKy7qSlmhNg6YRJuhtfcAoiBjJrO300TREg46nUK3QAwSHt/py3F5WSdHcZ2dniV8ON+zLL0qcVxTglB2DHVUeCStYykTqoV3uZoxYYPHXCd1KTW3ZzdSpCaHVl39REtM0R4tMARNkl3lYhEsS7M6TCjispTLLl9qXdSp86IvtMCPx3mcbjcY59pk/fwwUgneRbocD+7DyVZfFvF98UXh5VGPIKry65DLhNowqsDtBZqYqlAih2LAOuJPxCQKe4pEdPZm81kzGduIV1X+AjBEv7W5K8IXdNm4EG7gMS74i4XW4p4Jn5Axr8An4kTsZnTaGUE0t2RjCJicoa3+CkYJTRDM6CoXoBBJQoerued3MVrH7DvuYtslyrmW4nJu8bTNmVGjS8zuPq4QbfZmekxzbMQWjuEcsw7iwAHIf/hDyRtUUX/T4ioDAU5C72Wx6XSSlSlEDCeEBuM3jnsS5zf54g39mgZkPGlbTaRrdYuxmmDBvh9mYzbb1ANcUW3XEu5rA+j69xOeeVLQVbXZJd04zudBzFg5Kyp2cGNI1KC+27ZOvSTRtrG+V7Ham9lEisJ01tUASV0gdUUSSYHPvD8z6bfJF30Gj/W7hBXqOzXpo2SQ/jPHQ4O68tlUlVBYu2HcCCjHncb25NJWpMk="
 
 matrix:
   include:
   - os: linux
-    sudo: required
-    services:
-      - docker
+    dist: xenial
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=debian:testing
+      - ARCH_ROOT_BUILD=1
   - os: linux
-    sudo: required
-    services:
-      - docker
+    dist: xenial
     compiler: clang
     env:
-      - DOCKERSYS=debian DOCKERIMG=debian:testing
+      - ARCH_ROOT_BUILD=1
   - os: linux
-    sudo: required
-    services:
-      - docker
+    dist: xenial
     compiler: gcc
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:27 FEDORAVER=27
+      - ARCH_ROOT_BUILD=1
+      - ARCH_ROOT_MINGW=x86_64
+      - DAILY_BUILD=1
   - os: linux
-    sudo: required
-    services:
-      - docker
-    compiler: clang
-    env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:27 FEDORAVER=27
-  - os: linux
-    sudo: required
-    services:
-      - docker
+    dist: xenial
     compiler: gcc
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:28 FEDORAVER=28
+      - ARCH_ROOT_BUILD=1
+      - ARCH_ROOT_MINGW=i686
+      - DAILY_BUILD=1
   - os: linux
-    sudo: required
-    services:
-      - docker
-    compiler: clang
+    dist: xenial
+    compiler: gcc
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:28 FEDORAVER=28
+      - ARCH_ROOT_BUILD=1
+      - ARCH_ROOT_MINGW=x86_64
+      - RELEASE_BUILD=1
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    env:
+      - ARCH_ROOT_BUILD=1
+      - ARCH_ROOT_MINGW=i686
+      - RELEASE_BUILD=1
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:rawhide FEDORAVER=rawhide
+      - DOCKERSYS=debian
+      - DOCKERIMG=debian:testing
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=fedora DOCKERIMG=fedora:rawhide FEDORAVER=rawhide
+      - DOCKERSYS=debian
+      - DOCKERIMG=debian:testing
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=opensuse DOCKERIMG=opensuse:tumbleweed
+      - DOCKERSYS=fedora
+      - DOCKERIMG=fedora:27
+      - FEDORAVER=27
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=opensuse DOCKERIMG=opensuse:tumbleweed
+      - DOCKERSYS=fedora
+      - DOCKERIMG=fedora:27
+      - FEDORAVER=27
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:xenial
+      - DOCKERSYS=fedora
+      - DOCKERIMG=fedora:28
+      - FEDORAVER=28
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:xenial
+      - DOCKERSYS=fedora
+      - DOCKERIMG=fedora:28
+      - FEDORAVER=28
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:bionic
+      - DOCKERSYS=fedora
+      - DOCKERIMG=fedora:rawhide
+      - FEDORAVER=rawhide
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:bionic
+      - DOCKERSYS=fedora
+      - DOCKERIMG=fedora:rawhide
+      - FEDORAVER=rawhide
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:cosmic
+      - DOCKERSYS=opensuse
+      - DOCKERIMG=opensuse/tumbleweed
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:cosmic
+      - DOCKERSYS=opensuse
+      - DOCKERIMG=opensuse/tumbleweed
   - os: linux
     sudo: required
     services:
       - docker
     compiler: gcc
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:disco
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:xenial
+      - DAILY_BUILD=1
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:xenial
+      - RELEASE_BUILD=1
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:xenial
   - os: linux
     sudo: required
     services:
       - docker
     compiler: clang
     env:
-      - DOCKERSYS=debian DOCKERIMG=ubuntu:disco
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:xenial
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:bionic
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:bionic
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:cosmic
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:cosmic
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: gcc
+    env:
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:disco
+  - os: linux
+    sudo: required
+    services:
+      - docker
+    compiler: clang
+    env:
+      - DOCKERSYS=debian
+      - DOCKERIMG=ubuntu:disco
+  - os: osx
+    osx_image: xcode9.1
+    compiler: clang
+    env:
+      - DAILY_BUILD=1
+  - os: osx
+    osx_image: xcode9.1
+    compiler: clang
+    env:
+      - RELEASE_BUILD=1
   - os: osx
     osx_image: xcode9.1
     compiler: clang
@@ -207,7 +302,7 @@ matrix:
 
 before_install: |
   if [ -z "${ANDROID_BUILD}" ]; then
-    if [ "${TRAVIS_OS_NAME}" = linux ]; then
+    if [ "${TRAVIS_OS_NAME}" = linux ] && [ -z "${ARCH_ROOT_BUILD}" ]; then
       docker pull ${DOCKERIMG}
       docker ps -a
       docker run -it -d -v ${PWD}:/sources -v $HOME/.ccache:/ccache -e CCACHE_DIR=/ccache -w /sources --name ${DOCKERSYS} ${DOCKERIMG} /bin/sh
@@ -226,6 +321,9 @@ install:
 before_script: |
   if [ "${ANDROID_BUILD}" = 1 ]; then
     export COMPILESPEC=android-${COMPILER}
+  elif [ "${ARCH_ROOT_BUILD}" = 1 ] && [ ! -z "${ARCH_ROOT_MINGW}" ]; then
+    export CXX=${ARCH_ROOT_MINGW}-w64-mingw32-g++
+    export COMPILESPEC=win32-g++
   elif [ "${TRAVIS_OS_NAME}" = linux ]; then
     if [ "${CXX}" = g++ ]; then
       export COMPILESPEC=linux-g++
@@ -248,6 +346,8 @@ script:
 after_success:
   - chmod +x ports/ci/travis/deploy.sh
   - ports/ci/travis/deploy.sh
+  - chmod +x ports/ci/travis/upload.sh
+  - ports/ci/travis/upload.sh
 
 branches:
   only:

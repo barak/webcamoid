@@ -308,7 +308,7 @@
         <translation>המרת שמע</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="150"/>
+        <location filename="../qml/GeneralConfig.qml" line="149"/>
         <source>Virtual camera driver</source>
         <translation>מנהל התקן וירטואלי למצלמה</translation>
     </message>
@@ -367,6 +367,14 @@
         <location filename="../qml/MediaConfig.qml" line="98"/>
         <source>Remove</source>
         <translation>הסרה</translation>
+    </message>
+</context>
+<context>
+    <name>MediaTools</name>
+    <message>
+        <location filename="../../src/mediatools.cpp" line="223"/>
+        <source>Daily Build</source>
+        <translation>מהדורה יומית</translation>
     </message>
 </context>
 <context>
@@ -2049,22 +2057,22 @@
         <translation>חום</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="192"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="215"/>
         <source>Video format</source>
         <translation>תסדיר וידאו</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="222"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="253"/>
         <source>Resolution</source>
         <translation>רזולוציה</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="264"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="295"/>
         <source>FPS</source>
         <translation>שקופיות לשנייה</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="318"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="344"/>
         <source>Reset</source>
         <translation>איפוס</translation>
     </message>

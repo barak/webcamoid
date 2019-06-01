@@ -70,7 +70,6 @@ class MediaWriterFFmpegGlobal
         QMap<QString, QVariantMap> m_codecDefaults;
 
         MediaWriterFFmpegGlobal();
-
         inline AvMediaTypeStrMap initAvMediaTypeStrMap();
         inline VectorVideoCaps initDVSupportedCaps();
         inline VectorVideoCaps initDNxHDSupportedCaps();
@@ -105,11 +104,7 @@ class MediaWriterFFmpegPrivate
         QMap<int, AbstractStreamPtr> m_streamsMap;
         bool m_isRecording {false};
 
-        MediaWriterFFmpegPrivate(MediaWriterFFmpeg *self):
-            self(self)
-        {
-        }
-
+        explicit MediaWriterFFmpegPrivate(MediaWriterFFmpeg *self);
         QString guessFormat();
         QVariantList parseOptions(const AVClass *avClass) const;
         AVDictionary *formatContextOptions(AVFormatContext *formatContext,
@@ -163,7 +158,7 @@ QVariantList MediaWriterFFmpeg::streams() const
 {
     QVariantList streams;
 
-    for (const QVariantMap &stream: this->d->m_streamConfigs)
+    for (auto &stream: this->d->m_streamConfigs)
         streams << stream;
 
     return streams;
@@ -183,6 +178,8 @@ QStringList MediaWriterFFmpeg::supportedFormats()
          it++)
         if (!this->m_formatsBlackList.contains(it.key()))
             formats << it.key();
+
+    std::sort(formats.begin(), formats.end());
 
     return formats;
 }
@@ -271,6 +268,8 @@ QStringList MediaWriterFFmpeg::supportedCodecs(const QString &format,
             if (!this->m_codecsBlackList.contains(codec))
                 supportedCodecs << codec;
     }
+
+    std::sort(supportedCodecs.begin(), supportedCodecs.end());
 
     return supportedCodecs;
 }
@@ -417,7 +416,7 @@ QVariantMap MediaWriterFFmpeg::updateStream(int index,
     if (codecParams.contains("label")
         && this->d->m_streamConfigs[index]["label"] != codecParams.value("label")) {
         this->d->m_streamConfigs[index]["label"] = codecParams.value("label");
-        streamChanged |= true;
+        streamChanged = true;
     }
 
     AkCaps streamCaps = this->d->m_streamConfigs[index]["caps"].value<AkCaps>();
@@ -425,7 +424,7 @@ QVariantMap MediaWriterFFmpeg::updateStream(int index,
     if (codecParams.contains("caps")
         && this->d->m_streamConfigs[index]["caps"] != codecParams.value("caps")) {
         this->d->m_streamConfigs[index]["caps"] = codecParams.value("caps");
-        streamChanged |= true;
+        streamChanged = true;
     }
 
     QString codec;
@@ -438,7 +437,7 @@ QVariantMap MediaWriterFFmpeg::updateStream(int index,
             codec = this->defaultCodec(outputFormat, streamCaps.mimeType());
 
         this->d->m_streamConfigs[index]["codec"] = codec;
-        streamChanged |= true;
+        streamChanged = true;
     } else
         codec = this->d->m_streamConfigs[index]["codec"].toString();
 
@@ -450,7 +449,7 @@ QVariantMap MediaWriterFFmpeg::updateStream(int index,
         int bitRate = codecParams["bitrate"].toInt();
         this->d->m_streamConfigs[index]["bitrate"] =
                 bitRate > 0? bitRate: codecDefaults["defaultBitRate"].toInt();
-        streamChanged |= true;
+        streamChanged = true;
     }
 
     if (streamCaps.mimeType() == "video/x-raw"
@@ -458,7 +457,7 @@ QVariantMap MediaWriterFFmpeg::updateStream(int index,
         int gop = codecParams["gop"].toInt();
         this->d->m_streamConfigs[index]["gop"] =
                 gop > 0? gop: codecDefaults["defaultGOP"].toInt();
-        streamChanged |= true;
+        streamChanged = true;
     }
 
     if (streamChanged)
@@ -532,6 +531,11 @@ QVariantList MediaWriterFFmpeg::codecOptions(int index)
     }
 
     return codecOptions;
+}
+
+MediaWriterFFmpegPrivate::MediaWriterFFmpegPrivate(MediaWriterFFmpeg *self):
+    self(self)
+{
 }
 
 QString MediaWriterFFmpegPrivate::guessFormat()
@@ -689,7 +693,7 @@ QVariantList MediaWriterFFmpegPrivate::parseOptions(const AVClass *avClass) cons
 
     QVariantList options;
 
-    for (auto option: avOptions) {
+    for (auto &option: avOptions) {
         auto unitMap = option.last().toList();
 
         if (!unitMap.isEmpty()) {
@@ -793,7 +797,7 @@ AkVideoCaps MediaWriterFFmpeg::nearestDVCaps(const AkVideoCaps &caps) const
     AkVideoCaps nearestCaps;
     qreal q = std::numeric_limits<qreal>::max();
 
-    for (const AkVideoCaps &sCaps: mediaWriterFFmpegGlobal->m_dvSupportedCaps) {
+    for (auto &sCaps: mediaWriterFFmpegGlobal->m_dvSupportedCaps) {
         qreal dw = sCaps.width() - caps.width();
         qreal dh = sCaps.height() - caps.height();
         qreal df = sCaps.fps().value() - caps.fps().value();
@@ -814,7 +818,7 @@ AkVideoCaps MediaWriterFFmpeg::nearestDNxHDCaps(const AkVideoCaps &caps) const
     AkVideoCaps nearestCaps;
     qreal q = std::numeric_limits<qreal>::max();
 
-    for (const AkVideoCaps &sCaps: mediaWriterFFmpegGlobal->m_dnXhdSupportedCaps) {
+    for (auto &sCaps: mediaWriterFFmpegGlobal->m_dnXhdSupportedCaps) {
         qreal dw = sCaps.width() - caps.width();
         qreal dh = sCaps.height() - caps.height();
         AkFrac fps = sCaps.fps().isValid()? sCaps.fps(): caps.fps();
@@ -838,7 +842,7 @@ AkVideoCaps MediaWriterFFmpeg::nearestH261Caps(const AkVideoCaps &caps) const
     QSize nearestSize;
     qreal q = std::numeric_limits<qreal>::max();
 
-    for (const QSize &size: mediaWriterFFmpegGlobal->m_h261SupportedSize) {
+    for (auto &size: mediaWriterFFmpegGlobal->m_h261SupportedSize) {
         qreal dw = size.width() - caps.width();
         qreal dh = size.height() - caps.height();
         qreal k = dw * dw + dh * dh;
@@ -864,7 +868,7 @@ AkVideoCaps MediaWriterFFmpeg::nearestH263Caps(const AkVideoCaps &caps) const
     QSize nearestSize;
     qreal q = std::numeric_limits<qreal>::max();
 
-    for (const QSize &size: mediaWriterFFmpegGlobal->m_h263SupportedSize) {
+    for (auto &size: mediaWriterFFmpegGlobal->m_h263SupportedSize) {
         qreal dw = size.width() - caps.width();
         qreal dh = size.height() - caps.height();
         qreal k = dw * dw + dh * dh;
@@ -890,7 +894,7 @@ AkVideoCaps MediaWriterFFmpeg::nearestGXFCaps(const AkVideoCaps &caps) const
     QSize nearestSize;
     qreal q = std::numeric_limits<qreal>::max();
 
-    for (const QSize &size: mediaWriterFFmpegGlobal->m_gxfSupportedSize) {
+    for (auto &size: mediaWriterFFmpegGlobal->m_gxfSupportedSize) {
         qreal dw = size.width() - caps.width();
         qreal dh = size.height() - caps.height();
         qreal k = dw * dw + dh * dh;
@@ -916,7 +920,7 @@ AkAudioCaps MediaWriterFFmpeg::nearestSWFCaps(const AkAudioCaps &caps) const
     int nearestSampleRate = 0;
     int q = std::numeric_limits<int>::max();
 
-    for (const int &sampleRate: mediaWriterFFmpegGlobal->m_swfSupportedSampleRates) {
+    for (auto &sampleRate: mediaWriterFFmpegGlobal->m_swfSupportedSampleRates) {
         int k = qAbs(sampleRate - caps.rate());
 
         if (k < q) {
@@ -1472,27 +1476,26 @@ SupportedCodecsType MediaWriterFFmpegGlobal::initSupportedCodecs()
 
             if (av_codec_is_encoder(codec) && codecSupported) {
                 if (codec->type == AVMEDIA_TYPE_VIDEO) {
+                    if (!codec->pix_fmts)
+                        continue;
+
                     // Skip Codecs with pixel formats that can't be encoded to.
-                    int unsupported = 0;
-                    int i = 0;
+                    bool isValid = false;
 
-                    if (codec->pix_fmts)
-                        forever {
-                            AVPixelFormat sampleFormat = codec->pix_fmts[i];
+                    for (auto sampleFormat = codec->pix_fmts;
+                         *sampleFormat != AV_PIX_FMT_NONE;
+                         sampleFormat++) {
+                        if (sws_isSupportedOutput(*sampleFormat)) {
+                            /* Keep all codecs that have at least one supported
+                               pixel format. */
+                            isValid = true;
 
-                            if (sampleFormat == AV_PIX_FMT_NONE)
-                                break;
-
-                            if (!sws_isSupportedOutput(sampleFormat))
-                                unsupported++;
-
-                            i++;
+                            break;
                         }
+                    }
 
-                            // Keep all codecs that have at least one supported pixel
-                            // format.
-                            if (unsupported == i)
-                                continue;
+                    if (!isValid)
+                        continue;
                 }
 
                 supportedCodecs[outputFormat->name][codec->type] << codecName;

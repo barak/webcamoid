@@ -21,8 +21,7 @@
 
 import math
 import os
-import platform
-import subprocess
+import subprocess # nosec
 import sys
 import threading
 import zipfile
@@ -36,20 +35,28 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
     def __init__(self):
         super().__init__()
         self.targetSystem = 'posix_windows'
-        self.installDir = os.path.join(self.rootDir, 'ports/deploy/temp_priv')
-        self.pkgsDir = os.path.join(self.rootDir, 'ports/deploy/packages_auto/windows')
+        self.installDir = os.path.join(self.buildDir, 'ports/deploy/temp_priv')
+        self.pkgsDir = os.path.join(self.buildDir, 'ports/deploy/packages_auto/windows')
+        self.detectQt(os.path.join(self.buildDir, 'StandAlone'))
         self.programName = 'webcamoid'
         self.rootInstallDir = os.path.join(self.installDir, self.programName)
         self.binaryInstallDir = os.path.join(self.rootInstallDir, 'bin')
-        self.libInstallDir = os.path.join(self.rootInstallDir, 'lib')
-        self.libQtInstallDir = os.path.join(self.libInstallDir, 'qt')
-        self.qmlInstallDir = os.path.join(self.libQtInstallDir, 'qml')
-        self.pluginsInstallDir = os.path.join(self.libQtInstallDir, 'plugins')
+        self.libInstallDir = self.qmakeQuery(var='QT_INSTALL_LIBS') \
+                                .replace(self.qmakeQuery(var='QT_INSTALL_PREFIX'),
+                                         self.rootInstallDir)
+        self.libQtInstallDir = self.qmakeQuery(var='QT_INSTALL_ARCHDATA') \
+                                .replace(self.qmakeQuery(var='QT_INSTALL_PREFIX'),
+                                         self.rootInstallDir)
+        self.qmlInstallDir = self.qmakeQuery(var='QT_INSTALL_QML') \
+                                .replace(self.qmakeQuery(var='QT_INSTALL_PREFIX'),
+                                         self.rootInstallDir)
+        self.pluginsInstallDir = self.qmakeQuery(var='QT_INSTALL_PLUGINS') \
+                                .replace(self.qmakeQuery(var='QT_INSTALL_PREFIX'),
+                                         self.rootInstallDir)
         self.qtConf = os.path.join(self.binaryInstallDir, 'qt.conf')
         self.qmlRootDirs = ['StandAlone/share/qml', 'libAvKys/Plugins']
         self.mainBinary = os.path.join(self.binaryInstallDir, self.programName + '.exe')
         self.programName = os.path.splitext(os.path.basename(self.mainBinary))[0]
-        self.detectQt(os.path.join(self.buildDir, 'StandAlone'))
         self.programVersion = self.detectVersion(os.path.join(self.rootDir, 'commons.pri'))
         self.detectMake()
         self.binarySolver = tools.binary_pecoff.DeployToolsBinary()
@@ -68,10 +75,11 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         self.changeLog = os.path.join(self.rootDir, 'ChangeLog')
         self.targetArch = '64bit' if 'x86_64' in self.qtInstallBins else '32bit'
 
-    def removeUnneededFiles(self, path):
+    @staticmethod
+    def removeUnneededFiles(path):
         afiles = set()
 
-        for root, dirs, files in os.walk(path):
+        for root, _, files in os.walk(path):
             for f in files:
                 if f.endswith('.a') \
                     or f.endswith('.static.prl') \
@@ -146,6 +154,8 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
                 for depPath in self.binarySolver.allDependencies(path):
                     deps.add(depPath)
 
+        deps = sorted(deps)
+
         for dep in deps:
             depPath = os.path.join(self.binaryInstallDir, os.path.basename(dep))
             print('    {} -> {}'.format(dep, depPath))
@@ -155,7 +165,7 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
     def removeDebugs(self):
         dbgFiles = set()
 
-        for root, dirs, files in os.walk(self.libQtInstallDir):
+        for root, _, files in os.walk(self.libQtInstallDir):
             for f in files:
                 if f.endswith('.dll'):
                     fname, ext = os.path.splitext(f)
@@ -172,10 +182,10 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         pacman = self.whereBin('pacman')
 
         if len(pacman) > 0:
-            process = subprocess.Popen([pacman, '-Qo', path],
+            process = subprocess.Popen([pacman, '-Qo', path], # nosec
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
+            stdout, _ = process.communicate()
 
             if process.returncode != 0:
                 return ''
@@ -192,20 +202,20 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         dpkg = self.whereBin('dpkg')
 
         if len(dpkg) > 0:
-            process = subprocess.Popen([dpkg, '-S', path],
+            process = subprocess.Popen([dpkg, '-S', path], # nosec
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
+            stdout, _ = process.communicate()
 
             if process.returncode != 0:
                 return ''
 
             package = stdout.split(b':')[0].decode(sys.getdefaultencoding()).strip()
 
-            process = subprocess.Popen([dpkg, '-s', package],
+            process = subprocess.Popen([dpkg, '-s', package], # nosec
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
+            stdout, _ = process.communicate()
 
             if process.returncode != 0:
                 return ''
@@ -221,10 +231,10 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         rpm = self.whereBin('rpm')
 
         if len(rpm) > 0:
-            process = subprocess.Popen([rpm, '-qf', path],
+            process = subprocess.Popen([rpm, '-qf', path], # nosec
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
+            stdout, _ = process.communicate()
 
             if process.returncode != 0:
                 return ''
@@ -235,11 +245,11 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
     def commitHash(self):
         try:
-            process = subprocess.Popen(['git', 'rev-parse', 'HEAD'],
+            process = subprocess.Popen(['git', 'rev-parse', 'HEAD'], # nosec
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE,
                                         cwd=self.rootDir)
-            stdout, stderr = process.communicate()
+            stdout, _ = process.communicate()
 
             if process.returncode != 0:
                 return ''
@@ -248,7 +258,8 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         except:
             return ''
 
-    def sysInfo(self):
+    @staticmethod
+    def sysInfo():
         info = ''
 
         for f in os.listdir('/etc'):
@@ -270,14 +281,30 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
         # Write repository info.
 
-        commitHash = self.commitHash()
-
-        if len(commitHash) < 1:
-            commitHash = 'Unknown'
-
         with open(depsInfoFile, 'w') as f:
-            print('    Commit hash: ' + commitHash + '\n')
-            f.write('Commit hash: ' + commitHash + '\n\n')
+            commitHash = self.commitHash()
+
+            if len(commitHash) < 1:
+                commitHash = 'Unknown'
+
+            print('    Commit hash: ' + commitHash)
+            f.write('Commit hash: ' + commitHash + '\n')
+
+            buildLogUrl = ''
+
+            if 'TRAVIS_BUILD_WEB_URL' in os.environ:
+                buildLogUrl = os.environ['TRAVIS_BUILD_WEB_URL']
+            elif 'APPVEYOR_ACCOUNT_NAME' in os.environ and 'APPVEYOR_PROJECT_NAME' in os.environ and 'APPVEYOR_JOB_ID' in os.environ:
+                buildLogUrl = 'https://ci.appveyor.com/project/{}/{}/build/job/{}'.format(os.environ['APPVEYOR_ACCOUNT_NAME'],
+                                                                                          os.environ['APPVEYOR_PROJECT_SLUG'],
+                                                                                          os.environ['APPVEYOR_JOB_ID'])
+
+            if len(buildLogUrl) > 0:
+                print('    Build log URL: ' + buildLogUrl)
+                f.write('Build log URL: ' + buildLogUrl + '\n')
+
+            print()
+            f.write('\n')
 
         # Write host info.
 
@@ -294,21 +321,26 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
         # Write Wine version and emulated system info.
 
-        process = subprocess.Popen(['wine', '--version'],
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
+        process = subprocess.Popen(['wine', '--version'], # nosec
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
         wineVersion = stdout.decode(sys.getdefaultencoding()).strip()
-
-        process = subprocess.Popen(['wine', 'cmd', '/c', 'ver'],
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        fakeWindowsVersion = stdout.decode(sys.getdefaultencoding()).strip()
 
         with open(depsInfoFile, 'a') as f:
             print('    Wine Version: {}'.format(wineVersion))
             f.write('Wine Version: {}\n'.format(wineVersion))
+
+        process = subprocess.Popen(['wine', 'cmd', '/c', 'ver'], # nosec
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        fakeWindowsVersion = stdout.decode(sys.getdefaultencoding()).strip()
+
+        if len(fakeWindowsVersion) < 1:
+            fakeWindowsVersion = 'Unknown'
+
+        with open(depsInfoFile, 'a') as f:
             print('    Windows Version: {}'.format(fakeWindowsVersion))
             f.write('Windows Version: {}\n'.format(fakeWindowsVersion))
             print()
@@ -333,6 +365,8 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
     def createLauncher(self):
         path = os.path.join(self.rootInstallDir, self.programName) + '.bat'
+        libDir = os.path.relpath(self.libInstallDir, self.rootInstallDir)
+        qmlDir = os.path.relpath(self.qmlInstallDir, self.rootInstallDir).replace('/', '\\')
 
         with open(path, 'w') as launcher:
             launcher.write('@echo off\n')
@@ -346,9 +380,14 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
             launcher.write('rem Default values: software | d3d12 | openvg\n')
             launcher.write('rem set QT_QUICK_BACKEND=""\n')
             launcher.write('\n')
-            launcher.write('start /b "" "%~dp0bin\\{}" -q "%~dp0lib\\qt\\qml" -p "%~dp0lib\\avkys" -c "%~dp0share\\config"\n'.format(self.programName))
+            launcher.write('start /b "" '
+                           + '"%~dp0bin\\{}" '.format(self.programName)
+                           + '-p "%~dp0{}\\avkys" '.format(libDir)
+                           + '-q "%~dp0{}" '.format(qmlDir)
+                           + '-c "%~dp0share\\config"\n')
 
-    def hrSize(self, size):
+    @staticmethod
+    def hrSize(size):
         i = int(math.log(size) // math.log(1024))
 
         if i < 1:
@@ -361,8 +400,14 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
     def printPackageInfo(self, path):
         if os.path.exists(path):
-            print('   ', os.path.basename(path),
+            print('   ',
+                  os.path.basename(path),
                   self.hrSize(os.path.getsize(path)))
+            print('    sha256sum:', Deploy.sha256sum(path))
+        else:
+            print('   ',
+                  os.path.basename(path),
+                  'FAILED')
 
     def createPortable(self, mutex):
         arch = 'win32' if self.targetArch == '32bit' else 'win64'

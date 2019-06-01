@@ -1,8 +1,10 @@
-version: 8.5.0.{build}-{branch}
+version: 8.6.1.{build}-{branch}
 os: MinGW
 
+image: Visual Studio 2017
+
 platform:
-  - x86
+  - x64
 
 build:
   parallel: true
@@ -20,42 +22,55 @@ environment:
   global:
     FFMPEG_VERSION: 4.1
     GSTREAMER_VERSION: 1.14.4
+    PYTHON_VERSION: Python37
     QMAKESPEC: win32-g++
     MAKETOOL: mingw32-make
-    INSTALL_PREFIX: C:/projects/webcamoid/ports/deploy/temp_priv/root/usr
+    INSTALL_PREFIX: C:/projects/webcamoid/ports/deploy/temp_priv/usr
+    # api key from https://bintray.com/profile/edit
+    # encrypted in https://ci.appveyor.com/tools/encrypt
+    BT_KEY:
+      secure: seneRk4ppI4bquIsdweI8pd8FT0RXUvU2LOUNGSBEA28IhFQijypil2CfC3WtJxa
 
   matrix:
-    - QTDIR: C:\Qt\5.11.2\mingw53_32
-      TOOLSDIR: C:\Qt\Tools\mingw492_32
-    - QTDIR: C:\Qt\5.11.2\mingw53_32
-      TOOLSDIR: C:\Qt\Tools\mingw530_32
-    - QTDIR: C:\Qt\5.11.2\msvc2015
+    - MSYS2_BUILD: 1
+    - QTDIR: C:\Qt\5.12\mingw73_64
+      TOOLSDIR: C:\Qt\Tools\mingw730_64
+    - QTDIR: C:\Qt\5.12\msvc2017
       TOOLSDIR: C:\Qt\Tools\QtCreator
       QMAKESPEC: win32-msvc
-      VSPATH: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC
+      VSPATH: C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build
       MAKETOOL: jom
-    - QTDIR: C:\Qt\5.11.2\msvc2015_64
+      PLATFORM: x86
+    - QTDIR: C:\Qt\5.12\msvc2017_64
       TOOLSDIR: C:\Qt\Tools\QtCreator
       QMAKESPEC: win32-msvc
-      PLATFORM: x64
-      VSPATH: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC
-      MAKETOOL: jom
-    - QTDIR: C:\Qt\5.11.2\msvc2017_64
-      TOOLSDIR: C:\Qt\Tools\QtCreator
-      QMAKESPEC: win32-msvc
-      PLATFORM: x64
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       VSPATH: C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build
       MAKETOOL: jom
 
 install:
-  - ports\ci\appveyor\install_deps.bat
+  - if "%MSYS2_BUILD%" == "" (
+        ports\ci\appveyor\install_deps.bat
+    ) else (
+        C:\msys64\usr\bin\bash -lc "cd /c/projects/webcamoid && ./ports/ci/appveyor/install_deps.sh"
+    )
 
 build_script:
-  - ports\ci\appveyor\build.bat
+  - if "%MSYS2_BUILD%" == "" (
+        ports\ci\appveyor\build.bat
+    ) else (
+        C:\msys64\usr\bin\bash -lc "cd /c/projects/webcamoid && ./ports/ci/appveyor/build.sh '%INSTALL_PREFIX%'"
+    )
 
-on_success:
-  - ports\ci\appveyor\deploy.bat
+after_build:
+  - if "%MSYS2_BUILD%" == "" (
+        ports\ci\appveyor\deploy.bat
+    ) else (
+        C:\msys64\usr\bin\bash -lc "cd /c/projects/webcamoid && ./ports/ci/appveyor/deploy.sh"
+    )
+  - ports\ci\appveyor\push_artifacts.bat
+
+deploy_script:
+  - ports\ci\appveyor\upload.bat
 
 notifications:
   - provider: Email

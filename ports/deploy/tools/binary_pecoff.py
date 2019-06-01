@@ -32,7 +32,7 @@ class DeployToolsBinary(tools.binary.DeployToolsBinary):
         super().__init__()
 
     def isValid(self, path):
-        mimetype, encoding = mimetypes.guess_type(path)
+        mimetype, _ = mimetypes.guess_type(path)
 
         if mimetype == 'application/x-msdownload':
             return True
@@ -94,11 +94,10 @@ class DeployToolsBinary(tools.binary.DeployToolsBinary):
             # Move to Sections table.
             f.seek(sectionTablePos, os.SEEK_SET)
             sections = []
-            idataTableVirtual = -1
             idataTablePhysical = -1
 
             # Search for 'idata' section.
-            for i in range(nSections):
+            for _ in range(nSections):
                 # Read section.
                 section = struct.unpack('8pIIIIIIHHI', f.read(40))
                 sectionName = section[0].replace(b'\x00', b'')
@@ -107,7 +106,6 @@ class DeployToolsBinary(tools.binary.DeployToolsBinary):
                 sections += [section]
 
                 if sectionName == b'idata' or sectionName == b'rdata':
-                    idataTableVirtual = section[2]
                     idataTablePhysical = section[4]
 
                     # If import table was defined calculate it's position in

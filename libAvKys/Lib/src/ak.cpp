@@ -37,13 +37,15 @@
 class AkPrivate
 {
     public:
-        QQmlEngine *m_globalEngine;
+        QQmlEngine *m_globalEngine {nullptr};
         QStringList m_qmlImportPathList;
         QStringList m_qmlDefaultImportPathList;
         QDir m_applicationDir;
 
         AkPrivate();
+#ifdef Q_OS_WIN32
         virtual ~AkPrivate();
+#endif
         QString convertToAbsolute(const QString &path) const;
         QStringList qmlImportPaths() const;
 };
@@ -161,13 +163,13 @@ AkPrivate::AkPrivate()
 #endif
 }
 
+#ifdef Q_OS_WIN32
 AkPrivate::~AkPrivate()
 {
-#ifdef Q_OS_WIN32
     // Close COM library.
     CoUninitialize();
-#endif
 }
+#endif
 
 QString AkPrivate::convertToAbsolute(const QString &path) const
 {
@@ -181,6 +183,9 @@ QString AkPrivate::convertToAbsolute(const QString &path) const
 
 QStringList AkPrivate::qmlImportPaths() const
 {
+#ifdef Q_OS_ANDROID
+    return {};
+#else
     QStringList importPaths {QString(QT_INSTALL_QML)};
 
 #ifdef Q_OS_WIN32
@@ -200,4 +205,5 @@ QStringList AkPrivate::qmlImportPaths() const
     importPaths << this->convertToAbsolute(relativePath);
 
     return importPaths;
+#endif
 }
