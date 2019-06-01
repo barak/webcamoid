@@ -1,3 +1,18 @@
+webcamoid (8.6.1+dfsg-1) experimental; urgency=medium
+
+  * New upstream version 8.6.1+dfsg
+  * DH_LEVEL: 12
+  * debian/rules:
+      - Remove manpage.gz file
+  * debian/webcamoid.manpages:
+      - Fix path
+  * debian/webcamoid-plugins.lintian-overrides:
+      - Add one more override. Same reason
+  * debian/libavkys8.symbols:
+      - Update
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Sat, 01 Jun 2019 12:44:41 -0300
+
 webcamoid (8.5.0+dfsg-2) unstable; urgency=medium
 
   * Upload to unstable
