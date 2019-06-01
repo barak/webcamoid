@@ -16,6 +16,28 @@ REM along with Webcamoid. If not, see <http://www.gnu.org/licenses/>.
 REM
 REM Web-Site: http://webcamoid.github.io/
 
+if "%PLATFORM%" == "x86" (
+    set FF_ARCH=win32
+    set GST_ARCH=x86
+    set VC_ARGS=x86
+) else (
+    set FF_ARCH=win64
+    set GST_ARCH=x86_64
+    set VC_ARGS=amd64
+)
+
+rem Visual Studio init
+if not "%VSPATH%" == "" call "%VSPATH%\vcvarsall" %VC_ARGS%
+
+set FFMPEG_DEV_PATH=%CD%\ffmpeg-%FFMPEG_VERSION%-%FF_ARCH%-dev
+set PATH_ORIG=%PATH%
+
+if not "%DAILY_BUILD%" == "" goto DailyBuild
+
+set GSTREAMER_DEV_PATH=C:\gstreamer\1.0\%GST_ARCH%
+set PATH=%QTDIR%\bin;%TOOLSDIR%\bin;%CD%\ffmpeg-%FFMPEG_VERSION%-%FF_ARCH%-shared\bin;%GSTREAMER_DEV_PATH%\bin;%PATH%
+
+qmake -query
 qmake Webcamoid.pro ^
     CONFIG+=%CONFIGURATION% ^
     CONFIG+=silent ^
@@ -41,5 +63,60 @@ qmake Webcamoid.pro ^
     GSTREAMERLIBS+=-lgstaudio-1.0 ^
     GSTREAMERLIBS+=-lgstvideo-1.0
 
-%MAKETOOL% -f Makefile qmake_all
+goto Make
+
+:DailyBuild
+
+set PATH=%QTDIR%\bin;%TOOLSDIR%\bin;%CD%\ffmpeg-%FFMPEG_VERSION%-%FF_ARCH%-shared\bin;%PATH%
+
+qmake -query
+qmake Webcamoid.pro ^
+    CONFIG+=%CONFIGURATION% ^
+    CONFIG+=silent ^
+    PREFIX="%INSTALL_PREFIX%" ^
+    FFMPEGINCLUDES="%FFMPEG_DEV_PATH%\include" ^
+    FFMPEGLIBS=-L"%FFMPEG_DEV_PATH%\lib" ^
+    FFMPEGLIBS+=-lavcodec ^
+    FFMPEGLIBS+=-lavdevice ^
+    FFMPEGLIBS+=-lavformat ^
+    FFMPEGLIBS+=-lavutil ^
+    FFMPEGLIBS+=-lswresample ^
+    FFMPEGLIBS+=-lswscale
+
+:Make
+
 %MAKETOOL% -j4
+
+if "%DAILY_BUILD%" == "" goto EndScript
+
+if "%PLATFORM%" == "x86" (
+    set DRV_ARCH=x64
+) else (
+    set DRV_ARCH=x86
+)
+
+echo.
+echo Building %DRV_ARCH% virtual camera driver
+echo.
+
+mkdir akvcam
+cd akvcam
+
+set PATH=%QTDIR_ALT%\bin;%TOOLSDIR_ALT%\bin;%PATH_ORIG%
+qmake -query
+qmake ^
+    CONFIG+=silent ^
+    ..\libAvKys\Plugins\VirtualCamera\VirtualCamera.pro ^
+    VIRTUALCAMERAONLY=1
+%MAKETOOL% -j4
+
+cd ..
+mkdir libAvKys\Plugins\VirtualCamera\src\dshow\VirtualCamera\AkVirtualCamera.plugin\%DRV_ARCH%
+xcopy ^
+    akvcam\src\dshow\VirtualCamera\AkVirtualCamera.plugin\%DRV_ARCH%\* ^
+    libAvKys\Plugins\VirtualCamera\src\dshow\VirtualCamera\AkVirtualCamera.plugin\%DRV_ARCH% ^
+    /i /y
+
+:EndScript
+
+set PATH=%PATH_ORIG%

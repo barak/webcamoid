@@ -23,7 +23,7 @@ import configparser
 import fnmatch
 import os
 import re
-import subprocess
+import subprocess # nosec
 import sys
 import time
 
@@ -44,7 +44,8 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
         self.binarySolver = None
         self.installerConfig = ''
 
-    def detectMakeFiles(self, makePath):
+    @staticmethod
+    def detectMakeFiles(makePath):
         makeFiles = []
 
         try:
@@ -91,10 +92,10 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
             if var != '':
                 args += [var]
 
-            process = subprocess.Popen(args,
+            process = subprocess.Popen(args, # nosec
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
+            stdout, _ = process.communicate()
 
             return stdout.strip().decode(sys.getdefaultencoding())
         except:
@@ -102,7 +103,11 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
 
         return ''
 
-    def detectVersion(self, proFile):
+    @staticmethod
+    def detectVersion(proFile):
+        if 'DAILY_BUILD' in os.environ:
+            return 'daily'
+
         verMaj = '0'
         verMin = '0'
         verPat = '0'
@@ -132,7 +137,11 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
         if self.targetSystem == 'windows':
             homeQt = 'C:\\Qt'
         elif self.targetSystem == 'posix_windows':
-            homeQt = os.path.expanduser('~/.wine/drive_c/Qt')
+            if 'WINEPREFIX' in os.environ:
+                homeQt = os.path.expanduser(os.path.join(os.environ['WINEPREFIX'],
+                                                         'drive_c/Qt'))
+            else:
+                homeQt = os.path.expanduser('~/.wine/drive_c/Qt')
         else:
             homeQt = os.path.expanduser('~/Qt')
 
@@ -141,7 +150,7 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
         if self.targetSystem == 'windows' or self.targetSystem == 'posix_windows':
             binCreator += '.exe'
 
-        for root, dirs, files in os.walk(homeQt):
+        for root, _, files in os.walk(homeQt):
             for f in files:
                 if f == binCreator:
                     self.qtIFW = os.path.join(root, f)
@@ -172,19 +181,19 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
 
         if self.targetSystem == 'posix_windows':
             installerBase = 'Z:' + installerBase.replace('/', '\\')
-            process = subprocess.Popen(['wine',
+            process = subprocess.Popen(['wine', # nosec
                                         installerBase,
                                         '--version'],
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate(input=b'\n')
+            stdout, _ = process.communicate(input=b'\n')
         else:
-            process = subprocess.Popen([installerBase,
+            process = subprocess.Popen([installerBase, # nosec
                                         '--version'],
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
+            stdout, _ = process.communicate()
 
         for line in stdout.split(b'\n'):
             if b'IFW Version:' in line:
@@ -192,7 +201,8 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
 
                 return
 
-    def listQmlFiles(self, path):
+    @staticmethod
+    def listQmlFiles(path):
         qmlFiles = set()
 
         if os.path.isfile(path):
@@ -201,14 +211,15 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
             if baseName == 'qmldir' or path.endswith('.qml'):
                 qmlFiles.add(path)
         else:
-            for root, dirs, files in os.walk(path):
+            for root, _, files in os.walk(path):
                 for f in files:
                     if f == 'qmldir' or f.endswith('.qml'):
                         qmlFiles.add(os.path.join(root, f))
 
         return list(qmlFiles)
 
-    def modulePath(self, importLine):
+    @staticmethod
+    def modulePath(importLine):
         imp = importLine.strip().split()
         path = imp[1].replace('.', '/')
         majorVersion = imp[2].split('.')[0]
@@ -329,6 +340,10 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
         paths = {'Plugins': os.path.relpath(self.pluginsInstallDir, self.binaryInstallDir),
                  'Imports': os.path.relpath(self.qmlInstallDir, self.binaryInstallDir),
                  'Qml2Imports': os.path.relpath(self.qmlInstallDir, self.binaryInstallDir)}
+        confPath = os.path.dirname(self.qtConf)
+
+        if not os.path.exists(confPath):
+            os.makedirs(confPath)
 
         with open(self.qtConf, 'w') as qtconf:
             qtconf.write('[Paths]\n')
@@ -336,7 +351,8 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
             for path in paths:
                 qtconf.write('{} = {}\n'.format(path, paths[path]))
 
-    def readChangeLog(self, changeLog, appName, version):
+    @staticmethod
+    def readChangeLog(changeLog, appName, version):
         if os.path.exists(changeLog):
             with open(changeLog) as f:
                 for line in f:
@@ -347,7 +363,7 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
                     f.readline()
                     changeLogText = ''
 
-                    for line in f:
+                    for line_ in f:
                         if re.match('{} \d+\.\d+\.\d+:'.format(appName), line):
                             # Remove last line.
                             i = changeLogText.rfind('\n')
@@ -357,7 +373,7 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
 
                             return changeLogText
 
-                        changeLogText += line
+                        changeLogText += line_
 
         return ''
 
@@ -405,7 +421,12 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
             config.write('<?xml version="1.0" encoding="UTF-8"?>\n')
             config.write('<Installer>\n')
             config.write('    <Name>{}</Name>\n'.format(appName))
-            config.write('    <Version>{}</Version>\n'.format(self.programVersion))
+
+            if 'DAILY_BUILD' in os.environ:
+                config.write('    <Version>0.0.0</Version>\n')
+            else:
+                config.write('    <Version>{}</Version>\n'.format(self.programVersion))
+
             config.write('    <Title>{}</Title>\n'.format(packageConf['Package']['description'].strip()))
             config.write('    <Publisher>{}</Publisher>\n'.format(appName))
             config.write('    <ProductUrl>{}</ProductUrl>\n'.format(packageConf['Package']['url'].strip()))
@@ -429,7 +450,12 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
             f.write('<Package>\n')
             f.write('    <DisplayName>{}</DisplayName>\n'.format(appName))
             f.write('    <Description>{}</Description>\n'.format(packageConf['Package']['description'].strip()))
-            f.write('    <Version>{}</Version>\n'.format(self.programVersion))
+
+            if 'DAILY_BUILD' in os.environ:
+                f.write('    <Version>0.0.0</Version>\n')
+            else:
+                f.write('    <Version>{}</Version>\n'.format(self.programVersion))
+
             f.write('    <ReleaseDate>{}</ReleaseDate>\n'.format(time.strftime('%Y-%m-%d')))
             f.write('    <Name>{}</Name>\n'.format(componentName))
             f.write('    <Licenses>\n')
@@ -438,9 +464,12 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
             f.write('    </Licenses>\n')
             f.write('    <Script>installscript.qs</Script>\n')
             f.write('    <UpdateText>\n')
-            f.write(self.readChangeLog(self.changeLog,
-                                       appName,
-                                       self.programVersion))
+
+            if not 'DAILY_BUILD' in os.environ:
+                f.write(self.readChangeLog(self.changeLog,
+                                        appName,
+                                        self.programVersion))
+
             f.write('    </UpdateText>\n')
             f.write('    <Default>true</Default>\n')
             f.write('    <ForcedInstallation>true</ForcedInstallation>\n')
@@ -454,10 +483,16 @@ class DeployToolsQt(tools.utils.DeployToolsUtils):
         if os.path.exists(self.outPackage):
             os.remove(self.outPackage)
 
-        process = subprocess.Popen([self.qtIFW,
-                                    '-c', configXml,
-                                    '-p', self.installerPackages,
-                                    self.outPackage],
+        params = []
+
+        if self.targetSystem == 'posix_windows':
+            params = ['wine']
+
+        params += [self.qtIFW,
+                   '-c', configXml,
+                   '-p', self.installerPackages,
+                   self.outPackage]
+        process = subprocess.Popen(params, # nosec
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         process.communicate()

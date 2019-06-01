@@ -21,7 +21,7 @@
 
 import os
 import re
-import subprocess
+import subprocess # nosec
 import threading
 import time
 
@@ -40,7 +40,7 @@ class DeployToolsBinary(tools.utils.DeployToolsUtils):
     def find(self, path):
         binaries = []
 
-        for root, dirs, files in os.walk(path):
+        for root, _, files in os.walk(path):
             for f in files:
                 binaryPath = os.path.join(root, f)
 
@@ -49,7 +49,7 @@ class DeployToolsBinary(tools.utils.DeployToolsUtils):
 
         return binaries
 
-    def dump(self):
+    def dump(self, binary):
         return {}
 
     def dependencies(self, binary):
@@ -95,7 +95,7 @@ class DeployToolsBinary(tools.utils.DeployToolsUtils):
         if self.stripBin == '':
             return
 
-        process = subprocess.Popen([self.stripBin, binary],
+        process = subprocess.Popen([self.stripBin, binary], # nosec
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         process.communicate()
@@ -138,6 +138,7 @@ class DeployToolsBinary(tools.utils.DeployToolsUtils):
         for exclude in self.excludes:
             if self.targetSystem == 'windows' or self.targetSystem == 'posix_windows':
                 path = path.lower().replace('\\', '/')
+                exclude = exclude.lower()
 
             if re.fullmatch(exclude, path):
                 return True

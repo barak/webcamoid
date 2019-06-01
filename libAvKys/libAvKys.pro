@@ -73,6 +73,7 @@ isEmpty(NOLIBUVC) {
     !isEmpty(LIBUVCINCLUDES): cache(LIBUVCINCLUDES)
     !isEmpty(LIBUVCLIBS): cache(LIBUVCLIBS)
     qtCompileTest(libuvc)
+    CONFIG(config_libuvc): qtCompileTest(libusb_has_hotplug)
 }
 
 isEmpty(NOMEDIAFOUNDATION): qtCompileTest(mediafoundation)
@@ -104,10 +105,12 @@ SUBDIRS += \
 
 # Install rules
 
-!macx | !isEmpty(NOAPPBUNDLE) {
-    INSTALLS += license
-    license.files = ../COPYING
-    license.path = $${LICENSEDIR}
+!android {
+    !macx | !isEmpty(NOAPPBUNDLE) {
+        INSTALLS += license
+        license.files = ../COPYING
+        license.path = $${LICENSEDIR}
+    }
 }
 
 !isEmpty(BUILDDOCS): !isEqual(BUILDDOCS, 0) {

@@ -19,12 +19,12 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-import fnmatch
+import hashlib
 import multiprocessing
 import os
 import platform
 import shutil
-import subprocess
+import subprocess # nosec
 import sys
 
 class DeployToolsUtils:
@@ -152,13 +152,28 @@ class DeployToolsUtils:
         os.chdir(buildDir)
 
         if installRoot == '':
-            process = subprocess.Popen([self.make, 'install'],
+            process = subprocess.Popen([self.make, 'install'], # nosec
                                        stdout=subprocess.PIPE)
         else:
-            process = subprocess.Popen([self.make, 'INSTALL_ROOT=' + installRoot, 'install'],
-                                    stdout=subprocess.PIPE)
+            process = subprocess.Popen([self.make, 'INSTALL_ROOT=' + installRoot, 'install'], # nosec
+                                       stdout=subprocess.PIPE)
 
         process.communicate()
         os.chdir(previousDir)
 
         return process.returncode
+
+    @staticmethod
+    def sha256sum(fileName):
+        sha = hashlib.sha256()
+
+        with open(fileName, 'rb') as f:
+            while True:
+                data = f.read(1024)
+
+                if not data:
+                    break
+
+                sha.update(data)
+
+        return sha.hexdigest()

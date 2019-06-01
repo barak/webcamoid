@@ -17,22 +17,40 @@
 # Web-Site: http://webcamoid.github.io/
 
 VER_MAJ = 8
-VER_MIN = 5
-VER_PAT = 0
+VER_MIN = 6
+VER_PAT = 1
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
 
 isEmpty(BUILDDOCS): BUILDDOCS = 0
+
 isEmpty(QDOCTOOL): {
-    unix: QDOCTOOL = $$[QT_INSTALL_BINS]/qdoc
-    !unix: QDOCTOOL = $$[QT_INSTALL_LIBEXECS]/qdoc
+    QDOC_FNAME = qdoc
+
+    exists($$[QT_INSTALL_LIBEXECS]/$${QDOC_FNAME}*) {
+        QDOCTOOL = $$[QT_INSTALL_LIBEXECS]/$${QDOC_FNAME}
+    } else {
+        QDOCTOOL = $$[QT_INSTALL_BINS]/$${QDOC_FNAME}
+    }
 }
+
 isEmpty(QMAKE_LRELEASE) {
-    unix: QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease
-    !unix: QMAKE_LRELEASE = $$[QT_INSTALL_LIBEXECS]/lrelease
+    LRELEASE_FNAME = lrelease
+
+    exists($$[QT_INSTALL_LIBEXECS]/$${LRELEASE_FNAME}*) {
+        QMAKE_LRELEASE = $$[QT_INSTALL_LIBEXECS]/$${LRELEASE_FNAME}
+    } else {
+        QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/$${LRELEASE_FNAME}
+    }
 }
+
 isEmpty(QMAKE_LUPDATE) {
-    unix: QMAKE_LUPDATE = $$[QT_INSTALL_BINS]/lupdate
-    !unix: QMAKE_LUPDATE = $$[QT_INSTALL_LIBEXECS]/lupdate
+    LUPDATE_FNAME = lupdate
+
+    exists($$[QT_INSTALL_LIBEXECS]/$${LUPDATE_FNAME}*) {
+        QMAKE_LUPDATE = $$[QT_INSTALL_LIBEXECS]/$${LUPDATE_FNAME}
+    } else {
+        QMAKE_LUPDATE = $$[QT_INSTALL_BINS]/$${LUPDATE_FNAME}
+    }
 }
 
 isEmpty(BUNDLENAME): BUNDLENAME = webcamoid
@@ -51,8 +69,10 @@ win32 {
     }
 } else: macx: isEmpty(NOAPPBUNDLE) {
     DEFAULT_PREFIX = /Applications
+} else: android: {
+    DEFAULT_PREFIX = /.
 } else {
-    DEFAULT_PREFIX = /usr
+    DEFAULT_PREFIX = $$[QT_INSTALL_PREFIX]
 }
 
 isEmpty(PREFIX): PREFIX = $${DEFAULT_PREFIX}
@@ -66,6 +86,8 @@ isEmpty(EXECPREFIX) {
 isEmpty(BINDIR) {
     macx: isEmpty(NOAPPBUNDLE) {
         BINDIR = $${EXECPREFIX}/MacOS
+    } else: android {
+        BINDIR = $${EXECPREFIX}/libs/$$ANDROID_TARGET_ARCH
     } else {
         BINDIR = $${EXECPREFIX}/bin
     }
@@ -75,6 +97,8 @@ isEmpty(LIBEXECDIR): LIBEXECDIR = $${EXECPREFIX}/libexec
 isEmpty(DATAROOTDIR) {
     macx: isEmpty(NOAPPBUNDLE) {
         DATAROOTDIR = $${EXECPREFIX}/Resources
+    } else: android {
+        DATAROOTDIR = $${EXECPREFIX}/assets
     } else {
         DATAROOTDIR = $${PREFIX}/share
     }
@@ -93,10 +117,11 @@ isEmpty(PSDIR): PSDIR = $${DOCDIR}/ps
 isEmpty(LIBDIR) {
     macx: isEmpty(NOAPPBUNDLE) {
         LIBDIR = $${EXECPREFIX}/Frameworks
-    } else: win32 {
+    } else: android {
         LIBDIR = $${BINDIR}
     } else {
-        LIBDIR = $${EXECPREFIX}/lib
+        INSTALL_LIBS = $$[QT_INSTALL_LIBS]
+        LIBDIR = $$replace(INSTALL_LIBS, $$[QT_INSTALL_PREFIX], $${EXECPREFIX})
     }
 }
 isEmpty(LOCALEDIR): LOCALEDIR = $${DATAROOTDIR}/locale
@@ -107,17 +132,18 @@ isEmpty(LOCALLIBDIR): LOCALLIBDIR = $${LOCALDIR}/lib
 isEmpty(INSTALLQMLDIR) {
     macx: isEmpty(NOAPPBUNDLE) {
         INSTALLQMLDIR = $${DATAROOTDIR}/qml
-    } else: win32 {
-        INSTALLQMLDIR = $${EXECPREFIX}/lib/qt/qml
+    } else: android {
+        INSTALLQMLDIR = $${DATAROOTDIR}/qml
     } else {
-        INSTALLQMLDIR = $${LIBDIR}/qt/qml
+        INSTALL_QML = $$[QT_INSTALL_QML]
+        INSTALLQMLDIR = $$replace(INSTALL_QML, $$[QT_INSTALL_LIBS], $${LIBDIR})
     }
 }
 isEmpty(INSTALLPLUGINSDIR) {
     macx: isEmpty(NOAPPBUNDLE) {
         INSTALLPLUGINSDIR = $${EXECPREFIX}/Plugins/$${COMMONS_TARGET}
-    } else: win32 {
-        INSTALLPLUGINSDIR = $${EXECPREFIX}/lib/$${COMMONS_TARGET}
+    } else: android {
+        INSTALLPLUGINSDIR = $${BINDIR}
     } else {
         INSTALLPLUGINSDIR = $${LIBDIR}/$${COMMONS_TARGET}
     }
@@ -134,7 +160,7 @@ DEFINES += \
     EXECPREFIX=\"\\\"$$EXECPREFIX\\\"\" \
     BINDIR=\"\\\"$$BINDIR\\\"\" \
     SBINDIR=\"\\\"$$SBINDIR\\\"\" \
-    LIBEXECDIR=\"\\\"LIBEXECDIR\\\"\" \
+    LIBEXECDIR=\"\\\"$$LIBEXECDIR\\\"\" \
     DATAROOTDIR=\"\\\"$$DATAROOTDIR\\\"\" \
     DATDIR=\"\\\"$$DATDIR\\\"\" \
     SYSCONFDIR=\"\\\"$$SYSCONFDIR\\\"\" \
@@ -156,24 +182,27 @@ DEFINES += \
     INSTALLQMLDIR=\"\\\"$$INSTALLQMLDIR\\\"\" \
     INSTALLPLUGINSDIR=\"\\\"$$INSTALLPLUGINSDIR\\\"\"
 
-TARGET_ARCH = $${QMAKE_TARGET.arch}
-
-mingw {
-    TARGET_ARCH = $$system($${QMAKE_CC} -dumpmachine)
+android {
+    TARGET_ARCH = $$ANDROID_TARGET_ARCH
+} else: msvc {
+    TARGET_ARCH = $${QMAKE_TARGET.arch}
+    TARGET_ARCH = $$basename(TARGET_ARCH)
+    TARGET_ARCH = $$replace(TARGET_ARCH, x64, x86_64)
+} else {
+    TARGET_ARCH = $$system($${QMAKE_CXX} -dumpmachine)
     TARGET_ARCH = $$split(TARGET_ARCH, -)
     TARGET_ARCH = $$first(TARGET_ARCH)
 }
 
-msvc {
-    TARGET_ARCH = $$basename(TARGET_ARCH)
-    TARGET_ARCH = $$replace(TARGET_ARCH, x64, x86_64)
-}
+COMPILER = $$basename(QMAKE_CXX)
+COMPILER = $$replace(COMPILER, \+\+, pp)
+COMPILER = $$join(COMPILER, _)
 
 CONFIG(debug, debug|release) {
-    COMMONS_BUILD_PATH = debug/Qt$${QT_VERSION}/$$basename(QMAKE_CC)/$${TARGET_ARCH}
+    COMMONS_BUILD_PATH = debug/Qt$${QT_VERSION}/$${COMPILER}/$${TARGET_ARCH}
     DEFINES += QT_DEBUG
 } else {
-    COMMONS_BUILD_PATH = release/Qt$${QT_VERSION}/$$basename(QMAKE_CC)/$${TARGET_ARCH}
+    COMMONS_BUILD_PATH = release/Qt$${QT_VERSION}/$$COMPILER/$${TARGET_ARCH}
 }
 
 BIN_DIR = $${COMMONS_BUILD_PATH}/bin

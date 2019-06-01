@@ -50,12 +50,13 @@ exists(commons.pri) {
     PRE_TARGETDEPS += compiler_builddocs_make_all
 }
 
-unix: CONFIG(debug, debug|release) {
-    MANPAGESOURCES = share/man/man1/$${COMMONS_TARGET}.1
+unix: !android: !macx | !isEmpty(NOAPPBUNDLE) {
+    MANPAGESOURCES = share/man/$${COMMONS_TARGET}.1
+    MANPAGEOUT = $${OUT_PWD}/$${MANPAGESOURCES}.gz
 
     buildmanpage.input = MANPAGESOURCES
-    buildmanpage.output = ${QMAKE_FILE_IN}.gz
-    buildmanpage.commands = gzip -c9 ${QMAKE_FILE_IN} > ${QMAKE_FILE_IN}.gz
+    buildmanpage.output = $${MANPAGEOUT}
+    buildmanpage.commands = gzip -c9 ${QMAKE_FILE_IN} > $${MANPAGEOUT}
     buildmanpage.clean = dummy_file
     buildmanpage.CONFIG += no_link
     QMAKE_EXTRA_COMPILERS += buildmanpage
@@ -65,6 +66,9 @@ unix: CONFIG(debug, debug|release) {
 CONFIG += qt
 macx: CONFIG -= app_bundle
 !isEmpty(STATIC_BUILD):!isEqual(STATIC_BUILD, 0): CONFIG += static
+
+DAILY_BUILD = $$(DAILY_BUILD)
+!isEmpty(DAILY_BUILD): DEFINES += DAILY_BUILD
 
 HEADERS = \
     src/mediatools.h \
@@ -84,7 +88,6 @@ INCLUDEPATH += \
 LIBS += -L$${OUT_PWD}/../libAvKys/Lib/$${BIN_DIR} -lavkys
 win32: LIBS += -lole32
 
-OTHER_FILES += share/effects.xml
 unix: OTHER_FILES += $${MANPAGESOURCES}
 macx: OTHER_FILES += Info.plist
 
@@ -127,10 +130,11 @@ CODECFORSRC = UTF-8
 INSTALLS += target
 target.path = $${BINDIR}
 
-unix: !isEmpty(NOAPPBUNDLE) {
+unix: !android: !macx | !isEmpty(NOAPPBUNDLE) {
     INSTALLS += manpage
-    manpage.files = share/man/man1/webcamoid.1.gz
+    manpage.files = $${OUT_PWD}/share/man/$${COMMONS_TARGET}.1.gz
     manpage.path = $${MANDIR}/man1
+    manpage.CONFIG += no_check_exist
 }
 
 win32 {
@@ -141,7 +145,7 @@ win32 {
     INSTALLS += appIcon
     appIcon.files = share/icons/webcamoid.icns
     appIcon.path = $${DATAROOTDIR}
-} else: unix: !macx {
+} else: unix: !android: !macx {
     INSTALLS += \
         appIcon8x8 \
         appIcon16x16 \
@@ -188,13 +192,15 @@ win32 {
     docs.CONFIG += no_check_exist
 }
 
-!macx | !isEmpty(NOAPPBUNDLE) {
-    INSTALLS += license
-    license.files = ../COPYING
-    license.path = $${LICENSEDIR}
+!android {
+    !macx | !isEmpty(NOAPPBUNDLE) {
+        INSTALLS += license
+        license.files = ../COPYING
+        license.path = $${LICENSEDIR}
+    }
 }
 
-unix: !macx {
+unix: !android: !macx {
     INSTALLS += desktop
     desktop.files = ../$${COMMONS_TARGET}.desktop
     desktop.path = $${DATAROOTDIR}/applications
@@ -204,4 +210,20 @@ macx: isEmpty(NOAPPBUNDLE) {
     INSTALLS += infoPlist
     infoPlist.files = Info.plist
     infoPlist.path = $${EXECPREFIX}
+}
+
+android {
+    QT += concurrent xml
+
+    DISTFILES += \
+        share/android/AndroidManifest.xml \
+        share/android/res/drawable-hdpi/icon.png \
+        share/android/res/drawable-ldpi/icon.png \
+        share/android/res/drawable-mdpi/icon.png \
+        share/android/res/drawable-xhdpi/icon.png \
+        share/android/res/drawable-xxhdpi/icon.png \
+        share/android/res/drawable-xxxhdpi/icon.png \
+        share/android/res/values/libs.xml
+
+    ANDROID_PACKAGE_SOURCE_DIR = $$PWD/share/android
 }
