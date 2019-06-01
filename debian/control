@@ -2,7 +2,7 @@ Source: webcamoid
 Section: video
 Priority: optional
 Maintainer: Herbert Parentes Fortes Neto <hpfn@debian.org>
-Build-Depends: debhelper (>= 11),
+Build-Depends: debhelper (>= 12),
                libasound2-dev,
                libavcodec-dev (>= 4.0),
                libavdevice-dev (>= 4.0),
