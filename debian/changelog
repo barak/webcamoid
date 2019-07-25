@@ -1,3 +1,12 @@
+webcamoid (8.6.1+dfsg-2) unstable; urgency=medium
+
+  * Upload to unstable
+  * Use 'debhelper-compat' in d/control rather than a d/compat file
+  * debian/control:
+      - Bump Standards-Version from 4.3.0 to 4.4.0
+
+ -- Herbert Parentes Fortes Neto <hpfn@debian.org>  Thu, 25 Jul 2019 16:42:02 -0300
+
 webcamoid (8.6.1+dfsg-1) experimental; urgency=medium
 
   * New upstream version 8.6.1+dfsg
