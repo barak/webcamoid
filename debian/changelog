@@ -1,3 +1,10 @@
+webcamoid (8.6.1+dfsg-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * source only upload to enable migration (Closes: #953273)
+
+ -- Paul Gevers <elbrus@debian.org>  Fri, 06 Mar 2020 22:11:09 +0100
+
 webcamoid (8.6.1+dfsg-2) unstable; urgency=medium
 
   * Upload to unstable
