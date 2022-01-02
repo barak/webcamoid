@@ -1,6 +1,5 @@
 version=4
 opts=\
-repacksuffix=+dfsg,\
-repack,compression=xz,\
-dversionmangle=s/\+dfsg// \
-https://github.com/hipersayanX/webcamoid/releases .*/archive/v?(\d\S+)\.(?:zip|tar)\.?(?:gz|bz2|xz)? debian uupdate
+ repacksuffix=+dfsg,\
+ dversionmangle=s/\+dfsg// \
+ https://github.com/@PACKAGE@/@PACKAGE@/tags .*/v?@ANY_VERSION@@ARCHIVE_EXT@
