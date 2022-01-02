@@ -1,3 +1,20 @@
+webcamoid (8.8.0+dfsg-1) unstable; urgency=medium
+
+  * Update uscan support file
+  * New upstream version (closes: #956630)
+  * Refer to common license file for CC0-1.0.
+  * Use secure URI in Homepage field.
+  * Bump debhelper from old 12 to 13.
+  * Set upstream metadata fields:
+    Bug-Database, Bug-Submit, Repository, Repository-Browse.
+  * Update standards version to 4.6.0, no changes needed.
+  * Remove quilt patch: no need to specify full path of icon in desktop file
+  * Add quilt patch, need to #include <limits> (closes: #1002960)
+  * Adjust installation scripts for upstream changes and dh_missing
+  * Remove debian/*.symbols; it's not much use for this churning C++ library
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Wed, 05 Jan 2022 21:36:45 +0000
+
 webcamoid (8.6.1+dfsg-2.1) unstable; urgency=medium
 
   * Non-maintainer upload.

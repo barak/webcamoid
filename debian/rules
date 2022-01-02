@@ -2,13 +2,14 @@
 
 export DH_VERBOSE=1
 
-export PVER=$(shell dpkg-parsechangelog --show-field version | cut -d"+" -f1 )
+include /usr/share/dpkg/architecture.mk
+include /usr/share/dpkg/pkg-info.mk
+
+export PVER=$(shell echo $(DEB_VERSION_UPSTREAM) | cut -d"+" -f1 )
 
 export DEB_BUILD_MAINT_OPTIONS := hardening=+all
 export DEB_LDFLAGS_MAINT_APPEND := -fPIE -pie -Wl,--as-needed
 export QT_SELECT=5
-
-DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 %:
 	dh $@ --buildsystem=qmake
@@ -22,11 +23,10 @@ override_dh_auto_configure:
 override_dh_makeshlibs:
 	dh_makeshlibs -- -v$(PVER)
 
-override_dh_clean:
-	dh_clean
-	find ./libAvKys/Tests/ -name "test_auto" | xargs -i rm {}
-	find ./libAvKys/Tests/ -name "test.o" | xargs -i rm {}
-	find ./libAvKys/Tests/ -name "Makefile" | xargs -i rm {}
+execute_after_dh_clean:
+	find ./libAvKys/Tests/ -name "test_auto" -delete
+	find ./libAvKys/Tests/ -name "test.o" -delete
+	find ./libAvKys/Tests/ -name "Makefile" -delete
 	rm -f ./libAvKys/config.log
 	rm -f ./libAvKys/.qmake.cache
 	rm -f ./libAvKys/.qmake.stash

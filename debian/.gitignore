@@ -1,0 +1,11 @@
+/*.substvars
+/.debhelper/
+/akqml/
+/debhelper-build-stamp
+/files
+/libavkys-dev/
+/libavkys8/
+/tmp/
+/webcamoid-data/
+/webcamoid-plugins/
+/webcamoid/

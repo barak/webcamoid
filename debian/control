@@ -2,7 +2,7 @@ Source: webcamoid
 Section: video
 Priority: optional
 Maintainer: Herbert Parentes Fortes Neto <hpfn@debian.org>
-Build-Depends: debhelper-compat (= 12),
+Build-Depends: debhelper-compat (= 13),
                libasound2-dev,
                libavcodec-dev (>= 4.0),
                libavdevice-dev (>= 4.0),
@@ -23,8 +23,8 @@ Build-Depends: debhelper-compat (= 12),
                qtmultimedia5-dev,
                qtquickcontrols2-5-dev,
                qttools5-dev-tools
-Standards-Version: 4.4.0
-Homepage: http://webcamoid.github.io/
+Standards-Version: 4.6.0
+Homepage: https://webcamoid.github.io/
 Vcs-Git: https://salsa.debian.org/debian/webcamoid.git
 Vcs-Browser: https://salsa.debian.org/debian/webcamoid
 

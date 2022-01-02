@@ -3,3 +3,5 @@
 StandAlone/share/icons usr/share/webcamoid/
 StandAlone/share/qml usr/share/webcamoid/
 StandAlone/share/ts/*.qm usr/share/webcamoid/locale
+usr/share/icons/hicolor/*x*/apps/webcamoid.png
+usr/share/icons/hicolor/scalable/apps/webcamoid.svg
