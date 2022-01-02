@@ -17,8 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QDateTime>
 #include <QImage>
 #include <QQmlContext>
+#include <QRandomGenerator>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "quarkelement.h"
@@ -61,24 +64,9 @@ void QuarkElement::controlInterfaceConfigure(QQmlContext *context, const QString
     context->setContextProperty("controlId", this->objectName());
 }
 
-void QuarkElement::setNFrames(int nFrames)
+AkPacket QuarkElement::iVideoStream(const AkVideoPacket &packet)
 {
-    if (this->d->m_nFrames == nFrames)
-        return;
-
-    this->d->m_nFrames = nFrames;
-    emit this->nFramesChanged(nFrames);
-}
-
-void QuarkElement::resetNFrames()
-{
-    this->setNFrames(16);
-}
-
-AkPacket QuarkElement::iStream(const AkPacket &packet)
-{
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
+    auto src = packet.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -102,13 +90,27 @@ AkPacket QuarkElement::iStream(const AkPacket &packet)
         QRgb *dstLine = reinterpret_cast<QRgb *>(oFrame.scanLine(y));
 
         for (int x = 0; x < src.width(); x++) {
-            int frame = qrand() % this->d->m_frames.size();
+            int frame = QRandomGenerator::global()->bounded(this->d->m_frames.size());
             dstLine[x] = this->d->m_frames[frame].pixel(x, y);
         }
     }
 
-    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
+    auto oPacket = AkVideoPacket::fromImage(oFrame, packet);
     akSend(oPacket)
+}
+
+void QuarkElement::setNFrames(int nFrames)
+{
+    if (this->d->m_nFrames == nFrames)
+        return;
+
+    this->d->m_nFrames = nFrames;
+    emit this->nFramesChanged(nFrames);
+}
+
+void QuarkElement::resetNFrames()
+{
+    this->setNFrames(16);
 }
 
 #include "moc_quarkelement.cpp"

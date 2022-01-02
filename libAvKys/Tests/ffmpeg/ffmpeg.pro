@@ -16,9 +16,9 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-CONFIG += console c++11
+include(../tests.pri)
 
-macx: QT_CONFIG -= no-pkg-config
+macx | android: QT_CONFIG -= no-pkg-config
 
 DEFINES += __STDC_CONSTANT_MACROS
 
@@ -38,4 +38,5 @@ isEmpty(FFMPEGLIBS) {
 SOURCES = \
     test.cpp
 
+DESTDIR = $${OUT_PWD}/$${BIN_DIR}
 TARGET = test_auto

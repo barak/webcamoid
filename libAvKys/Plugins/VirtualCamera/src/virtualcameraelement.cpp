@@ -25,6 +25,7 @@
 #include <QSharedPointer>
 #include <QMutex>
 #include <akcaps.h>
+#include <akfrac.h>
 #include <akpacket.h>
 #include <akvideopacket.h>
 
@@ -70,6 +71,11 @@ VirtualCameraElement::~VirtualCameraElement()
 {
     this->setState(AkElement::ElementStateNull);
     delete this->d;
+}
+
+QString VirtualCameraElement::errorMessage() const
+{
+    return QString::fromStdWString(this->d->m_ipcBridge.errorMessage());
 }
 
 QStringList VirtualCameraElement::driverPaths() const
@@ -168,13 +174,12 @@ QVariantMap VirtualCameraElement::addStream(int streamIndex,
         return {};
 
     AkVideoCaps videoCaps(streamCaps);
-    videoCaps.format() = AkVideoCaps::Format_rgb24;
-    videoCaps.bpp() = AkVideoCaps::bitsPerPixel(AkVideoCaps::Format_rgb24);
-    videoCaps.width() = roundTo(videoCaps.width(), PREFERRED_ROUNDING);
-    videoCaps.height() = roundTo(videoCaps.height(), PREFERRED_ROUNDING);
+    videoCaps.setFormat(AkVideoCaps::Format_rgb24);
+    videoCaps.setWidth(roundTo(videoCaps.width(), PREFERRED_ROUNDING));
+    videoCaps.setHeight(roundTo(videoCaps.height(), PREFERRED_ROUNDING));
 
     this->d->m_streamIndex = streamIndex;
-    this->d->m_streamCaps = videoCaps.toCaps();
+    this->d->m_streamCaps = videoCaps;
 
     QVariantMap outputParams = {
         {"caps", QVariant::fromValue(streamCaps)}
@@ -195,15 +200,14 @@ QVariantMap VirtualCameraElement::updateStream(int streamIndex,
         return {};
 
     AkVideoCaps videoCaps(streamCaps);
-    videoCaps.format() = AkVideoCaps::Format_rgb24;
-    videoCaps.bpp() = AkVideoCaps::bitsPerPixel(AkVideoCaps::Format_rgb24);
-    videoCaps.width() = roundTo(videoCaps.width(), PREFERRED_ROUNDING);
-    videoCaps.height() = roundTo(videoCaps.height(), PREFERRED_ROUNDING);
+    videoCaps.setFormat(AkVideoCaps::Format_rgb24);
+    videoCaps.setWidth(roundTo(videoCaps.width(), PREFERRED_ROUNDING));
+    videoCaps.setHeight(roundTo(videoCaps.height(), PREFERRED_ROUNDING));
 
     this->d->m_streamIndex = streamIndex;
-    this->d->m_streamCaps = videoCaps.toCaps();
+    this->d->m_streamCaps = videoCaps;
 
-    QVariantMap outputParams = {
+    QVariantMap outputParams {
         {"caps", QVariant::fromValue(streamCaps)}
     };
 
@@ -248,8 +252,12 @@ QString VirtualCameraElement::createWebcam(const QString &description)
                                                   description.toStdWString(),
                                               formats);
 
-    if (webcam.empty())
+    if (webcam.empty()) {
+        auto error = this->d->m_ipcBridge.errorMessage();
+        emit this->errorMessageChanged(QString::fromStdWString(error));
+
         return {};
+    }
 
     emit this->mediasChanged(this->medias());
 
@@ -302,6 +310,30 @@ void VirtualCameraElement::controlInterfaceConfigure(QQmlContext *context,
 
     context->setContextProperty("VirtualCamera", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
     context->setContextProperty("controlId", controlId);
+}
+
+AkPacket VirtualCameraElement::iVideoStream(const AkVideoPacket &packet)
+{
+    this->d->m_mutex.lock();
+
+    if (this->state() == AkElement::ElementStatePlaying) {
+        auto videoPacket = packet.convert(AkVideoCaps::Format_rgb24, 32);
+        auto fps = AkVCam::Fraction {uint32_t(videoPacket.caps().fps().num()),
+                                     uint32_t(videoPacket.caps().fps().den())};
+        AkVCam::VideoFormat format(videoPacket.caps().fourCC(),
+                                   videoPacket.caps().width(),
+                                   videoPacket.caps().height(),
+                                   {fps});
+        AkVCam::VideoFrame frame(format);
+        memcpy(frame.data().data(),
+               videoPacket.buffer().constData(),
+               size_t(videoPacket.buffer().size()));
+        this->d->m_ipcBridge.write(this->d->m_curDevice.toStdString(), frame);
+    }
+
+    this->d->m_mutex.unlock();
+
+    akSend(packet)
 }
 
 void VirtualCameraElement::setDriverPaths(const QStringList &driverPaths)
@@ -550,32 +582,6 @@ bool VirtualCameraElement::setState(AkElement::ElementState state)
     }
 
     return false;
-}
-
-AkPacket VirtualCameraElement::iStream(const AkPacket &packet)
-{
-    this->d->m_mutex.lock();
-
-    if (this->state() == AkElement::ElementStatePlaying) {
-        auto videoPacket = AkVideoPacket(packet)
-                           .convert(AkVideoCaps::Format_rgb24)
-                           .roundSizeTo(PREFERRED_ROUNDING);
-        auto fps = AkVCam::Fraction {uint32_t(videoPacket.caps().fps().num()),
-                                     uint32_t(videoPacket.caps().fps().den())};
-        AkVCam::VideoFormat format(videoPacket.caps().fourCC(),
-                                   videoPacket.caps().width(),
-                                   videoPacket.caps().height(),
-                                   {fps});
-        AkVCam::VideoFrame frame(format);
-        memcpy(frame.data().data(),
-               videoPacket.buffer().constData(),
-               size_t(videoPacket.buffer().size()));
-        this->d->m_ipcBridge.write(this->d->m_curDevice.toStdString(), frame);
-    }
-
-    this->d->m_mutex.unlock();
-
-    akSend(packet)
 }
 
 void VirtualCameraElement::rootMethodUpdated(const QString &rootMethod)

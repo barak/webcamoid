@@ -62,32 +62,32 @@ extern "C"
 // no AV correction is done if too big error
 #define AV_NOSYNC_THRESHOLD 10.0
 
-using V4l2PixFmtMap = QMap<QString, AVPixelFormat>;
+using ImgFmtMap = QMap<QString, AVPixelFormat>;
 
-inline V4l2PixFmtMap initV4l2PixFmtMap()
+inline ImgFmtMap initImgFmtMap()
 {
-    V4l2PixFmtMap rawToFF = {
+    ImgFmtMap rawToFF = {
         // RGB formats
-        {"RGB1", AV_PIX_FMT_RGB8    },
-        {"R444", AV_PIX_FMT_RGB444LE},
-        {"RGBO", AV_PIX_FMT_RGB555LE},
-        {"RGBP", AV_PIX_FMT_RGB565LE},
-        {"RGBQ", AV_PIX_FMT_RGB555BE},
-        {"RGBR", AV_PIX_FMT_RGB565BE},
-        {"BGR3", AV_PIX_FMT_BGR24   },
-        {"RGB3", AV_PIX_FMT_RGB24   },
-        {"BGR0", AV_PIX_FMT_BGR0    },
-        {"BGR4", AV_PIX_FMT_RGB0    },
-        {"RGB4", AV_PIX_FMT_0RGB    },
-        {"ARGB", AV_PIX_FMT_ARGB    },
-        {"RGBA", AV_PIX_FMT_RGBA    },
+        {"RGB332"  , AV_PIX_FMT_RGB8    },
+        {"RGB444"  , AV_PIX_FMT_RGB444LE},
+        {"RGB555"  , AV_PIX_FMT_RGB555LE},
+        {"RGB565"  , AV_PIX_FMT_RGB565LE},
+        {"RGB555BE", AV_PIX_FMT_RGB555BE},
+        {"RGB565BE", AV_PIX_FMT_RGB565BE},
+        {"BGR"     , AV_PIX_FMT_BGR24   },
+        {"RGB"     , AV_PIX_FMT_RGB24   },
+        {"BGR0"    , AV_PIX_FMT_BGR0    },
+        {"BGRX"    , AV_PIX_FMT_RGB0    },
+        {"RGBX"    , AV_PIX_FMT_0RGB    },
+        {"ARGB"    , AV_PIX_FMT_ARGB    },
+        {"RGBA"    , AV_PIX_FMT_RGBA    },
 
         // Grey formats
-        {"Y800", AV_PIX_FMT_GRAY8    },
-        {"GREY", AV_PIX_FMT_GRAY8    },
-        {"Y16 ", AV_PIX_FMT_GRAY16LE },
-        {"B1W0", AV_PIX_FMT_MONOWHITE},
-        {"B0W1", AV_PIX_FMT_MONOBLACK},
+        {"Y800"  , AV_PIX_FMT_GRAY8    },
+        {"GRAY8" , AV_PIX_FMT_GRAY8    },
+        {"GRAY16", AV_PIX_FMT_GRAY16LE },
+        {"B1W0"  , AV_PIX_FMT_MONOWHITE},
+        {"B0W1"  , AV_PIX_FMT_MONOBLACK},
 
         // Palette formats
         {"PAL8", AV_PIX_FMT_PAL8},
@@ -116,19 +116,19 @@ inline V4l2PixFmtMap initV4l2PixFmtMap()
         {"NV16", AV_PIX_FMT_NV16},
 
         // Bayer formats
-        {"BA81", AV_PIX_FMT_BAYER_BGGR8},
-        {"GBRG", AV_PIX_FMT_BAYER_GBRG8},
-        {"GRBG", AV_PIX_FMT_BAYER_GRBG8},
-        {"RGGB", AV_PIX_FMT_BAYER_RGGB8},
+        {"SBGGR8", AV_PIX_FMT_BAYER_BGGR8},
+        {"SGBRG8", AV_PIX_FMT_BAYER_GBRG8},
+        {"SGRBG8", AV_PIX_FMT_BAYER_GRBG8},
+        {"SRGGB8", AV_PIX_FMT_BAYER_RGGB8},
 
         // 10bit raw bayer, expanded to 16 bits
-        {"BYR2", AV_PIX_FMT_BAYER_BGGR16LE}
+        {"SBGGR16", AV_PIX_FMT_BAYER_BGGR16LE}
     };
 
     return rawToFF;
 }
 
-Q_GLOBAL_STATIC_WITH_ARGS(V4l2PixFmtMap, rawToFF, (initV4l2PixFmtMap()))
+Q_GLOBAL_STATIC_WITH_ARGS(ImgFmtMap, rawToFF, (initImgFmtMap()))
 
 using V4l2CodecMap = QMap<QString, AVCodecID>;
 
@@ -537,7 +537,7 @@ void ConvertVideoFFmpegPrivate::convert(const FramePtr &frame)
                                            nullptr,
                                            oFrame.linesize);
 
-    QByteArray oBuffer(frameSize, 0);
+    QByteArray oBuffer(frameSize, Qt::Uninitialized);
 
     if (av_image_fill_pointers(reinterpret_cast<uint8_t **>(oFrame.data),
                                outPixFormat,
@@ -556,24 +556,19 @@ void ConvertVideoFFmpegPrivate::convert(const FramePtr &frame)
               oFrame.data,
               oFrame.linesize);
 
-    AkVideoCaps caps;
-    caps.isValid() = true;
-    caps.format() = AkVideoCaps::Format_rgb24;
-    caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
-    caps.width() = frame->width;
-    caps.height() = frame->height;
-    caps.fps() = this->m_fps;
-
     // Create packet
     AkVideoPacket oPacket;
-    oPacket.caps() = caps;
+    oPacket.caps() = {AkVideoCaps::Format_rgb24,
+                     frame->width,
+                     frame->height,
+                     this->m_fps};
     oPacket.buffer() = oBuffer;
     oPacket.id() = this->m_id;
     oPacket.pts() = frame->pts;
-    oPacket.timeBase() = caps.fps().invert();
+    oPacket.timeBase() = this->m_fps.invert();
     oPacket.index() = 0;
 
-    emit self->frameReady(oPacket.toPacket());
+    emit self->frameReady(oPacket);
 }
 
 void ConvertVideoFFmpegPrivate::log(qreal diff)

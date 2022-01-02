@@ -25,17 +25,17 @@
 template<typename T>
 struct Pixel
 {
-    Pixel():
-        r(0), g(0), b(0), a(0)
-    {
-    }
+    T r;
+    T g;
+    T b;
+    T a;
 
-    Pixel(T red, T green, T blue, T alpha):
+    inline Pixel(T red=0, T green=0, T blue=0, T alpha=0):
         r(red), g(green), b(blue), a(alpha)
     {
     }
 
-    Pixel operator +(const Pixel &other)
+    inline Pixel operator +(const Pixel &other)
     {
         return Pixel(this->r + other.r,
                      this->g + other.g,
@@ -43,25 +43,20 @@ struct Pixel
                      this->a + other.a);
     }
 
-    void clear()
+    inline void clear()
     {
         this->r = 0;
         this->g = 0;
         this->b = 0;
         this->a = 0;
     }
-
-    T r;
-    T g;
-    T b;
-    T a;
 };
 
 // These are used as accumulators
-typedef struct Pixel<quint64> Integer64Pixel;
-typedef struct Pixel<quint32> IntegerPixel;
-typedef struct Pixel<quint16> ShortPixel;
-typedef struct Pixel<quint8>  CharPixel;
+typedef Pixel<quint64> Integer64Pixel;
+typedef Pixel<quint32> IntegerPixel;
+typedef Pixel<quint16> ShortPixel;
+typedef Pixel<quint8> CharPixel;
 typedef IntegerPixel HistogramListItem;
 
 #endif // PIXELSTRUCTS_H

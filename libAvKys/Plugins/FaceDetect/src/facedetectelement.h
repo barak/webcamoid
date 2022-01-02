@@ -82,7 +82,8 @@ class FaceDetectElement: public AkElement
             MarkerTypeEllipse,
             MarkerTypeImage,
             MarkerTypePixelate,
-            MarkerTypeBlur
+            MarkerTypeBlur,
+            MarkerTypeBlurOuter
         };
 
         FaceDetectElement();
@@ -97,6 +98,7 @@ class FaceDetectElement: public AkElement
         Q_INVOKABLE QSize pixelGridSize() const;
         Q_INVOKABLE int blurRadius() const;
         Q_INVOKABLE QSize scanSize() const;
+        Q_INVOKABLE QVector<QRect> detectFaces(const AkVideoPacket &packet);
 
     private:
         FaceDetectElementPrivate *d;
@@ -105,6 +107,7 @@ class FaceDetectElement: public AkElement
         QString controlInterfaceProvide(const QString &controlId) const;
         void controlInterfaceConfigure(QQmlContext *context,
                                        const QString &controlId) const;
+        AkPacket iVideoStream(const AkVideoPacket &packet);
 
     signals:
         void haarFileChanged(const QString &haarFile);
@@ -136,7 +139,6 @@ class FaceDetectElement: public AkElement
         void resetPixelGridSize();
         void resetBlurRadius();
         void resetScanSize();
-        AkPacket iStream(const AkPacket &packet);
 };
 
 #endif // FACEDETECTELEMENT_H

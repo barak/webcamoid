@@ -25,11 +25,13 @@
 #include <QThreadPool>
 #include <QFuture>
 #include <QMutex>
+#include <akfrac.h>
 #include <akcaps.h>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "videocaptureelement.h"
-#include "videocaptureglobals.h"
+#include "videocaptureelementsettings.h"
 #include "convertvideo.h"
 #include "capture.h"
 
@@ -40,12 +42,11 @@
 
 inline const QStringList *mirrorFormats()
 {
-    static const QStringList mirrorFormats = {
-        "RGB3",
-        "RGB4",
-        "RGBP",
-        "RGBO",
-        "BGR0"
+    static const QStringList mirrorFormats {
+        "RGB",
+        "RGB565",
+        "RGB555",
+        "BGRX",
     };
 
     return &mirrorFormats;
@@ -55,9 +56,10 @@ inline const QStringList *mirrorFormats()
 #if !defined(Q_OS_OSX)
 inline const QStringList *swapRgbFormats()
 {
-    static const QStringList swapRgbFormats = {
+    static const QStringList swapRgbFormats {
 #ifdef Q_OS_WIN32
-        "RGB3",
+        "RGB",
+        "BGRX",
 #endif
         "YV12"
     };
@@ -65,8 +67,6 @@ inline const QStringList *swapRgbFormats()
     return &swapRgbFormats;
 }
 #endif
-
-Q_GLOBAL_STATIC(VideoCaptureGlobals, globalVideoCapture)
 
 template<typename T>
 inline QSharedPointer<T> ptr_cast(QObject *obj=nullptr)
@@ -88,6 +88,8 @@ inline void waitLoop(const QFuture<T> &loop)
 class VideoCaptureElementPrivate
 {
     public:
+        VideoCaptureElement *self;
+        VideoCaptureElementSettings settings;
         ConvertVideoPtr m_convertVideo;
         CapturePtr m_capture;
         QThreadPool m_threadPool;
@@ -98,33 +100,30 @@ class VideoCaptureElementPrivate
         bool m_mirror {false};
         bool m_swapRgb {false};
 
+        explicit VideoCaptureElementPrivate(VideoCaptureElement *self);
         void cameraLoop();
+        void codecLibUpdated(const QString &codecLib);
+        void captureLibUpdated(const QString &captureLib);
+        void frameReady(const AkPacket &packet) const;
 };
 
 VideoCaptureElement::VideoCaptureElement():
     AkMultimediaSourceElement()
 {
-    this->d = new VideoCaptureElementPrivate;
+    this->d = new VideoCaptureElementPrivate(this);
+    QObject::connect(&this->d->settings,
+                     &VideoCaptureElementSettings::codecLibChanged,
+                     [this] (const QString &codecLib) {
+                        this->d->codecLibUpdated(codecLib);
+                     });
+    QObject::connect(&this->d->settings,
+                     &VideoCaptureElementSettings::captureLibChanged,
+                     [this] (const QString &captureLib) {
+                        this->d->captureLibUpdated(captureLib);
+                     });
 
-    QObject::connect(globalVideoCapture,
-                     SIGNAL(codecLibChanged(const QString &)),
-                     this,
-                     SIGNAL(codecLibChanged(const QString &)));
-    QObject::connect(globalVideoCapture,
-                     SIGNAL(codecLibChanged(const QString &)),
-                     this,
-                     SLOT(codecLibUpdated(const QString &)));
-    QObject::connect(globalVideoCapture,
-                     SIGNAL(captureLibChanged(const QString &)),
-                     this,
-                     SIGNAL(captureLibChanged(const QString &)));
-    QObject::connect(globalVideoCapture,
-                     SIGNAL(captureLibChanged(const QString &)),
-                     this,
-                     SLOT(captureLibUpdated(const QString &)));
-
-    this->codecLibUpdated(globalVideoCapture->codecLib());
-    this->captureLibUpdated(globalVideoCapture->captureLib());
+    this->d->codecLibUpdated(this->d->settings.codecLib());
+    this->d->captureLibUpdated(this->d->settings.captureLib());
 }
 
 VideoCaptureElement::~VideoCaptureElement()
@@ -192,15 +191,10 @@ AkCaps VideoCaptureElement::caps(int stream)
     if (!caps)
         return AkCaps();
 
-    AkVideoCaps videoCaps;
-    videoCaps.isValid() = true;
-    videoCaps.format() = AkVideoCaps::Format_rgb24;
-    videoCaps.bpp() = AkVideoCaps::bitsPerPixel(videoCaps.format());
-    videoCaps.width() = caps.property("width").toInt();
-    videoCaps.height() = caps.property("height").toInt();
-    videoCaps.fps() = caps.property("fps").toString();
-
-    return videoCaps;
+    return AkVideoCaps(AkVideoCaps::Format_rgb24,
+                       caps.property("width").toInt(),
+                       caps.property("height").toInt(),
+                       caps.property("fps").toString());
 }
 
 AkCaps VideoCaptureElement::rawCaps(int stream) const
@@ -241,16 +235,6 @@ int VideoCaptureElement::nBuffers() const
         return {};
 
     return this->d->m_capture->nBuffers();
-}
-
-QString VideoCaptureElement::codecLib() const
-{
-    return globalVideoCapture->codecLib();
-}
-
-QString VideoCaptureElement::captureLib() const
-{
-    return globalVideoCapture->captureLib();
 }
 
 QVariantList VideoCaptureElement::imageControls() const
@@ -301,6 +285,12 @@ bool VideoCaptureElement::resetCameraControls()
     return this->d->m_capture->resetCameraControls();
 }
 
+VideoCaptureElementPrivate::VideoCaptureElementPrivate(VideoCaptureElement *self):
+    self(self)
+{
+
+}
+
 void VideoCaptureElementPrivate::cameraLoop()
 {
     if (!this->m_convertVideo || !this->m_capture)
@@ -321,7 +311,7 @@ void VideoCaptureElementPrivate::cameraLoop()
                 continue;
             }
 
-            AkPacket packet = this->m_capture->readFrame();
+            auto packet = this->m_capture->readFrame();
 
             if (!packet)
                 continue;
@@ -354,6 +344,95 @@ void VideoCaptureElementPrivate::cameraLoop()
     // Close COM library.
     CoUninitialize();
 #endif
+}
+
+void VideoCaptureElementPrivate::codecLibUpdated(const QString &codecLib)
+{
+    auto state = self->state();
+    self->setState(AkElement::ElementStateNull);
+
+    this->m_mutexLib.lock();
+
+    this->m_convertVideo =
+            ptr_cast<ConvertVideo>(VideoCaptureElement::loadSubModule("VideoCapture",
+                                                                      codecLib));
+
+    if (this->m_convertVideo)
+        QObject::connect(this->m_convertVideo.data(),
+                         &ConvertVideo::frameReady,
+                         [this] (const AkPacket &packet) {
+                            this->frameReady(packet);
+                         });
+
+    this->m_mutexLib.unlock();
+
+    self->setState(state);
+}
+
+void VideoCaptureElementPrivate::captureLibUpdated(const QString &captureLib)
+{
+    auto state = self->state();
+    self->setState(AkElement::ElementStateNull);
+
+    this->m_mutexLib.lock();
+
+    this->m_capture =
+            ptr_cast<Capture>(VideoCaptureElement::loadSubModule("VideoCapture",
+                                                                 captureLib));
+
+    this->m_mutexLib.unlock();
+
+    if (!this->m_capture)
+        return;
+
+    QObject::connect(this->m_capture.data(),
+                     &Capture::error,
+                     self,
+                     &VideoCaptureElement::error);
+    QObject::connect(this->m_capture.data(),
+                     &Capture::webcamsChanged,
+                     self,
+                     &VideoCaptureElement::mediasChanged);
+    QObject::connect(this->m_capture.data(),
+                     &Capture::deviceChanged,
+                     self,
+                     &VideoCaptureElement::mediaChanged);
+    QObject::connect(this->m_capture.data(),
+                     &Capture::imageControlsChanged,
+                     self,
+                     &VideoCaptureElement::imageControlsChanged);
+    QObject::connect(this->m_capture.data(),
+                     &Capture::cameraControlsChanged,
+                     self,
+                     &VideoCaptureElement::cameraControlsChanged);
+
+    emit self->mediasChanged(self->medias());
+    emit self->streamsChanged(self->streams());
+
+    auto medias = self->medias();
+
+    if (!medias.isEmpty())
+        self->setMedia(medias.first());
+
+    self->setState(state);
+}
+
+void VideoCaptureElementPrivate::frameReady(const AkPacket &packet) const
+{
+    if (this->m_mirror || this->m_swapRgb) {
+        AkVideoPacket videoPacket(packet);
+        QImage oImage = videoPacket.toImage();
+
+        if (this->m_mirror)
+            oImage = oImage.mirrored();
+
+        if (this->m_swapRgb)
+            oImage = oImage.rgbSwapped();
+
+        emit self->oStream(AkVideoPacket::fromImage(oImage, videoPacket));
+    } else {
+        emit self->oStream(packet);
+    }
 }
 
 QString VideoCaptureElement::controlInterfaceProvide(const QString &controlId) const
@@ -460,16 +539,6 @@ void VideoCaptureElement::setNBuffers(int nBuffers)
         this->d->m_capture->setNBuffers(nBuffers);
 }
 
-void VideoCaptureElement::setCodecLib(const QString &codecLib)
-{
-    globalVideoCapture->setCodecLib(codecLib);
-}
-
-void VideoCaptureElement::setCaptureLib(const QString &captureLib)
-{
-    globalVideoCapture->setCaptureLib(captureLib);
-}
-
 void VideoCaptureElement::resetMedia()
 {
     if (this->d->m_capture)
@@ -494,20 +563,46 @@ void VideoCaptureElement::resetNBuffers()
         this->d->m_capture->resetNBuffers();
 }
 
-void VideoCaptureElement::resetCodecLib()
-{
-    globalVideoCapture->resetCodecLib();
-}
-
-void VideoCaptureElement::resetCaptureLib()
-{
-    globalVideoCapture->resetCaptureLib();
-}
-
 void VideoCaptureElement::reset()
 {
+    bool running = this->d->m_runCameraLoop;
+    this->setState(AkElement::ElementStateNull);
+
     if (this->d->m_capture)
         this->d->m_capture->reset();
+
+    if (running)
+        this->setState(AkElement::ElementStatePlaying);
+
+    QSettings settings;
+
+    settings.beginGroup("VideoCapture");
+    auto ndevices = settings.beginReadArray("devices");
+    auto media = this->d->m_capture->device();
+    auto deviceDescription = this->d->m_capture->description(media);
+    decltype(ndevices) i = 0;
+
+    for (; i < ndevices; i++) {
+        settings.setArrayIndex(i);
+        auto deviceId = settings.value("id").toString();
+        auto description = settings.value("description").toString();
+
+        if (deviceId == media && description == deviceDescription)
+            break;
+    }
+
+    auto streams = this->d->m_capture->streams();
+
+    settings.endArray();
+
+    settings.beginWriteArray("devices");
+    settings.setArrayIndex(i);
+    settings.setValue("id", media);
+    settings.setValue("description", deviceDescription);
+    settings.setValue("stream", streams.isEmpty()? 0: streams.first());
+
+    settings.endArray();
+    settings.endGroup();
 }
 
 bool VideoCaptureElement::setState(AkElement::ElementState state)
@@ -585,96 +680,6 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
     }
 
     return false;
-}
-
-void VideoCaptureElement::frameReady(const AkPacket &packet)
-{
-    if (this->d->m_mirror || this->d->m_swapRgb) {
-        AkVideoPacket videoPacket(packet);
-        QImage oImage = videoPacket.toImage();
-
-        if (this->d->m_mirror)
-            oImage = oImage.mirrored();
-
-        if (this->d->m_swapRgb)
-            oImage = oImage.rgbSwapped();
-
-        emit this->oStream(AkVideoPacket::fromImage(oImage,
-                                                    videoPacket).toPacket());
-    } else {
-        emit this->oStream(packet);
-    }
-}
-
-void VideoCaptureElement::codecLibUpdated(const QString &codecLib)
-{
-    auto state = this->state();
-    this->setState(AkElement::ElementStateNull);
-
-    this->d->m_mutexLib.lock();
-
-    this->d->m_convertVideo =
-            ptr_cast<ConvertVideo>(VideoCaptureElement::loadSubModule("VideoCapture",
-                                                                      codecLib));
-
-    if (this->d->m_convertVideo)
-        QObject::connect(this->d->m_convertVideo.data(),
-                         &ConvertVideo::frameReady,
-                         this,
-                         &VideoCaptureElement::frameReady,
-                         Qt::DirectConnection);
-
-    this->d->m_mutexLib.unlock();
-
-    this->setState(state);
-}
-
-void VideoCaptureElement::captureLibUpdated(const QString &captureLib)
-{
-    auto state = this->state();
-    this->setState(AkElement::ElementStateNull);
-
-    this->d->m_mutexLib.lock();
-
-    this->d->m_capture =
-            ptr_cast<Capture>(VideoCaptureElement::loadSubModule("VideoCapture",
-                                                                 captureLib));
-
-    this->d->m_mutexLib.unlock();
-
-    if (!this->d->m_capture)
-        return;
-
-    QObject::connect(this->d->m_capture.data(),
-                     &Capture::error,
-                     this,
-                     &VideoCaptureElement::error);
-    QObject::connect(this->d->m_capture.data(),
-                     &Capture::webcamsChanged,
-                     this,
-                     &VideoCaptureElement::mediasChanged);
-    QObject::connect(this->d->m_capture.data(),
-                     &Capture::deviceChanged,
-                     this,
-                     &VideoCaptureElement::mediaChanged);
-    QObject::connect(this->d->m_capture.data(),
-                     &Capture::imageControlsChanged,
-                     this,
-                     &VideoCaptureElement::imageControlsChanged);
-    QObject::connect(this->d->m_capture.data(),
-                     &Capture::cameraControlsChanged,
-                     this,
-                     &VideoCaptureElement::cameraControlsChanged);
-
-    emit this->mediasChanged(this->medias());
-    emit this->streamsChanged(this->streams());
-
-    auto medias = this->medias();
-
-    if (!medias.isEmpty())
-        this->setMedia(medias.first());
-
-    this->setState(state);
 }
 
 #include "moc_videocaptureelement.cpp"

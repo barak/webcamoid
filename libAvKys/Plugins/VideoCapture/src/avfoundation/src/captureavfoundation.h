@@ -24,20 +24,13 @@
 
 class CaptureAvFoundationPrivate;
 class QWaitCondition;
+class QMutex;
 
 class CaptureAvFoundation: public Capture
 {
     Q_OBJECT
 
     public:
-        enum IoMethod
-        {
-            IoMethodUnknown = -1,
-            IoMethodReadWrite,
-            IoMethodMemoryMap,
-            IoMethodUserPointer
-        };
-
         CaptureAvFoundation(QObject *parent=nullptr);
         ~CaptureAvFoundation();
 

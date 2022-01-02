@@ -56,6 +56,7 @@ namespace AkVCam
             std::map<int64_t, XpcMessage> m_messageHandlers;
             std::vector<std::string> m_broadcasting;
             std::map<std::string, std::string> m_options;
+            std::wstring m_error;
             bool m_asClient;
             bool m_uninstall;
 
@@ -91,7 +92,7 @@ namespace AkVCam
             bool mkpath(const std::string &path) const;
             bool rm(const std::string &path) const;
             bool createDaemonPlist(const std::string &fileName) const;
-            bool loadDaemon() const;
+            bool loadDaemon();
             void unloadDaemon() const;
             bool checkDaemon();
             void uninstallPlugin();
@@ -104,11 +105,11 @@ namespace AkVCam
             std::vector<IpcBridge *> m_bridges;
     };
 
-    inline IpcBridgePrivate *ipcBridgePrivate()
+    inline IpcBridgePrivate &ipcBridgePrivate()
     {
         static IpcBridgePrivate ipcBridgePrivate;
 
-        return &ipcBridgePrivate;
+        return ipcBridgePrivate;
     }
 }
 
@@ -116,14 +117,19 @@ AkVCam::IpcBridge::IpcBridge()
 {
     AkIpcBridgeLogMethod();
     this->d = new IpcBridgePrivate(this);
-    ipcBridgePrivate()->add(this);
+    ipcBridgePrivate().add(this);
 }
 
 AkVCam::IpcBridge::~IpcBridge()
 {
     this->unregisterPeer();
-    ipcBridgePrivate()->remove(this);
+    ipcBridgePrivate().remove(this);
     delete this->d;
+}
+
+std::wstring AkVCam::IpcBridge::errorMessage() const
+{
+    return this->d->m_error;
 }
 
 void AkVCam::IpcBridge::setOption(const std::string &key,
@@ -228,7 +234,7 @@ bool AkVCam::IpcBridge::registerPeer(bool asClient)
 
     xpc_connection_set_event_handler(serverMessagePort, ^(xpc_object_t event) {
         if (event == XPC_ERROR_CONNECTION_INTERRUPTED) {
-            ipcBridgePrivate()->connectionInterrupted();
+            ipcBridgePrivate().connectionInterrupted();
         }
     });
     xpc_connection_resume(serverMessagePort);
@@ -263,7 +269,7 @@ bool AkVCam::IpcBridge::registerPeer(bool asClient)
         auto client = reinterpret_cast<xpc_connection_t>(event);
 
         xpc_connection_set_event_handler(client, ^(xpc_object_t event) {
-            ipcBridgePrivate()->messageReceived(client, event);
+            ipcBridgePrivate().messageReceived(client, event);
         });
 
         xpc_connection_resume(client);
@@ -662,8 +668,11 @@ std::string AkVCam::IpcBridge::deviceCreate(const std::wstring &description,
 
     this->registerPeer(false);
 
-    if (!this->d->m_serverMessagePort || !this->d->m_messagePort)
+    if (!this->d->m_serverMessagePort || !this->d->m_messagePort) {
+        this->d->m_error = L"Can't register peer";
+
         return {};
+    }
 
     auto dictionary = xpc_dictionary_create(nullptr, nullptr, 0);
     xpc_dictionary_set_int64(dictionary, "message", AKVCAM_ASSISTANT_MSG_DEVICE_CREATE);
@@ -691,6 +700,7 @@ std::string AkVCam::IpcBridge::deviceCreate(const std::wstring &description,
     auto replyType = xpc_get_type(reply);
 
     if (replyType != XPC_TYPE_DICTIONARY) {
+        this->d->m_error = L"Can't set virtual camera formats";
         xpc_release(reply);
 
         return {};
@@ -881,8 +891,10 @@ bool AkVCam::IpcBridge::write(const std::string &deviceId,
     xpc_dictionary_set_int64(dictionary, "message", AKVCAM_ASSISTANT_MSG_FRAME_READY);
     xpc_dictionary_set_string(dictionary, "device", deviceId.c_str());
     xpc_dictionary_set_value(dictionary, "frame", surfaceObj);
-    xpc_connection_send_message(this->d->m_serverMessagePort, dictionary);
+    auto reply = xpc_connection_send_message_with_reply_sync(this->d->m_serverMessagePort,
+                                                             dictionary);
     xpc_release(dictionary);
+    xpc_release(reply);
     xpc_release(surfaceObj);
     CFRelease(surface);
 
@@ -1117,24 +1129,28 @@ void AkVCam::IpcBridgePrivate::frameReady(xpc_connection_t client,
     auto frame = xpc_dictionary_get_value(event, "frame");
     auto surface = IOSurfaceLookupFromXPCObject(frame);
 
-    if (!surface)
-        return;
+    if (surface) {
+        uint32_t surfaceSeed = 0;
+        IOSurfaceLock(surface, kIOSurfaceLockReadOnly, &surfaceSeed);
+        FourCC fourcc = IOSurfaceGetPixelFormat(surface);
+        int width = int(IOSurfaceGetWidth(surface));
+        int height = int(IOSurfaceGetHeight(surface));
+        size_t size = IOSurfaceGetAllocSize(surface);
+        auto data = reinterpret_cast<uint8_t *>(IOSurfaceGetBaseAddress(surface));
+        VideoFormat videoFormat(fourcc, width, height);
+        VideoFrame videoFrame(videoFormat);
+        memcpy(videoFrame.data().data(), data, size);
+        IOSurfaceUnlock(surface, kIOSurfaceLockReadOnly, &surfaceSeed);
+        CFRelease(surface);
 
-    uint32_t surfaceSeed = 0;
-    IOSurfaceLock(surface, kIOSurfaceLockReadOnly, &surfaceSeed);
-    FourCC fourcc = IOSurfaceGetPixelFormat(surface);
-    int width = int(IOSurfaceGetWidth(surface));
-    int height = int(IOSurfaceGetHeight(surface));
-    size_t size = IOSurfaceGetAllocSize(surface);
-    auto data = reinterpret_cast<uint8_t *>(IOSurfaceGetBaseAddress(surface));
-    VideoFormat videoFormat(fourcc, width, height);
-    VideoFrame videoFrame(videoFormat);
-    memcpy(videoFrame.data().data(), data, size);
-    IOSurfaceUnlock(surface, kIOSurfaceLockReadOnly, &surfaceSeed);
-    CFRelease(surface);
+        for (auto bridge: this->m_bridges)
+            AKVCAM_EMIT(bridge, FrameReady, deviceId, videoFrame)
+    }
 
-    for (auto bridge: this->m_bridges)
-        AKVCAM_EMIT(bridge, FrameReady, deviceId, videoFrame)
+    auto reply = xpc_dictionary_create_reply(event);
+    xpc_dictionary_set_bool(reply, "status", surface? true: false);
+    xpc_connection_send_message(client, reply);
+    xpc_release(reply);
 }
 
 void AkVCam::IpcBridgePrivate::setBroadcasting(xpc_connection_t client,
@@ -1411,7 +1427,7 @@ bool AkVCam::IpcBridgePrivate::createDaemonPlist(const std::string &fileName) co
     return true;
 }
 
-bool AkVCam::IpcBridgePrivate::loadDaemon() const
+bool AkVCam::IpcBridgePrivate::loadDaemon()
 {
     AkIpcBridgePrivateLogMethod();
     auto launchctl = popen("launchctl list " AKVCAM_ASSISTANT_NAME, "r");
@@ -1422,13 +1438,21 @@ bool AkVCam::IpcBridgePrivate::loadDaemon() const
     auto daemonsPath = replace(CMIO_DAEMONS_PATH, "~", this->homePath());
     auto dstDaemonsPath = daemonsPath + "/" AKVCAM_ASSISTANT_NAME ".plist";
 
-    if (!this->fileExists(dstDaemonsPath))
+    if (!this->fileExists(dstDaemonsPath)) {
+        this->m_error = L"Daemon plist does not exists";
+
         return false;
+    }
 
     launchctl = popen(("launchctl load -w '" + dstDaemonsPath + "'").c_str(),
                        "r");
 
-    return launchctl && !pclose(launchctl);
+    bool result = launchctl && !pclose(launchctl);
+
+    if (!result)
+        this->m_error = L"Can't launch daemon";
+
+    return result;
 }
 
 void AkVCam::IpcBridgePrivate::unloadDaemon() const
@@ -1452,8 +1476,11 @@ bool AkVCam::IpcBridgePrivate::checkDaemon()
     AkIpcBridgePrivateLogMethod();
     auto driverPath = this->locateDriverPath();
 
-    if (driverPath.empty())
+    if (driverPath.empty()) {
+        this->m_error = L"Driver not found";
+
         return false;
+    }
 
     auto plugin = this->fileName(driverPath);
     std::wstring dstPath = CMIO_PLUGINS_DAL_PATH_L;
@@ -1465,8 +1492,11 @@ bool AkVCam::IpcBridgePrivate::checkDaemon()
         std::wfstream cmds;
         cmds.open(cmdFileName, std::ios_base::out);
 
-        if (!cmds.is_open())
+        if (!cmds.is_open()) {
+            this->m_error = L"Can't create script";
+
             return false;
+        }
 
         cmds << L"mkdir -p "
              << pluginInstallPath
@@ -1494,11 +1524,17 @@ bool AkVCam::IpcBridgePrivate::checkDaemon()
     auto dstDaemonsPath = daemonsPath + "/" + AKVCAM_ASSISTANT_NAME + ".plist";
 
     if (!this->fileExists(dstDaemonsPath)) {
-        if (!this->mkpath(daemonsPath))
-            return false;
+        if (!this->mkpath(daemonsPath)) {
+            this->m_error = L"Can't create daemon path";
 
-        if (!this->createDaemonPlist(dstDaemonsPath))
             return false;
+        }
+
+        if (!this->createDaemonPlist(dstDaemonsPath)) {
+            this->m_error = L"Can't create daemon plist";
+
+            return false;
+        }
     }
 
     return this->loadDaemon();

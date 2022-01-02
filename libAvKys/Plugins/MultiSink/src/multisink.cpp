@@ -19,6 +19,7 @@
 
 #include "multisink.h"
 #include "multisinkelement.h"
+#include "multisinkelementsettings.h"
 
 QObject *MultiSink::create(const QString &key, const QString &specification)
 {
@@ -26,13 +27,16 @@ QObject *MultiSink::create(const QString &key, const QString &specification)
 
     if (key == AK_PLUGIN_TYPE_ELEMENT)
         return new MultiSinkElement();
+    else if (key == AK_PLUGIN_TYPE_ELEMENT_SETTINGS)
+        return new MultiSinkElementSettings();
 
     return nullptr;
 }
 
 QStringList MultiSink::keys() const
 {
-    return QStringList();
+    return {AK_PLUGIN_TYPE_ELEMENT,
+            AK_PLUGIN_TYPE_ELEMENT_SETTINGS};
 }
 
 #include "moc_multisink.cpp"

@@ -40,10 +40,10 @@ class AudioDevCoreAudio: public AudioDev
         Q_INVOKABLE QString description(const QString &device);
         Q_INVOKABLE AkAudioCaps preferredFormat(const QString &device);
         Q_INVOKABLE QList<AkAudioCaps::SampleFormat> supportedFormats(const QString &device);
-        Q_INVOKABLE QList<int> supportedChannels(const QString &device);
+        Q_INVOKABLE QList<AkAudioCaps::ChannelLayout> supportedChannelLayouts(const QString &device);
         Q_INVOKABLE QList<int> supportedSampleRates(const QString &device);
         Q_INVOKABLE bool init(const QString &device, const AkAudioCaps &caps);
-        Q_INVOKABLE QByteArray read(int samples);
+        Q_INVOKABLE QByteArray read();
         Q_INVOKABLE bool write(const AkAudioPacket &packet);
         Q_INVOKABLE bool uninit();
 

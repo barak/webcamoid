@@ -20,8 +20,8 @@
 #include <QThread>
 #include <akfrac.h>
 #include <akcaps.h>
-#include <akvideocaps.h>
 #include <akpacket.h>
+#include <akvideocaps.h>
 #include <akvideopacket.h>
 
 extern "C"
@@ -84,15 +84,10 @@ VideoStream::~VideoStream()
 
 AkCaps VideoStream::caps() const
 {
-    AkVideoCaps caps;
-    caps.isValid() = true;
-    caps.format() = AkVideoCaps::Format_rgb24;
-    caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
-    caps.width() = this->codecContext()->width;
-    caps.height() = this->codecContext()->height;
-    caps.fps() = this->d->fps();
-
-    return caps.toCaps();
+    return AkVideoCaps(AkVideoCaps::Format_rgb24,
+                       this->codecContext()->width,
+                       this->codecContext()->height,
+                       this->d->fps());
 }
 
 void VideoStream::processPacket(AVPacket *packet)
@@ -171,7 +166,7 @@ void VideoStream::processData(AVFrame *frame)
             this->globalClock()->setClock(pts);
 
         this->m_clockDiff = diff;
-        AkPacket oPacket = this->d->convert(frame);
+        auto oPacket = this->d->convert(frame);
         emit this->oStream(oPacket);
         emit this->frameSent();
 
@@ -245,7 +240,7 @@ AkPacket VideoStreamPrivate::convert(AVFrame *iFrame)
                                            nullptr,
                                            oFrame.linesize);
 
-    QByteArray oBuffer(frameSize, 0);
+    QByteArray oBuffer(frameSize, Qt::Uninitialized);
 
     if (av_image_fill_pointers(reinterpret_cast<uint8_t **>(oFrame.data),
                                outPixFormat,
@@ -264,24 +259,20 @@ AkPacket VideoStreamPrivate::convert(AVFrame *iFrame)
               oFrame.data,
               oFrame.linesize);
 
-    AkVideoCaps caps;
-    caps.isValid() = true;
-    caps.format() = AkVideoCaps::Format_rgb24;
-    caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
-    caps.width() = width;
-    caps.height() = iFrame->height;
-    caps.fps() = this->fps();
-
     // Create packet
+
     AkVideoPacket oPacket;
-    oPacket.caps() = caps;
+    oPacket.caps() = {AkVideoCaps::Format_rgb24,
+                     width,
+                     iFrame->height,
+                     this->fps()};
     oPacket.buffer() = oBuffer;
     oPacket.pts() = iFrame->pts;
     oPacket.timeBase() = self->timeBase();
     oPacket.index() = int(self->index());
     oPacket.id() = self->id();
 
-    return oPacket.toPacket();
+    return oPacket;
 }
 
 int64_t VideoStreamPrivate::bestEffortTimestamp(const AVFrame *frame) const

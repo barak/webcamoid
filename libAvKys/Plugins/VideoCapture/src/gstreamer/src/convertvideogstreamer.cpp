@@ -21,6 +21,8 @@
 #include <QtConcurrent>
 #include <ak.h>
 #include <akcaps.h>
+#include <akfrac.h>
+#include <akpacket.h>
 #include <akvideocaps.h>
 #include <akvideopacket.h>
 #include <gst/video/video.h>
@@ -31,20 +33,19 @@
 
 using StringStringMap = QMap<QString, QString>;
 
-inline StringStringMap initFourCCToGst()
+inline const StringStringMap &initFourCCToGst()
 {
-    StringStringMap fourCCToGst = {
+    static const StringStringMap fourCCToGst = {
         // RGB formats
-        {"RGBO", "video/x-raw,format=RGB15"},
-        {"RGBP", "video/x-raw,format=RGB16"},
-        {"BGR3", "video/x-raw,format=BGR"  },
-        {"RGB3", "video/x-raw,format=RGB"  },
-        {"BGR4", "video/x-raw,format=BGRx" },
-        {"RGB4", "video/x-raw,format=xRGB" },
+        {"RGB555", "video/x-raw,format=RGB15"},
+        {"RGB565", "video/x-raw,format=RGB16"},
+        {"BGR"   , "video/x-raw,format=BGR"  },
+        {"RGB"   , "video/x-raw,format=RGB"  },
+        {"BGRX"  , "video/x-raw,format=BGRx" },
+        {"XRGB"  , "video/x-raw,format=xRGB" },
 
         // Grey formats
-        {"GREY", "video/x-raw,format=GRAY8"},
-        {"Y04 ", "video/x-raw,format=Y41P" },
+        {"GRAY8", "video/x-raw,format=GRAY8"},
 
         // Luminance+Chrominance formats
         {"YVU9", "video/x-raw,format=YVU9"},
@@ -68,10 +69,10 @@ inline StringStringMap initFourCCToGst()
         {"TM12", "video/x-raw,format=NV12_64Z32"},
 
         // Bayer formats - see http://www.siliconimaging.com/RGB%20Bayer.htm
-        {"BA81", "video/x-bayer,format=bggr"},
-        {"GBRG", "video/x-bayer,format=gbrg"},
-        {"GRBG", "video/x-bayer,format=grbg"},
-        {"RGGB", "video/x-bayer,format=rggb"},
+        {"SBGGR8", "video/x-bayer,format=bggr"},
+        {"SGBRG8", "video/x-bayer,format=gbrg"},
+        {"SGRBG8", "video/x-bayer,format=grbg"},
+        {"SRGGB8", "video/x-bayer,format=rggb"},
 
         // compressed formats
         {"MJPG", "image/jpeg"                                         },
@@ -164,22 +165,24 @@ bool ConvertVideoGStreamer::init(const AkCaps &caps)
     int height = caps.property("height").toInt();
     AkFrac fps = caps.property("fps").toString();
 
-    AkCaps gstCaps = fourCCToGst->value(fourcc);
-    GstCaps *inCaps = nullptr;
+    auto gstCaps = fourCCToGst->value(fourcc);
 
-    if (gstCaps.mimeType() == "video/x-raw"
-        || gstCaps.mimeType() == "video/x-bayer"
-        || gstCaps.mimeType() == "video/x-pwc1"
-        || gstCaps.mimeType() == "video/x-pwc2"
-        || gstCaps.mimeType() == "video/x-sonix") {
-        gstCaps.setProperty("width", width);
-        gstCaps.setProperty("height", height);
-        gstCaps.setProperty("framerate", fps.toString());
-        inCaps = gst_caps_from_string(gstCaps.toString().toStdString().c_str());
-    } else if (!gstCaps.mimeType().isEmpty()) {
-        inCaps = gst_caps_from_string(gstCaps.toString().toStdString().c_str());
-    } else
+    if (gstCaps.isEmpty())
         return false;
+
+    auto inCaps = gst_caps_from_string(gstCaps.toStdString().c_str());
+
+    if (gstCaps.startsWith("video/x-raw")
+        || gstCaps.startsWith("video/x-bayer")
+        || gstCaps.startsWith("video/x-pwc1")
+        || gstCaps.startsWith("video/x-pwc2")
+        || gstCaps.startsWith("video/x-sonix")) {
+        gst_caps_set_simple(inCaps,
+                            "width", width,
+                            "height", height,
+                            "framerate", fps.toString().toStdString().c_str(),
+                            nullptr);
+    }
 
     inCaps = gst_caps_fixate(inCaps);
 
@@ -501,25 +504,22 @@ GstFlowReturn ConvertVideoGStreamerPrivate::videoBufferCallback(GstElement *vide
     GstVideoInfo *videoInfo = gst_video_info_new();
     gst_video_info_from_caps(videoInfo, caps);
 
-    // Create a package and return it.
-    AkVideoPacket oVideoPacket;
-    oVideoPacket.caps().isValid() = true;
-    oVideoPacket.caps().format() = AkVideoCaps::Format_rgb24;
-    oVideoPacket.caps().bpp() = AkVideoCaps::bitsPerPixel(oVideoPacket.caps().format());
-    oVideoPacket.caps().width() = videoInfo->width;
-    oVideoPacket.caps().height() = videoInfo->height;
-    oVideoPacket.caps().fps() = AkFrac(videoInfo->fps_n, videoInfo->fps_d);
-
     gst_video_info_free(videoInfo);
 
     GstBuffer *buffer = gst_sample_get_buffer(sample);
     GstMapInfo info;
     gst_buffer_map(buffer, &info, GST_MAP_READ);
-
-    QByteArray oBuffer(int(info.size), 0);
+    QByteArray oBuffer(int(info.size), Qt::Uninitialized);
     memcpy(oBuffer.data(), info.data, info.size);
 
+    // Create a package and return it.
+    AkVideoPacket oVideoPacket;
+    oVideoPacket.caps() = {AkVideoCaps::Format_rgb24,
+                           videoInfo->width,
+                           videoInfo->height,
+                           AkFrac(videoInfo->fps_n, videoInfo->fps_d)};
     oVideoPacket.buffer() = oBuffer;
+
     oVideoPacket.pts() = qint64(GST_BUFFER_PTS(buffer));
     oVideoPacket.timeBase() = AkFrac(1, GST_SECOND);
     oVideoPacket.index() = 0;
@@ -528,7 +528,7 @@ GstFlowReturn ConvertVideoGStreamerPrivate::videoBufferCallback(GstElement *vide
     gst_buffer_unmap(buffer, &info);
     gst_sample_unref(sample);
 
-    emit self->frameReady(oVideoPacket.toPacket());
+    emit self->frameReady(oVideoPacket);
 
     return GST_FLOW_OK;
 }

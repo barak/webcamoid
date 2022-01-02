@@ -49,7 +49,7 @@ __inline bool operator <(REFGUID guid1, REFGUID guid2)
     return guid1.Data1 < guid2.Data1;
 }
 
-typedef QMap<VideoProcAmpProperty, QString> VideoProcAmpPropertyMap;
+using VideoProcAmpPropertyMap = QMap<VideoProcAmpProperty, QString>;
 
 inline VideoProcAmpPropertyMap initVideoProcAmpPropertyMap()
 {
@@ -71,7 +71,7 @@ inline VideoProcAmpPropertyMap initVideoProcAmpPropertyMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(VideoProcAmpPropertyMap, vpapToStr, (initVideoProcAmpPropertyMap()))
 
-typedef QMap<CameraControlProperty, QString> CameraControlMap;
+using CameraControlMap = QMap<CameraControlProperty, QString>;
 
 inline CameraControlMap initCameraControlMap()
 {
@@ -90,74 +90,74 @@ inline CameraControlMap initCameraControlMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(CameraControlMap, ccToStr, (initCameraControlMap()))
 
-typedef QMap<GUID, QString> GuidToStrMap;
+using GuidToStrMap = QMap<GUID, QString>;
 
 inline GuidToStrMap initGuidToStrMap()
 {
     GuidToStrMap guidToStr = {
-        {MEDIASUBTYPE_CLPL               , "CLPL"},
-        {MEDIASUBTYPE_YUYV               , "YUYV"},
-        {MEDIASUBTYPE_IYUV               , "IYUV"},
-        {MEDIASUBTYPE_YVU9               , "YVU9"},
-        {MEDIASUBTYPE_Y411               , "Y411"},
-        {MEDIASUBTYPE_Y41P               , "Y41P"},
-        {MEDIASUBTYPE_YUY2               , "YUY2"},
-        {MEDIASUBTYPE_YVYU               , "YVYU"},
-        {MEDIASUBTYPE_UYVY               , "UYVY"},
-        {MEDIASUBTYPE_Y211               , "Y211"},
-        {MEDIASUBTYPE_CLJR               , "CLJR"},
-        {MEDIASUBTYPE_IF09               , "IF09"},
-        {MEDIASUBTYPE_CPLA               , "CPLA"},
-        {MEDIASUBTYPE_MJPG               , "MJPG"},
-        {MEDIASUBTYPE_TVMJ               , "TVMJ"},
-        {MEDIASUBTYPE_WAKE               , "WAKE"},
-        {MEDIASUBTYPE_CFCC               , "CFCC"},
-        {MEDIASUBTYPE_IJPG               , "IJPG"},
-        {MEDIASUBTYPE_Plum               , "Plum"},
-        {MEDIASUBTYPE_DVCS               , "DVCS"},
-        {MEDIASUBTYPE_DVSD               , "DVSD"},
-        {MEDIASUBTYPE_MDVF               , "MDVF"},
-        {MEDIASUBTYPE_RGB1               , "RGB1"},
-        {MEDIASUBTYPE_RGB4               , "BGR0"},
-        {MEDIASUBTYPE_RGB8               , "RGB8"},
-        {MEDIASUBTYPE_RGB565             , "RGBP"},
-        {MEDIASUBTYPE_RGB555             , "RGBO"},
-        {MEDIASUBTYPE_RGB24              , "RGB3"},
-        {MEDIASUBTYPE_RGB32              , "BGR0"},
-        {MEDIASUBTYPE_ARGB1555           , "AR15"},
-        {MEDIASUBTYPE_ARGB4444           , "AR12"},
-        {MEDIASUBTYPE_ARGB32             , "BA24"},
-        {MEDIASUBTYPE_AYUV               , "AYUV"},
-        {MEDIASUBTYPE_AI44               , "AI44"},
-        {MEDIASUBTYPE_IA44               , "IA44"},
-        {MEDIASUBTYPE_RGB32_D3D_DX7_RT   , "7R32"},
-        {MEDIASUBTYPE_RGB16_D3D_DX7_RT   , "7R16"},
-        {MEDIASUBTYPE_ARGB32_D3D_DX7_RT  , "7A88"},
-        {MEDIASUBTYPE_ARGB4444_D3D_DX7_RT, "7A44"},
-        {MEDIASUBTYPE_ARGB1555_D3D_DX7_RT, "7A15"},
-        {MEDIASUBTYPE_RGB32_D3D_DX9_RT   , "9R32"},
-        {MEDIASUBTYPE_RGB16_D3D_DX9_RT   , "9R16"},
-        {MEDIASUBTYPE_ARGB32_D3D_DX9_RT  , "9A88"},
-        {MEDIASUBTYPE_ARGB4444_D3D_DX9_RT, "9A44"},
-        {MEDIASUBTYPE_ARGB1555_D3D_DX9_RT, "9A15"},
-        {MEDIASUBTYPE_YV12               , "YV12"},
-        {MEDIASUBTYPE_NV12               , "NV12"},
-        {MEDIASUBTYPE_IMC1               , "IMC1"},
-        {MEDIASUBTYPE_IMC2               , "IMC2"},
-        {MEDIASUBTYPE_IMC3               , "IMC3"},
-        {MEDIASUBTYPE_IMC4               , "IMC4"},
-        {MEDIASUBTYPE_S340               , "S340"},
-        {MEDIASUBTYPE_S342               , "S342"},
-        {MEDIASUBTYPE_QTRpza             , "rpza"},
-        {MEDIASUBTYPE_QTSmc              , "smc "},
-        {MEDIASUBTYPE_QTRle              , "rle "},
-        {MEDIASUBTYPE_QTJpeg             , "jpeg"},
-        {MEDIASUBTYPE_dvsd               , "dvsd"},
-        {MEDIASUBTYPE_dvhd               , "dvhd"},
-        {MEDIASUBTYPE_dvsl               , "dvsl"},
-        {MEDIASUBTYPE_dv25               , "dv25"},
-        {MEDIASUBTYPE_dv50               , "dv50"},
-        {MEDIASUBTYPE_dvh1               , "dvh1"}
+        {MEDIASUBTYPE_CLPL               , "CLPL"    },
+        {MEDIASUBTYPE_YUYV               , "YUYV"    },
+        {MEDIASUBTYPE_IYUV               , "IYUV"    },
+        {MEDIASUBTYPE_YVU9               , "YVU9"    },
+        {MEDIASUBTYPE_Y411               , "Y411"    },
+        {MEDIASUBTYPE_Y41P               , "Y41P"    },
+        {MEDIASUBTYPE_YUY2               , "YUY2"    },
+        {MEDIASUBTYPE_YVYU               , "YVYU"    },
+        {MEDIASUBTYPE_UYVY               , "UYVY"    },
+        {MEDIASUBTYPE_Y211               , "Y211"    },
+        {MEDIASUBTYPE_CLJR               , "CLJR"    },
+        {MEDIASUBTYPE_IF09               , "IF09"    },
+        {MEDIASUBTYPE_CPLA               , "CPLA"    },
+        {MEDIASUBTYPE_MJPG               , "MJPG"    },
+        {MEDIASUBTYPE_TVMJ               , "TVMJ"    },
+        {MEDIASUBTYPE_WAKE               , "WAKE"    },
+        {MEDIASUBTYPE_CFCC               , "CFCC"    },
+        {MEDIASUBTYPE_IJPG               , "IJPG"    },
+        {MEDIASUBTYPE_Plum               , "Plum"    },
+        {MEDIASUBTYPE_DVCS               , "DVCS"    },
+        {MEDIASUBTYPE_DVSD               , "DVSD"    },
+        {MEDIASUBTYPE_MDVF               , "MDVF"    },
+        {MEDIASUBTYPE_RGB1               , "RGB1"    },
+        {MEDIASUBTYPE_RGB4               , "BGRX"    },
+        {MEDIASUBTYPE_RGB8               , "RGB8"    },
+        {MEDIASUBTYPE_RGB565             , "RGB565"  },
+        {MEDIASUBTYPE_RGB555             , "RGB555"  },
+        {MEDIASUBTYPE_RGB24              , "RGB"     },
+        {MEDIASUBTYPE_RGB32              , "BGRX"    },
+        {MEDIASUBTYPE_ARGB1555           , "ARGB555" },
+        {MEDIASUBTYPE_ARGB4444           , "ARGB4444"},
+        {MEDIASUBTYPE_ARGB32             , "ARGB"    },
+        {MEDIASUBTYPE_AYUV               , "AYUV"    },
+        {MEDIASUBTYPE_AI44               , "AI44"    },
+        {MEDIASUBTYPE_IA44               , "IA44"    },
+        {MEDIASUBTYPE_RGB32_D3D_DX7_RT   , "7R32"    },
+        {MEDIASUBTYPE_RGB16_D3D_DX7_RT   , "7R16"    },
+        {MEDIASUBTYPE_ARGB32_D3D_DX7_RT  , "7A88"    },
+        {MEDIASUBTYPE_ARGB4444_D3D_DX7_RT, "7A44"    },
+        {MEDIASUBTYPE_ARGB1555_D3D_DX7_RT, "7A15"    },
+        {MEDIASUBTYPE_RGB32_D3D_DX9_RT   , "9R32"    },
+        {MEDIASUBTYPE_RGB16_D3D_DX9_RT   , "9R16"    },
+        {MEDIASUBTYPE_ARGB32_D3D_DX9_RT  , "9A88"    },
+        {MEDIASUBTYPE_ARGB4444_D3D_DX9_RT, "9A44"    },
+        {MEDIASUBTYPE_ARGB1555_D3D_DX9_RT, "9A15"    },
+        {MEDIASUBTYPE_YV12               , "YV12"    },
+        {MEDIASUBTYPE_NV12               , "NV12"    },
+        {MEDIASUBTYPE_IMC1               , "IMC1"    },
+        {MEDIASUBTYPE_IMC2               , "IMC2"    },
+        {MEDIASUBTYPE_IMC3               , "IMC3"    },
+        {MEDIASUBTYPE_IMC4               , "IMC4"    },
+        {MEDIASUBTYPE_S340               , "S340"    },
+        {MEDIASUBTYPE_S342               , "S342"    },
+        {MEDIASUBTYPE_QTRpza             , "rpza"    },
+        {MEDIASUBTYPE_QTSmc              , "smc "    },
+        {MEDIASUBTYPE_QTRle              , "rle "    },
+        {MEDIASUBTYPE_QTJpeg             , "jpeg"    },
+        {MEDIASUBTYPE_dvsd               , "dvsd"    },
+        {MEDIASUBTYPE_dvhd               , "dvhd"    },
+        {MEDIASUBTYPE_dvsl               , "dvsl"    },
+        {MEDIASUBTYPE_dv25               , "dv25"    },
+        {MEDIASUBTYPE_dv50               , "dv50"    },
+        {MEDIASUBTYPE_dvh1               , "dvh1"    },
     };
 
     return guidToStr;
@@ -165,7 +165,7 @@ inline GuidToStrMap initGuidToStrMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(GuidToStrMap, guidToStr, (initGuidToStrMap()))
 
-typedef QMap<CaptureDShow::IoMethod, QString> IoMethodMap;
+using IoMethodMap = QMap<CaptureDShow::IoMethod, QString>;
 
 inline IoMethodMap initIoMethodMap()
 {
@@ -180,24 +180,24 @@ inline IoMethodMap initIoMethodMap()
 
 Q_GLOBAL_STATIC_WITH_ARGS(IoMethodMap, ioMethodToStr, (initIoMethodMap()))
 
-typedef QSharedPointer<IGraphBuilder> GraphBuilderPtr;
-typedef QSharedPointer<IBaseFilter> BaseFilterPtr;
-typedef QSharedPointer<ISampleGrabber> SampleGrabberPtr;
-typedef QSharedPointer<IAMStreamConfig> StreamConfigPtr;
-typedef QSharedPointer<FrameGrabber> FrameGrabberPtr;
-typedef QSharedPointer<IMoniker> MonikerPtr;
-typedef QMap<QString, MonikerPtr> MonikersMap;
-typedef QSharedPointer<AM_MEDIA_TYPE> MediaTypePtr;
-typedef QList<MediaTypePtr> MediaTypesList;
-typedef QSharedPointer<IPin> PinPtr;
-typedef QList<PinPtr> PinList;
+using BaseFilterPtr = QSharedPointer<IBaseFilter>;
+using SampleGrabberPtr = QSharedPointer<ISampleGrabber>;
+using MonikerPtr = QSharedPointer<IMoniker>;
+using MonikersMap = QMap<QString, MonikerPtr>;
+using MediaTypePtr = QSharedPointer<AM_MEDIA_TYPE>;
+using MediaTypesList = QList<MediaTypePtr>;
+using PinPtr = QSharedPointer<IPin>;
+using PinList = QList<PinPtr>;
 
 class CaptureDShowPrivate
 {
     public:
-        QStringList m_webcams;
+        CaptureDShow *self;
         QString m_device;
         QList<int> m_streams;
+        QStringList m_devices;
+        QMap<QString, QString> m_descriptions;
+        QMap<QString, QVariantList> m_devicesCaps;
         qint64 m_id {-1};
         AkFrac m_timeBase;
         CaptureDShow::IoMethod m_ioMethod {CaptureDShow::IoMethodGrabSample};
@@ -215,14 +215,18 @@ class CaptureDShowPrivate
         QVariantMap m_localImageControls;
         QVariantMap m_localCameraControls;
 
+        explicit CaptureDShowPrivate(CaptureDShow *self);
+        QString devicePath(IPropertyBag *propertyBag) const;
+        QString deviceDescription(IPropertyBag *propertyBag) const;
+        QVariantList caps(IBaseFilter *baseFilter) const;
         AkCaps capsFromMediaType(const AM_MEDIA_TYPE *mediaType) const;
         AkCaps capsFromMediaType(const MediaTypePtr &mediaType) const;
         HRESULT enumerateCameras(IEnumMoniker **ppEnum) const;
         MonikersMap listMonikers() const;
         MonikerPtr findMoniker(const QString &webcam) const;
+        QString monikerDisplayName(IMoniker *moniker) const;
         IBaseFilter *findFilterP(const QString &webcam) const;
         BaseFilterPtr findFilter(const QString &webcam) const;
-        MediaTypesList listMediaTypes(const QString &webcam) const;
         MediaTypesList listMediaTypes(IBaseFilter *filter) const;
         bool isPinConnected(IPin *pPin, bool *ok=nullptr) const;
         PinPtr findUnconnectedPin(IBaseFilter *pFilter,
@@ -232,10 +236,8 @@ class CaptureDShowPrivate
                             IBaseFilter *pDest) const;
         PinList enumPins(IBaseFilter *filter,
                          PIN_DIRECTION direction) const;
-        static void deleteUnknown(IUnknown *unknown);
         static void freeMediaType(AM_MEDIA_TYPE &mediaType);
         static void deleteMediaType(AM_MEDIA_TYPE *mediaType);
-        static void deletePin(IPin *pin);
         QVariantList imageControls(IBaseFilter *filter) const;
         bool setImageControls(IBaseFilter *filter,
                               const QVariantMap &imageControls) const;
@@ -245,21 +247,22 @@ class CaptureDShowPrivate
         QVariantMap controlStatus(const QVariantList &controls) const;
         QVariantMap mapDiff(const QVariantMap &map1,
                             const QVariantMap &map2) const;
+        void frameReceived(qreal time, const QByteArray &buffer);
+        void updateDevices();
 };
 
 CaptureDShow::CaptureDShow(QObject *parent):
     Capture(parent),
     QAbstractNativeEventFilter()
 {
-    this->d = new CaptureDShowPrivate;
-
+    this->d = new CaptureDShowPrivate(this);
     QObject::connect(&this->d->m_frameGrabber,
                      &FrameGrabber::frameReady,
-                     this,
-                     &CaptureDShow::frameReceived,
-                     Qt::DirectConnection);
-
+                     [this] (qreal time, const QByteArray &packet) {
+                        this->d->frameReceived(time, packet);
+                     });
     qApp->installNativeEventFilter(this);
+    this->d->updateDevices();
 }
 
 CaptureDShow::~CaptureDShow()
@@ -270,7 +273,7 @@ CaptureDShow::~CaptureDShow()
 
 QStringList CaptureDShow::webcams() const
 {
-    return this->d->listMonikers().keys();
+    return this->d->m_devices;
 }
 
 QString CaptureDShow::device() const
@@ -283,21 +286,21 @@ QList<int> CaptureDShow::streams()
     if (!this->d->m_streams.isEmpty())
         return this->d->m_streams;
 
-    QVariantList caps = this->caps(this->d->m_device);
+    auto caps = this->caps(this->d->m_device);
 
     if (caps.isEmpty())
-        return QList<int>();
+        return {};
 
-    return QList<int>() << 0;
+    return {0};
 }
 
 QList<int> CaptureDShow::listTracks(const QString &mimeType)
 {
     if (mimeType != "video/x-raw"
         && !mimeType.isEmpty())
-        return QList<int>();
+        return {};
 
-    QVariantList caps = this->caps(this->d->m_device);
+    auto caps = this->caps(this->d->m_device);
     QList<int> streams;
 
     for (int i = 0; i < caps.count(); i++)
@@ -318,63 +321,18 @@ int CaptureDShow::nBuffers() const
 
 QString CaptureDShow::description(const QString &webcam) const
 {
-    if (webcam.isEmpty())
-        return QString();
-
-    MonikerPtr moniker = this->d->findMoniker(webcam);
-
-    if (!moniker)
-        return QString();
-
-    IPropertyBag *pPropBag = nullptr;
-    HRESULT hr = moniker->BindToStorage(nullptr,
-                                        nullptr,
-                                        IID_IPropertyBag,
-                                        reinterpret_cast<void **>(&pPropBag));
-
-    if (FAILED(hr))
-        return QString();
-
-    VARIANT var;
-    VariantInit(&var);
-
-    // Get description or friendly name.
-    hr = pPropBag->Read(L"Description", &var, nullptr);
-
-    if (FAILED(hr))
-        hr = pPropBag->Read(L"FriendlyName", &var, nullptr);
-
-    QString description;
-
-    if (SUCCEEDED(hr))
-        description = QString::fromWCharArray(var.bstrVal);
-
-    pPropBag->Release();
-
-    return description;
+    return this->d->m_descriptions.value(webcam);
 }
 
 QVariantList CaptureDShow::caps(const QString &webcam) const
 {
-    QVariantList caps;
-    MediaTypesList mediaTypes = this->d->listMediaTypes(webcam);
-
-    for (const MediaTypePtr &mediaType: mediaTypes) {
-        AkCaps videoCaps = this->d->capsFromMediaType(mediaType);
-
-        if (!videoCaps)
-            continue;
-
-        caps << QVariant::fromValue(videoCaps);
-    }
-
-    return caps;
+    return this->d->m_devicesCaps.value(webcam);
 }
 
 QString CaptureDShow::capsDescription(const AkCaps &caps) const
 {
     if (caps.mimeType() != "video/unknown")
-        return QString();
+        return {};
 
     AkFrac fps = caps.property("fps").toString();
 
@@ -397,8 +355,8 @@ bool CaptureDShow::setImageControls(const QVariantMap &imageControls)
     this->d->m_controlsMutex.unlock();
 
     for (int i = 0; i < globalImageControls.count(); i++) {
-        QVariantList control = globalImageControls[i].toList();
-        QString controlName = control[0].toString();
+        auto control = globalImageControls[i].toList();
+        auto controlName = control[0].toString();
 
         if (imageControls.contains(controlName)) {
             control[6] = imageControls[controlName];
@@ -426,8 +384,8 @@ bool CaptureDShow::resetImageControls()
 {
     QVariantMap controls;
 
-    for (const QVariant &control: this->imageControls()) {
-        QVariantList params = control.toList();
+    for (auto &control: this->imageControls()) {
+        auto params = control.toList();
         controls[params[0].toString()] = params[5].toInt();
     }
 
@@ -446,8 +404,8 @@ bool CaptureDShow::setCameraControls(const QVariantMap &cameraControls)
     this->d->m_controlsMutex.unlock();
 
     for (int i = 0; i < globalCameraControls.count(); i++) {
-        QVariantList control = globalCameraControls[i].toList();
-        QString controlName = control[0].toString();
+        auto control = globalCameraControls[i].toList();
+        auto controlName = control[0].toString();
 
         if (cameraControls.contains(controlName)) {
             control[6] = cameraControls[controlName];
@@ -474,9 +432,8 @@ bool CaptureDShow::resetCameraControls()
 {
     QVariantMap controls;
 
-    for (const QVariant &control: this->cameraControls()) {
-        QVariantList params = control.toList();
-
+    for (auto &control: this->cameraControls()) {
+        auto params = control.toList();
         controls[params[0].toString()] = params[5].toInt();
     }
 
@@ -521,9 +478,7 @@ AkPacket CaptureDShow::readFrame()
     this->d->freeMediaType(mediaType);
 
     AkPacket packet;
-
     auto timestamp = QDateTime::currentMSecsSinceEpoch();
-
     auto pts =
             qint64(timestamp
                    * this->d->m_timeBase.invert().value()
@@ -542,7 +497,8 @@ AkPacket CaptureDShow::readFrame()
                    this->d->m_curBuffer.constData(),
                    size_t(bufferSize));
 
-            packet = AkPacket(caps, oBuffer);
+            packet = AkPacket(caps);
+            packet.setBuffer(oBuffer);
             packet.setPts(pts);
             packet.setTimeBase(this->d->m_timeBase);
             packet.setIndex(0);
@@ -557,16 +513,17 @@ AkPacket CaptureDShow::readFrame()
         HRESULT hr = this->d->m_grabber->GetCurrentBuffer(&bufferSize, nullptr);
 
         if (FAILED(hr))
-            return AkPacket();
+            return {};
 
         QByteArray oBuffer(bufferSize, 0);
         hr = this->d->m_grabber->GetCurrentBuffer(&bufferSize,
                                                   reinterpret_cast<long *>(oBuffer.data()));
 
         if (FAILED(hr))
-            return AkPacket();
+            return {};
 
-        packet = AkPacket(caps, oBuffer);
+        packet = AkPacket(caps);
+        packet.setBuffer(oBuffer);
         packet.setPts(pts);
         packet.setTimeBase(this->d->m_timeBase);
         packet.setIndex(0);
@@ -580,7 +537,7 @@ bool CaptureDShow::nativeEventFilter(const QByteArray &eventType,
                                      void *message,
                                      long *result)
 {
-    Q_UNUSED(eventType);
+    Q_UNUSED(eventType)
 
     if (!message)
         return false;
@@ -592,13 +549,7 @@ bool CaptureDShow::nativeEventFilter(const QByteArray &eventType,
         case DBT_DEVICEARRIVAL:
         case DBT_DEVICEREMOVECOMPLETE:
         case DBT_DEVNODES_CHANGED: {
-            auto webcams = this->webcams();
-
-            if (webcams != this->d->m_webcams) {
-                emit this->webcamsChanged(webcams);
-
-                this->d->m_webcams = webcams;
-            }
+            this->d->updateDevices();
 
             if (result)
                 *result = TRUE;
@@ -613,17 +564,92 @@ bool CaptureDShow::nativeEventFilter(const QByteArray &eventType,
     return false;
 }
 
+CaptureDShowPrivate::CaptureDShowPrivate(CaptureDShow *self):
+    self(self)
+{
+
+}
+
+QString CaptureDShowPrivate::devicePath(IPropertyBag *propertyBag) const
+{
+    VARIANT var;
+    VariantInit(&var);
+    auto hr = propertyBag->Read(L"DevicePath", &var, nullptr);
+    QString devicePath;
+
+    if (SUCCEEDED(hr))
+        devicePath = QString::fromWCharArray(var.bstrVal);
+
+    VariantClear(&var);
+
+    return devicePath;
+}
+
+QString CaptureDShowPrivate::deviceDescription(IPropertyBag *propertyBag) const
+{
+
+    VARIANT var;
+    VariantInit(&var);
+    auto hr = propertyBag->Read(L"Description", &var, nullptr);
+
+    if (FAILED(hr))
+        hr = propertyBag->Read(L"FriendlyName", &var, nullptr);
+
+    QString description;
+
+    if (SUCCEEDED(hr))
+        description = QString::fromWCharArray(var.bstrVal);
+
+    VariantClear(&var);
+
+    return description;
+}
+
+QVariantList CaptureDShowPrivate::caps(IBaseFilter *baseFilter) const
+{
+    auto pins = this->enumPins(baseFilter, PINDIR_OUTPUT);
+    QVariantList caps;
+
+    for (auto &pin: pins) {
+        IEnumMediaTypes *pEnum = nullptr;
+
+        if (FAILED(pin->EnumMediaTypes(&pEnum)))
+            continue;
+
+        pEnum->Reset();
+        AM_MEDIA_TYPE *mediaType = nullptr;
+
+        while (pEnum->Next(1, &mediaType, nullptr) == S_OK) {
+            if (mediaType->formattype == FORMAT_VideoInfo
+                && mediaType->cbFormat >= sizeof(VIDEOINFOHEADER)
+                && mediaType->pbFormat != nullptr
+                && guidToStr->contains(mediaType->subtype)) {
+                auto videoCaps = this->capsFromMediaType(mediaType);
+
+                if (videoCaps)
+                    caps << QVariant::fromValue(videoCaps);
+            }
+
+            this->deleteMediaType(mediaType);
+        }
+
+        pEnum->Release();
+    }
+
+    return caps;
+}
+
 AkCaps CaptureDShowPrivate::capsFromMediaType(const AM_MEDIA_TYPE *mediaType) const
 {
     if (!mediaType)
-        return AkCaps();
+        return {};
 
     VIDEOINFOHEADER *videoInfoHeader =
             reinterpret_cast<VIDEOINFOHEADER *>(mediaType->pbFormat);
     QString fourcc = guidToStr->value(mediaType->subtype);
 
     if (fourcc.isEmpty())
-        return AkCaps();
+        return {};
 
     AkCaps videoCaps;
     videoCaps.setMimeType("video/unknown");
@@ -689,20 +715,15 @@ MonikersMap CaptureDShowPrivate::listMonikers() const
                 continue;
             }
 
-            VARIANT var;
-            VariantInit(&var);
-            hr = pPropBag->Read(L"DevicePath", &var, nullptr);
+            auto devicePath = this->devicePath(pPropBag);
 
-            QString devicePath;
+            if (devicePath.isEmpty())
+                devicePath = this->monikerDisplayName(pMoniker);
 
-            if (SUCCEEDED(hr))
-                devicePath = QString::fromWCharArray(var.bstrVal);
-            else
-                devicePath = QString("/dev/video%1").arg(i);
-
-            monikers[devicePath] = MonikerPtr(pMoniker, this->deleteUnknown);
-
-            VariantClear(&var);
+            monikers[devicePath] =
+                    MonikerPtr(pMoniker, [] (IMoniker *moniker) {
+                        moniker->Release();
+                    });
             pPropBag->Release();
         }
 
@@ -722,15 +743,28 @@ MonikerPtr CaptureDShowPrivate::findMoniker(const QString &webcam) const
     return {};
 }
 
+QString CaptureDShowPrivate::monikerDisplayName(IMoniker *moniker) const
+{
+    IBindCtx *bind_ctx = nullptr;
+
+    if (FAILED(CreateBindCtx(0, &bind_ctx)))
+        return {};
+
+    LPOLESTR olestr = nullptr;
+    moniker->GetDisplayName(bind_ctx, nullptr, &olestr);
+    bind_ctx->Release();
+
+    return QString::fromWCharArray(olestr);
+}
+
 IBaseFilter *CaptureDShowPrivate::findFilterP(const QString &webcam) const
 {
-    MonikerPtr moniker = this->findMoniker(webcam);
+    auto moniker = this->findMoniker(webcam);
 
     if (!moniker)
         return nullptr;
 
     IBaseFilter *filter = nullptr;
-
     HRESULT hr = moniker->BindToObject(nullptr,
                                        nullptr,
                                        IID_IBaseFilter,
@@ -744,27 +778,22 @@ IBaseFilter *CaptureDShowPrivate::findFilterP(const QString &webcam) const
 
 BaseFilterPtr CaptureDShowPrivate::findFilter(const QString &webcam) const
 {
-    IBaseFilter *filter = this->findFilterP(webcam);
+    auto filter = this->findFilterP(webcam);
 
     if (!filter)
-        return BaseFilterPtr();
+        return {};
 
-    return BaseFilterPtr(filter, this->deleteUnknown);
-}
-
-MediaTypesList CaptureDShowPrivate::listMediaTypes(const QString &webcam) const
-{
-    BaseFilterPtr filter = this->findFilter(webcam);
-
-    return this->listMediaTypes(filter.data());
+    return BaseFilterPtr(filter, [] (IBaseFilter *filter) {
+        filter->Release();
+    });
 }
 
 MediaTypesList CaptureDShowPrivate::listMediaTypes(IBaseFilter *filter) const
 {
-    PinList pins = this->enumPins(filter, PINDIR_OUTPUT);
+    auto pins = this->enumPins(filter, PINDIR_OUTPUT);
     MediaTypesList mediaTypes;
 
-    for (const PinPtr &pin: pins) {
+    for (auto &pin: pins) {
         IEnumMediaTypes *pEnum = nullptr;
 
         if (FAILED(pin->EnumMediaTypes(&pEnum)))
@@ -821,7 +850,7 @@ PinPtr CaptureDShowPrivate::findUnconnectedPin(IBaseFilter *pFilter,
     IEnumPins *pEnum = nullptr;
 
     if (FAILED(pFilter->EnumPins(&pEnum)))
-        return PinPtr();
+        return {};
 
     pEnum->Reset();
     PinPtr matchedPin;
@@ -840,7 +869,9 @@ PinPtr CaptureDShowPrivate::findUnconnectedPin(IBaseFilter *pFilter,
         if (!ok || connected)
             continue;
 
-        matchedPin = PinPtr(pPin, this->deletePin);
+        matchedPin = PinPtr(pPin, [] (IPin *pin) {
+            pin->Release();
+        });
         pPin->AddRef();
 
         break;
@@ -891,7 +922,9 @@ PinList CaptureDShowPrivate::enumPins(IBaseFilter *filter,
 
             if (SUCCEEDED(pin->QueryDirection(&pinDir))
                 && pinDir == direction) {
-                pinList << PinPtr(pin, this->deleteUnknown);
+                pinList << PinPtr(pin, [] (IPin *pin) {
+                    pin->Release();
+                });
 
                 continue;
             }
@@ -903,11 +936,6 @@ PinList CaptureDShowPrivate::enumPins(IBaseFilter *filter,
     }
 
     return pinList;
-}
-
-void CaptureDShowPrivate::deleteUnknown(IUnknown *unknown)
-{
-    unknown->Release();
 }
 
 void CaptureDShowPrivate::freeMediaType(AM_MEDIA_TYPE &mediaType)
@@ -934,59 +962,74 @@ void CaptureDShowPrivate::deleteMediaType(AM_MEDIA_TYPE *mediaType)
     CoTaskMemFree(mediaType);
 }
 
-void CaptureDShowPrivate::deletePin(IPin *pin)
-{
-    pin->Release();
-}
-
 QVariantList CaptureDShowPrivate::imageControls(IBaseFilter *filter) const
 {
     if (!filter)
         return QVariantList();
 
-    qint32 min;
-    qint32 max;
-    qint32 step;
-    qint32 defaultValue;
-    qint32 flags;
-    qint32 value;
+    qint32 min = 0;
+    qint32 max = 0;
+    qint32 step = 0;
+    qint32 defaultValue = 0;
+    qint32 value = 0;
+    qint32 flags = 0;
 
     QVariantList controls;
     IAMVideoProcAmp *pProcAmp = nullptr;
 
     if (SUCCEEDED(filter->QueryInterface(IID_IAMVideoProcAmp,
                                          reinterpret_cast<void **>(&pProcAmp)))) {
-        for (const VideoProcAmpProperty &property: vpapToStr->keys()) {
-            if (SUCCEEDED(pProcAmp->GetRange(property,
+        for (auto it = vpapToStr->begin(); it != vpapToStr->end(); it++) {
+            if (SUCCEEDED(pProcAmp->GetRange(it.key(),
                                              reinterpret_cast<LONG *>(&min),
                                              reinterpret_cast<LONG *>(&max),
                                              reinterpret_cast<LONG *>(&step),
                                              reinterpret_cast<LONG *>(&defaultValue),
-                                             reinterpret_cast<LONG *>(&flags))))
-                if (SUCCEEDED(pProcAmp->Get(property,
+                                             reinterpret_cast<LONG *>(&flags)))) {
+                bool autoSupport = flags & VideoProcAmp_Flags_Auto;
+                bool manualSupport = flags & VideoProcAmp_Flags_Manual;
+
+                if (SUCCEEDED(pProcAmp->Get(it.key(),
                                             reinterpret_cast<LONG *>(&value),
                                             reinterpret_cast<LONG *>(&flags)))) {
-                    QVariantList control;
+                    if (autoSupport) {
+                        QVariantList control {
+                            it.value() + " (Auto)",
+                            QString("boolean"),
+                            0,
+                            1,
+                            1,
+                            1,
+                            flags & VideoProcAmp_Flags_Auto,
+                            QStringList()
+                        };
 
-                    QString type;
+                        controls << QVariant(control);
+                    }
 
-                    if (property == VideoProcAmp_ColorEnable
-                        || property == VideoProcAmp_BacklightCompensation)
-                        type = "boolean";
-                    else
-                        type = "integer";
+                    if (manualSupport) {
+                        QString type;
 
-                    control << vpapToStr->value(property)
-                            << type
-                            << min
-                            << max
-                            << step
-                            << defaultValue
-                            << value
-                            << QStringList();
+                        if (min == 0 && max == 1)
+                            type = "boolean";
+                        else
+                            type = "integer";
 
-                    controls << QVariant(control);
+                        QVariantList control {
+                            it.value(),
+                            type,
+                            min,
+                            max,
+                            step,
+                            defaultValue,
+                            value,
+                            QStringList()
+                        };
+
+                        controls << QVariant(control);
+                    }
                 }
+            }
         }
 
         pProcAmp->Release();
@@ -1005,13 +1048,33 @@ bool CaptureDShowPrivate::setImageControls(IBaseFilter *filter,
 
     if (SUCCEEDED(filter->QueryInterface(IID_IAMVideoProcAmp,
                                          reinterpret_cast<void **>(&pProcAmp)))) {
-        for (const VideoProcAmpProperty &property: vpapToStr->keys()) {
-            QString propertyStr = vpapToStr->value(property);
+        for (auto it = vpapToStr->begin(); it != vpapToStr->end(); it++) {
+            auto key = it.value();
 
-            if (imageControls.contains(propertyStr))
-                pProcAmp->Set(property,
-                              imageControls[propertyStr].toInt(),
-                              VideoProcAmp_Flags_Manual);
+            if (imageControls.contains(key)) {
+                LONG value = 0;
+                LONG flags = 0;
+                pProcAmp->Get(it.key(),
+                              reinterpret_cast<LONG *>(&value),
+                              reinterpret_cast<LONG *>(&flags));
+                value = imageControls[key].toInt();
+                pProcAmp->Set(it.key(), value, flags);
+            }
+
+            if (imageControls.contains(key + " (Auto)")) {
+                LONG value = 0;
+                LONG flags = 0;
+                pProcAmp->Get(it.key(),
+                              reinterpret_cast<LONG *>(&value),
+                              reinterpret_cast<LONG *>(&flags));
+
+                if (imageControls[key + " (Auto)"].toBool())
+                    flags |= VideoProcAmp_Flags_Auto;
+                else
+                    flags &= ~VideoProcAmp_Flags_Auto;
+
+                pProcAmp->Set(it.key(), value, flags);
+            }
         }
 
         pProcAmp->Release();
@@ -1025,41 +1088,69 @@ QVariantList CaptureDShowPrivate::cameraControls(IBaseFilter *filter) const
     if (!filter)
         return QVariantList();
 
-    qint32 min;
-    qint32 max;
-    qint32 step;
-    qint32 defaultValue;
-    qint32 flags;
-    qint32 value;
+    qint32 min = 0;
+    qint32 max = 0;
+    qint32 step = 0;
+    qint32 defaultValue = 0;
+    qint32 value = 0;
+    qint32 flags = 0;
 
     QVariantList controls;
     IAMCameraControl *pCameraControl = nullptr;
 
     if (SUCCEEDED(filter->QueryInterface(IID_IAMCameraControl,
                                          reinterpret_cast<void **>(&pCameraControl)))) {
-        for (const CameraControlProperty &cameraControl: ccToStr->keys()) {
-            if (SUCCEEDED(pCameraControl->GetRange(cameraControl,
+        for (auto it = ccToStr->begin(); it != ccToStr->end(); it++) {
+            if (SUCCEEDED(pCameraControl->GetRange(it.key(),
                                                    reinterpret_cast<LONG *>(&min),
                                                    reinterpret_cast<LONG *>(&max),
                                                    reinterpret_cast<LONG *>(&step),
                                                    reinterpret_cast<LONG *>(&defaultValue),
-                                                   reinterpret_cast<LONG *>(&flags))))
-                if (SUCCEEDED(pCameraControl->Get(cameraControl,
+                                                   reinterpret_cast<LONG *>(&flags)))) {
+                bool autoSupport = flags & CameraControl_Flags_Auto;
+                bool manualSupport = flags & CameraControl_Flags_Manual;
+
+                if (SUCCEEDED(pCameraControl->Get(it.key(),
                                                   reinterpret_cast<LONG *>(&value),
                                                   reinterpret_cast<LONG *>(&flags)))) {
-                    QVariantList control;
+                    if (autoSupport) {
+                        QVariantList control {
+                            it.value() + " (Auto)",
+                            QString("boolean"),
+                            0,
+                            1,
+                            1,
+                            1,
+                            flags & CameraControl_Flags_Auto,
+                            QStringList()
+                        };
 
-                    control << ccToStr->value(cameraControl)
-                            << QString("integer")
-                            << min
-                            << max
-                            << step
-                            << defaultValue
-                            << value
-                            << QStringList();
+                        controls << QVariant(control);
+                    }
 
-                    controls << QVariant(control);
+                    if (manualSupport) {
+                        QString type;
+
+                        if (min == 0 && max == 1)
+                            type = "boolean";
+                        else
+                            type = "integer";
+
+                        QVariantList control {
+                            it.value(),
+                            type,
+                            min,
+                            max,
+                            step,
+                            defaultValue,
+                            value,
+                            QStringList()
+                        };
+
+                        controls << QVariant(control);
+                    }
                 }
+            }
         }
 
         pCameraControl->Release();
@@ -1078,13 +1169,33 @@ bool CaptureDShowPrivate::setCameraControls(IBaseFilter *filter,
 
     if (SUCCEEDED(filter->QueryInterface(IID_IAMCameraControl,
                                          reinterpret_cast<void **>(&pCameraControl)))) {
-        for (const CameraControlProperty &cameraControl: ccToStr->keys()) {
-            QString cameraControlStr = ccToStr->value(cameraControl);
+        for (auto it = ccToStr->begin(); it != ccToStr->end(); it++) {
+            auto key = it.value();
 
-            if (cameraControls.contains(cameraControlStr))
-                pCameraControl->Set(cameraControl,
-                                    cameraControls[cameraControlStr].toInt(),
-                                    CameraControl_Flags_Manual);
+            if (cameraControls.contains(key)) {
+                LONG value = 0;
+                LONG flags = 0;
+                pCameraControl->Get(it.key(),
+                                    reinterpret_cast<LONG *>(&value),
+                                    reinterpret_cast<LONG *>(&flags));
+                value = cameraControls[key].toInt();
+                pCameraControl->Set(it.key(), value, flags);
+            }
+
+            if (cameraControls.contains(key + " (Auto)")) {
+                LONG value = 0;
+                LONG flags = 0;
+                pCameraControl->Get(it.key(),
+                                    reinterpret_cast<LONG *>(&value),
+                                    reinterpret_cast<LONG *>(&flags));
+
+                if (cameraControls[key + " (Auto)"].toBool())
+                    flags |= CameraControl_Flags_Auto;
+                else
+                    flags &= ~CameraControl_Flags_Auto;
+
+                pCameraControl->Set(it.key(), value, flags);
+            }
         }
 
         pCameraControl->Release();
@@ -1098,8 +1209,8 @@ QVariantMap CaptureDShowPrivate::controlStatus(const QVariantList &controls) con
     QVariantMap controlStatus;
 
     for (auto &control: controls) {
-        QVariantList params = control.toList();
-        QString controlName = params[0].toString();
+        auto params = control.toList();
+        auto controlName = params[0].toString();
         controlStatus[controlName] = params[6];
     }
 
@@ -1118,6 +1229,92 @@ QVariantMap CaptureDShowPrivate::mapDiff(const QVariantMap &map1,
         }
 
     return map;
+}
+
+void CaptureDShowPrivate::frameReceived(qreal time, const QByteArray &buffer)
+{
+    Q_UNUSED(time)
+
+    this->m_mutex.lock();
+    this->m_curBuffer = buffer;
+    this->m_waitCondition.wakeAll();
+    this->m_mutex.unlock();
+}
+
+void CaptureDShowPrivate::updateDevices()
+{
+    decltype(this->m_devices) devices;
+    decltype(this->m_descriptions) descriptions;
+    decltype(this->m_devicesCaps) devicesCaps;
+
+    MonikersMap monikers;
+    IEnumMoniker *pEnum = nullptr;
+    HRESULT hr = this->enumerateCameras(&pEnum);
+
+    if (SUCCEEDED(hr)) {
+        pEnum->Reset();
+        IMoniker *moniker = nullptr;
+
+        for (int i = 0; pEnum->Next(1, &moniker, nullptr) == S_OK; i++) {
+            IPropertyBag *propertyBag = nullptr;
+            HRESULT hr = moniker->BindToStorage(nullptr,
+                                                nullptr,
+                                                IID_IPropertyBag,
+                                                reinterpret_cast<void **>(&propertyBag));
+
+            if (FAILED(hr)) {
+                moniker->Release();
+
+                continue;
+            }
+
+            auto devicePath = this->devicePath(propertyBag);
+
+            if (devicePath.isEmpty())
+                devicePath = this->monikerDisplayName(moniker);
+
+            auto description = this->deviceDescription(propertyBag);
+            propertyBag->Release();
+
+            IBaseFilter *baseFilter = nullptr;
+            hr = moniker->BindToObject(nullptr,
+                                       nullptr,
+                                       IID_IBaseFilter,
+                                       reinterpret_cast<void **>(&baseFilter));
+
+            if (FAILED(hr)) {
+                moniker->Release();
+
+                continue;
+            }
+
+            auto caps = this->caps(baseFilter);
+            baseFilter->Release();
+
+            if (!caps.isEmpty()) {
+                devices << devicePath;
+                descriptions[devicePath] = description;
+                devicesCaps[devicePath] = caps;
+            }
+
+            moniker->Release();
+        }
+
+        pEnum->Release();
+    }
+
+    if (devicesCaps.isEmpty()) {
+        devices.clear();
+        descriptions.clear();
+    }
+
+    this->m_descriptions = descriptions;
+    this->m_devicesCaps = devicesCaps;
+
+    if (this->m_devices != devices) {
+        this->m_devices = devices;
+        emit self->webcamsChanged(this->m_devices);
+    }
 }
 
 bool CaptureDShow::init()
@@ -1209,7 +1406,10 @@ bool CaptureDShow::init()
         hr = grabberPtr->SetCallback(&this->d->m_frameGrabber, type);
     }
 
-    this->d->m_grabber = SampleGrabberPtr(grabberPtr, this->d->deleteUnknown);
+    this->d->m_grabber =
+            SampleGrabberPtr(grabberPtr, [] (ISampleGrabber *sampleGrabber) {
+        sampleGrabber->Release();
+    });
 
     if (!this->d->connectFilters(this->d->m_graph,
                                  this->d->m_webcamFilter.data(),
@@ -1292,7 +1492,7 @@ bool CaptureDShow::init()
 
     for (const PinPtr &pin: pins) {
         IAMStreamConfig *pStreamConfig = nullptr;
-        HRESULT hr =
+        auto hr =
                 pin->QueryInterface(IID_IAMStreamConfig,
                                     reinterpret_cast<void **>(&pStreamConfig));
 
@@ -1421,7 +1621,7 @@ void CaptureDShow::setIoMethod(const QString &ioMethod)
 
 void CaptureDShow::setNBuffers(int nBuffers)
 {
-    Q_UNUSED(nBuffers);
+    Q_UNUSED(nBuffers)
 }
 
 void CaptureDShow::resetDevice()
@@ -1454,16 +1654,6 @@ void CaptureDShow::reset()
     this->resetStreams();
     this->resetImageControls();
     this->resetCameraControls();
-}
-
-void CaptureDShow::frameReceived(qreal time, const QByteArray &buffer)
-{
-    Q_UNUSED(time)
-
-    this->d->m_mutex.lock();
-    this->d->m_curBuffer = buffer;
-    this->d->m_waitCondition.wakeAll();
-    this->d->m_mutex.unlock();
 }
 
 #include "moc_capturedshow.cpp"

@@ -28,10 +28,68 @@ elif [ "${TRAVIS_OS_NAME}" = linux ] && [ -z "${ANDROID_BUILD}" ]; then
     fi
 fi
 
+cd ports/deploy
+git clone https://github.com/webcamoid/DeployTools.git
+cd ../..
+
 DEPLOYSCRIPT=deployscript.sh
 
 if [ "${ANDROID_BUILD}" = 1 ]; then
-    echo "Deploy not supported for Android"
+    export JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:bin/java::')
+    export ANDROID_HOME="${PWD}/build/android-sdk"
+    export ANDROID_NDK="${PWD}/build/android-ndk"
+    export ANDROID_NDK_HOME=${ANDROID_NDK}
+    export ANDROID_NDK_PLATFORM=android-${ANDROID_PLATFORM}
+    export ANDROID_NDK_ROOT=${ANDROID_NDK}
+    export ANDROID_SDK_ROOT=${ANDROID_HOME}
+    export PATH="${JAVA_HOME}/bin/java:${PATH}"
+    export PATH="$PATH:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin"
+    export PATH="${PATH}:${ANDROID_HOME}/platform-tools"
+    export PATH="${PATH}:${ANDROID_HOME}/emulator"
+    export PATH="${PATH}:${ANDROID_NDK}"
+    export ORIG_PATH="${PATH}"
+    export KEYSTORE_PATH="${PWD}/keystores/debug.keystore"
+    nArchs=$(echo "${TARGET_ARCH}" | tr ':' ' ' | wc -w)
+    lastArch=$(echo "${TARGET_ARCH}" | awk -F: '{print $NF}')
+
+    if [ "${nArchs}" = 1 ]; then
+        export PATH="${PWD}/build/Qt/${QTVER_ANDROID}/android/bin:${PWD}/.local/bin:${ORIG_PATH}"
+        export BUILD_PATH=${PWD}/build-webcamoid-${lastArch}
+        export PYTHONPATH="${PWD}/ports/deploy/DeployTools"
+
+        python3 ports/deploy/deploy.py
+    else
+        pkgMerge=
+
+        for arch_ in $(echo "${TARGET_ARCH}" | tr ":" "\n"); do
+            if [ ! -z "${pkgMerge}" ]; then
+                pkgMerge=${pkgMerge}:
+            fi
+
+            pkgMerge=${pkgMerge}${PWD}/build-webcamoid-${arch_}
+        done
+
+        for arch_ in $(echo "${TARGET_ARCH}" | tr ":" "\n"); do
+            export PATH="${PWD}/build/Qt/${QTVER_ANDROID}/android/bin:${PWD}/.local/bin:${ORIG_PATH}"
+            export BUILD_PATH=${PWD}/build-webcamoid-${arch_}
+            export PYTHONPATH="${PWD}/ports/deploy/DeployTools"
+
+            if [ "${arch_}" = "${lastArch}" ]; then
+                export PACKAGES_PREPARE_ONLY=0
+                export PACKAGES_MERGE="${pkgMerge}"
+            else
+                export PACKAGES_PREPARE_ONLY=1
+            fi
+
+            export NO_SHOW_PKG_DATA_INFO=1
+
+            python3 ports/deploy/deploy.py
+        done
+    fi
+
+    mkdir -p "${PWD}/ports/deploy/packages_auto"
+    cp -rvf "${PWD}/build-webcamoid-${lastArch}/ports/deploy/packages_auto"/* \
+            "${PWD}/ports/deploy/packages_auto"
 elif [ "${ARCH_ROOT_BUILD}" = 1 ]; then
     sudo mount --bind root.x86_64 root.x86_64
     sudo mount --bind $HOME root.x86_64/$HOME
@@ -41,8 +99,10 @@ elif [ "${ARCH_ROOT_BUILD}" = 1 ]; then
 
 export LC_ALL=C
 export HOME=$HOME
-export PATH="\$PWD/.local/bin:\$PATH"
+export PATH="$TRAVIS_BUILD_DIR/.local/bin:\$PATH"
+export PYTHONPATH="$TRAVIS_BUILD_DIR/ports/deploy/DeployTools"
 export WINEPREFIX=/opt/.wine
+export TRAVIS_BRANCH=$TRAVIS_BRANCH
 cd $TRAVIS_BUILD_DIR
 EOF
 
@@ -66,6 +126,8 @@ elif [ "${TRAVIS_OS_NAME}" = linux ]; then
 #!/bin/sh
 
 export PATH="\$PWD/.local/bin:\$PATH"
+export PYTHONPATH="\$PWD/ports/deploy/DeployTools"
+export TRAVIS_BRANCH=$TRAVIS_BRANCH
 xvfb-run --auto-servernum python3 ports/deploy/deploy.py
 EOF
 
@@ -73,5 +135,6 @@ EOF
 
     ${EXEC} bash ${DEPLOYSCRIPT}
 elif [ "${TRAVIS_OS_NAME}" = osx ]; then
-    ${EXEC} python3 ports/deploy/deploy.py
+    export PYTHONPATH="${PWD}/ports/deploy/DeployTools"
+    python3 ports/deploy/deploy.py
 fi

@@ -21,41 +21,43 @@
 
 #include "audiodeviceglobals.h"
 
+class AudioDeviceGlobalsPrivate
+{
+    public:
+        QString m_audioLib;
+        QStringList m_preferredLibrary;
+
+        AudioDeviceGlobalsPrivate();
+};
+
 AudioDeviceGlobals::AudioDeviceGlobals(QObject *parent):
     QObject(parent)
 {
-    this->m_preferredLibrary = QStringList {
-#ifdef Q_OS_WIN32
-        "wasapi",
-        "qtaudio"
-#elif defined(Q_OS_OSX)
-        "coreaudio",
-        "pulseaudio",
-        "jack",
-        "qtaudio"
-#else
-        "pulseaudio",
-        "alsa",
-        "oss",
-        "jack",
-        "qtaudio"
-#endif
-    };
-
+    this->d = new AudioDeviceGlobalsPrivate;
     this->resetAudioLib();
+}
+
+AudioDeviceGlobals::~AudioDeviceGlobals()
+{
+    delete this->d;
 }
 
 QString AudioDeviceGlobals::audioLib() const
 {
-    return this->m_audioLib;
+    return this->d->m_audioLib;
+}
+
+QStringList AudioDeviceGlobals::subModules() const
+{
+    return AkElement::listSubModules("AudioDevice");
 }
 
 void AudioDeviceGlobals::setAudioLib(const QString &audioLib)
 {
-    if (this->m_audioLib == audioLib)
+    if (this->d->m_audioLib == audioLib)
         return;
 
-    this->m_audioLib = audioLib;
+    this->d->m_audioLib = audioLib;
     emit this->audioLibChanged(audioLib);
 }
 
@@ -63,15 +65,37 @@ void AudioDeviceGlobals::resetAudioLib()
 {
     auto subModules = AkElement::listSubModules("AudioDevice");
 
-    for (auto &framework: this->m_preferredLibrary)
+    for (auto &framework: this->d->m_preferredLibrary)
         if (subModules.contains(framework)) {
             this->setAudioLib(framework);
 
             return;
         }
 
-    if (this->m_audioLib.isEmpty() && !subModules.isEmpty())
+    if (this->d->m_audioLib.isEmpty() && !subModules.isEmpty())
         this->setAudioLib(subModules.first());
     else
         this->setAudioLib("");
 }
+
+AudioDeviceGlobalsPrivate::AudioDeviceGlobalsPrivate()
+{
+    this->m_preferredLibrary = QStringList {
+#ifdef Q_OS_WIN32
+        "wasapi",
+#elif defined(Q_OS_OSX)
+        "coreaudio",
+        "pulseaudio",
+        "jack",
+#elif defined(Q_OS_ANDROID)
+        "ndkaudio",
+        "opensl",
+#else
+        "pulseaudio",
+        "alsa",
+        "jack",
+#endif
+    };
+}
+
+#include "moc_audiodeviceglobals.cpp"

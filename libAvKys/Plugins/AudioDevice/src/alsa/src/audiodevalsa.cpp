@@ -31,41 +31,21 @@
 
 using SampleFormatMap = QMap<AkAudioCaps::SampleFormat, snd_pcm_format_t>;
 
-inline SampleFormatMap initSampleFormatMap()
+inline const SampleFormatMap &sampleFormats()
 {
-    SampleFormatMap sampleFormat = {
-        {AkAudioCaps::SampleFormat_s8   , SND_PCM_FORMAT_S8        },
-        {AkAudioCaps::SampleFormat_u8   , SND_PCM_FORMAT_U8        },
-        {AkAudioCaps::SampleFormat_s16  , SND_PCM_FORMAT_S16_LE    },
-        {AkAudioCaps::SampleFormat_s16be, SND_PCM_FORMAT_S16_BE    },
-        {AkAudioCaps::SampleFormat_u16le, SND_PCM_FORMAT_U16_LE    },
-        {AkAudioCaps::SampleFormat_u16be, SND_PCM_FORMAT_U16_BE    },
-        {AkAudioCaps::SampleFormat_s24le, SND_PCM_FORMAT_S24_LE    },
-        {AkAudioCaps::SampleFormat_s24be, SND_PCM_FORMAT_S24_BE    },
-        {AkAudioCaps::SampleFormat_u24le, SND_PCM_FORMAT_U24_LE    },
-        {AkAudioCaps::SampleFormat_u24be, SND_PCM_FORMAT_U24_BE    },
-        {AkAudioCaps::SampleFormat_s32le, SND_PCM_FORMAT_S32_LE    },
-        {AkAudioCaps::SampleFormat_s32be, SND_PCM_FORMAT_S32_BE    },
-        {AkAudioCaps::SampleFormat_u32le, SND_PCM_FORMAT_U32_LE    },
-        {AkAudioCaps::SampleFormat_u32be, SND_PCM_FORMAT_U32_BE    },
-        {AkAudioCaps::SampleFormat_fltle, SND_PCM_FORMAT_FLOAT_LE  },
-        {AkAudioCaps::SampleFormat_fltbe, SND_PCM_FORMAT_FLOAT_BE  },
-        {AkAudioCaps::SampleFormat_dblle, SND_PCM_FORMAT_FLOAT64_LE},
-        {AkAudioCaps::SampleFormat_dblbe, SND_PCM_FORMAT_FLOAT64_BE},
-        {AkAudioCaps::SampleFormat_s16  , SND_PCM_FORMAT_S16       },
-        {AkAudioCaps::SampleFormat_u16  , SND_PCM_FORMAT_U16       },
-        {AkAudioCaps::SampleFormat_s24  , SND_PCM_FORMAT_S24       },
-        {AkAudioCaps::SampleFormat_u24  , SND_PCM_FORMAT_U24       },
-        {AkAudioCaps::SampleFormat_s32  , SND_PCM_FORMAT_S32       },
-        {AkAudioCaps::SampleFormat_u32  , SND_PCM_FORMAT_U32       },
-        {AkAudioCaps::SampleFormat_flt  , SND_PCM_FORMAT_FLOAT     },
-        {AkAudioCaps::SampleFormat_dbl  , SND_PCM_FORMAT_FLOAT64   },
+    static const SampleFormatMap sampleFormat {
+        {AkAudioCaps::SampleFormat_s8 , SND_PCM_FORMAT_S8     },
+        {AkAudioCaps::SampleFormat_u8 , SND_PCM_FORMAT_U8     },
+        {AkAudioCaps::SampleFormat_s16, SND_PCM_FORMAT_S16    },
+        {AkAudioCaps::SampleFormat_u16, SND_PCM_FORMAT_U16    },
+        {AkAudioCaps::SampleFormat_s32, SND_PCM_FORMAT_S32    },
+        {AkAudioCaps::SampleFormat_u32, SND_PCM_FORMAT_U32    },
+        {AkAudioCaps::SampleFormat_flt, SND_PCM_FORMAT_FLOAT  },
+        {AkAudioCaps::SampleFormat_dbl, SND_PCM_FORMAT_FLOAT64},
     };
 
     return sampleFormat;
 }
-
-Q_GLOBAL_STATIC_WITH_ARGS(SampleFormatMap, sampleFormats, (initSampleFormatMap()))
 
 class AudioDevAlsaPrivate
 {
@@ -78,17 +58,18 @@ class AudioDevAlsaPrivate
         QStringList m_sources;
         QMap<QString, QString> m_pinDescriptionMap;
         QMap<QString, QList<AkAudioCaps::SampleFormat>> m_supportedFormats;
-        QMap<QString, QList<int>> m_supportedChannels;
+        QMap<QString, QList<AkAudioCaps::ChannelLayout>> m_supportedLayouts;
         QMap<QString, QList<int>> m_supportedSampleRates;
         snd_pcm_t *m_pcmHnd {nullptr};
         QFileSystemWatcher *m_fsWatcher {nullptr};
         QTimer m_timer;
         QMutex m_mutex;
+        int m_samples {0};
 
         explicit AudioDevAlsaPrivate(AudioDevAlsa *self);
         void fillDeviceInfo(const QString &device,
                             QList<AkAudioCaps::SampleFormat> *supportedFormats,
-                            QList<int> *supportedChannels,
+                            QList<AkAudioCaps::ChannelLayout> *supportedLayouts,
                             QList<int> *supportedSampleRates) const;
 };
 
@@ -161,11 +142,11 @@ QString AudioDevAlsa::description(const QString &device)
 AkAudioCaps AudioDevAlsa::preferredFormat(const QString &device)
 {
     return this->d->m_sinks.contains(device)?
-                AkAudioCaps(AkAudioCaps::SampleFormat_s16,
-                            2,
+                AkAudioCaps(AkAudioCaps::SampleFormat_s32,
+                            AkAudioCaps::Layout_stereo,
                             44100):
                 AkAudioCaps(AkAudioCaps::SampleFormat_u8,
-                            1,
+                            AkAudioCaps::Layout_mono,
                             8000);
 }
 
@@ -174,9 +155,9 @@ QList<AkAudioCaps::SampleFormat> AudioDevAlsa::supportedFormats(const QString &d
     return this->d->m_supportedFormats.value(device);
 }
 
-QList<int> AudioDevAlsa::supportedChannels(const QString &device)
+QList<AkAudioCaps::ChannelLayout> AudioDevAlsa::supportedChannelLayouts(const QString &device)
 {
-    return this->d->m_supportedChannels.value(device);
+    return this->d->m_supportedLayouts.value(device);
 }
 
 QList<int> AudioDevAlsa::supportedSampleRates(const QString &device)
@@ -189,28 +170,31 @@ bool AudioDevAlsa::init(const QString &device, const AkAudioCaps &caps)
     QMutexLocker mutexLockeer(&this->d->m_mutex);
 
     this->d->m_pcmHnd = nullptr;
-    int error = snd_pcm_open(&this->d->m_pcmHnd,
-                             QString(device)
-                                 .remove(QRegExp(":Input$|:Output$"))
-                                 .toStdString().c_str(),
-                             device.endsWith(":Input")?
-                                 SND_PCM_STREAM_CAPTURE: SND_PCM_STREAM_PLAYBACK,
-                             SND_PCM_NONBLOCK);
+    int error =
+            snd_pcm_open(&this->d->m_pcmHnd,
+                         QString(device)
+                             .remove(QRegExp(":Input$|:Output$"))
+                             .toStdString().c_str(),
+                         device.endsWith(":Input")?
+                             SND_PCM_STREAM_CAPTURE: SND_PCM_STREAM_PLAYBACK,
+                         SND_PCM_NONBLOCK);
 
     if (error < 0)
         goto init_fail;
 
     error = snd_pcm_set_params(this->d->m_pcmHnd,
-                               sampleFormats->value(caps.format(),
-                                                    SND_PCM_FORMAT_UNKNOWN),
+                               sampleFormats().value(caps.format(),
+                                                     SND_PCM_FORMAT_UNKNOWN),
                                SND_PCM_ACCESS_RW_INTERLEAVED,
                                uint(caps.channels()),
                                uint(caps.rate()),
                                1,
-                               500000);
+                               uint(1000 * this->latency()));
 
     if (error < 0)
         goto init_fail;
+
+    this->d->m_samples = qMax(this->latency() * caps.rate() / 1000, 1);
 
     return true;
 
@@ -222,13 +206,11 @@ init_fail:
     return false;
 }
 
-QByteArray AudioDevAlsa::read(int samples)
+QByteArray AudioDevAlsa::read()
 {
-    if (samples < 1)
-        return {};
+    int samples = this->d->m_samples;
 
     QMutexLocker mutexLockeer(&this->d->m_mutex);
-
     auto bufferSize = snd_pcm_frames_to_bytes(this->d->m_pcmHnd, samples);
     QByteArray buffer(int(bufferSize), 0);
     auto data = buffer.data();
@@ -250,7 +232,7 @@ QByteArray AudioDevAlsa::read(int samples)
                 continue;
             }
 
-            return QByteArray();
+            return {};
         }
     }
 
@@ -313,7 +295,7 @@ AudioDevAlsaPrivate::AudioDevAlsaPrivate(AudioDevAlsa *self):
 
 void AudioDevAlsaPrivate::fillDeviceInfo(const QString &device,
                                          QList<AkAudioCaps::SampleFormat> *supportedFormats,
-                                         QList<int> *supportedChannels,
+                                         QList<AkAudioCaps::ChannelLayout> *supportedLayouts,
                                          QList<int> *supportedSampleRates) const
 {
     snd_pcm_t *pcmHnd = nullptr;
@@ -328,6 +310,8 @@ void AudioDevAlsaPrivate::fillDeviceInfo(const QString &device,
     if (error < 0)
         return;
 
+    uint maxChannels = 0;
+
     snd_pcm_hw_params_t *hwParams = nullptr;
     snd_pcm_hw_params_malloc(&hwParams);
     snd_pcm_hw_params_any(pcmHnd, hwParams);
@@ -339,7 +323,7 @@ void AudioDevAlsaPrivate::fillDeviceInfo(const QString &device,
                                       SND_PCM_ACCESS_RW_INTERLEAVED) < 0)
         goto deviceCaps_fail;
 
-    static const QVector<snd_pcm_format_t> preferredFormats = {
+    static const QVector<snd_pcm_format_t> preferredFormats {
         SND_PCM_FORMAT_FLOAT,
         SND_PCM_FORMAT_S32,
         SND_PCM_FORMAT_U32,
@@ -350,12 +334,27 @@ void AudioDevAlsaPrivate::fillDeviceInfo(const QString &device,
     };
 
     for (auto fmt: preferredFormats)
-        if (snd_pcm_hw_params_test_format(pcmHnd, hwParams, fmt) >= 0)
-            supportedFormats->append(sampleFormats->key(fmt));
+        if (snd_pcm_hw_params_test_format(pcmHnd, hwParams, fmt) >= 0) {
+            auto format = sampleFormats().key(fmt);
 
-    for (int channels = 1; channels < 3; channels++)
-        if (snd_pcm_hw_params_test_channels(pcmHnd, hwParams, uint(channels)) >= 0)
-            supportedChannels->append(channels);
+            if (!supportedFormats->contains(format))
+                supportedFormats->append(format);
+        }
+
+    std::sort(supportedFormats->begin(), supportedFormats->end());
+
+    if (snd_pcm_hw_params_get_channels_max(hwParams, &maxChannels) < 0)
+        maxChannels = 3;
+    else
+        maxChannels = qBound<uint>(1, maxChannels, 16) + 1;
+
+    for (uint channels = 1; channels < maxChannels; channels++)
+        if (snd_pcm_hw_params_test_channels(pcmHnd, hwParams, channels) >= 0) {
+            auto layout = AkAudioCaps::defaultChannelLayout(int(channels));
+
+            if (layout != AkAudioCaps::Layout_none)
+                supportedLayouts->append(layout);
+        }
 
     for (auto &rate: self->commonSampleRates())
         if (snd_pcm_hw_params_test_rate(pcmHnd, hwParams, uint(rate), 0) >= 0)
@@ -374,7 +373,7 @@ void AudioDevAlsa::updateDevices()
     decltype(this->d->m_sinks) outputs;
     decltype(this->d->m_pinDescriptionMap) pinDescriptionMap;
     decltype(this->d->m_supportedFormats) supportedFormats;
-    decltype(this->d->m_supportedChannels) supportedChannels;
+    decltype(this->d->m_supportedLayouts) supportedChannels;
     decltype(this->d->m_supportedSampleRates) supportedSampleRates;
 
     int card = -1;
@@ -412,60 +411,60 @@ void AudioDevAlsa::updateDevices()
         snd_ctl_close(ctlHnd);
 
         QList<AkAudioCaps::SampleFormat> _supportedFormats;
-        QList<int> _supportedChannels;
+        QList<AkAudioCaps::ChannelLayout> _supportedLayouts;
         QList<int> _supportedSampleRates;
 
         auto input = deviceId + ":Input";
         this->d->fillDeviceInfo(input,
                                 &_supportedFormats,
-                                &_supportedChannels,
+                                &_supportedLayouts,
                                 &_supportedSampleRates);
 
         if (_supportedFormats.isEmpty())
             _supportedFormats = this->d->m_supportedFormats.value(input);
 
-        if (_supportedChannels.isEmpty())
-            _supportedChannels = this->d->m_supportedChannels.value(input);
+        if (_supportedLayouts.isEmpty())
+            _supportedLayouts = this->d->m_supportedLayouts.value(input);
 
         if (_supportedSampleRates.isEmpty())
             _supportedSampleRates = this->d->m_supportedSampleRates.value(input);
 
         if (!_supportedFormats.isEmpty()
-            && !_supportedChannels.isEmpty()
+            && !_supportedLayouts.isEmpty()
             && !_supportedSampleRates.isEmpty()) {
             inputs << input;
             pinDescriptionMap[input] = description;
             supportedFormats[input] = _supportedFormats;
-            supportedChannels[input] = _supportedChannels;
+            supportedChannels[input] = _supportedLayouts;
             supportedSampleRates[input] = _supportedSampleRates;
         }
 
         _supportedFormats.clear();
-        _supportedChannels.clear();
+        _supportedLayouts.clear();
         _supportedSampleRates.clear();
 
         auto output = deviceId + ":Output";
         this->d->fillDeviceInfo(output,
                                 &_supportedFormats,
-                                &_supportedChannels,
+                                &_supportedLayouts,
                                 &_supportedSampleRates);
 
         if (_supportedFormats.isEmpty())
             _supportedFormats = this->d->m_supportedFormats.value(output);
 
-        if (_supportedChannels.isEmpty())
-            _supportedChannels = this->d->m_supportedChannels.value(output);
+        if (_supportedLayouts.isEmpty())
+            _supportedLayouts = this->d->m_supportedLayouts.value(output);
 
         if (_supportedSampleRates.isEmpty())
             _supportedSampleRates = this->d->m_supportedSampleRates.value(output);
 
         if (!_supportedFormats.isEmpty()
-            && !_supportedChannels.isEmpty()
+            && !_supportedLayouts.isEmpty()
             && !_supportedSampleRates.isEmpty()) {
             outputs << output;
             pinDescriptionMap[output] = description;
             supportedFormats[output] = _supportedFormats;
-            supportedChannels[output] = _supportedChannels;
+            supportedChannels[output] = _supportedLayouts;
             supportedSampleRates[output] = _supportedSampleRates;
         }
     }
@@ -490,7 +489,7 @@ void AudioDevAlsa::updateDevices()
             QString io = snd_device_name_get_hint(*hint, "IOID");
 
             QList<AkAudioCaps::SampleFormat> _supportedFormats;
-            QList<int> _supportedChannels;
+            QList<AkAudioCaps::ChannelLayout> _supportedLayouts;
             QList<int> _supportedSampleRates;
 
             if (fillInputs && (io.isEmpty() || io == "Input")) {
@@ -498,31 +497,31 @@ void AudioDevAlsa::updateDevices()
 
                 this->d->fillDeviceInfo(input,
                                         &_supportedFormats,
-                                        &_supportedChannels,
+                                        &_supportedLayouts,
                                         &_supportedSampleRates);
 
                 if (_supportedFormats.isEmpty())
                     _supportedFormats = this->d->m_supportedFormats.value(input);
 
-                if (_supportedChannels.isEmpty())
-                    _supportedChannels = this->d->m_supportedChannels.value(input);
+                if (_supportedLayouts.isEmpty())
+                    _supportedLayouts = this->d->m_supportedLayouts.value(input);
 
                 if (_supportedSampleRates.isEmpty())
                     _supportedSampleRates = this->d->m_supportedSampleRates.value(input);
 
                 if (!_supportedFormats.isEmpty()
-                    && !_supportedChannels.isEmpty()
+                    && !_supportedLayouts.isEmpty()
                     && !_supportedSampleRates.isEmpty()) {
                     inputs << input;
                     pinDescriptionMap[input] = description;
                     supportedFormats[input] = _supportedFormats;
-                    supportedChannels[input] = _supportedChannels;
+                    supportedChannels[input] = _supportedLayouts;
                     supportedSampleRates[input] = _supportedSampleRates;
                 }
             }
 
             _supportedFormats.clear();
-            _supportedChannels.clear();
+            _supportedLayouts.clear();
             _supportedSampleRates.clear();
 
             if (fillOuputs && (io.isEmpty() || io == "Output")) {
@@ -530,25 +529,25 @@ void AudioDevAlsa::updateDevices()
 
                 this->d->fillDeviceInfo(output,
                                         &_supportedFormats,
-                                        &_supportedChannels,
+                                        &_supportedLayouts,
                                         &_supportedSampleRates);
 
                 if (_supportedFormats.isEmpty())
                     _supportedFormats = this->d->m_supportedFormats.value(output);
 
-                if (_supportedChannels.isEmpty())
-                    _supportedChannels = this->d->m_supportedChannels.value(output);
+                if (_supportedLayouts.isEmpty())
+                    _supportedLayouts = this->d->m_supportedLayouts.value(output);
 
                 if (_supportedSampleRates.isEmpty())
                     _supportedSampleRates = this->d->m_supportedSampleRates.value(output);
 
                 if (!_supportedFormats.isEmpty()
-                    && !_supportedChannels.isEmpty()
+                    && !_supportedLayouts.isEmpty()
                     && !_supportedSampleRates.isEmpty()) {
                     outputs << output;
                     pinDescriptionMap[output] = description;
                     supportedFormats[output] = _supportedFormats;
-                    supportedChannels[output] = _supportedChannels;
+                    supportedChannels[output] = _supportedLayouts;
                     supportedSampleRates[output] = _supportedSampleRates;
                 }
             }
@@ -560,8 +559,8 @@ void AudioDevAlsa::updateDevices()
     if (this->d->m_supportedFormats != supportedFormats)
         this->d->m_supportedFormats = supportedFormats;
 
-    if (this->d->m_supportedChannels != supportedChannels)
-        this->d->m_supportedChannels = supportedChannels;
+    if (this->d->m_supportedLayouts != supportedChannels)
+        this->d->m_supportedLayouts = supportedChannels;
 
     if (this->d->m_supportedSampleRates != supportedSampleRates)
         this->d->m_supportedSampleRates = supportedSampleRates;

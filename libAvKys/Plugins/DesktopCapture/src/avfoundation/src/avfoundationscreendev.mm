@@ -25,6 +25,7 @@
 #include <QMutex>
 #include <ak.h>
 #include <akcaps.h>
+#include <akpacket.h>
 #include <akvideopacket.h>
 #include <CoreGraphics/CoreGraphics.h>
 
@@ -128,22 +129,17 @@ AkCaps AVFoundationScreenDev::caps(int stream)
 {
     if (this->d->m_curScreenNumber < 0
         || stream != 0)
-        return AkCaps();
+        return {};
 
     auto screen = QGuiApplication::screens()[this->d->m_curScreenNumber];
 
     if (!screen)
-        return QString();
+        return {};
 
-    AkVideoCaps caps;
-    caps.isValid() = true;
-    caps.format() = AkVideoCaps::Format_argb;
-    caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
-    caps.width() = screen->size().width();
-    caps.height() = screen->size().height();
-    caps.fps() = this->d->m_fps;
-
-    return caps.toCaps();
+    return AkVideoCaps(AkVideoCaps::Format_argb,
+                       screen->size().width(),
+                       screen->size().height(),
+                       this->d->m_fps);
 }
 
 void AVFoundationScreenDev::frameReceived(CGDirectDisplayID screen,
@@ -154,21 +150,18 @@ void AVFoundationScreenDev::frameReceived(CGDirectDisplayID screen,
 {
     CGImageRef image = CGDisplayCreateImage(screen);
 
-    AkVideoCaps caps;
-    caps.isValid() = true;
-    caps.format() = AkVideoCaps::Format_argb;
-    caps.bpp() = AkVideoCaps::bitsPerPixel(caps.format());
-    caps.width() = int(CGImageGetWidth(image));
-    caps.height() = int(CGImageGetHeight(image));
-    caps.fps() = fps;
+    AkVideoPacket videoPacket;
+    videoPacket.caps() = {AkVideoCaps::Format_argb,
+                          int(CGImageGetWidth(image)),
+                          int(CGImageGetHeight(image)),
+                          fps};
+    videoPacket.buffer() = buffer;
+    videoPacket.pts() = pts;
+    videoPacket.timeBase() = fps.invert();
+    videoPacket.index() = 0;
+    videoPacket.id() = id;
 
-    AkVideoPacket videoPacket(caps, buffer);
-    videoPacket.setPts(pts);
-    videoPacket.setTimeBase(fps.invert());
-    videoPacket.setIndex(0);
-    videoPacket.setId(id);
-
-    emit this->oStream(videoPacket.toPacket());
+    emit this->oStream(videoPacket);
 }
 
 void AVFoundationScreenDev::sendPacket(const AkPacket &packet)

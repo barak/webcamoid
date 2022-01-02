@@ -19,7 +19,9 @@
 
 #include <QImage>
 #include <QQmlContext>
+#include <QRandomGenerator>
 #include <QtMath>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "shagadelicelement.h"
@@ -77,24 +79,9 @@ void ShagadelicElement::controlInterfaceConfigure(QQmlContext *context,
     context->setContextProperty("controlId", this->objectName());
 }
 
-void ShagadelicElement::setMask(quint32 mask)
+AkPacket ShagadelicElement::iVideoStream(const AkVideoPacket &packet)
 {
-    if (this->d->m_mask == mask)
-        return;
-
-    this->d->m_mask = mask;
-    emit this->maskChanged(mask);
-}
-
-void ShagadelicElement::resetMask()
-{
-    this->setMask(0xffffff);
-}
-
-AkPacket ShagadelicElement::iStream(const AkPacket &packet)
-{
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
+    auto src = packet.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -153,8 +140,22 @@ AkPacket ShagadelicElement::iStream(const AkPacket &packet)
     this->d->m_bx += this->d->m_bvx;
     this->d->m_by += this->d->m_bvy;
 
-    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
+    auto oPacket = AkVideoPacket::fromImage(oFrame, packet);
     akSend(oPacket)
+}
+
+void ShagadelicElement::setMask(quint32 mask)
+{
+    if (this->d->m_mask == mask)
+        return;
+
+    this->d->m_mask = mask;
+    emit this->maskChanged(mask);
+}
+
+void ShagadelicElement::resetMask()
+{
+    this->setMask(0xffffff);
 }
 
 QImage ShagadelicElementPrivate::makeRipple(const QSize &size) const
@@ -200,10 +201,10 @@ void ShagadelicElementPrivate::init(const QSize &size)
     this->m_ripple = this->makeRipple(size);
     this->m_spiral = this->makeSpiral(size);
 
-    this->m_rx = qrand() % size.width();
-    this->m_ry = qrand() % size.height();
-    this->m_bx = qrand() % size.width();
-    this->m_by = qrand() % size.height();
+    this->m_rx = QRandomGenerator::global()->bounded(size.width());
+    this->m_ry = QRandomGenerator::global()->bounded(size.height());
+    this->m_bx = QRandomGenerator::global()->bounded(size.width());
+    this->m_by = QRandomGenerator::global()->bounded(size.height());
 
     this->m_rvx = -2;
     this->m_rvy = -2;

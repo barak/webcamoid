@@ -77,18 +77,16 @@ isEmpty(NOLIBUVC) {
 }
 
 isEmpty(NOMEDIAFOUNDATION): qtCompileTest(mediafoundation)
-
-isEmpty(NOOSS) {
-    cache(INCLUDEDIR)
-    qtCompileTest(oss)
-}
-
+isEmpty(NONDKAUDIO): qtCompileTest(ndk_audio)
+isEmpty(NONDKCAMERA): qtCompileTest(ndk_camera)
+isEmpty(NONDKMEDIA): qtCompileTest(ndk_media)
+isEmpty(NOOPENSL): qtCompileTest(opensl)
 isEmpty(NOPULSEAUDIO): qtCompileTest(pulseaudio)
-isEmpty(NOQTAUDIO): qtCompileTest(qtaudio)
 
-isEmpty(NOV4L2) {
+isEmpty(NOV4L2): !android {
     qtCompileTest(v4l2)
     CONFIG(config_v4l2): qtCompileTest(v4l2_extendedcontrols)
+    CONFIG(config_v4l2): qtCompileTest(v4l2_extraformats)
     isEmpty(NOV4LUTILS): CONFIG(config_v4l2): qtCompileTest(v4lutils)
 }
 

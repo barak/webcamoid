@@ -19,17 +19,17 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-import tools.utils
+from WebcamoidDeployTools import DTUtils
 
 
 if __name__ =='__main__':
-    system = tools.utils.DeployToolsUtils().system
+    system = DTUtils.Utils().system
 
     while True:
         try:
             deploy = __import__('deploy_' + system).Deploy()
-        except:
-            print('No valid deploy script found.')
+        except Exception as e:
+            print('No valid deploy script found: ', e)
 
             exit()
 

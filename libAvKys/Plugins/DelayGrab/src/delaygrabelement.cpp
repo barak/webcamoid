@@ -17,13 +17,15 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <cstdlib>
-#include <QMap>
-#include <QVector>
-#include <QMutex>
+#include <QDateTime>
 #include <QImage>
+#include <QMap>
+#include <QMutex>
 #include <QQmlContext>
+#include <QRandomGenerator>
+#include <QVector>
 #include <QtMath>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "delaygrabelement.h"
@@ -43,7 +45,6 @@ inline DelayGrabModeMap initDelayGrabModeMap()
 }
 
 Q_GLOBAL_STATIC_WITH_ARGS(DelayGrabModeMap, modeToStr, (initDelayGrabModeMap()))
-
 
 class DelayGrabElementPrivate
 {
@@ -115,57 +116,9 @@ void DelayGrabElement::controlInterfaceConfigure(QQmlContext *context,
     context->setContextProperty("controlId", this->objectName());
 }
 
-void DelayGrabElement::setMode(const QString &mode)
+AkPacket DelayGrabElement::iVideoStream(const AkVideoPacket &packet)
 {
-    DelayGrabMode modeEnum = modeToStr->key(mode, DelayGrabModeRingsIncrease);
-
-    if (this->d->m_mode == modeEnum)
-        return;
-
-    QMutexLocker locker(&this->d->m_mutex);
-    this->d->m_mode = modeEnum;
-    emit this->modeChanged(mode);
-}
-
-void DelayGrabElement::setBlockSize(int blockSize)
-{
-    if (this->d->m_blockSize == blockSize)
-        return;
-
-    QMutexLocker locker(&this->d->m_mutex);
-    this->d->m_blockSize = blockSize;
-    emit this->blockSizeChanged(blockSize);
-}
-
-void DelayGrabElement::setNFrames(int nFrames)
-{
-    if (this->d->m_nFrames == nFrames)
-        return;
-
-    QMutexLocker locker(&this->d->m_mutex);
-    this->d->m_nFrames = nFrames;
-    emit this->nFramesChanged(nFrames);
-}
-
-void DelayGrabElement::resetMode()
-{
-    this->setMode("RingsIncrease");
-}
-
-void DelayGrabElement::resetBlockSize()
-{
-    this->setBlockSize(2);
-}
-
-void DelayGrabElement::resetNFrames()
-{
-    this->setNFrames(71);
-}
-
-AkPacket DelayGrabElement::iStream(const AkPacket &packet)
-{
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
+    auto src = packet.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -226,8 +179,58 @@ AkPacket DelayGrabElement::iStream(const AkPacket &packet)
         }
     }
 
-    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
+    auto oPacket = AkVideoPacket::fromImage(oFrame, packet);
     akSend(oPacket)
+}
+
+void DelayGrabElement::setMode(const QString &mode)
+{
+    DelayGrabMode modeEnum = modeToStr->key(mode, DelayGrabModeRingsIncrease);
+
+    if (this->d->m_mode == modeEnum)
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_mode = modeEnum;
+    this->d->m_mutex.unlock();
+    emit this->modeChanged(mode);
+}
+
+void DelayGrabElement::setBlockSize(int blockSize)
+{
+    if (this->d->m_blockSize == blockSize)
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_blockSize = blockSize;
+    this->d->m_mutex.unlock();
+    emit this->blockSizeChanged(blockSize);
+}
+
+void DelayGrabElement::setNFrames(int nFrames)
+{
+    if (this->d->m_nFrames == nFrames)
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_nFrames = nFrames;
+    this->d->m_mutex.unlock();
+    emit this->nFramesChanged(nFrames);
+}
+
+void DelayGrabElement::resetMode()
+{
+    this->setMode("RingsIncrease");
+}
+
+void DelayGrabElement::resetBlockSize()
+{
+    this->setBlockSize(2);
+}
+
+void DelayGrabElement::resetNFrames()
+{
+    this->setNFrames(71);
 }
 
 void DelayGrabElement::updateDelaymap()
@@ -255,7 +258,7 @@ void DelayGrabElement::updateDelaymap()
 
             if (this->d->m_mode == DelayGrabModeRandomSquare) {
                 // Random delay with square distribution
-                qreal d = qreal(qrand()) / RAND_MAX;
+                auto d = QRandomGenerator::global()->bounded(RAND_MAX);
                 value = 16.0 * d * d;
             } else if (this->d->m_mode == DelayGrabModeVerticalIncrease) {
                 value = qAbs(x) / 2.0;
