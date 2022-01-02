@@ -17,8 +17,8 @@
 # Web-Site: http://webcamoid.github.io/
 
 VER_MAJ = 8
-VER_MIN = 6
-VER_PAT = 1
+VER_MIN = 8
+VER_PAT = 0
 VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
 
 isEmpty(BUILDDOCS): BUILDDOCS = 0
@@ -126,7 +126,13 @@ isEmpty(LIBDIR) {
 }
 isEmpty(LOCALEDIR): LOCALEDIR = $${DATAROOTDIR}/locale
 isEmpty(MANDIR): MANDIR = $${DATAROOTDIR}/man
-isEmpty(LICENSEDIR): LICENSEDIR = $${DATAROOTDIR}/licenses/$${COMMONS_TARGET}
+isEmpty(LICENSEDIR) {
+    android {
+        LICENSEDIR = $${DATAROOTDIR}
+    } else {
+        LICENSEDIR = $${DATAROOTDIR}/licenses/$${COMMONS_TARGET}
+    }
+}
 isEmpty(LOCALDIR): LOCALDIR = $${PREFIX}/local
 isEmpty(LOCALLIBDIR): LOCALLIBDIR = $${LOCALDIR}/lib
 isEmpty(INSTALLQMLDIR) {
@@ -148,6 +154,7 @@ isEmpty(INSTALLPLUGINSDIR) {
         INSTALLPLUGINSDIR = $${LIBDIR}/$${COMMONS_TARGET}
     }
 }
+isEmpty(JARDIR): JARDIR = $${EXECPREFIX}/libs
 
 macx: !isEmpty(NOAPPBUNDLE): DEFINES += NOAPPBUNDLE
 
@@ -205,6 +212,8 @@ CONFIG(debug, debug|release) {
     COMMONS_BUILD_PATH = release/Qt$${QT_VERSION}/$$COMPILER/$${TARGET_ARCH}
 }
 
+android: COMMONS_BUILD_PATH = $${COMMONS_BUILD_PATH}/$${ANDROID_PLATFORM}
+
 BIN_DIR = $${COMMONS_BUILD_PATH}/bin
 MOC_DIR = $${COMMONS_BUILD_PATH}/moc
 OBJECTS_DIR = $${COMMONS_BUILD_PATH}/obj
@@ -235,7 +244,7 @@ win32 {
         win32-g++: QMAKE_LFLAGS = -static-libgcc -static-libstdc++
     }
 }
-macx: QT_CONFIG -= no-pkg-config
+macx | android: QT_CONFIG -= no-pkg-config
 
 # Enable c++11 support in all platforms
 !CONFIG(c++11): CONFIG += c++11

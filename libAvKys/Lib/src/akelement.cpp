@@ -53,8 +53,6 @@ class AkPluginInfoPrivate
 class AkElementPrivate
 {
     public:
-        QString m_pluginId;
-        QString m_pluginPath;
         QString m_pluginFilePattern;
         QStringList m_pluginsSearchPaths;
         QStringList m_defaultPluginsSearchPaths;
@@ -95,7 +93,10 @@ AkElement::~AkElement()
 
 QString AkElement::pluginId() const
 {
-    return this->d->m_pluginId;
+    QString className(this->metaObject()->className());
+    className.remove(QRegExp("Element$"));
+
+    return className;
 }
 
 QString AkElement::pluginId(const QString &path)
@@ -105,7 +106,7 @@ QString AkElement::pluginId(const QString &path)
 
 QString AkElement::pluginPath() const
 {
-    return this->d->m_pluginPath;
+    return AkElement::pluginPath(this->pluginId());
 }
 
 AkElement::ElementState AkElement::state() const
@@ -246,20 +247,14 @@ bool AkElement::unlink(const QObject *srcElement, const QObject *dstElement)
 }
 
 AkElementPtr AkElement::create(const QString &pluginId,
-                               const QString &elementName)
+                               const QString &pluginSub)
 {
-    auto element = AkElement::createPtr(pluginId, elementName);
-
-    if (!element)
-        return AkElementPtr();
-
-    return AkElementPtr(element);
+    return AkElement::create<AkElement>(pluginId, pluginSub);
 }
 
-AkElement *AkElement::createPtr(const QString &pluginId,
-                                const QString &elementName)
+QObject *AkElement::createPtr(const QString &pluginId, const QString &pluginSub)
 {
-    QString filePath = AkElement::pluginPath(pluginId);
+    auto filePath = AkElement::pluginPath(pluginId);
 
     if (filePath.isEmpty())
         return nullptr;
@@ -280,21 +275,12 @@ AkElement *AkElement::createPtr(const QString &pluginId,
     if (!plugin)
         return nullptr;
 
-    auto element =
-            qobject_cast<AkElement *>(plugin->create(AK_PLUGIN_TYPE_ELEMENT,
-                                                     ""));
+    auto object = plugin->create(pluginSub.isEmpty()?
+                                     AK_PLUGIN_TYPE_ELEMENT: pluginSub,
+                                 "");
     delete plugin;
 
-    if (!element)
-        return nullptr;
-
-    if (!elementName.isEmpty())
-        element->setObjectName(elementName);
-
-    element->d->m_pluginId = pluginId;
-    element->d->m_pluginPath = filePath;
-
-    return element;
+    return object;
 }
 
 QStringList AkElement::listSubModules(const QString &pluginId,
@@ -327,11 +313,11 @@ QStringList AkElement::listSubModules(const QStringList &types)
 {
     QString pluginId;
 
-    if (this->d->m_pluginId.isEmpty()) {
+    if (this->pluginId().isEmpty()) {
         pluginId = this->metaObject()->className();
-        pluginId.replace(QRegExp("Element$"), "");
+        pluginId.remove(QRegExp("Element$"));
     } else {
-        pluginId = this->d->m_pluginId;
+        pluginId = this->pluginId();
     }
 
     if (types.isEmpty())
@@ -397,11 +383,11 @@ QStringList AkElement::listSubModulesPaths()
 {
     QString pluginId;
 
-    if (this->d->m_pluginId.isEmpty()) {
+    if (this->pluginId().isEmpty()) {
         pluginId = this->metaObject()->className();
-        pluginId.replace(QRegExp("Element$"), "");
+        pluginId.remove(QRegExp("Element$"));
     } else {
-        pluginId = this->d->m_pluginId;
+        pluginId = this->pluginId();
     }
 
     return AkElement::listSubModulesPaths(pluginId);
@@ -445,11 +431,11 @@ QObject *AkElement::loadSubModule(const QString &subModule)
 {
     QString pluginId;
 
-    if (this->d->m_pluginId.isEmpty()) {
+    if (this->pluginId().isEmpty()) {
         pluginId = this->metaObject()->className();
-        pluginId.replace(QRegExp("Element$"), "");
+        pluginId.remove(QRegExp("Element$"));
     } else {
-        pluginId = this->d->m_pluginId;
+        pluginId = this->pluginId();
     }
 
     return AkElement::loadSubModule(pluginId, subModule);
@@ -662,16 +648,6 @@ AkPacket AkElement::operator ()(const AkPacket &packet)
     return this->iStream(packet);
 }
 
-AkPacket AkElement::operator ()(const AkAudioPacket &packet)
-{
-    return this->iStream(packet);
-}
-
-AkPacket AkElement::operator ()(const AkVideoPacket &packet)
-{
-    return this->iStream(packet);
-}
-
 QString AkElement::controlInterfaceProvide(const QString &controlId) const
 {
     Q_UNUSED(controlId)
@@ -692,27 +668,27 @@ void AkElement::stateChange(AkElement::ElementState from, AkElement::ElementStat
     Q_UNUSED(to)
 }
 
+AkPacket AkElement::iAudioStream(const AkAudioPacket &packet)
+{
+    Q_UNUSED(packet)
+
+    return AkPacket();
+}
+
+AkPacket AkElement::iVideoStream(const AkVideoPacket &packet)
+{
+    Q_UNUSED(packet)
+
+    return AkPacket();
+}
+
 AkPacket AkElement::iStream(const AkPacket &packet)
 {
     if (packet.caps().mimeType() == "audio/x-raw")
-        return this->iStream(AkAudioPacket(packet));
+        return this->iAudioStream(packet);
 
     if (packet.caps().mimeType() == "video/x-raw")
-        return this->iStream(AkVideoPacket(packet));
-
-    return AkPacket();
-}
-
-AkPacket AkElement::iStream(const AkAudioPacket &packet)
-{
-    Q_UNUSED(packet)
-
-    return AkPacket();
-}
-
-AkPacket AkElement::iStream(const AkVideoPacket &packet)
-{
-    Q_UNUSED(packet)
+        return this->iVideoStream(packet);
 
     return AkPacket();
 }

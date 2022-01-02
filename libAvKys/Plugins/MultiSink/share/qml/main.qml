@@ -61,7 +61,6 @@ ColumnLayout {
             var streamConfig = streams[stream]
             var streamOptions = classStreamOptions.createObject(clyStreamOptions)
             streamOptions.Layout.fillWidth = true
-
             var streamCaps = Ak.newCaps(streamConfig.caps)
 
             if (streamCaps.mimeType === "audio/x-raw")
@@ -144,7 +143,7 @@ ColumnLayout {
     Connections {
         target: MultiSink
 
-        onSupportedFormatsChanged : updateSupportedFormats(supportedFormats)
+        onSupportedFormatsChanged: updateSupportedFormats(supportedFormats)
         onOutputFormatChanged: {
             btnFormatOptions.enabled = MultiSink.formatOptions().length > 0;
 

@@ -27,14 +27,16 @@ import sys
 import threading
 import zipfile
 
-import deploy_base
-import tools.binary_pecoff
-import tools.qt5
+from WebcamoidDeployTools import DTDeployBase
+from WebcamoidDeployTools import DTQt5
+from WebcamoidDeployTools import DTBinaryPecoff
 
 
-class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
+class Deploy(DTDeployBase.DeployBase, DTQt5.Qt5Tools):
     def __init__(self):
         super().__init__()
+        rootDir = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
+        self.setRootDir(rootDir)
         self.installDir = os.path.join(self.buildDir, 'ports/deploy/temp_priv')
         self.pkgsDir = os.path.join(self.buildDir, 'ports/deploy/packages_auto/windows')
         self.detectQt(os.path.join(self.buildDir, 'StandAlone'))
@@ -58,8 +60,13 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         self.programName = os.path.splitext(os.path.basename(self.mainBinary))[0]
         self.programVersion = self.detectVersion(os.path.join(self.rootDir, 'commons.pri'))
         self.detectMake()
-        self.binarySolver = tools.binary_pecoff.DeployToolsBinary()
-        self.binarySolver.readExcludeList(os.path.join(self.rootDir, 'ports/deploy/exclude.{}.{}.txt'.format(os.name, sys.platform)))
+        xspec = self.qmakeQuery(var='QMAKE_XSPEC')
+
+        if 'android' in xspec:
+            self.targetSystem = 'android'
+
+        self.binarySolver = DTBinaryPecoff.PecoffBinaryTools()
+        self.binarySolver.readExcludes(os.name, sys.platform)
         self.packageConfig = os.path.join(self.rootDir, 'ports/deploy/package_info.conf')
         self.dependencies = []
         self.installerConfig = os.path.join(self.installDir, 'installer/config')
@@ -136,9 +143,11 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
             dep = dep.replace('\\', '/')
             depPath = os.path.join(self.binaryInstallDir, os.path.basename(dep))
             depPath = depPath.replace('\\', '/')
-            print('    {} -> {}'.format(dep, depPath))
-            self.copy(dep, depPath)
-            self.dependencies.append(dep)
+
+            if dep != depPath:
+                print('    {} -> {}'.format(dep, depPath))
+                self.copy(dep, depPath)
+                self.dependencies.append(dep)
 
     def removeDebugs(self):
         dbgFiles = set()
@@ -171,6 +180,9 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
             launcher.write('\n')
             launcher.write('rem Default values: software | d3d12 | openvg\n')
             launcher.write('rem set QT_QUICK_BACKEND=""\n')
+            launcher.write('\n')
+            launcher.write('rem Enable plugin debugging\n')
+            launcher.write('rem set QT_DEBUG_PLUGINS=1\n')
             launcher.write('\n')
             launcher.write('start /b "" '
                            + '"%~dp0bin\\{}" '.format(self.programName)
@@ -226,21 +238,6 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
         return ''
 
-    def commitHash(self):
-        try:
-            process = subprocess.Popen(['git', 'rev-parse', 'HEAD'], # nosec
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE,
-                                        cwd=self.rootDir)
-            stdout, _ = process.communicate()
-
-            if process.returncode != 0:
-                return ''
-
-            return stdout.decode(sys.getdefaultencoding()).strip()
-        except:
-            return ''
-
     @staticmethod
     def sysInfo():
         try:
@@ -269,7 +266,7 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         # Write repository info.
 
         with open(depsInfoFile, 'w') as f:
-            commitHash = self.commitHash()
+            commitHash = self.gitCommitHash(self.rootDir)
 
             if len(commitHash) < 1:
                 commitHash = 'Unknown'
@@ -372,9 +369,14 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         mutex = threading.Lock()
 
         threads = [threading.Thread(target=self.createPortable, args=(mutex,))]
+        packagingTools = ['zip']
 
         if self.qtIFW != '':
             threads.append(threading.Thread(target=self.createAppInstaller, args=(mutex,)))
+            packagingTools += ['Qt Installer Framework']
+
+        if len(packagingTools) > 0:
+            print('Detected packaging tools: {}\n'.format(', '.join(packagingTools)))
 
         for thread in threads:
             thread.start()

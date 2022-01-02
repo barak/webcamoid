@@ -23,47 +23,37 @@
 #include <akelement.h>
 
 class ACapsConvertElementPrivate;
-class AkCaps;
+class AkAudioCaps;
 
 class ACapsConvertElement: public AkElement
 {
     Q_OBJECT
-    Q_PROPERTY(QString caps
+    Q_PROPERTY(AkAudioCaps caps
                READ caps
                WRITE setCaps
                RESET resetCaps
                NOTIFY capsChanged)
-    Q_PROPERTY(QString convertLib
-               READ convertLib
-               WRITE setConvertLib
-               RESET resetConvertLib
-               NOTIFY convertLibChanged)
 
     public:
         ACapsConvertElement();
         ~ACapsConvertElement();
 
-        Q_INVOKABLE QString caps() const;
-        Q_INVOKABLE QString convertLib() const;
+        Q_INVOKABLE AkAudioCaps caps() const;
 
     private:
         ACapsConvertElementPrivate *d;
 
+    protected:
+        AkPacket iAudioStream(const AkAudioPacket &packet);
+
     signals:
-        void capsChanged(const QString &caps);
-        void convertLibChanged(const QString &convertLib);
+        void capsChanged(const AkAudioCaps &caps);
 
     public slots:
-        void setCaps(const QString &caps);
-        void setConvertLib(const QString &convertLib);
+        void setCaps(const AkAudioCaps &caps);
         void resetCaps();
-        void resetConvertLib();
 
-        AkPacket iStream(const AkAudioPacket &packet);
         bool setState(AkElement::ElementState state);
-
-    private slots:
-        void convertLibUpdated(const QString &convertLib);
 };
 
 #endif // ACAPSCONVERTELEMENT_H

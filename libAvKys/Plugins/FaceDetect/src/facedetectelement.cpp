@@ -23,6 +23,7 @@
 #include <QStandardPaths>
 #include <QPainter>
 #include <QQmlContext>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "facedetectelement.h"
@@ -37,7 +38,8 @@ inline MarkerTypeMap initMarkerTypeMap()
         {FaceDetectElement::MarkerTypeEllipse  , "ellipse"  },
         {FaceDetectElement::MarkerTypeImage    , "image"    },
         {FaceDetectElement::MarkerTypePixelate , "pixelate" },
-        {FaceDetectElement::MarkerTypeBlur     , "blur"     }
+        {FaceDetectElement::MarkerTypeBlur     , "blur"     },
+        {FaceDetectElement::MarkerTypeBlurOuter, "blurouter"}
     };
 
     return markerTypeToStr;
@@ -145,6 +147,23 @@ QSize FaceDetectElement::scanSize() const
     return this->d->m_scanSize;
 }
 
+QVector<QRect> FaceDetectElement::detectFaces(const AkVideoPacket &packet)
+{
+    QSize scanSize(this->d->m_scanSize);
+
+    if (this->d->m_haarFile.isEmpty() || scanSize.isEmpty())
+        return {};
+
+    auto src = packet.toImage();
+
+    if (src.isNull())
+        return {};
+
+    QImage scanFrame(src.scaled(scanSize, Qt::KeepAspectRatio));
+
+    return this->d->m_cascadeClassifier.detect(scanFrame);
+}
+
 QString FaceDetectElement::controlInterfaceProvide(const QString &controlId) const
 {
     Q_UNUSED(controlId)
@@ -164,6 +183,95 @@ void FaceDetectElement::controlInterfaceConfigure(QQmlContext *context,
     context->setContextProperty("picturesPath", picturesPath[0]);
 }
 
+AkPacket FaceDetectElement::iVideoStream(const AkVideoPacket &packet)
+{
+    QSize scanSize(this->d->m_scanSize);
+
+    if (this->d->m_haarFile.isEmpty()
+        || scanSize.isEmpty())
+        akSend(packet)
+
+    auto src = packet.toImage();
+
+    if (src.isNull())
+        return AkPacket();
+
+    QImage oFrame = src.convertToFormat(QImage::Format_ARGB32);
+    qreal scale = 1;
+
+    QImage scanFrame(src.scaled(scanSize, Qt::KeepAspectRatio));
+
+    if (scanFrame.width() == scanSize.width())
+        scale = qreal(src.width()) / scanSize.width();
+    else
+        scale = qreal(src.height()) / scanSize.height();
+
+    this->d->m_cascadeClassifier.setEqualize(true);
+    QVector<QRect> vecFaces = this->d->m_cascadeClassifier.detect(scanFrame);
+
+    if (vecFaces.isEmpty())
+        akSend(packet)
+
+    QPainter painter;
+    painter.begin(&oFrame);
+
+    /* Many users will want to blur even if no faces were detected! */
+    if (this->d->m_markerType == MarkerTypeBlurOuter) {
+        QRect all(0, 0, src.width(), src.height());
+        auto rectPacket = AkVideoPacket::fromImage(src.copy(all), packet);
+        AkVideoPacket blurPacket = this->d->m_blurFilter->iStream(rectPacket);
+        auto blurImage = blurPacket.toImage();
+        painter.drawImage(all, blurImage);
+        /* for a better effect, we could add a second (weaker) blur */
+        /* and copy this to larger boxes around all faces */
+    }
+
+    for (auto &face: vecFaces) {
+        QRect rect(int(scale * face.x()),
+                   int(scale * face.y()),
+                   int(scale * face.width()),
+                   int(scale * face.height()));
+
+        if (this->d->m_markerType == MarkerTypeRectangle) {
+            painter.setPen(this->d->m_markerPen);
+            painter.drawRect(rect);
+        } else if (this->d->m_markerType == MarkerTypeEllipse) {
+            painter.setPen(this->d->m_markerPen);
+            painter.drawEllipse(rect);
+        } else if (this->d->m_markerType == MarkerTypeImage)
+            painter.drawImage(rect, this->d->m_markerImg);
+        else if (this->d->m_markerType == MarkerTypePixelate) {
+            qreal sw = 1.0 / this->d->m_pixelGridSize.width();
+            qreal sh = 1.0 / this->d->m_pixelGridSize.height();
+            QImage imagePixelate = src.copy(rect);
+
+            imagePixelate = imagePixelate.scaled(int(sw * imagePixelate.width()),
+                                                 int(sh * imagePixelate.height()),
+                                                 Qt::IgnoreAspectRatio,
+                                                 Qt::FastTransformation)
+                                         .scaled(imagePixelate.width(),
+                                                 imagePixelate.height(),
+                                                 Qt::IgnoreAspectRatio,
+                                                 Qt::FastTransformation);
+
+            painter.drawImage(rect, imagePixelate);
+        } else if (this->d->m_markerType == MarkerTypeBlur) {
+            auto rectPacket = AkVideoPacket::fromImage(src.copy(rect), packet);
+            AkVideoPacket blurPacket = this->d->m_blurFilter->iStream(rectPacket);
+            auto blurImage = blurPacket.toImage();
+
+            painter.drawImage(rect, blurImage);
+        } else if (this->d->m_markerType == MarkerTypeBlurOuter) {
+            painter.drawImage(rect, src.copy(rect));
+        }
+    }
+
+    painter.end();
+
+    auto oPacket = AkVideoPacket::fromImage(oFrame, packet);
+    akSend(oPacket)
+}
+
 void FaceDetectElement::setHaarFile(const QString &haarFile)
 {
     if (this->d->m_haarFile == haarFile)
@@ -180,7 +288,7 @@ void FaceDetectElement::setHaarFile(const QString &haarFile)
 
 void FaceDetectElement::setMarkerType(const QString &markerType)
 {
-    MarkerType markerTypeEnum = markerTypeToStr->key(markerType, MarkerTypeRectangle);
+    auto markerTypeEnum = markerTypeToStr->key(markerType, MarkerTypeRectangle);
 
     if (this->d->m_markerType == markerTypeEnum)
         return;
@@ -301,83 +409,6 @@ void FaceDetectElement::resetBlurRadius()
 void FaceDetectElement::resetScanSize()
 {
     this->setScanSize(QSize(160, 120));
-}
-
-AkPacket FaceDetectElement::iStream(const AkPacket &packet)
-{
-    QSize scanSize(this->d->m_scanSize);
-
-    if (this->d->m_haarFile.isEmpty()
-        || scanSize.isEmpty())
-        akSend(packet)
-
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
-
-    if (src.isNull())
-        return AkPacket();
-
-    QImage oFrame = src.convertToFormat(QImage::Format_ARGB32);
-    qreal scale = 1;
-
-    QImage scanFrame(src.scaled(scanSize, Qt::KeepAspectRatio));
-
-    if (scanFrame.width() == scanSize.width())
-        scale = qreal(src.width()) / scanSize.width();
-    else
-        scale = qreal(src.height()) / scanSize.height();
-
-    this->d->m_cascadeClassifier.setEqualize(true);
-    QVector<QRect> vecFaces = this->d->m_cascadeClassifier.detect(scanFrame);
-
-    if (vecFaces.isEmpty())
-        akSend(packet)
-
-    QPainter painter;
-    painter.begin(&oFrame);
-
-    for (const QRect &face: vecFaces) {
-        QRect rect(int(scale * face.x()),
-                   int(scale * face.y()),
-                   int(scale * face.width()),
-                   int(scale * face.height()));
-
-        if (this->d->m_markerType == MarkerTypeRectangle) {
-            painter.setPen(this->d->m_markerPen);
-            painter.drawRect(rect);
-        } else if (this->d->m_markerType == MarkerTypeEllipse) {
-            painter.setPen(this->d->m_markerPen);
-            painter.drawEllipse(rect);
-        } else if (this->d->m_markerType == MarkerTypeImage)
-            painter.drawImage(rect, this->d->m_markerImg);
-        else if (this->d->m_markerType == MarkerTypePixelate) {
-            qreal sw = 1.0 / this->d->m_pixelGridSize.width();
-            qreal sh = 1.0 / this->d->m_pixelGridSize.height();
-            QImage imagePixelate = src.copy(rect);
-
-            imagePixelate = imagePixelate.scaled(int(sw * imagePixelate.width()),
-                                                 int(sh * imagePixelate.height()),
-                                                 Qt::IgnoreAspectRatio,
-                                                 Qt::FastTransformation)
-                                         .scaled(imagePixelate.width(),
-                                                 imagePixelate.height(),
-                                                 Qt::IgnoreAspectRatio,
-                                                 Qt::FastTransformation);
-
-            painter.drawImage(rect, imagePixelate);
-        } else if (this->d->m_markerType == MarkerTypeBlur) {
-            auto rectPacket = AkVideoPacket::fromImage(src.copy(rect), videoPacket);
-            AkVideoPacket blurPacket = this->d->m_blurFilter->iStream(rectPacket.toPacket());
-            auto blurImage = blurPacket.toImage();
-
-            painter.drawImage(rect, blurImage);
-        }
-    }
-
-    painter.end();
-
-    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
-    akSend(oPacket)
 }
 
 #include "moc_facedetectelement.cpp"

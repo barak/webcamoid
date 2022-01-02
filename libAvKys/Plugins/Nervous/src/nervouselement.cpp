@@ -17,9 +17,12 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <QVector>
+#include <QDateTime>
 #include <QImage>
 #include <QQmlContext>
+#include <QRandomGenerator>
+#include <QVector>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "nervouselement.h"
@@ -70,38 +73,9 @@ void NervousElement::controlInterfaceConfigure(QQmlContext *context,
     context->setContextProperty("controlId", this->objectName());
 }
 
-void NervousElement::setNFrames(int nFrames)
+AkPacket NervousElement::iVideoStream(const AkVideoPacket &packet)
 {
-    if (this->d->m_nFrames == nFrames)
-        return;
-
-    this->d->m_nFrames = nFrames;
-    this->nFramesChanged(nFrames);
-}
-
-void NervousElement::setSimple(bool simple)
-{
-    if (this->d->m_simple == simple)
-        return;
-
-    this->d->m_simple = simple;
-    this->simpleChanged(simple);
-}
-
-void NervousElement::resetNFrames()
-{
-    this->setNFrames(32);
-}
-
-void NervousElement::resetSimple()
-{
-    this->setSimple(false);
-}
-
-AkPacket NervousElement::iStream(const AkPacket &packet)
-{
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
+    auto src = packet.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -130,21 +104,49 @@ AkPacket NervousElement::iStream(const AkPacket &packet)
             nFrame = qBound(0, nFrame, this->d->m_frames.size() - 1);
             timer--;
         } else {
-            nFrame = qrand() % this->d->m_frames.size();
-            this->d->m_stride = qrand() % 5 - 2;
+            nFrame = QRandomGenerator::global()->bounded(this->d->m_frames.size());
+            this->d->m_stride = QRandomGenerator::global()->bounded(2, 6);
 
             if (this->d->m_stride >= 0)
                 this->d->m_stride++;
 
-            timer = qrand() % 6 + 2;
+            timer = QRandomGenerator::global()->bounded(2, 8);
         }
     } else if(!this->d->m_frames.isEmpty()) {
-        nFrame = qrand() % this->d->m_frames.size();
+        nFrame = QRandomGenerator::global()->bounded(this->d->m_frames.size());
     }
 
-    auto oPacket = AkVideoPacket::fromImage(this->d->m_frames[nFrame],
-                                            videoPacket).toPacket();
+    auto oPacket =
+            AkVideoPacket::fromImage(this->d->m_frames[nFrame], packet);
     akSend(oPacket)
+}
+
+void NervousElement::setNFrames(int nFrames)
+{
+    if (this->d->m_nFrames == nFrames)
+        return;
+
+    this->d->m_nFrames = nFrames;
+    this->nFramesChanged(nFrames);
+}
+
+void NervousElement::setSimple(bool simple)
+{
+    if (this->d->m_simple == simple)
+        return;
+
+    this->d->m_simple = simple;
+    this->simpleChanged(simple);
+}
+
+void NervousElement::resetNFrames()
+{
+    this->setNFrames(32);
+}
+
+void NervousElement::resetSimple()
+{
+    this->setSimple(false);
 }
 
 #include "moc_nervouselement.cpp"

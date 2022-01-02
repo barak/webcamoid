@@ -40,7 +40,7 @@ class QDataStream;
 class QQmlEngine;
 class QQmlContext;
 
-typedef QSharedPointer<AkElement> AkElementPtr;
+using AkElementPtr = QSharedPointer<AkElement>;
 
 /// Plugin template.
 class AKCOMMONS_EXPORT AkElement: public QObject
@@ -68,7 +68,7 @@ class AKCOMMONS_EXPORT AkElement: public QObject
         AkElement(QObject *parent=nullptr);
         virtual ~AkElement();
 
-        Q_INVOKABLE QString pluginId() const;
+        Q_INVOKABLE virtual QString pluginId() const;
         Q_INVOKABLE static QString pluginId(const QString &path);
         Q_INVOKABLE QString pluginPath() const;
         Q_INVOKABLE virtual AkElement::ElementState state() const;
@@ -99,12 +99,23 @@ class AKCOMMONS_EXPORT AkElement: public QObject
                                        const AkElementPtr &dstElement);
         Q_INVOKABLE static bool unlink(const QObject *srcElement,
                                        const QObject *dstElement);
+        template<typename T>
+        static inline QSharedPointer<T> create(const QString &pluginId,
+                                               const QString &pluginSub={})
+        {
+            auto object = AkElement::createPtr(pluginId, pluginSub);
+
+            if (!object)
+                return {};
+
+            return QSharedPointer<T>(reinterpret_cast<T *>(object));
+        }
         Q_INVOKABLE static AkElementPtr create(const QString &pluginId,
-                                               const QString &elementName="");
-        Q_INVOKABLE static AkElement *createPtr(const QString &pluginId,
-                                                const QString &elementName="");
+                                               const QString &pluginSub={});
+        Q_INVOKABLE static QObject *createPtr(const QString &pluginId,
+                                              const QString &pluginSub={});
         Q_INVOKABLE static QStringList listSubModules(const QString &pluginId,
-                                                      const QString &type="");
+                                                      const QString &type={});
         Q_INVOKABLE QStringList listSubModules(const QStringList &types={});
         Q_INVOKABLE static QStringList listSubModulesPaths(const QString &pluginId);
         Q_INVOKABLE QStringList listSubModulesPaths();
@@ -133,8 +144,6 @@ class AKCOMMONS_EXPORT AkElement: public QObject
         Q_INVOKABLE static void clearCache();
 
         virtual AkPacket operator ()(const AkPacket &packet);
-        virtual AkPacket operator ()(const AkAudioPacket &packet);
-        virtual AkPacket operator ()(const AkVideoPacket &packet);
 
     private:
         AkElementPrivate *d;
@@ -144,6 +153,8 @@ class AKCOMMONS_EXPORT AkElement: public QObject
         virtual void controlInterfaceConfigure(QQmlContext *context,
                                                const QString &controlId) const;
         virtual void stateChange(AkElement::ElementState from, AkElement::ElementState to);
+        virtual AkPacket iAudioStream(const AkAudioPacket &packet);
+        virtual AkPacket iVideoStream(const AkVideoPacket &packet);
 
     Q_SIGNALS:
         void stateChanged(AkElement::ElementState state);
@@ -151,14 +162,13 @@ class AKCOMMONS_EXPORT AkElement: public QObject
 
     public Q_SLOTS:
         virtual AkPacket iStream(const AkPacket &packet);
-        virtual AkPacket iStream(const AkAudioPacket &packet);
-        virtual AkPacket iStream(const AkVideoPacket &packet);
         virtual bool setState(AkElement::ElementState state);
         virtual void resetState();
 };
 
-QDataStream &operator >>(QDataStream &istream, AkElement::ElementState &state);
-QDataStream &operator <<(QDataStream &ostream, AkElement::ElementState state);
+AKCOMMONS_EXPORT QDataStream &operator >>(QDataStream &istream, AkElement::ElementState &state);
+AKCOMMONS_EXPORT QDataStream &operator <<(QDataStream &ostream, AkElement::ElementState state);
+
 Q_DECLARE_METATYPE(AkElement::ElementState)
 
 #endif // AKELEMENT_H

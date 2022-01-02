@@ -32,7 +32,7 @@ DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName, 0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0
 #define MAX_ERRORS_READ_WRITE 5
 #define EVENT_TIMEOUT 1000
 
-typedef QMap<HRESULT, QString> ErrorCodesMap;
+using ErrorCodesMap = QMap<HRESULT, QString>;
 
 inline ErrorCodesMap initErrorCodesMap()
 {
@@ -89,11 +89,13 @@ class AudioDevWasapiPrivate
         QString m_defaultSource;
         QMap<QString, QString> m_descriptionMap;
         QMap<QString, QList<AkAudioCaps::SampleFormat>> m_supportedFormats;
-        QMap<QString, QList<int>> m_supportedChannels;
+        QMap<QString, QList<AkAudioCaps::ChannelLayout>> m_supportedLayouts;
         QMap<QString, QList<int>> m_supportedSampleRates;
         QMap<QString, AkAudioCaps> m_preferredInputCaps;
         QMap<QString, AkAudioCaps> m_preferredOutputCaps;
         QByteArray m_audioBuffer;
+        AkAudioCaps m_curCaps;
+        QString m_curDevice;
         IMMDeviceEnumerator *m_deviceEnumerator {nullptr};
         IMMDevice *m_pDevice {nullptr};
         IAudioClient *m_pAudioClient {nullptr};
@@ -101,20 +103,15 @@ class AudioDevWasapiPrivate
         IAudioRenderClient *m_pRenderClient {nullptr};
         HANDLE m_hEvent {nullptr};
         ULONG m_cRef {1};
-        AkAudioCaps m_curCaps;
-        QString m_curDevice;
+        int m_samples {0};
 
-        explicit AudioDevWasapiPrivate(AudioDevWasapi *self):
-            self(self)
-        {
-        }
-
+        explicit AudioDevWasapiPrivate(AudioDevWasapi *self);
         bool waveFormatFromCaps(WAVEFORMATEX *wfx,
                                 const AkAudioCaps &caps) const;
         AkAudioCaps capsFromWaveFormat(WAVEFORMATEX *wfx) const;
         void fillDeviceInfo(const QString &device,
                             QList<AkAudioCaps::SampleFormat> *supportedFormats,
-                            QList<int> *supportedChannels,
+                            QList<AkAudioCaps::ChannelLayout> *supportedLayouts,
                             QList<int> *supportedSampleRates) const;
         AkAudioCaps preferredCaps(const QString &device,
                                   EDataFlow dataFlow) const;
@@ -202,9 +199,9 @@ QList<AkAudioCaps::SampleFormat> AudioDevWasapi::supportedFormats(const QString 
     return this->d->m_supportedFormats.value(device);
 }
 
-QList<int> AudioDevWasapi::supportedChannels(const QString &device)
+QList<AkAudioCaps::ChannelLayout> AudioDevWasapi::supportedChannelLayouts(const QString &device)
 {
-    return this->d->m_supportedChannels.value(device);
+    return this->d->m_supportedLayouts.value(device);
 }
 
 QList<int> AudioDevWasapi::supportedSampleRates(const QString &device)
@@ -361,16 +358,14 @@ bool AudioDevWasapi::init(const QString &device,
     }
 
     this->d->m_curDevice = device;
+    this->d->m_samples = qMax(this->latency() * caps.rate() / 1000, 1);
 
     return true;
 }
 
-QByteArray AudioDevWasapi::read(int samples)
+QByteArray AudioDevWasapi::read()
 {
-    if (samples < 1)
-        return {};
-
-    int bufferSize = samples
+    int bufferSize = this->d->m_samples
                      * this->d->m_curCaps.bps()
                      * this->d->m_curCaps.channels()
                      / 8;
@@ -614,6 +609,11 @@ ULONG AudioDevWasapi::Release()
     return lRef;
 }
 
+AudioDevWasapiPrivate::AudioDevWasapiPrivate(AudioDevWasapi *self):
+    self(self)
+{
+}
+
 bool AudioDevWasapiPrivate::waveFormatFromCaps(WAVEFORMATEX *wfx,
                                                const AkAudioCaps &caps) const
 {
@@ -644,17 +644,16 @@ AkAudioCaps AudioDevWasapiPrivate::capsFromWaveFormat(WAVEFORMATEX *wfx) const
     auto sampleFormat =
         AkAudioCaps::sampleFormatFromProperties(sampleType,
                                                 int(wfx->wBitsPerSample),
-                                                Q_BYTE_ORDER,
-                                                false);
+                                                Q_BYTE_ORDER);
 
     return AkAudioCaps(sampleFormat,
-                       int(wfx->nChannels),
+                       AkAudioCaps::defaultChannelLayout(int(wfx->nChannels)),
                        int(wfx->nSamplesPerSec));
 }
 
 void AudioDevWasapiPrivate::fillDeviceInfo(const QString &device,
                                            QList<AkAudioCaps::SampleFormat> *supportedFormats,
-                                           QList<int> *supportedChannels,
+                                           QList<AkAudioCaps::ChannelLayout> *supportedLayouts,
                                            QList<int> *supportedSampleRates) const
 {
     if (!this->m_deviceEnumerator)
@@ -684,11 +683,11 @@ void AudioDevWasapiPrivate::fillDeviceInfo(const QString &device,
         pAudioClient = this->m_pAudioClient;
     }
 
-    static const QVector<AkAudioCaps::SampleFormat> preferredFormats = {
+    static const QVector<AkAudioCaps::SampleFormat> preferredFormats {
         AkAudioCaps::SampleFormat_flt,
         AkAudioCaps::SampleFormat_s32,
         AkAudioCaps::SampleFormat_s16,
-        AkAudioCaps::SampleFormat_u8
+        AkAudioCaps::SampleFormat_u8,
     };
 
     for (auto &format: preferredFormats)
@@ -696,14 +695,16 @@ void AudioDevWasapiPrivate::fillDeviceInfo(const QString &device,
             for (auto &rate: self->commonSampleRates()) {
                 WAVEFORMATEX wfx;
                 WAVEFORMATEX *closestWfx = nullptr;
-                this->waveFormatFromCaps(&wfx,
-                                         AkAudioCaps(format, channels, rate));
+                AkAudioCaps audioCaps(format,
+                                      AkAudioCaps::defaultChannelLayout(channels),
+                                      rate);
+                this->waveFormatFromCaps(&wfx, audioCaps);
 
                 if (SUCCEEDED(pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_SHARED,
                                                               &wfx,
                                                               &closestWfx))) {
                     AkAudioCaps::SampleFormat sampleFormat;
-                    int nchannels;
+                    AkAudioCaps::ChannelLayout layout;
                     int sampleRate;
 
                     if (closestWfx) {
@@ -714,22 +715,22 @@ void AudioDevWasapiPrivate::fillDeviceInfo(const QString &device,
                         sampleFormat =
                             AkAudioCaps::sampleFormatFromProperties(sampleType,
                                                                     int(closestWfx->wBitsPerSample),
-                                                                    Q_BYTE_ORDER,
-                                                                    false);
-                        nchannels = int(closestWfx->nChannels);
+                                                                    Q_BYTE_ORDER);
+                        layout = AkAudioCaps::defaultChannelLayout(int(closestWfx->nChannels));
                         sampleRate = int(closestWfx->nSamplesPerSec);
                         CoTaskMemFree(closestWfx);
                     } else {
                         sampleFormat = format;
-                        nchannels = channels;
+                        layout = AkAudioCaps::defaultChannelLayout(channels);
                         sampleRate = rate;
                     }
 
                     if (!supportedFormats->contains(sampleFormat))
                         supportedFormats->append(sampleFormat);
 
-                    if (!supportedChannels->contains(nchannels))
-                        supportedChannels->append(nchannels);
+                    if (layout != AkAudioCaps::Layout_none
+                        && !supportedLayouts->contains(layout))
+                        supportedLayouts->append(layout);
 
                     if (!supportedSampleRates->contains(sampleRate))
                         supportedSampleRates->append(sampleRate);
@@ -740,6 +741,8 @@ void AudioDevWasapiPrivate::fillDeviceInfo(const QString &device,
         pAudioClient->Release();
         pDevice->Release();
     }
+
+    std::sort(supportedFormats->begin(), supportedFormats->end());
 }
 
 AkAudioCaps AudioDevWasapiPrivate::preferredCaps(const QString &device,
@@ -774,10 +777,10 @@ AkAudioCaps AudioDevWasapiPrivate::preferredCaps(const QString &device,
 
     AkAudioCaps caps = dataFlow == eCapture?
                 AkAudioCaps(AkAudioCaps::SampleFormat_u8,
-                            1,
+                            AkAudioCaps::Layout_mono,
                             8000):
                 AkAudioCaps(AkAudioCaps::SampleFormat_s16,
-                            2,
+                            AkAudioCaps::Layout_stereo,
                             44100);
 
     WAVEFORMATEX wfx;
@@ -874,7 +877,7 @@ void AudioDevWasapi::updateDevices()
     decltype(this->d->m_defaultSource) defaultSource;
     decltype(this->d->m_descriptionMap) descriptionMap;
     decltype(this->d->m_supportedFormats) supportedFormats;
-    decltype(this->d->m_supportedChannels) supportedChannels;
+    decltype(this->d->m_supportedLayouts) supportedChannels;
     decltype(this->d->m_supportedSampleRates) supportedSampleRates;
     decltype(this->d->m_preferredInputCaps) preferredInputCaps;
     decltype(this->d->m_preferredOutputCaps) preferredOutputCaps;
@@ -926,27 +929,27 @@ void AudioDevWasapi::updateDevices()
                                     auto devId = QString::fromWCharArray(deviceId);
 
                                     QList<AkAudioCaps::SampleFormat> _supportedFormats;
-                                    QList<int> _supportedChannels;
+                                    QList<AkAudioCaps::ChannelLayout> _supportedLayouts;
                                     QList<int> _supportedSampleRates;
                                     this->d->fillDeviceInfo(devId,
                                                             &_supportedFormats,
-                                                            &_supportedChannels,
+                                                            &_supportedLayouts,
                                                             &_supportedSampleRates);
 
                                     if (_supportedFormats.isEmpty())
                                         _supportedFormats =
                                                 this->d->m_supportedFormats.value(devId);
 
-                                    if (_supportedChannels.isEmpty())
-                                        _supportedChannels =
-                                                this->d->m_supportedChannels.value(devId);
+                                    if (_supportedLayouts.isEmpty())
+                                        _supportedLayouts =
+                                                this->d->m_supportedLayouts.value(devId);
 
                                     if (_supportedSampleRates.isEmpty())
                                         _supportedSampleRates =
                                                 this->d->m_supportedSampleRates.value(devId);
 
                                     if (!_supportedFormats.isEmpty()
-                                        && !_supportedChannels.isEmpty()
+                                        && !_supportedLayouts.isEmpty()
                                         && !_supportedSampleRates.isEmpty()) {
                                         if (dataFlow == eCapture) {
                                             inputs << devId;
@@ -963,7 +966,7 @@ void AudioDevWasapi::updateDevices()
                                         descriptionMap[devId] =
                                                 QString::fromWCharArray(friendlyName.pwszVal);
                                         supportedFormats[devId] = _supportedFormats;
-                                        supportedChannels[devId] = _supportedChannels;
+                                        supportedChannels[devId] = _supportedLayouts;
                                         supportedSampleRates[devId] = _supportedSampleRates;
                                     }
 
@@ -987,8 +990,8 @@ void AudioDevWasapi::updateDevices()
     if (this->d->m_supportedFormats != supportedFormats)
         this->d->m_supportedFormats = supportedFormats;
 
-    if (this->d->m_supportedChannels != supportedChannels)
-        this->d->m_supportedChannels = supportedChannels;
+    if (this->d->m_supportedLayouts != supportedChannels)
+        this->d->m_supportedLayouts = supportedChannels;
 
     if (this->d->m_supportedSampleRates != supportedSampleRates)
         this->d->m_supportedSampleRates = supportedSampleRates;

@@ -17,6 +17,7 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QtGlobal>
 #include <QImage>
 #include <QMutex>
 #include <QFile>
@@ -26,22 +27,32 @@
 #include <QQmlProperty>
 #include <QQmlApplicationEngine>
 #include <akcaps.h>
+#include <akaudiocaps.h>
+#include <akvideocaps.h>
+#include <akpacket.h>
 #include <akvideopacket.h>
+#include <akplugin.h>
 
 #include "recording.h"
 
 #define DEFAULT_RECORD_AUDIO true
 #define AUDIO_RECORDING_KEY "Enable audio recording"
 
+using ObjectPtr = QSharedPointer<QObject>;
+
 class RecordingPrivate
 {
     public:
         QQmlApplicationEngine *m_engine {nullptr};
         QStringList m_availableFormats;
-        AkCaps m_audioCaps;
-        AkCaps m_videoCaps;
+        AkAudioCaps m_audioCaps;
+        AkVideoCaps m_videoCaps;
         QString m_videoFileName;
         AkElementPtr m_record {AkElement::create("MultiSink")};
+        ObjectPtr m_recordSettings {
+             AkElement::create<QObject>("MultiSink",
+                                        AK_PLUGIN_TYPE_ELEMENT_SETTINGS)
+        };
         QMutex m_mutex;
         AkVideoPacket m_curPacket;
         QImage m_photo;
@@ -102,7 +113,10 @@ Recording::Recording(QQmlApplicationEngine *engine, QObject *parent):
                          SIGNAL(supportedFormatsChanged(const QStringList &)),
                          this,
                          SLOT(updateFormat()));
-        QObject::connect(this->d->m_record.data(),
+    }
+
+    if (this->d->m_recordSettings) {
+        QObject::connect(this->d->m_recordSettings.data(),
                          SIGNAL(codecLibChanged(const QString &)),
                          this,
                          SLOT(saveMultiSinkCodecLib(const QString &)));
@@ -166,12 +180,12 @@ QString Recording::format() const
     return QString();
 }
 
-AkCaps Recording::audioCaps() const
+AkAudioCaps Recording::audioCaps() const
 {
     return this->d->m_audioCaps;
 }
 
-AkCaps Recording::videoCaps() const
+AkVideoCaps Recording::videoCaps() const
 {
     return this->d->m_videoCaps;
 }
@@ -285,7 +299,7 @@ QStringList RecordingPrivate::recordingFormats() const
                               "supportedFormats",
                               Q_RETURN_ARG(QStringList, supportedFormats));
 
-    for (const QString &format: supportedFormats) {
+    for (auto &format: supportedFormats) {
         QStringList audioCodecs;
         QMetaObject::invokeMethod(this->m_record.data(),
                                   "supportedCodecs",
@@ -306,10 +320,15 @@ QStringList RecordingPrivate::recordingFormats() const
                                   Q_RETURN_ARG(QStringList, extensions),
                                   Q_ARG(QString, format));
 
+#ifdef Q_OS_ANDROID
+        if (!videoCodecs.isEmpty() && !extensions.isEmpty())
+            formats << format;
+#else
         if ((format == "gif" || !audioCodecs.isEmpty())
             && !videoCodecs.isEmpty()
             && !extensions.isEmpty())
             formats << format;
+#endif
     }
 
     return formats;
@@ -321,7 +340,7 @@ void Recording::setFormat(const QString &format)
         this->d->m_record->setProperty("outputFormat", format);
 }
 
-void Recording::setAudioCaps(const AkCaps &audioCaps)
+void Recording::setAudioCaps(const AkAudioCaps &audioCaps)
 {
     if (this->d->m_audioCaps == audioCaps)
         return;
@@ -330,7 +349,7 @@ void Recording::setAudioCaps(const AkCaps &audioCaps)
     emit this->audioCapsChanged(audioCaps);
 }
 
-void Recording::setVideoCaps(const AkCaps &videoCaps)
+void Recording::setVideoCaps(const AkVideoCaps &videoCaps)
 {
     if (this->d->m_videoCaps == videoCaps)
         return;
@@ -375,21 +394,21 @@ void Recording::resetFormat()
     QString defaultFormat;
 
     if (this->d->m_record)
-        defaultFormat =
-                this->d->m_record->property("codecLib").toString() == "gstreamer"?
-                    "webmmux": "webm";
+        QMetaObject::invokeMethod(this->d->m_record.data(),
+                                  "defaultFormat",
+                                  Q_RETURN_ARG(QString, defaultFormat));
 
     this->setFormat(defaultFormat);
 }
 
 void Recording::resetAudioCaps()
 {
-    this->setAudioCaps(AkCaps());
+    this->setAudioCaps({});
 }
 
 void Recording::resetVideoCaps()
 {
-    this->setVideoCaps(AkCaps());
+    this->setVideoCaps({});
 }
 
 void Recording::resetRecordAudio()
@@ -487,12 +506,11 @@ void Recording::updateFormat()
     if (!this->d->m_record)
         return;
 
-    auto codecLib = this->d->m_record->property("codecLib").toString();
-
-    if (codecLib.isEmpty())
-        return;
-
-    this->setFormat(codecLib == "gstreamer"? "webmmux": "webm");
+    QString defaultFormat;
+    QMetaObject::invokeMethod(this->d->m_record.data(),
+                              "defaultFormat",
+                              Q_RETURN_ARG(QString, defaultFormat));
+    this->setFormat(defaultFormat);
 }
 
 void Recording::loadProperties()
@@ -501,19 +519,23 @@ void Recording::loadProperties()
 
     config.beginGroup("Libraries");
 
-    if (this->d->m_record)
-        this->d->m_record->setProperty("codecLib",
-                                       config.value("MultiSink.codecLib",
-                                                    this->d->m_record->property("codecLib")));
+    if (this->d->m_recordSettings) {
+        auto codecLib =
+                config.value("MultiSink.codecLib",
+                             this->d->m_recordSettings->property("codecLib"));
+        this->d->m_recordSettings->setProperty("codecLib", codecLib);
+    }
 
     config.endGroup();
 
     QString defaultFormat;
 
-    if (this->d->m_record)
-        defaultFormat =
-                this->d->m_record->property("codecLib").toString() == "gstreamer"?
-                    "webmmux": "webm";
+    if (this->d->m_record) {
+        QString defaultFormat;
+        QMetaObject::invokeMethod(this->d->m_record.data(),
+                                  "defaultFormat",
+                                  Q_RETURN_ARG(QString, defaultFormat));
+    }
 
     QString preferredFormat =
             this->d->m_availableFormats.isEmpty()
@@ -875,9 +897,10 @@ void Recording::saveProperties()
     QSettings config;
     config.beginGroup("Libraries");
 
-    if (this->d->m_record)
-        config.setValue("MultiSink.codecLib",
-                        this->d->m_record->property("codecLib"));
+    if (this->d->m_recordSettings) {
+        auto codecLib = this->d->m_recordSettings->property("codecLib");
+        config.setValue("MultiSink.codecLib", codecLib);
+    }
 
     config.endGroup();
 }

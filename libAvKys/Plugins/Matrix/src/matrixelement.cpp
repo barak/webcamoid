@@ -22,6 +22,7 @@
 #include <QPainter>
 #include <QFontMetrics>
 #include <QMutex>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "matrixelement.h"
@@ -339,13 +340,65 @@ void MatrixElement::controlInterfaceConfigure(QQmlContext *context,
     context->setContextProperty("controlId", this->objectName());
 }
 
+AkPacket MatrixElement::iVideoStream(const AkVideoPacket &packet)
+{
+    auto src = packet.toImage();
+
+    if (src.isNull())
+        return AkPacket();
+
+    src = src.convertToFormat(QImage::Format_RGB32);
+
+    this->d->m_mutex.lock();
+    int textWidth = src.width() / this->d->m_fontSize.width();
+    int textHeight = src.height() / this->d->m_fontSize.height();
+
+    int outWidth = textWidth * this->d->m_fontSize.width();
+    int outHeight = textHeight * this->d->m_fontSize.height();
+
+    QImage oFrame(outWidth, outHeight, src.format());
+
+    QList<Character> characters(this->d->m_characters);
+    this->d->m_mutex.unlock();
+
+    if (characters.size() < 256) {
+        oFrame.fill(this->d->m_backgroundColor);
+        auto oPacket =
+                AkVideoPacket::fromImage(oFrame.scaled(src.size()), packet);
+        akSend(oPacket)
+    }
+
+    QImage textImage = src.scaled(textWidth, textHeight);
+    QRgb *textImageBits = reinterpret_cast<QRgb *>(textImage.bits());
+    int textArea = textImage.width() * textImage.height();
+    QPainter painter;
+
+    painter.begin(&oFrame);
+
+    for (int i = 0; i < textArea; i++) {
+        int x = this->d->m_fontSize.width() * (i % textWidth);
+        int y = this->d->m_fontSize.height() * (i / textWidth);
+
+        Character chr = characters[qGray(textImageBits[i])];
+        painter.drawImage(x, y, chr.image);
+        textImageBits[i] = chr.foreground;
+    }
+
+    painter.drawImage(0, 0, this->d->renderRain(oFrame.size(), textImage));
+    painter.end();
+
+    auto oPacket = AkVideoPacket::fromImage(oFrame, packet);
+    akSend(oPacket)
+}
+
 void MatrixElement::setNDrops(int nDrops)
 {
     if (this->d->m_nDrops == nDrops)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_nDrops = nDrops;
+    this->d->m_mutex.unlock();
     emit this->nDropsChanged(nDrops);
 }
 
@@ -354,8 +407,9 @@ void MatrixElement::setCharTable(const QString &charTable)
     if (this->d->m_charTable == charTable)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_charTable = charTable;
+    this->d->m_mutex.unlock();
     emit this->charTableChanged(charTable);
 }
 
@@ -364,19 +418,18 @@ void MatrixElement::setFont(const QFont &font)
     if (this->d->m_font == font)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
-
+    this->d->m_mutex.lock();
     QFont::HintingPreference hp =
             hintingPreferenceToStr->key(this->hintingPreference(),
                                         QFont::PreferFullHinting);
     QFont::StyleStrategy ss =
             styleStrategyToStr->key(this->styleStrategy(),
                                     QFont::NoAntialias);
-
     this->d->m_font = font;
     this->d->m_font.setHintingPreference(hp);
     this->d->m_font.setStyleStrategy(ss);
     this->d->m_rain.clear();
+    this->d->m_mutex.unlock();
     emit this->fontChanged(font);
 }
 
@@ -389,9 +442,10 @@ void MatrixElement::setHintingPreference(const QString &hintingPreference)
     if (this->d->m_font.hintingPreference() == hp)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_font.setHintingPreference(hp);
     this->d->m_rain.clear();
+    this->d->m_mutex.unlock();
     emit hintingPreferenceChanged(hintingPreference);
 }
 
@@ -404,9 +458,10 @@ void MatrixElement::setStyleStrategy(const QString &styleStrategy)
     if (this->d->m_font.styleStrategy() == ss)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_font.setStyleStrategy(ss);
     this->d->m_rain.clear();
+    this->d->m_mutex.unlock();
     emit styleStrategyChanged(styleStrategy);
 }
 
@@ -415,8 +470,9 @@ void MatrixElement::setCursorColor(QRgb cursorColor)
     if (this->d->m_cursorColor == cursorColor)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_cursorColor = cursorColor;
+    this->d->m_mutex.unlock();
     emit this->cursorColorChanged(cursorColor);
 }
 
@@ -425,8 +481,9 @@ void MatrixElement::setForegroundColor(QRgb foregroundColor)
     if (this->d->m_foregroundColor == foregroundColor)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_foregroundColor = foregroundColor;
+    this->d->m_mutex.unlock();
     emit this->foregroundColorChanged(foregroundColor);
 }
 
@@ -435,8 +492,9 @@ void MatrixElement::setBackgroundColor(QRgb backgroundColor)
     if (this->d->m_backgroundColor == backgroundColor)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_backgroundColor = backgroundColor;
+    this->d->m_mutex.unlock();
     emit this->backgroundColorChanged(backgroundColor);
 }
 
@@ -445,8 +503,9 @@ void MatrixElement::setMinDropLength(int minDropLength)
     if (this->d->m_minDropLength == minDropLength)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_minDropLength = minDropLength;
+    this->d->m_mutex.unlock();
     emit this->minDropLengthChanged(minDropLength);
 }
 
@@ -455,8 +514,9 @@ void MatrixElement::setMaxDropLength(int maxDropLength)
     if (this->d->m_maxDropLength == maxDropLength)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_maxDropLength = maxDropLength;
+    this->d->m_mutex.unlock();
     emit this->maxDropLengthChanged(maxDropLength);
 }
 
@@ -465,8 +525,9 @@ void MatrixElement::setMinSpeed(qreal minSpeed)
     if (qFuzzyCompare(this->d->m_minSpeed, minSpeed))
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_minSpeed = minSpeed;
+    this->d->m_mutex.unlock();
     emit this->minSpeedChanged(minSpeed);
 }
 
@@ -475,8 +536,9 @@ void MatrixElement::setMaxSpeed(qreal maxSpeed)
     if (qFuzzyCompare(this->d->m_maxSpeed, maxSpeed))
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_maxSpeed = maxSpeed;
+    this->d->m_mutex.unlock();
     emit this->maxSpeedChanged(maxSpeed);
 }
 
@@ -485,8 +547,9 @@ void MatrixElement::setShowCursor(bool showCursor)
     if (this->d->m_showCursor == showCursor)
         return;
 
-    QMutexLocker locker(&this->d->m_mutex);
+    this->d->m_mutex.lock();
     this->d->m_showCursor = showCursor;
+    this->d->m_mutex.unlock();
     emit this->showCursorChanged(showCursor);
 }
 
@@ -558,58 +621,6 @@ void MatrixElement::resetMaxSpeed()
 void MatrixElement::resetShowCursor()
 {
     this->setShowCursor(false);
-}
-
-AkPacket MatrixElement::iStream(const AkPacket &packet)
-{
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
-
-    if (src.isNull())
-        return AkPacket();
-
-    src = src.convertToFormat(QImage::Format_RGB32);
-
-    this->d->m_mutex.lock();
-    int textWidth = src.width() / this->d->m_fontSize.width();
-    int textHeight = src.height() / this->d->m_fontSize.height();
-
-    int outWidth = textWidth * this->d->m_fontSize.width();
-    int outHeight = textHeight * this->d->m_fontSize.height();
-
-    QImage oFrame(outWidth, outHeight, src.format());
-
-    QList<Character> characters(this->d->m_characters);
-    this->d->m_mutex.unlock();
-
-    if (characters.size() < 256) {
-        oFrame.fill(this->d->m_backgroundColor);
-        auto oPacket = AkVideoPacket::fromImage(oFrame.scaled(src.size()),
-                                                videoPacket).toPacket();
-        akSend(oPacket)
-    }
-
-    QImage textImage = src.scaled(textWidth, textHeight);
-    QRgb *textImageBits = reinterpret_cast<QRgb *>(textImage.bits());
-    int textArea = textImage.width() * textImage.height();
-    QPainter painter;
-
-    painter.begin(&oFrame);
-
-    for (int i = 0; i < textArea; i++) {
-        int x = this->d->m_fontSize.width() * (i % textWidth);
-        int y = this->d->m_fontSize.height() * (i / textWidth);
-
-        Character chr = characters[qGray(textImageBits[i])];
-        painter.drawImage(x, y, chr.image);
-        textImageBits[i] = chr.foreground;
-    }
-
-    painter.drawImage(0, 0, this->d->renderRain(oFrame.size(), textImage));
-    painter.end();
-
-    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
-    akSend(oPacket)
 }
 
 void MatrixElement::updateCharTable()

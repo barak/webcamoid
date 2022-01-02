@@ -28,14 +28,16 @@ import sys
 import tarfile
 import threading
 
-import deploy_base
-import tools.binary_elf
-import tools.qt5
+from WebcamoidDeployTools import DTDeployBase
+from WebcamoidDeployTools import DTQt5
+from WebcamoidDeployTools import DTBinaryElf
 
 
-class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
+class Deploy(DTDeployBase.DeployBase, DTQt5.Qt5Tools):
     def __init__(self):
         super().__init__()
+        rootDir = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
+        self.setRootDir(rootDir)
         self.installDir = os.path.join(self.buildDir, 'ports/deploy/temp_priv')
         self.pkgsDir = os.path.join(self.buildDir, 'ports/deploy/packages_auto', sys.platform)
         self.detectQt(os.path.join(self.buildDir, 'StandAlone'))
@@ -59,9 +61,15 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         self.programName = os.path.basename(self.mainBinary)
         self.programVersion = self.detectVersion(os.path.join(self.rootDir, 'commons.pri'))
         self.detectMake()
-        self.targetSystem = 'posix_windows' if 'win32' in self.qmakeQuery(var='QMAKE_XSPEC') else 'posix'
-        self.binarySolver = tools.binary_elf.DeployToolsBinary()
-        self.binarySolver.readExcludeList(os.path.join(self.rootDir, 'ports/deploy/exclude.{}.{}.txt'.format(os.name, sys.platform)))
+        xspec = self.qmakeQuery(var='QMAKE_XSPEC')
+
+        if 'win32' in xspec:
+            self.targetSystem = 'posix_windows'
+        elif 'android' in xspec:
+            self.targetSystem = 'android'
+
+        self.binarySolver = DTBinaryElf.ElfBinaryTools()
+        self.binarySolver.readExcludes(os.name, sys.platform)
         self.packageConfig = os.path.join(self.rootDir, 'ports/deploy/package_info.conf')
         self.dependencies = []
         self.installerConfig = os.path.join(self.installDir, 'installer/config')
@@ -100,13 +108,16 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
         for dep in deps:
             depPath = os.path.join(self.libInstallDir, os.path.basename(dep))
-            print('    {} -> {}'.format(dep, depPath))
-            self.copy(dep, depPath, True)
-            self.dependencies.append(dep)
+
+            if dep != depPath:
+                print('    {} -> {}'.format(dep, depPath))
+                self.copy(dep, depPath, True)
+                self.dependencies.append(dep)
 
     def prepare(self):
         print('Executing make install')
-        self.makeInstall(self.buildDir, self.installDir)
+        params = {'INSTALL_ROOT': self.installDir}
+        self.makeInstall(self.buildDir, params)
         self.detectTargetArch()
         self.appImage = self.detectAppImage()
         print('Copying Qml modules\n')
@@ -206,21 +217,6 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
         return ''
 
-    def commitHash(self):
-        try:
-            process = subprocess.Popen(['git', 'rev-parse', 'HEAD'], # nosec
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE,
-                                        cwd=self.rootDir)
-            stdout, _ = process.communicate()
-
-            if process.returncode != 0:
-                return ''
-
-            return stdout.decode(sys.getdefaultencoding()).strip()
-        except:
-            return ''
-
     @staticmethod
     def sysInfo():
         info = ''
@@ -237,6 +233,12 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
 
     def writeBuildInfo(self):
         shareDir = os.path.join(self.rootInstallDir, 'share')
+
+        try:
+            os.makedirs(self.pkgsDir)
+        except:
+            pass
+
         depsInfoFile = os.path.join(shareDir, 'build-info.txt')
 
         if not os.path.exists(shareDir):
@@ -245,7 +247,7 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         # Write repository info.
 
         with open(depsInfoFile, 'w') as f:
-            commitHash = self.commitHash()
+            commitHash = self.gitCommitHash(self.rootDir)
 
             if len(commitHash) < 1:
                 commitHash = 'Unknown'
@@ -463,12 +465,18 @@ class Deploy(deploy_base.DeployBase, tools.qt5.DeployToolsQt):
         mutex = threading.Lock()
 
         threads = [threading.Thread(target=self.createPortable, args=(mutex,))]
+        packagingTools = ['tar.xz']
 
         if self.qtIFW != '':
             threads.append(threading.Thread(target=self.createAppInstaller, args=(mutex,)))
+            packagingTools += ['Qt Installer Framework']
 
         if self.appImage != '':
             threads.append(threading.Thread(target=self.createAppImage, args=(mutex,)))
+            packagingTools += ['AppImage']
+
+        if len(packagingTools) > 0:
+            print('Detected packaging tools: {}\n'.format(', '.join(packagingTools)))
 
         for thread in threads:
             thread.start()

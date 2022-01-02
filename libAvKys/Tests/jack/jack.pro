@@ -16,7 +16,9 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-macx: QT_CONFIG -= no-pkg-config
+include(../tests.pri)
+
+macx | android: QT_CONFIG -= no-pkg-config
 
 SOURCES = \
     test.cpp
@@ -24,4 +26,5 @@ SOURCES = \
 CONFIG += link_pkgconfig
 PKGCONFIG += jack
 
+DESTDIR = $${OUT_PWD}/$${BIN_DIR}
 TARGET = test_auto

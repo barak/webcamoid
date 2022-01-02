@@ -16,9 +16,9 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-CONFIG += console c++11
+include(../tests.pri)
 
-macx: QT_CONFIG -= no-pkg-config
+macx | android: QT_CONFIG -= no-pkg-config
 
 SOURCES = \
     test.cpp
@@ -33,4 +33,5 @@ isEmpty(LIBUSBLIBS): PKGCONFIG += libusb-1.0
 !isEmpty(LIBUVCLIBS): LIBS += $${LIBUVCLIBS}
 isEmpty(LIBUVCLIBS): PKGCONFIG += libuvc
 
+DESTDIR = $${OUT_PWD}/$${BIN_DIR}
 TARGET = test_auto

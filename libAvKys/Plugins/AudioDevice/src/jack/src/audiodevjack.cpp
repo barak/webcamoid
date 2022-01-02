@@ -68,6 +68,7 @@ class AudioDevJackPrivate
         QMutex m_mutex;
         QWaitCondition m_canWrite;
         QWaitCondition m_samplesAvailable;
+        int m_samples {0};
         int m_sampleRate {0};
         int m_curChannels {0};
         int m_maxBufferSize {0};
@@ -138,7 +139,7 @@ AudioDevJack::AudioDevJack(QObject *parent):
         if (channels > 0)
             this->d->m_caps[it.key()] =
                     AkAudioCaps(AkAudioCaps::SampleFormat_flt,
-                                channels,
+                                AkAudioCaps::defaultChannelLayout(qBound(1, channels, 2)),
                                 this->d->m_sampleRate);
     }
 }
@@ -200,12 +201,16 @@ QList<AkAudioCaps::SampleFormat> AudioDevJack::supportedFormats(const QString &d
     return QList<AkAudioCaps::SampleFormat> {AkAudioCaps::SampleFormat_flt};
 }
 
-QList<int> AudioDevJack::supportedChannels(const QString &device)
+QList<AkAudioCaps::ChannelLayout> AudioDevJack::supportedChannelLayouts(const QString &device)
 {
-    QList<int> supportedChannels;
+    QList<AkAudioCaps::ChannelLayout> supportedChannels;
 
-    for (int i = 0; i < this->d->m_devicePorts.value(device).size(); i++)
-        supportedChannels << i + 1;
+    for (int i = 0; i < this->d->m_devicePorts.value(device).size(); i++) {
+        auto layout = AkAudioCaps::defaultChannelLayout(i + 1);
+
+        if (layout != AkAudioCaps::Layout_none)
+            supportedChannels << layout;
+    }
 
     return supportedChannels;
 }
@@ -304,19 +309,17 @@ bool AudioDevJack::init(const QString &device, const AkAudioCaps &caps)
                              * uint(caps.channels())
                              * bufferSize);
     this->d->m_isInput = device == ":jackinput:";
+    this->d->m_samples = qMax(this->latency() * caps.rate() / 1000, 1);
 
     return true;
 }
 
-QByteArray AudioDevJack::read(int samples)
+QByteArray AudioDevJack::read()
 {
-    if (samples < 1)
-        return {};
-
     int bufferSize = 2
                      * int(sizeof(jack_default_audio_sample_t))
                      * this->d->m_curChannels
-                     * samples;
+                     * this->d->m_samples;
 
     QByteArray audioData;
 

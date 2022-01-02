@@ -17,11 +17,14 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QDateTime>
 #include <QImage>
+#include <QMutex>
 #include <QPainter>
 #include <QQmlContext>
-#include <QMutex>
+#include <QRandomGenerator>
 #include <QtMath>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "diceelement.h"
@@ -66,24 +69,9 @@ void DiceElement::controlInterfaceConfigure(QQmlContext *context,
     context->setContextProperty("controlId", this->objectName());
 }
 
-void DiceElement::setDiceSize(int diceSize)
+AkPacket DiceElement::iVideoStream(const AkVideoPacket &packet)
 {
-    if (this->d->m_diceSize == diceSize)
-        return;
-
-    this->d->m_diceSize = diceSize;
-    emit this->diceSizeChanged(diceSize);
-}
-
-void DiceElement::resetDiceSize()
-{
-    this->setDiceSize(24);
-}
-
-AkPacket DiceElement::iStream(const AkPacket &packet)
-{
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
+    auto src = packet.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -135,22 +123,35 @@ AkPacket DiceElement::iStream(const AkPacket &packet)
 
     painter.end();
 
-    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
+    auto oPacket = AkVideoPacket::fromImage(oFrame, packet);
     akSend(oPacket)
+}
+
+void DiceElement::setDiceSize(int diceSize)
+{
+    if (this->d->m_diceSize == diceSize)
+        return;
+
+    this->d->m_diceSize = diceSize;
+    emit this->diceSizeChanged(diceSize);
+}
+
+void DiceElement::resetDiceSize()
+{
+    this->setDiceSize(24);
 }
 
 void DiceElement::updateDiceMap()
 {
     int width = qCeil(this->d->m_frameSize.width() / qreal(this->d->m_diceSize));
     int height = qCeil(this->d->m_frameSize.height() / qreal(this->d->m_diceSize));
-
     QImage diceMap(width, height, QImage::Format_Grayscale8);
 
     for (int y = 0; y < diceMap.height(); y++) {
         auto oLine = reinterpret_cast<quint8 *>(diceMap.scanLine(y));
 
         for (int x = 0; x < diceMap.width(); x++)
-            oLine[x] = qrand() % 4;
+            oLine[x] = quint8(QRandomGenerator::global()->bounded(4));
     }
 
     this->d->m_diceMap = diceMap;

@@ -21,58 +21,65 @@
 
 #include "videocaptureglobals.h"
 
+class VideoCaptureGlobalsPrivate
+{
+    public:
+        QString m_codecLib;
+        QString m_captureLib;
+        QStringList m_preferredFramework;
+        QStringList m_preferredLibrary;
+
+        VideoCaptureGlobalsPrivate();
+};
+
 VideoCaptureGlobals::VideoCaptureGlobals(QObject *parent):
     QObject(parent)
 {
-    this->m_preferredFramework = QStringList {
-        "ffmpeg",
-        "gstreamer",
-    };
-
-    this->m_preferredLibrary = QStringList {
-#ifdef Q_OS_WIN32
-        "dshow",
-        "mediafoundation",
-        "libuvc",
-#elif defined(Q_OS_OSX)
-        "avfoundation",
-        "libuvc",
-#else
-        "v4lutils",
-        "v4l2sys",
-        "libuvc",
-#endif
-    };
-
+    this->d = new VideoCaptureGlobalsPrivate;
     this->resetCodecLib();
     this->resetCaptureLib();
 }
 
+VideoCaptureGlobals::~VideoCaptureGlobals()
+{
+    delete this->d;
+}
+
 QString VideoCaptureGlobals::codecLib() const
 {
-    return this->m_codecLib;
+    return this->d->m_codecLib;
 }
 
 QString VideoCaptureGlobals::captureLib() const
 {
-    return this->m_captureLib;
+    return this->d->m_captureLib;
+}
+
+QStringList VideoCaptureGlobals::codecSubModules() const
+{
+    return AkElement::listSubModules("VideoCapture", "convert");
+}
+
+QStringList VideoCaptureGlobals::captureSubModules() const
+{
+    return AkElement::listSubModules("VideoCapture", "capture");
 }
 
 void VideoCaptureGlobals::setCodecLib(const QString &codecLib)
 {
-    if (this->m_codecLib == codecLib)
+    if (this->d->m_codecLib == codecLib)
         return;
 
-    this->m_codecLib = codecLib;
+    this->d->m_codecLib = codecLib;
     emit this->codecLibChanged(codecLib);
 }
 
 void VideoCaptureGlobals::setCaptureLib(const QString &captureLib)
 {
-    if (this->m_captureLib == captureLib)
+    if (this->d->m_captureLib == captureLib)
         return;
 
-    this->m_captureLib = captureLib;
+    this->d->m_captureLib = captureLib;
     emit this->captureLibChanged(captureLib);
 }
 
@@ -80,14 +87,14 @@ void VideoCaptureGlobals::resetCodecLib()
 {
     auto subModules = AkElement::listSubModules("VideoCapture", "convert");
 
-    for (auto &framework: this->m_preferredFramework)
+    for (auto &framework: this->d->m_preferredFramework)
         if (subModules.contains(framework)) {
             this->setCodecLib(framework);
 
             return;
         }
 
-    if (this->m_codecLib.isEmpty() && !subModules.isEmpty())
+    if (this->d->m_codecLib.isEmpty() && !subModules.isEmpty())
         this->setCodecLib(subModules.first());
     else
         this->setCodecLib("");
@@ -97,15 +104,42 @@ void VideoCaptureGlobals::resetCaptureLib()
 {
     auto subModules = AkElement::listSubModules("VideoCapture", "capture");
 
-    for (auto &framework: this->m_preferredLibrary)
+    for (auto &framework: this->d->m_preferredLibrary)
         if (subModules.contains(framework)) {
             this->setCaptureLib(framework);
 
             return;
         }
 
-    if (this->m_codecLib.isEmpty() && !subModules.isEmpty())
+    if (this->d->m_codecLib.isEmpty() && !subModules.isEmpty())
         this->setCaptureLib(subModules.first());
     else
         this->setCaptureLib("");
 }
+
+VideoCaptureGlobalsPrivate::VideoCaptureGlobalsPrivate()
+{
+    this->m_preferredFramework = QStringList {
+        "ffmpeg",
+        "gstreamer",
+        "generic",
+    };
+
+    this->m_preferredLibrary = QStringList {
+#ifdef Q_OS_WIN32
+        "dshow",
+        "mediafoundation",
+#elif defined(Q_OS_OSX)
+        "avfoundation",
+#elif defined(Q_OS_ANDROID)
+        "androicamera",
+        "ndkcamera",
+#else
+        "v4lutils",
+        "v4l2sys",
+#endif
+        "libuvc",
+    };
+}
+
+#include "moc_videocaptureglobals.cpp"

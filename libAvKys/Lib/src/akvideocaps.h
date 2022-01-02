@@ -30,29 +30,51 @@
    | ((quint32(c) & 0xff) <<  8) \
    |  (quint32(d) & 0xff))
 
-#define AK_FOURCC_NULL AkFourCC('\x0', '\x0', '\x0', '\x0')
+inline quint32 AkFourCCS(const QString &fourcc)
+{
+    if (fourcc.size() != 4)
+        return 0;
+
+    return AkFourCC(fourcc[0].toLatin1(),
+                    fourcc[1].toLatin1(),
+                    fourcc[2].toLatin1(),
+                    fourcc[3].toLatin1());
+}
+
+#define AkFourCCR(a, b, c, d) \
+    (((quint32(d) & 0xff) << 24) \
+   | ((quint32(c) & 0xff) << 16) \
+   | ((quint32(b) & 0xff) <<  8) \
+   |  (quint32(a) & 0xff))
+
+inline quint32 AkFourCCRS(const QString &fourcc)
+{
+    if (fourcc.size() != 4)
+        return 0;
+
+    return AkFourCCR(fourcc[0].toLatin1(),
+                     fourcc[1].toLatin1(),
+                     fourcc[2].toLatin1(),
+                     fourcc[3].toLatin1());
+}
+
+#define AK_FOURCC_NULL AkFourCC(0, 0, 0, 0)
 
 class AkVideoCapsPrivate;
 class AkCaps;
 class AkFrac;
-class QDataStream;
 
 class AKCOMMONS_EXPORT AkVideoCaps: public QObject
 {
     Q_OBJECT
     Q_ENUMS(PixelFormat)
-    Q_PROPERTY(bool isValid
-               READ isValid)
     Q_PROPERTY(PixelFormat format
                READ format
                WRITE setFormat
                RESET resetFormat
                NOTIFY formatChanged)
     Q_PROPERTY(int bpp
-               READ bpp
-               WRITE setBpp
-               RESET resetBpp
-               NOTIFY bppChanged)
+               READ bpp)
     Q_PROPERTY(QSize size
                READ size
                WRITE setSize
@@ -73,14 +95,22 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
                WRITE setFps
                RESET resetFps
                NOTIFY fpsChanged)
-    Q_PROPERTY(int pictureSize
+    Q_PROPERTY(int align
+               READ align
+               WRITE setAlign
+               RESET resetAlign
+               NOTIFY alignChanged)
+    Q_PROPERTY(size_t pictureSize
                READ pictureSize)
+    Q_PROPERTY(int planes
+               READ planes)
 
     public:
         enum PixelFormat
         {
             Format_none = -1,
             Format_yuv420p,
+            Format_yvu420p,
             Format_yuyv422,
             Format_rgb24,
             Format_bgr24,
@@ -95,9 +125,8 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuvj420p,
             Format_yuvj422p,
             Format_yuvj444p,
-            Format_xvmcmc,
-            Format_xvmcidct,
             Format_uyvy422,
+            Format_vyuy422,
             Format_uyyvyy411,
             Format_bgr8,
             Format_bgr4,
@@ -116,34 +145,34 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuv440p,
             Format_yuvj440p,
             Format_yuva420p,
-            Format_vdpau_h264,
-            Format_vdpau_mpeg1,
-            Format_vdpau_mpeg2,
-            Format_vdpau_wmv3,
-            Format_vdpau_vc1,
             Format_rgb48be,
             Format_rgb48le,
             Format_rgb565be,
             Format_rgb565le,
             Format_rgb555be,
             Format_rgb555le,
+            Format_argb555be,
+            Format_argb555le,
             Format_bgr565be,
             Format_bgr565le,
             Format_bgr555be,
             Format_bgr555le,
-            Format_vaapi_moco,
-            Format_vaapi_idct,
-            Format_vaapi_vld,
+            Format_rgb666,
+            Format_argb1665,
+            Format_argb1666,
+            Format_bgr666,
+            Format_argb6666,
+            Format_abgr6666,
             Format_yuv420p16le,
             Format_yuv420p16be,
             Format_yuv422p16le,
             Format_yuv422p16be,
             Format_yuv444p16le,
             Format_yuv444p16be,
-            Format_vdpau_mpeg4,
-            Format_dxva2_vld,
             Format_rgb444le,
             Format_rgb444be,
+            Format_argb444be,
+            Format_argb444le,
             Format_bgr444le,
             Format_bgr444be,
             Format_ya8,
@@ -161,7 +190,6 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuv444p10le,
             Format_yuv422p9be,
             Format_yuv422p9le,
-            Format_vda_vld,
             Format_gbrp,
             Format_gbrp9be,
             Format_gbrp9le,
@@ -169,6 +197,8 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_gbrp10le,
             Format_gbrp16be,
             Format_gbrp16le,
+            Format_yuva422p,
+            Format_yuva444p,
             Format_yuva420p9be,
             Format_yuva420p9le,
             Format_yuva422p9be,
@@ -187,29 +217,25 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuva422p16le,
             Format_yuva444p16be,
             Format_yuva444p16le,
-            Format_vdpau,
             Format_xyz12le,
             Format_xyz12be,
             Format_nv16,
             Format_nv20le,
             Format_nv20be,
-            Format_yvyu422,
-            Format_vda,
-            Format_ya16be,
-            Format_ya16le,
-            Format_qsv,
-            Format_mmal,
-            Format_d3d11va_vld,
             Format_rgba64be,
             Format_rgba64le,
             Format_bgra64be,
             Format_bgra64le,
+            Format_yvyu422,
+            Format_ya16be,
+            Format_ya16le,
+            Format_gbrap,
+            Format_gbrap16be,
+            Format_gbrap16le,
             Format_0rgb,
             Format_rgb0,
             Format_0bgr,
             Format_bgr0,
-            Format_yuva444p,
-            Format_yuva422p,
             Format_yuv420p12be,
             Format_yuv420p12le,
             Format_yuv420p14be,
@@ -226,9 +252,6 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_gbrp12le,
             Format_gbrp14be,
             Format_gbrp14le,
-            Format_gbrap,
-            Format_gbrap16be,
-            Format_gbrap16le,
             Format_yuvj411p,
             Format_bayer_bggr8,
             Format_bayer_rggb8,
@@ -266,47 +289,60 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_gbrpf32le,
             Format_gbrapf32be,
             Format_gbrapf32le,
-            Format_v210,
-            Format_v216,
-            Format_v308
+            Format_gray14be,
+            Format_gray14le,
+            Format_grayf32be,
+            Format_grayf32le,
+            Format_rgbp,
+            Format_rgbap,
+            Format_argb1887,
+            Format_bgra1888,
+            Format_yuv444,
+            Format_gray2,
+            Format_gray4,
+            Format_gray24,
+            Format_gray32,
         };
 
         AkVideoCaps(QObject *parent=nullptr);
-        AkVideoCaps(const QVariantMap &caps);
-        AkVideoCaps(const QString &caps);
+        AkVideoCaps(PixelFormat format,
+                    int width,
+                    int height,
+                    const AkFrac &fps,
+                    int align=1);
+        AkVideoCaps(PixelFormat format,
+                    const QSize &size,
+                    const AkFrac &fps,
+                    int align=1);
         AkVideoCaps(const AkCaps &caps);
         AkVideoCaps(const AkVideoCaps &other);
         ~AkVideoCaps();
         AkVideoCaps &operator =(const AkVideoCaps &other);
         AkVideoCaps &operator =(const AkCaps &caps);
-        AkVideoCaps &operator =(const QString &caps);
         bool operator ==(const AkVideoCaps &other) const;
         bool operator !=(const AkVideoCaps &other) const;
         operator bool() const;
         operator AkCaps() const;
 
-        Q_INVOKABLE bool isValid() const;
-        Q_INVOKABLE bool &isValid();
         Q_INVOKABLE PixelFormat format() const;
-        Q_INVOKABLE PixelFormat &format();
         Q_INVOKABLE quint32 fourCC() const;
         Q_INVOKABLE int bpp() const;
-        Q_INVOKABLE int &bpp();
         Q_INVOKABLE QSize size() const;
         Q_INVOKABLE int width() const;
-        Q_INVOKABLE int &width();
         Q_INVOKABLE int height() const;
-        Q_INVOKABLE int &height();
         Q_INVOKABLE AkFrac fps() const;
         Q_INVOKABLE AkFrac &fps();
-        Q_INVOKABLE int pictureSize() const;
+        Q_INVOKABLE int align() const;
+        Q_INVOKABLE size_t pictureSize() const;
 
-        Q_INVOKABLE AkVideoCaps &fromMap(const QVariantMap &caps);
-        Q_INVOKABLE AkVideoCaps &fromString(const QString &caps);
+        Q_INVOKABLE static AkVideoCaps fromMap(const QVariantMap &caps);
         Q_INVOKABLE QVariantMap toMap() const;
-        Q_INVOKABLE QString toString() const;
         Q_INVOKABLE AkVideoCaps &update(const AkCaps &caps);
-        Q_INVOKABLE AkCaps toCaps() const;
+        Q_INVOKABLE size_t planeOffset(int plane) const;
+        Q_INVOKABLE size_t lineOffset(int plane, int y) const;
+        Q_INVOKABLE size_t bytesPerLine(int plane) const;
+        Q_INVOKABLE int planes() const;
+        Q_INVOKABLE size_t planeSize(int plane) const;
 
         Q_INVOKABLE static int bitsPerPixel(PixelFormat pixelFormat);
         Q_INVOKABLE static int bitsPerPixel(const QString &pixelFormat);
@@ -320,35 +356,32 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
 
     Q_SIGNALS:
         void formatChanged(PixelFormat format);
-        void bppChanged(int bpp);
         void sizeChanged(const QSize &size);
         void widthChanged(int width);
         void heightChanged(int height);
         void fpsChanged(const AkFrac &fps);
+        void alignChanged(int height);
 
     public Q_SLOTS:
         void setFormat(PixelFormat format);
-        void setBpp(int bpp);
         void setSize(const QSize &size);
         void setWidth(int width);
         void setHeight(int height);
         void setFps(const AkFrac &fps);
+        void setAlign(int align);
         void resetFormat();
-        void resetBpp();
         void resetSize();
         void resetWidth();
         void resetHeight();
         void resetFps();
+        void resetAlign();
         void clear();
-
-    friend QDebug operator <<(QDebug debug, const AkVideoCaps &caps);
-    friend QDataStream &operator >>(QDataStream &istream, AkVideoCaps &caps);
-    friend QDataStream &operator <<(QDataStream &ostream, const AkVideoCaps &caps);
 };
 
-QDebug operator <<(QDebug debug, const AkVideoCaps &caps);
-QDataStream &operator >>(QDataStream &istream, AkVideoCaps &caps);
-QDataStream &operator <<(QDataStream &ostream, const AkVideoCaps &caps);
+AKCOMMONS_EXPORT QDebug operator <<(QDebug debug, const AkVideoCaps &caps);
+AKCOMMONS_EXPORT QDebug operator <<(QDebug debug, AkVideoCaps::PixelFormat format);
+AKCOMMONS_EXPORT QDataStream &operator >>(QDataStream &istream, AkVideoCaps &caps);
+AKCOMMONS_EXPORT QDataStream &operator <<(QDataStream &ostream, const AkVideoCaps &caps);
 
 Q_DECLARE_METATYPE(AkVideoCaps)
 Q_DECLARE_METATYPE(AkVideoCaps::PixelFormat)

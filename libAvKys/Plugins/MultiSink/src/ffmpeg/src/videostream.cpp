@@ -91,16 +91,18 @@ VideoStream::VideoStream(const AVFormatContext *formatContext,
 
     AkVideoCaps videoCaps(configs["caps"].value<AkCaps>());
 
-    QString pixelFormat = AkVideoCaps::pixelFormatToString(videoCaps.format());
-    QStringList supportedPixelFormats = defaultCodecParams["supportedPixelFormats"].toStringList();
+    auto pixelFormat = AkVideoCaps::pixelFormatToString(videoCaps.format());
+    auto supportedPixelFormats =
+            defaultCodecParams["supportedPixelFormats"].toStringList();
 
-    if (!supportedPixelFormats.isEmpty() && !supportedPixelFormats.contains(pixelFormat)) {
-        QString defaultPixelFormat = defaultCodecParams["defaultPixelFormat"].toString();
-        videoCaps.format() = AkVideoCaps::pixelFormatFromString(defaultPixelFormat);
-        videoCaps.bpp() = AkVideoCaps::bitsPerPixel(videoCaps.format());
+    if (!supportedPixelFormats.isEmpty()
+        && !supportedPixelFormats.contains(pixelFormat)) {
+        auto defaultPixelFormat = defaultCodecParams["defaultPixelFormat"].toString();
+        videoCaps.setFormat(AkVideoCaps::pixelFormatFromString(defaultPixelFormat));
     }
 
-    QVariantList supportedFrameRates = defaultCodecParams["supportedFrameRates"].toList();
+    auto supportedFrameRates =
+            defaultCodecParams["supportedFrameRates"].toList();
 
     if (!supportedFrameRates.isEmpty()) {
         AkFrac frameRate;
@@ -139,20 +141,20 @@ VideoStream::VideoStream(const AVFormatContext *formatContext,
         videoCaps.setProperty("bitrate", QVariant());
         break;
     case AV_CODEC_ID_ROQ:
-        videoCaps.width() = int(qPow(2, qRound(qLn(videoCaps.width()) / qLn(2))));
-        videoCaps.height() = int(qPow(2, qRound(qLn(videoCaps.height()) / qLn(2))));
+        videoCaps.setWidth(int(qPow(2, qRound(qLn(videoCaps.width()) / qLn(2)))));
+        videoCaps.setHeight(int(qPow(2, qRound(qLn(videoCaps.height()) / qLn(2)))));
         videoCaps.fps() = AkFrac(qRound(videoCaps.fps().value()), 1);
         break;
     case AV_CODEC_ID_RV10:
-        videoCaps.width() = 16 * qRound(videoCaps.width() / 16.);
-        videoCaps.height() = 16 * qRound(videoCaps.height() / 16.);
+        videoCaps.setWidth(16 * qRound(videoCaps.width() / 16.));
+        videoCaps.setHeight(16 * qRound(videoCaps.height() / 16.));
         break;
     case AV_CODEC_ID_AMV:
-        videoCaps.height() = 16 * qRound(videoCaps.height() / 16.);
+        videoCaps.setHeight(16 * qRound(videoCaps.height() / 16.));
         break;
     case AV_CODEC_ID_XFACE:
-        videoCaps.width() = 48;
-        videoCaps.height() = 48;
+        videoCaps.setWidth(48);
+        videoCaps.setHeight(48);
         break;
     default:
         break;
@@ -161,7 +163,7 @@ VideoStream::VideoStream(const AVFormatContext *formatContext,
     if (!strcmp(formatContext->oformat->name, "gxf"))
         videoCaps = mediaWriter->nearestGXFCaps(videoCaps);
 
-    QString pixelFormatStr = AkVideoCaps::pixelFormatToString(videoCaps.format());
+    auto pixelFormatStr = AkVideoCaps::pixelFormatToString(videoCaps.format());
     codecContext->pix_fmt = av_get_pix_fmt(pixelFormatStr.toStdString().c_str());
     codecContext->width = videoCaps.width();
     codecContext->height = videoCaps.height();
@@ -217,7 +219,7 @@ void VideoStream::convertPacket(const AkPacket &packet)
     oFrame->height = codecContext->height;
     oFrame->pts = packet.pts();
 
-    AkVideoPacket videoPacket = packet;
+    AkVideoPacket videoPacket(packet);
     auto image = videoPacket.toImage();
     image = image.convertToFormat(QImage::Format_ARGB32);
     image = this->d->swapChannels(image);

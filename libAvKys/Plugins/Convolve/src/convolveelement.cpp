@@ -23,6 +23,7 @@
 #include <QImage>
 #include <QQmlContext>
 #include <akfrac.h>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "convolveelement.h"
@@ -94,81 +95,9 @@ void ConvolveElement::controlInterfaceConfigure(QQmlContext *context,
     context->setContextProperty("controlId", this->objectName());
 }
 
-void ConvolveElement::setKernel(const QVariantList &kernel)
+AkPacket ConvolveElement::iVideoStream(const AkVideoPacket &packet)
 {
-    QVector<int> k;
-
-    for (const QVariant &e: kernel)
-        k << e.toInt();
-
-    if (this->d->m_kernel == k)
-        return;
-
-    QMutexLocker locker(&this->d->m_mutex);
-    this->d->m_kernel = k;
-    emit this->kernelChanged(kernel);
-}
-
-void ConvolveElement::setKernelSize(const QSize &kernelSize)
-{
-    if (this->d->m_kernelSize == kernelSize)
-        return;
-
-    QMutexLocker locker(&this->d->m_mutex);
-    this->d->m_kernelSize = kernelSize;
-    emit this->kernelSizeChanged(kernelSize);
-}
-
-void ConvolveElement::setFactor(const AkFrac &factor)
-{
-    if (this->d->m_factor == factor)
-        return;
-
-    QMutexLocker locker(&this->d->m_mutex);
-    this->d->m_factor = factor;
-    emit this->factorChanged(factor);
-}
-
-void ConvolveElement::setBias(int bias)
-{
-    if (this->d->m_bias == bias)
-        return;
-
-    QMutexLocker locker(&this->d->m_mutex);
-    this->d->m_bias = bias;
-    emit this->biasChanged(bias);
-}
-
-void ConvolveElement::resetKernel()
-{
-    static const QVariantList kernel = {
-        0, 0, 0,
-        0, 1, 0,
-        0, 0, 0
-    };
-
-    this->setKernel(kernel);
-}
-
-void ConvolveElement::resetKernelSize()
-{
-    this->setKernelSize(QSize(3, 3));
-}
-
-void ConvolveElement::resetFactor()
-{
-    this->setFactor(AkFrac(1, 1));
-}
-
-void ConvolveElement::resetBias()
-{
-    this->setBias(0);
-}
-
-AkPacket ConvolveElement::iStream(const AkPacket &packet)
-{
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
+    auto src = packet.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -233,8 +162,83 @@ AkPacket ConvolveElement::iStream(const AkPacket &packet)
         }
     }
 
-    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
+    auto oPacket = AkVideoPacket::fromImage(oFrame, packet);
     akSend(oPacket)
+}
+
+void ConvolveElement::setKernel(const QVariantList &kernel)
+{
+    QVector<int> k;
+
+    for (const QVariant &e: kernel)
+        k << e.toInt();
+
+    if (this->d->m_kernel == k)
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_kernel = k;
+    this->d->m_mutex.unlock();
+    emit this->kernelChanged(kernel);
+}
+
+void ConvolveElement::setKernelSize(const QSize &kernelSize)
+{
+    if (this->d->m_kernelSize == kernelSize)
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_kernelSize = kernelSize;
+    this->d->m_mutex.unlock();
+    emit this->kernelSizeChanged(kernelSize);
+}
+
+void ConvolveElement::setFactor(const AkFrac &factor)
+{
+    if (this->d->m_factor == factor)
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_factor = factor;
+    this->d->m_mutex.unlock();
+    emit this->factorChanged(factor);
+}
+
+void ConvolveElement::setBias(int bias)
+{
+    if (this->d->m_bias == bias)
+        return;
+
+    this->d->m_mutex.lock();
+    this->d->m_bias = bias;
+    this->d->m_mutex.unlock();
+    emit this->biasChanged(bias);
+}
+
+void ConvolveElement::resetKernel()
+{
+    static const QVariantList kernel = {
+        0, 0, 0,
+        0, 1, 0,
+        0, 0, 0
+    };
+
+    this->setKernel(kernel);
+}
+
+void ConvolveElement::resetKernelSize()
+{
+    this->setKernelSize(QSize(3, 3));
+}
+
+void ConvolveElement::resetFactor()
+{
+    this->setFactor(AkFrac(1, 1));
+}
+
+void ConvolveElement::resetBias()
+{
+    this->setBias(0);
 }
 
 #include "moc_convolveelement.cpp"

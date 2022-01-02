@@ -21,14 +21,14 @@
 #define AUDIOLAYER_H
 
 #include <akelement.h>
+#include <akaudiocaps.h>
 
 class AudioLayerPrivate;
 class AudioLayer;
-class AkCaps;
 class AkAudioCaps;
 class QQmlApplicationEngine;
 
-typedef QSharedPointer<AudioLayer> AudioLayerPtr;
+using AudioLayerPtr = QSharedPointer<AudioLayer>;
 
 class AudioLayer: public QObject
 {
@@ -49,20 +49,20 @@ class AudioLayer: public QObject
     Q_PROPERTY(QStringList outputs
                READ outputs
                NOTIFY outputsChanged)
-    Q_PROPERTY(AkCaps inputCaps
+    Q_PROPERTY(AkAudioCaps inputCaps
                READ inputCaps
                WRITE setInputCaps
                RESET resetInputCaps
                NOTIFY inputCapsChanged)
-    Q_PROPERTY(AkCaps outputCaps
+    Q_PROPERTY(AkAudioCaps outputCaps
                READ outputCaps
                NOTIFY outputCapsChanged)
-    Q_PROPERTY(AkCaps inputDeviceCaps
+    Q_PROPERTY(AkAudioCaps inputDeviceCaps
                READ inputDeviceCaps
                WRITE setInputDeviceCaps
                RESET resetInputDeviceCaps
                NOTIFY inputDeviceCapsChanged)
-    Q_PROPERTY(AkCaps outputDeviceCaps
+    Q_PROPERTY(AkAudioCaps outputDeviceCaps
                READ outputDeviceCaps
                WRITE setOutputDeviceCaps
                RESET resetOutputDeviceCaps
@@ -82,6 +82,16 @@ class AudioLayer: public QObject
                WRITE setInputState
                RESET resetInputState
                NOTIFY inputStateChanged)
+    Q_PROPERTY(int inputLatency
+               READ inputLatency
+               WRITE setInputLatency
+               RESET resetInputLatency
+               NOTIFY inputLatencyChanged)
+    Q_PROPERTY(int outputLatency
+               READ outputLatency
+               WRITE setOutputLatency
+               RESET resetOutputLatency
+               NOTIFY outputLatencyChanged)
 
     public:
         AudioLayer(QQmlApplicationEngine *engine=nullptr,
@@ -92,18 +102,20 @@ class AudioLayer: public QObject
         Q_INVOKABLE QString audioOutput() const;
         Q_INVOKABLE QStringList inputs() const;
         Q_INVOKABLE QStringList outputs() const;
-        Q_INVOKABLE AkCaps inputCaps() const;
-        Q_INVOKABLE AkCaps outputCaps() const;
-        Q_INVOKABLE AkCaps inputDeviceCaps() const;
-        Q_INVOKABLE AkCaps outputDeviceCaps() const;
+        Q_INVOKABLE AkAudioCaps inputCaps() const;
+        Q_INVOKABLE AkAudioCaps outputCaps() const;
+        Q_INVOKABLE AkAudioCaps inputDeviceCaps() const;
+        Q_INVOKABLE AkAudioCaps outputDeviceCaps() const;
         Q_INVOKABLE QString inputDescription() const;
         Q_INVOKABLE QString description(const QString &device) const;
         Q_INVOKABLE AkElement::ElementState inputState() const;
         Q_INVOKABLE AkElement::ElementState outputState() const;
+        Q_INVOKABLE int inputLatency() const;
+        Q_INVOKABLE int outputLatency() const;
         Q_INVOKABLE AkAudioCaps preferredFormat(const QString &device);
-        Q_INVOKABLE QStringList supportedFormats(const QString &device);
-        Q_INVOKABLE QList<int> supportedChannels(const QString &device);
-        Q_INVOKABLE QList<int> supportedSampleRates(const QString &device);
+        Q_INVOKABLE QList<AkAudioCaps::SampleFormat> supportedFormats(const QString &device) const;
+        Q_INVOKABLE QList<AkAudioCaps::ChannelLayout> supportedChannelLayouts(const QString &device) const;
+        Q_INVOKABLE QList<int> supportedSampleRates(const QString &device) const;
 
     private:
         AudioLayerPrivate *d;
@@ -113,24 +125,28 @@ class AudioLayer: public QObject
         void audioOutputChanged(const QString &audioOutput);
         void inputsChanged(const QStringList &inputs);
         void outputsChanged(const QStringList &outputs);
-        void inputCapsChanged(const AkCaps &inputCaps);
-        void outputCapsChanged(const AkCaps &outputCaps);
-        void inputDeviceCapsChanged(const AkCaps &inputDeviceCaps);
-        void outputDeviceCapsChanged(const AkCaps &outputDeviceCaps);
+        void inputCapsChanged(const AkAudioCaps &inputCaps);
+        void outputCapsChanged(const AkAudioCaps &outputCaps);
+        void inputDeviceCapsChanged(const AkAudioCaps &inputDeviceCaps);
+        void outputDeviceCapsChanged(const AkAudioCaps &outputDeviceCaps);
         void inputDescriptionChanged(const QString &inputDescription);
         void inputStateChanged(AkElement::ElementState inputState);
         void outputStateChanged(AkElement::ElementState outputState);
+        void inputLatencyChanged(int inputLatency);
+        void outputLatencyChanged(int outputLatency);
         void oStream(const AkPacket &packet);
 
     public slots:
         void setAudioInput(const QStringList &audioInput);
         void setAudioOutput(const QString &audioOutput);
-        void setInputCaps(const AkCaps &inputCaps);
-        void setInputDeviceCaps(const AkCaps &inputDeviceCaps);
-        void setOutputDeviceCaps(const AkCaps &outputDeviceCaps);
+        void setInputCaps(const AkAudioCaps &inputCaps);
+        void setInputDeviceCaps(const AkAudioCaps &inputDeviceCaps);
+        void setOutputDeviceCaps(const AkAudioCaps &outputDeviceCaps);
         void setInputDescription(const QString &inputDescription);
         void setInputState(AkElement::ElementState inputState);
         bool setOutputState(AkElement::ElementState outputState);
+        void setInputLatency(int inputLatency);
+        void setOutputLatency(int outputLatency);
         void resetAudioInput();
         void resetAudioOutput();
         void resetInputCaps();
@@ -139,6 +155,8 @@ class AudioLayer: public QObject
         void resetInputDescription();
         void resetInputState();
         void resetOutputState();
+        void resetInputLatency();
+        void resetOutputLatency();
         AkPacket iStream(const AkPacket &packet);
         void setQmlEngine(QQmlApplicationEngine *engine=nullptr);
 

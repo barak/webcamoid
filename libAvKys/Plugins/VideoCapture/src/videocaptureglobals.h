@@ -22,7 +22,9 @@
 
 #include <QObject>
 
-class VideoCaptureGlobals : public QObject
+class VideoCaptureGlobalsPrivate;
+
+class VideoCaptureGlobals: public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString codecLib
@@ -35,18 +37,22 @@ class VideoCaptureGlobals : public QObject
                WRITE setCaptureLib
                RESET resetCaptureLib
                NOTIFY captureLibChanged)
+    Q_PROPERTY(QStringList codecSubModules
+               READ codecSubModules)
+    Q_PROPERTY(QStringList captureSubModules
+               READ captureSubModules)
 
     public:
         VideoCaptureGlobals(QObject *parent=nullptr);
+        ~VideoCaptureGlobals();
 
         Q_INVOKABLE QString codecLib() const;
         Q_INVOKABLE QString captureLib() const;
+        Q_INVOKABLE QStringList codecSubModules() const;
+        Q_INVOKABLE QStringList captureSubModules() const;
 
     private:
-        QString m_codecLib;
-        QString m_captureLib;
-        QStringList m_preferredFramework;
-        QStringList m_preferredLibrary;
+        VideoCaptureGlobalsPrivate *d;
 
     signals:
         void codecLibChanged(const QString &codecLib);

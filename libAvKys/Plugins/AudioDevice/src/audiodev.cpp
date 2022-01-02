@@ -28,6 +28,7 @@ class AudioDevPrivate
 {
     public:
         QVector<int> m_commonSampleRates;
+        int m_latency {25};
 };
 
 AudioDev::AudioDev(QObject *parent):
@@ -56,69 +57,74 @@ AudioDev::~AudioDev()
     delete this->d;
 }
 
-QVector<int> &AudioDev::commonSampleRates()
+int AudioDev::latency() const
+{
+    return this->d->m_latency;
+}
+
+const QVector<int> &AudioDev::commonSampleRates() const
 {
     return this->d->m_commonSampleRates;
 }
 
 QString AudioDev::error() const
 {
-    return QString();
+    return {};
 }
 
 QString AudioDev::defaultInput()
 {
-    return QString();
+    return {};
 }
 
 QString AudioDev::defaultOutput()
 {
-    return QString();
+    return {};
 }
 
 QStringList AudioDev::inputs()
 {
-    return QStringList();
+    return {};
 }
 
 QStringList AudioDev::outputs()
 {
-    return QStringList();
+    return {};
 }
 
 QString AudioDev::description(const QString &device)
 {
     Q_UNUSED(device)
 
-    return QString();
+    return {};
 }
 
 AkAudioCaps AudioDev::preferredFormat(const QString &device)
 {
     Q_UNUSED(device)
 
-    return AkAudioCaps();
+    return {};
 }
 
 QList<AkAudioCaps::SampleFormat> AudioDev::supportedFormats(const QString &device)
 {
     Q_UNUSED(device)
 
-    return QList<AkAudioCaps::SampleFormat>();
+    return {};
 }
 
-QList<int> AudioDev::supportedChannels(const QString &device)
+QList<AkAudioCaps::ChannelLayout> AudioDev::supportedChannelLayouts(const QString &device)
 {
     Q_UNUSED(device)
 
-    return QList<int>();
+    return {AkAudioCaps::Layout_mono, AkAudioCaps::Layout_stereo};
 }
 
 QList<int> AudioDev::supportedSampleRates(const QString &device)
 {
     Q_UNUSED(device)
 
-    return QList<int>();
+    return {};
 }
 
 bool AudioDev::init(const QString &device, const AkAudioCaps &caps)
@@ -129,11 +135,9 @@ bool AudioDev::init(const QString &device, const AkAudioCaps &caps)
     return false;
 }
 
-QByteArray AudioDev::read(int samples)
+QByteArray AudioDev::read()
 {
-    Q_UNUSED(samples)
-
-    return QByteArray();
+    return {};
 }
 
 bool AudioDev::write(const AkAudioPacket &packet)
@@ -146,6 +150,20 @@ bool AudioDev::write(const AkAudioPacket &packet)
 bool AudioDev::uninit()
 {
     return true;
+}
+
+void AudioDev::setLatency(int latency)
+{
+    if (this->d->m_latency == latency)
+        return;
+
+    this->d->m_latency = latency;
+    Q_EMIT this->latencyChanged(latency);
+}
+
+void AudioDev::resetLatency()
+{
+    this->setLatency(25);
 }
 
 #include "moc_audiodev.cpp"

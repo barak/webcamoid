@@ -26,7 +26,7 @@ class ConvertVideo;
 class AkCaps;
 class AkPacket;
 
-typedef QSharedPointer<ConvertVideo> ConvertVideoPtr;
+using ConvertVideoPtr = QSharedPointer<ConvertVideo>;
 
 class ConvertVideo: public QObject
 {

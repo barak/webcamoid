@@ -40,7 +40,7 @@ fi
 
 BUILDSCRIPT=dockerbuild.sh
 
-if [ "${DOCKERIMG}" = ubuntu:xenial ]; then
+if [ "${DOCKERIMG}" = ubuntu:bionic ]; then
     cat << EOF > ${BUILDSCRIPT}
 #!/bin/sh
 
@@ -51,11 +51,30 @@ EOF
 fi
 
 if [ "${ANDROID_BUILD}" = 1 ]; then
-    export PATH=$PWD/build/Qt/${QTVER}/android_${TARGET_ARCH}/bin:$PATH
-    export ANDROID_NDK_ROOT=$PWD/build/android-ndk-${NDKVER}
-    qmake -query
-    qmake -spec ${COMPILESPEC} Webcamoid.pro \
-        CONFIG+=silent
+    export JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:bin/java::')
+    export ANDROID_HOME="${PWD}/build/android-sdk"
+    export ANDROID_NDK="${PWD}/build/android-ndk"
+    export ANDROID_NDK_HOME=${ANDROID_NDK}
+    export ANDROID_NDK_PLATFORM=android-${ANDROID_PLATFORM}
+    export ANDROID_NDK_ROOT=${ANDROID_NDK}
+    export ANDROID_SDK_ROOT=${ANDROID_HOME}
+    export PATH="${JAVA_HOME}/bin/java:${PATH}"
+    export PATH="$PATH:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin"
+    export PATH="${PATH}:${ANDROID_HOME}/platform-tools"
+    export PATH="${PATH}:${ANDROID_HOME}/emulator"
+    export PATH="${PATH}:${ANDROID_NDK}"
+    export ORIG_PATH="${PATH}"
+
+    for arch_ in $(echo "${TARGET_ARCH}" | tr ":" "\n"); do
+        export PATH="${PWD}/build/Qt/${QTVER_ANDROID}/android/bin:${ORIG_PATH}"
+        mkdir build-webcamoid-${arch_}
+        cd build-webcamoid-${arch_}
+        qmake -query
+        qmake -spec ${COMPILESPEC} ../Webcamoid.pro \
+            CONFIG+=silent \
+            ANDROID_ABIS=${arch_}
+        cd ..
+    done
 elif [ "${ARCH_ROOT_BUILD}" = 1 ]; then
     sudo mount --bind root.x86_64 root.x86_64
     sudo mount --bind $HOME root.x86_64/$HOME
@@ -94,7 +113,7 @@ elif [ "${TRAVIS_OS_NAME}" = linux ]; then
     export PATH=$HOME/.local/bin:$PATH
 
     if [ "${DOCKERSYS}" = debian ]; then
-        if [ "${DOCKERIMG}" = ubuntu:xenial ]; then
+        if [ "${DOCKERIMG}" = ubuntu:bionic ]; then
             if [ -z "${DAILY_BUILD}" ] && [ -z "${RELEASE_BUILD}" ]; then
                 cat << EOF >> ${BUILDSCRIPT}
 #!/bin/sh
@@ -113,6 +132,7 @@ qmake -spec ${COMPILESPEC} Webcamoid.pro \
     CONFIG+=silent \
     QMAKE_CXX="${COMPILER}" \
     NOGSTREAMER=1 \
+    NOLIBAVDEVICE=1 \
     NOQTAUDIO=1
 EOF
             fi
@@ -153,7 +173,14 @@ if [ -z "${NJOBS}" ]; then
     NJOBS=4
 fi
 
-if [ "${ARCH_ROOT_BUILD}" = 1 ]; then
+if [ "${ANDROID_BUILD}" = 1 ]; then
+    for arch_ in $(echo "${TARGET_ARCH}" | tr ":" "\n"); do
+        export PATH="${PWD}/build/Qt/${QTVER_ANDROID}/android/bin:${ORIG_PATH}"
+        cd build-webcamoid-${arch_}
+        make -j${NJOBS}
+        cd ..
+    done
+elif [ "${ARCH_ROOT_BUILD}" = 1 ]; then
     cat << EOF > ${BUILDSCRIPT}
 #!/bin/sh
 
@@ -179,50 +206,4 @@ EOF
     sudo umount root.x86_64
 else
     ${EXEC} make -j${NJOBS}
-fi
-
-if [ "${ARCH_ROOT_BUILD}" = 1 ] && [ ! -z "${ARCH_ROOT_MINGW}" ]; then
-    if [ "$ARCH_ROOT_MINGW" = x86_64 ]; then
-        mingw_arch=i686
-        mingw_compiler=${COMPILER/x86_64/i686}
-        mingw_dstdir=x86
-    else
-        mingw_arch=x86_64
-        mingw_compiler=${COMPILER/i686/x86_64}
-        mingw_dstdir=x64
-    fi
-
-    echo
-    echo "Building $mingw_arch virtual camera driver"
-    echo
-    sudo mount --bind root.x86_64 root.x86_64
-    sudo mount --bind $HOME root.x86_64/$HOME
-
-    cat << EOF > ${BUILDSCRIPT}
-#!/bin/sh
-
-export LC_ALL=C
-export HOME=$HOME
-mkdir -p $TRAVIS_BUILD_DIR/akvcam
-cd $TRAVIS_BUILD_DIR/akvcam
-/usr/${mingw_arch}-w64-mingw32/lib/qt/bin/qmake \
-    -spec ${COMPILESPEC} \
-    ../libAvKys/Plugins/VirtualCamera/VirtualCamera.pro \
-    CONFIG+=silent \
-    QMAKE_CXX="${mingw_compiler}" \
-    VIRTUALCAMERAONLY=1
-make -j${NJOBS}
-EOF
-    chmod +x ${BUILDSCRIPT}
-    sudo cp -vf ${BUILDSCRIPT} root.x86_64/$HOME/
-
-    ${EXEC} bash $HOME/${BUILDSCRIPT}
-
-    sudo mkdir -p libAvKys/Plugins/VirtualCamera/src/dshow/VirtualCamera/AkVirtualCamera.plugin/${mingw_dstdir}
-    sudo cp -rvf \
-        akvcam/src/dshow/VirtualCamera/AkVirtualCamera.plugin/${mingw_dstdir}/* \
-        libAvKys/Plugins/VirtualCamera/src/dshow/VirtualCamera/AkVirtualCamera.plugin/${mingw_dstdir}/
-
-    sudo umount root.x86_64/$HOME
-    sudo umount root.x86_64
 fi

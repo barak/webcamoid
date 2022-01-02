@@ -27,8 +27,8 @@
 #include <QQmlProperty>
 #include <QQmlApplicationEngine>
 #include <akcaps.h>
-#include <akaudiocaps.h>
 #include <akpacket.h>
+#include <akplugin.h>
 
 #include "audiolayer.h"
 
@@ -36,18 +36,32 @@
 #define EXTERNAL_MEDIA_INPUT ":externalinput:"
 #define MAX_SAMPLE_RATE 512e3
 
+using ObjectPtr = QSharedPointer<QObject>;
+
 class AudioLayerPrivate
 {
     public:
         QQmlApplicationEngine *m_engine {nullptr};
         QStringList m_audioInput;
         QStringList m_inputs;
-        AkCaps m_inputCaps;
-        AkCaps m_outputCaps;
+        AkAudioCaps m_inputCaps;
+        AkAudioCaps m_outputCaps;
         QString m_inputDescription;
         AkElementPtr m_audioOut {AkElement::create("AudioDevice")};
+        ObjectPtr m_audioOutSettings {
+            AkElement::create<QObject>("AudioDevice",
+                                       AK_PLUGIN_TYPE_ELEMENT_SETTINGS)
+        };
         AkElementPtr m_audioIn {AkElement::create("AudioDevice")};
+        ObjectPtr m_audioInSettings {
+            AkElement::create<QObject>("AudioDevice",
+                                       AK_PLUGIN_TYPE_ELEMENT_SETTINGS)
+        };
         AkElementPtr m_audioConvert {AkElement::create("ACapsConvert")};
+        ObjectPtr m_audioConvertSettings {
+            AkElement::create<QObject>("ACapsConvert",
+                                       AK_PLUGIN_TYPE_ELEMENT_SETTINGS)
+        };
         AkElementPtr m_audioGenerator {AkElement::create("AudioGen")};
         AkElementPtr m_audioSwitch {AkElement::create("Multiplex")};
         QMutex m_mutex;
@@ -87,9 +101,9 @@ AudioLayer::AudioLayer(QQmlApplicationEngine *engine, QObject *parent):
                          this,
                          SIGNAL(audioOutputChanged(const QString &)));
         QObject::connect(this->d->m_audioOut.data(),
-                         SIGNAL(capsChanged(const AkCaps &)),
+                         SIGNAL(capsChanged(const AkAudioCaps &)),
                          this,
-                         SIGNAL(outputDeviceCapsChanged(const AkCaps &)));
+                         SIGNAL(outputDeviceCapsChanged(const AkAudioCaps &)));
         QObject::connect(this->d->m_audioOut.data(),
                          SIGNAL(outputsChanged(const QStringList &)),
                          this,
@@ -98,6 +112,10 @@ AudioLayer::AudioLayer(QQmlApplicationEngine *engine, QObject *parent):
                          SIGNAL(stateChanged(AkElement::ElementState)),
                          this,
                          SIGNAL(outputStateChanged(AkElement::ElementState)));
+        QObject::connect(this->d->m_audioOut.data(),
+                         SIGNAL(latencyChanged(int)),
+                         this,
+                         SIGNAL(outputLatencyChanged(int)));
     }
 
     if (this->d->m_audioIn) {
@@ -112,22 +130,26 @@ AudioLayer::AudioLayer(QQmlApplicationEngine *engine, QObject *parent):
                          SIGNAL(inputsChanged(const QStringList &)),
                          this,
                          SLOT(privInputsChanged(const QStringList &)));
-    }
-
-    if (this->d->m_audioOut) {
-        QObject::connect(this->d->m_audioOut.data(),
-                         SIGNAL(audioLibChanged(const QString &)),
-                         this,
-                         SLOT(saveAudioDeviceAudioLib(const QString &)));
-    } else if (this->d->m_audioIn) {
         QObject::connect(this->d->m_audioIn.data(),
+                         SIGNAL(latencyChanged(int)),
+                         this,
+                         SIGNAL(inputLatencyChanged(int)));
+    }
+
+    if (this->d->m_audioOutSettings) {
+        QObject::connect(this->d->m_audioOutSettings.data(),
+                         SIGNAL(audioLibChanged(const QString &)),
+                         this,
+                         SLOT(saveAudioDeviceAudioLib(const QString &)));
+    } else if (this->d->m_audioInSettings) {
+        QObject::connect(this->d->m_audioInSettings.data(),
                          SIGNAL(audioLibChanged(const QString &)),
                          this,
                          SLOT(saveAudioDeviceAudioLib(const QString &)));
     }
 
-    if (this->d->m_audioConvert) {
-        QObject::connect(this->d->m_audioConvert.data(),
+    if (this->d->m_audioConvertSettings) {
+        QObject::connect(this->d->m_audioConvertSettings.data(),
                          SIGNAL(convertLibChanged(const QString &)),
                          this,
                          SLOT(saveAudioConvertConvertLib(const QString &)));
@@ -214,50 +236,47 @@ QStringList AudioLayer::outputs() const
     return QStringList();
 }
 
-AkCaps AudioLayer::inputCaps() const
+AkAudioCaps AudioLayer::inputCaps() const
 {
     return this->d->m_inputCaps;
 }
 
-AkCaps AudioLayer::outputCaps() const
+AkAudioCaps AudioLayer::outputCaps() const
 {
     if (this->d->m_audioInput.contains(EXTERNAL_MEDIA_INPUT)) {
         if (this->d->m_inputCaps)
             return this->d->m_inputCaps;
 
-        AkCaps caps;
-
         if (this->d->m_audioGenerator)
-            caps = this->d->m_audioGenerator->property("caps").toString();
+            return this->d->m_audioGenerator->property("caps").value<AkAudioCaps>();
 
-        return caps;
+        return {};
     }
 
     if (this->d->m_audioInput.contains(DUMMY_INPUT_DEVICE)) {
-        AkCaps caps;
-
         if (this->d->m_audioGenerator)
-            caps = this->d->m_audioGenerator->property("caps").toString();
+            return this->d->m_audioGenerator->property("caps").value<AkAudioCaps>();
 
-        return caps;
+        return {};
     }
 
-    return this->d->m_audioIn?
-                this->d->m_audioIn->property("caps").value<AkCaps>():
-                AkCaps();
+    if (this->d->m_audioIn)
+        return this->d->m_audioIn->property("caps").value<AkAudioCaps>();
+
+    return {};
 }
 
-AkCaps AudioLayer::inputDeviceCaps() const
+AkAudioCaps AudioLayer::inputDeviceCaps() const
 {
     return this->outputCaps();
 }
 
-AkCaps AudioLayer::outputDeviceCaps() const
+AkAudioCaps AudioLayer::outputDeviceCaps() const
 {
     if (this->d->m_audioOut)
-        return this->d->m_audioOut->property("caps").value<AkCaps>();
+        return this->d->m_audioOut->property("caps").value<AkAudioCaps>();
 
-    return AkCaps();
+    return {};
 }
 
 QString AudioLayer::inputDescription() const
@@ -300,10 +319,28 @@ AkElement::ElementState AudioLayer::outputState() const
     return AkElement::ElementStateNull;
 }
 
+int AudioLayer::inputLatency() const
+{
+    if (this->d->m_audioIn)
+        return this->d->m_audioIn->property("latency").toInt();
+
+    return 1;
+}
+
+int AudioLayer::outputLatency() const
+{
+    if (this->d->m_audioOut)
+        return this->d->m_audioOut->property("latency").toInt();
+
+    return 1;
+}
+
 AkAudioCaps AudioLayer::preferredFormat(const QString &device)
 {
     if (device == DUMMY_INPUT_DEVICE)
-        return AkAudioCaps(AkAudioCaps::SampleFormat_s16, 1, 8000);
+        return AkAudioCaps(AkAudioCaps::SampleFormat_s16,
+                           AkAudioCaps::Layout_mono,
+                           8000);
 
     if (device == EXTERNAL_MEDIA_INPUT) {
         if (this->d->m_inputCaps)
@@ -312,7 +349,7 @@ AkAudioCaps AudioLayer::preferredFormat(const QString &device)
         AkAudioCaps caps;
 
         if (this->d->m_audioGenerator)
-            caps = this->d->m_audioGenerator->property("caps").toString();
+            caps = this->d->m_audioGenerator->property("caps").value<AkAudioCaps>();
 
         return caps;
     }
@@ -330,10 +367,15 @@ AkAudioCaps AudioLayer::preferredFormat(const QString &device)
     return AkAudioCaps();
 }
 
-QStringList AudioLayer::supportedFormats(const QString &device)
+QList<AkAudioCaps::SampleFormat> AudioLayer::supportedFormats(const QString &device) const
 {
     if (device == DUMMY_INPUT_DEVICE)
-        return QStringList {"flt", "s32", "s16", "u8"};
+        return {
+            AkAudioCaps::SampleFormat_s32,
+            AkAudioCaps::SampleFormat_s16,
+            AkAudioCaps::SampleFormat_flt,
+            AkAudioCaps::SampleFormat_u8,
+        };
 
     if (device == EXTERNAL_MEDIA_INPUT) {
         AkAudioCaps caps;
@@ -341,10 +383,10 @@ QStringList AudioLayer::supportedFormats(const QString &device)
         if (this->d->m_inputCaps)
             caps = this->d->m_inputCaps;
         else if (this->d->m_audioGenerator)
-            caps = this->d->m_audioGenerator->property("caps").toString();
+            caps = this->d->m_audioGenerator->property("caps").value<AkAudioCaps>();
 
         if (caps)
-            return QStringList {AkAudioCaps::sampleFormatToString(caps.format())};
+            return {caps.format()};
     } else if (this->d->m_audioOut) {
         QList<AkAudioCaps::SampleFormat> supportedFormats;
         QMetaObject::invokeMethod(this->d->m_audioOut.data(),
@@ -352,21 +394,16 @@ QStringList AudioLayer::supportedFormats(const QString &device)
                                   Q_RETURN_ARG(QList<AkAudioCaps::SampleFormat>, supportedFormats),
                                   Q_ARG(QString, device));
 
-        QStringList supportedFormatsStr;
-
-        for (auto &format: supportedFormats)
-            supportedFormatsStr << AkAudioCaps::sampleFormatToString(format);
-
-        return supportedFormatsStr;
+        return supportedFormats;
     }
 
-    return QStringList();
+    return {};
 }
 
-QList<int> AudioLayer::supportedChannels(const QString &device)
+QList<AkAudioCaps::ChannelLayout> AudioLayer::supportedChannelLayouts(const QString &device) const
 {
     if (device == DUMMY_INPUT_DEVICE)
-        return QList<int> {1, 2};
+        return {AkAudioCaps::Layout_mono, AkAudioCaps::Layout_stereo};
 
     if (device == EXTERNAL_MEDIA_INPUT) {
         AkAudioCaps caps;
@@ -374,24 +411,24 @@ QList<int> AudioLayer::supportedChannels(const QString &device)
         if (this->d->m_inputCaps)
             caps = this->d->m_inputCaps;
         else if (this->d->m_audioGenerator)
-            caps = this->d->m_audioGenerator->property("caps").toString();
+            caps = this->d->m_audioGenerator->property("caps").value<AkAudioCaps>();
 
         if (caps)
-            return QList<int> {caps.channels()};
+            return {caps.layout()};
     } else if (this->d->m_audioOut) {
-        QList<int> supportedChannels;
+        QList<AkAudioCaps::ChannelLayout> supportedChannelLayouts;
         QMetaObject::invokeMethod(this->d->m_audioOut.data(),
-                                  "supportedChannels",
-                                  Q_RETURN_ARG(QList<int>, supportedChannels),
+                                  "supportedChannelLayouts",
+                                  Q_RETURN_ARG(QList<AkAudioCaps::ChannelLayout>, supportedChannelLayouts),
                                   Q_ARG(QString, device));
 
-        return supportedChannels;
+        return supportedChannelLayouts;
     }
 
-    return QList<int>();
+    return {};
 }
 
-QList<int> AudioLayer::supportedSampleRates(const QString &device)
+QList<int> AudioLayer::supportedSampleRates(const QString &device) const
 {
     if (device == DUMMY_INPUT_DEVICE)
         return this->d->m_commonSampleRates.toList();
@@ -402,7 +439,7 @@ QList<int> AudioLayer::supportedSampleRates(const QString &device)
         if (this->d->m_inputCaps)
             caps = this->d->m_inputCaps;
         else if (this->d->m_audioGenerator)
-            caps = this->d->m_audioGenerator->property("caps").toString();
+            caps = this->d->m_audioGenerator->property("caps").value<AkAudioCaps>();
 
         if (caps)
             return QList<int> {caps.rate()};
@@ -416,7 +453,7 @@ QList<int> AudioLayer::supportedSampleRates(const QString &device)
         return supportedSampleRates;
     }
 
-    return QList<int>();
+    return {};
 }
 
 void AudioLayer::setAudioInput(const QStringList &audioInput)
@@ -460,7 +497,7 @@ void AudioLayer::setAudioOutput(const QString &audioOutput)
     }
 }
 
-void AudioLayer::setInputCaps(const AkCaps &inputCaps)
+void AudioLayer::setInputCaps(const AkAudioCaps &inputCaps)
 {
     if (this->d->m_inputCaps == inputCaps)
         return;
@@ -469,7 +506,7 @@ void AudioLayer::setInputCaps(const AkCaps &inputCaps)
     emit this->inputCapsChanged(inputCaps);
 }
 
-void AudioLayer::setInputDeviceCaps(const AkCaps &inputDeviceCaps)
+void AudioLayer::setInputDeviceCaps(const AkAudioCaps &inputDeviceCaps)
 {
     if (this->d->m_audioInput.contains(EXTERNAL_MEDIA_INPUT)
         || this->inputDeviceCaps() == inputDeviceCaps)
@@ -477,17 +514,18 @@ void AudioLayer::setInputDeviceCaps(const AkCaps &inputDeviceCaps)
 
     if (this->d->m_audioInput.contains(DUMMY_INPUT_DEVICE)) {
         if (this->d->m_audioGenerator)
-            this->d->m_audioGenerator->setProperty("caps", inputDeviceCaps.toString());
+            this->d->m_audioGenerator->setProperty("caps", QVariant::fromValue(inputDeviceCaps));
     } else if (this->d->m_audioIn)
         this->d->m_audioIn->setProperty("caps", QVariant::fromValue(inputDeviceCaps));
 
     emit inputDeviceCapsChanged(inputDeviceCaps);
 }
 
-void AudioLayer::setOutputDeviceCaps(const AkCaps &outputDeviceCaps)
+void AudioLayer::setOutputDeviceCaps(const AkAudioCaps &outputDeviceCaps)
 {
     if (this->d->m_audioOut)
-        this->d->m_audioOut->setProperty("caps", QVariant::fromValue(outputDeviceCaps));
+        this->d->m_audioOut->setProperty("caps",
+                                         QVariant::fromValue(outputDeviceCaps));
 }
 
 void AudioLayer::setInputDescription(const QString &inputDescription)
@@ -544,6 +582,18 @@ bool AudioLayer::setOutputState(AkElement::ElementState outputState)
     return false;
 }
 
+void AudioLayer::setInputLatency(int inputLatency)
+{
+    if (this->d->m_audioIn)
+        this->d->m_audioIn->setProperty("latency", inputLatency);
+}
+
+void AudioLayer::setOutputLatency(int outputLatency)
+{
+    if (this->d->m_audioOut)
+        this->d->m_audioOut->setProperty("latency", outputLatency);
+}
+
 void AudioLayer::resetAudioInput()
 {
     QStringList devices;
@@ -566,7 +616,7 @@ void AudioLayer::resetAudioOutput()
 
 void AudioLayer::resetInputCaps()
 {
-    this->setInputCaps(AkCaps());
+    this->setInputCaps({});
 }
 
 void AudioLayer::resetInputDeviceCaps()
@@ -599,6 +649,16 @@ void AudioLayer::resetInputState()
 void AudioLayer::resetOutputState()
 {
     this->setOutputState(AkElement::ElementStateNull);
+}
+
+void AudioLayer::resetInputLatency()
+{
+    this->setInputLatency(1);
+}
+
+void AudioLayer::resetOutputLatency()
+{
+    this->setOutputLatency(1);
 }
 
 AkPacket AudioLayer::iStream(const AkPacket &packet)
@@ -655,7 +715,7 @@ void AudioLayer::privInputsChanged(const QStringList &inputs)
 
 void AudioLayer::updateInputState()
 {
-    AkCaps outputCaps = this->outputCaps();
+    auto outputCaps = this->outputCaps();
 
     if (this->d->m_outputCaps != outputCaps) {
         this->d->m_outputCaps = outputCaps;
@@ -669,7 +729,7 @@ void AudioLayer::updateInputState()
 
 void AudioLayer::updateOutputState()
 {
-    AkCaps outputCaps = this->outputCaps();
+    auto outputCaps = this->outputCaps();
 
     if (this->d->m_outputCaps != outputCaps) {
         this->d->m_outputCaps = outputCaps;
@@ -686,18 +746,20 @@ void AudioLayer::loadProperties()
     QSettings config;
 
     config.beginGroup("Libraries");
-    auto audioDev = this->d->m_audioOut?
-                        this->d->m_audioOut: this->d->m_audioIn;
+    auto audioDev = this->d->m_audioOutSettings?
+                        this->d->m_audioOutSettings: this->d->m_audioInSettings;
 
     if (audioDev)
         audioDev->setProperty("audioLib",
                               config.value("AudioDevice.audioLib",
                                            audioDev->property("audioLib")));
 
-    if (this->d->m_audioConvert)
-        this->d->m_audioConvert->setProperty("convertLib",
-                                             config.value("AudioConvert.convertLib",
-                                                          this->d->m_audioConvert->property("convertLib")));
+    if (this->d->m_audioConvertSettings) {
+        auto convertLib =
+                config.value("AudioConvert.convertLib",
+                             this->d->m_audioConvertSettings->property("convertLib"));
+        this->d->m_audioConvertSettings->setProperty("convertLib", convertLib);
+    }
 
     config.endGroup();
 
@@ -756,15 +818,17 @@ void AudioLayer::saveProperties()
     config.endGroup();
 
     config.beginGroup("Libraries");
-    auto audioDev = this->d->m_audioOut?
-                        this->d->m_audioOut: this->d->m_audioIn;
+    auto audioDev = this->d->m_audioOutSettings?
+                        this->d->m_audioOutSettings: this->d->m_audioInSettings;
 
     if (audioDev)
         config.setValue("AudioDevice.audioLib", audioDev->property("audioLib"));
 
-    if (this->d->m_audioConvert)
-        config.setValue("AudioConvert.convertLib",
-                        this->d->m_audioConvert->property("convertLib"));
+    if (this->d->m_audioConvertSettings) {
+        auto convertLib =
+                this->d->m_audioConvertSettings->property("convertLib");
+        config.setValue("AudioConvert.convertLib", convertLib);
+    }
 
     config.endGroup();
 }

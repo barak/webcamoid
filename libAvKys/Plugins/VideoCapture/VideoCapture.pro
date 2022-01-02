@@ -20,12 +20,14 @@ TEMPLATE = subdirs
 
 CONFIG(debug, debug|release): CONFIG += ordered
 
-SUBDIRS = src
+SUBDIRS = src src/generic
+android: SUBDIRS += src/androidcamera
 CONFIG(config_avfoundation): SUBDIRS += src/avfoundation
 CONFIG(config_dshow): SUBDIRS += src/dshow
 CONFIG(config_ffmpeg): SUBDIRS += src/ffmpeg
 CONFIG(config_gstreamer): SUBDIRS += src/gstreamer
 CONFIG(config_libuvc): SUBDIRS += src/libuvc
 CONFIG(config_mediafoundation): SUBDIRS += src/mediafoundation
+CONFIG(config_ndk_camera): SUBDIRS += src/ndkcamera
 CONFIG(config_v4l2): SUBDIRS += src/v4l2sys
 CONFIG(config_v4lutils): SUBDIRS += src/v4lutils

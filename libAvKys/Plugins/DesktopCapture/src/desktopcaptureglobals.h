@@ -22,6 +22,8 @@
 
 #include <QObject>
 
+class DesktopCaptureGlobalsPrivate;
+
 class DesktopCaptureGlobals: public QObject
 {
     Q_OBJECT
@@ -30,15 +32,18 @@ class DesktopCaptureGlobals: public QObject
                WRITE setCaptureLib
                RESET resetCaptureLib
                NOTIFY captureLibChanged)
+    Q_PROPERTY(QStringList subModules
+               READ subModules)
 
     public:
         DesktopCaptureGlobals(QObject *parent=nullptr);
+        ~DesktopCaptureGlobals();
 
         Q_INVOKABLE QString captureLib() const;
+        Q_INVOKABLE QStringList subModules() const;
 
     private:
-        QString m_captureLib;
-        QStringList m_preferredLibrary;
+        DesktopCaptureGlobalsPrivate *d;
 
     signals:
         void captureLibChanged(const QString &captureLib);

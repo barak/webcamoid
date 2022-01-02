@@ -17,9 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <QTime>
 #include <QPainter>
 #include <QQmlContext>
+#include <QRandomGenerator>
+#include <QTime>
+#include <akpacket.h>
 #include <akvideopacket.h>
 
 #include "scrollelement.h"
@@ -38,8 +40,6 @@ class ScrollElementPrivate
 ScrollElement::ScrollElement(): AkElement()
 {
     this->d = new ScrollElementPrivate;
-
-    qsrand(uint(QTime::currentTime().msec()));
 }
 
 ScrollElement::~ScrollElement()
@@ -73,38 +73,9 @@ void ScrollElement::controlInterfaceConfigure(QQmlContext *context,
     context->setContextProperty("controlId", this->objectName());
 }
 
-void ScrollElement::setSpeed(qreal speed)
+AkPacket ScrollElement::iVideoStream(const AkVideoPacket &packet)
 {
-    if (qFuzzyCompare(speed, this->d->m_speed))
-        return;
-
-    this->d->m_speed = speed;
-    emit this->speedChanged(speed);
-}
-
-void ScrollElement::setNoise(qreal noise)
-{
-    if (qFuzzyCompare(this->d->m_noise, noise))
-        return;
-
-    this->d->m_noise = noise;
-    emit this->noiseChanged(noise);
-}
-
-void ScrollElement::resetSpeed()
-{
-    this->setSpeed(0.25);
-}
-
-void ScrollElement::resetNoise()
-{
-    this->setNoise(0.1);
-}
-
-AkPacket ScrollElement::iStream(const AkPacket &packet)
-{
-    AkVideoPacket videoPacket(packet);
-    auto src = videoPacket.toImage();
+    auto src = packet.toImage();
 
     if (src.isNull())
         return AkPacket();
@@ -140,8 +111,36 @@ AkPacket ScrollElement::iStream(const AkPacket &packet)
     else if (this->d->m_offset < 0.0)
         this->d->m_offset = src.height();
 
-    auto oPacket = AkVideoPacket::fromImage(oFrame, videoPacket).toPacket();
+    auto oPacket = AkVideoPacket::fromImage(oFrame, packet);
     akSend(oPacket)
+}
+
+void ScrollElement::setSpeed(qreal speed)
+{
+    if (qFuzzyCompare(speed, this->d->m_speed))
+        return;
+
+    this->d->m_speed = speed;
+    emit this->speedChanged(speed);
+}
+
+void ScrollElement::setNoise(qreal noise)
+{
+    if (qFuzzyCompare(this->d->m_noise, noise))
+        return;
+
+    this->d->m_noise = noise;
+    emit this->noiseChanged(noise);
+}
+
+void ScrollElement::resetSpeed()
+{
+    this->setSpeed(0.25);
+}
+
+void ScrollElement::resetNoise()
+{
+    this->setNoise(0.1);
 }
 
 QImage ScrollElementPrivate::generateNoise(const QSize &size, qreal persent) const
@@ -149,13 +148,13 @@ QImage ScrollElementPrivate::generateNoise(const QSize &size, qreal persent) con
     QImage noise(size, QImage::Format_ARGB32);
     noise.fill(0);
 
-    int peper = int(persent * size.width() * size.height());
+    auto peper = qRound(persent * size.width() * size.height());
 
     for (int i = 0; i < peper; i++) {
-        int gray = qrand() % 256;
-        int alpha = qrand() % 256;
-        int x = qrand() % noise.width();
-        int y = qrand() % noise.height();
+        int gray = QRandomGenerator::global()->bounded(256);
+        int alpha = QRandomGenerator::global()->bounded(256);
+        int x = QRandomGenerator::global()->bounded(noise.width());
+        int y = QRandomGenerator::global()->bounded(noise.height());
         noise.setPixel(x, y, qRgba(gray, gray, gray, alpha));
     }
 
