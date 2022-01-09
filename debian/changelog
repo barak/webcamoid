@@ -12,8 +12,10 @@ webcamoid (8.8.0+dfsg-1) unstable; urgency=medium
   * Add quilt patch, need to #include <limits> (closes: #1002960)
   * Adjust installation scripts for upstream changes and dh_missing
   * Remove debian/*.symbols; it's not much use for this churning C++ library
+  * Adopt package; much thanks to Herbert Parentes Fortes Neto, the
+    previous maintainer
 
- -- Barak A. Pearlmutter <bap@debian.org>  Wed, 05 Jan 2022 21:36:45 +0000
+ -- Barak A. Pearlmutter <bap@debian.org>  Sun, 09 Jan 2022 10:43:04 +0000
 
 webcamoid (8.6.1+dfsg-2.1) unstable; urgency=medium
 
