@@ -1,9 +1,10 @@
-webcamoid (9.0.0-1) UNRELEASED; urgency=medium
+webcamoid (9.0.0-1) unstable; urgency=medium
 
   * New upstream version
   * Upstream 9.0.0 removed non-DFSG files; adjust debian/copyright
+  * Remove quilt patch to nonexistant file
 
- -- Barak A. Pearlmutter <bap@debian.org>  Sat, 26 Feb 2022 22:30:34 +0000
+ -- Barak A. Pearlmutter <bap@debian.org>  Sat, 26 Feb 2022 23:04:15 +0000
 
 webcamoid (8.8.0+dfsg-1) unstable; urgency=medium
 
