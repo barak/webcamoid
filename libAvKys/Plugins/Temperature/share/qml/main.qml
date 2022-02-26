@@ -17,10 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
@@ -28,9 +27,10 @@ GridLayout {
     Connections {
         target: Temperature
 
-        onTemperatureChanged: {
+        function onTemperatureChanged(temperature)
+        {
             sldTemperature.value = temperature
-            spbTemperature.rvalue = temperature
+            spbTemperature.value = temperature
         }
     }
 
@@ -47,13 +47,14 @@ GridLayout {
 
         onValueChanged: Temperature.temperature = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbTemperature
-        rvalue: Temperature.temperature
-        minimumValue: sldTemperature.from
-        maximumValue: sldTemperature.to
-        step: sldTemperature.stepSize
+        value: Temperature.temperature
+        from: sldTemperature.from
+        to: sldTemperature.to
+        stepSize: sldTemperature.stepSize
+        editable: true
 
-        onRvalueChanged: Temperature.temperature = rvalue
+        onValueChanged: Temperature.temperature = value
     }
 }

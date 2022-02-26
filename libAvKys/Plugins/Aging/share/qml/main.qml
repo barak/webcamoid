@@ -17,10 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
@@ -28,9 +27,10 @@ GridLayout {
     Connections {
         target: Aging
 
-        onNScratchesChanged: {
+        function onNScratchesChanged(nScratches)
+        {
             sldNScratches.value = nScratches
-            spbNScratches.rvalue = nScratches
+            spbNScratches.value = nScratches
         }
     }
 
@@ -48,23 +48,32 @@ GridLayout {
 
         onValueChanged: Aging.nScratches = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbNScratches
-        rvalue: Aging.nScratches
-        maximumValue: sldNScratches.to
-        step: sldNScratches.stepSize
+        value: Aging.nScratches
+        to: sldNScratches.to
+        stepSize: sldNScratches.stepSize
+        editable: true
 
-        onRvalueChanged: Aging.nScratches = rvalue
+        onValueChanged: Aging.nScratches = Number(value)
     }
 
     // Aging mode.
     Label {
         text: qsTr("Add dust")
     }
-    CheckBox {
-        id: chkAddDust
-        checked: Aging.addDust
+    RowLayout {
+        Layout.columnSpan: 2
+        Layout.fillWidth: true
 
-        onCheckedChanged: Aging.addDust = checked
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            id: chkAddDust
+            checked: Aging.addDust
+
+            onCheckedChanged: Aging.addDust = checked
+        }
     }
 }

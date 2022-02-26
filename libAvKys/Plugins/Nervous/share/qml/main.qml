@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -29,20 +29,29 @@ GridLayout {
     }
     TextField {
         text: Nervous.nFrames
+        placeholderText: qsTr("N° of frames")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Nervous.nFrames = text
+        onTextChanged: Nervous.nFrames = Number(text)
     }
 
     Label {
         text: qsTr("Simple")
     }
-    CheckBox {
-        checked: Nervous.simple
+    RowLayout {
+        Layout.fillWidth: true
 
-        onCheckedChanged: Nervous.simple = checked
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            checked: Nervous.simple
+
+            onCheckedChanged: Nervous.simple = checked
+        }
     }
 }

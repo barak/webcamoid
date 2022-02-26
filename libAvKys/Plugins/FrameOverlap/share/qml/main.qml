@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -30,12 +30,14 @@ GridLayout {
     }
     TextField {
         text: FrameOverlap.nFrames
+        placeholderText: qsTr("N° of frames")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: FrameOverlap.nFrames = text
+        onTextChanged: FrameOverlap.nFrames = Number(text)
     }
 
     // Stride.
@@ -44,11 +46,13 @@ GridLayout {
     }
     TextField {
         text: FrameOverlap.stride
+        placeholderText: qsTr("Stride")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: FrameOverlap.stride = text
+        onTextChanged: FrameOverlap.stride = Number(text)
     }
 }

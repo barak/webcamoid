@@ -1,0 +1,18 @@
+{
+    "type": "WebcamoidPluginsCollection",
+    "plugins": [
+        {
+            "name": "v4l2loopback",
+            "description": "Create a virtual webcam using v4l2loopback driver",
+            "id": "VideoSink/VirtualCamera/Impl/v4l2loopback",
+            "implements": ["VirtualCameraImpl"],
+            "priority": 900,
+            "depends": [
+                "VideoFilter/Flip",
+                "VideoFilter/Scale",
+                "VideoFilter/SwapRB"
+            ],
+            "type": "qtplugin"
+        }
+    ]
+}

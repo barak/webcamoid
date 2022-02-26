@@ -17,11 +17,12 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
+import Qt.labs.platform 1.1 as LABS
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 2
@@ -31,7 +32,7 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbx.model.count; i++)
-            if (cbx.model.get(i).option === option) {
+            if (cbx.model.get(i).option == option) {
                 index = i
                 break
             }
@@ -39,46 +40,30 @@ GridLayout {
         return index
     }
 
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
-    }
-
     Label {
         text: qsTr("N° of drops")
     }
     TextField {
         text: Matrix.nDrops
+        placeholderText: qsTr("N° of drops")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Matrix.nDrops = text
+        onTextChanged: Matrix.nDrops = Number(text)
     }
-
     Label {
         text: qsTr("Symbols")
     }
     TextField {
         text: Matrix.charTable
-        onTextChanged: Matrix.charTable = text
+        placeholderText: qsTr("Symbols")
+        selectByMouse: true
         Layout.fillWidth: true
+
+        onTextChanged: Matrix.charTable = text
     }
 
     Label {
@@ -88,13 +73,15 @@ GridLayout {
         TextField {
             id: txtTable
             text: Matrix.font.family + " " + Matrix.font.pointSize
+            placeholderText: qsTr("Font")
+            selectByMouse: true
             readOnly: true
             font: Matrix.font
             Layout.fillWidth: true
         }
-        AkButton {
-            label: qsTr("Select")
-            iconRc: "image://icons/preferences-desktop-font"
+        Button {
+            text: qsTr("Select")
+            icon.source: "image://icons/fonts"
 
             onClicked: fontDialog.open()
         }
@@ -132,6 +119,7 @@ GridLayout {
     }
 
     Label {
+        //: Different font rendering strategies
         text: qsTr("Style")
     }
     ComboBox {
@@ -201,31 +189,46 @@ GridLayout {
     Label {
         text: qsTr("Cursor color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Matrix.cursorColor)
-        title: qsTr("Choose the cursor color")
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Matrix.cursorColor)
+            title: qsTr("Choose the cursor color")
 
-        onCurrentColorChanged: Matrix.cursorColor = toRgba(currentColor)
+            onCurrentColorChanged: Matrix.cursorColor = AkUtils.toRgba(currentColor)
+        }
     }
 
     Label {
         text: qsTr("Foreground color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Matrix.foregroundColor)
-        title: qsTr("Choose the foreground color")
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Matrix.foregroundColor)
+            title: qsTr("Choose the foreground color")
 
-        onCurrentColorChanged: Matrix.foregroundColor = toRgba(currentColor)
+            onCurrentColorChanged: Matrix.foregroundColor = AkUtils.toRgba(currentColor)
+        }
     }
 
     Label {
         text: qsTr("Background color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Matrix.backgroundColor)
-        title: qsTr("Choose the background color")
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Matrix.backgroundColor)
+            title: qsTr("Choose the background color")
 
-        onCurrentColorChanged: Matrix.backgroundColor = toRgba(currentColor)
+            onCurrentColorChanged: Matrix.backgroundColor = AkUtils.toRgba(currentColor)
+        }
     }
 
     Label {
@@ -233,63 +236,73 @@ GridLayout {
     }
     TextField {
         text: Matrix.minDropLength
+        placeholderText: qsTr("Min. drop length")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Matrix.minDropLength = text
+        onTextChanged: Matrix.minDropLength = Number(text)
     }
-
     Label {
         text: qsTr("Max. drop length")
     }
     TextField {
         text: Matrix.maxDropLength
+        placeholderText: qsTr("Max. drop length")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Matrix.maxDropLength = text
+        onTextChanged: Matrix.maxDropLength = Number(text)
     }
-
     Label {
         text: qsTr("Min. speed")
     }
     TextField {
         text: Matrix.minSpeed
+        placeholderText: qsTr("Min. speed")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+\.\d+|\d+\.|\.\d+|\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Matrix.minSpeed = text
+        onTextChanged: Matrix.minSpeed = Number(text)
     }
-
     Label {
         text: qsTr("Max. speed")
     }
     TextField {
         text: Matrix.maxSpeed
+        placeholderText: qsTr("Max. speed")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+\.\d+|\d+\.|\.\d+|\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Matrix.maxSpeed = text
+        onTextChanged: Matrix.maxSpeed = Number(text)
     }
 
     Label {
         text: qsTr("Show cursor")
     }
-    CheckBox {
-        checked: Matrix.showCursor
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            checked: Matrix.showCursor
 
-        onCheckedChanged: Matrix.showCursor = checked
+            onCheckedChanged: Matrix.showCursor = checked
+        }
     }
 
-    FontDialog {
+    LABS.FontDialog {
         id: fontDialog
         title: qsTr("Please choose a font")
         font: Matrix.font

@@ -17,11 +17,12 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
-import AkQmlControls 1.0
+import Qt.labs.platform 1.1 as LABS
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 2
@@ -31,7 +32,7 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbxHaarFile.model.count; i++)
-            if (cbxHaarFile.model.get(i).haarFile === haarFile) {
+            if (cbxHaarFile.model.get(i).haarFile == haarFile) {
                 index = i
                 break
             }
@@ -44,7 +45,7 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbxMarkerType.model.count; i++)
-            if (cbxMarkerType.model.get(i).markerType === markerType) {
+            if (cbxMarkerType.model.get(i).markerType == markerType) {
                 index = i
                 break
             }
@@ -57,7 +58,7 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbxMarkerStyle.model.count; i++)
-            if (cbxMarkerStyle.model.get(i).markerStyle === markerStyle) {
+            if (cbxMarkerStyle.model.get(i).markerStyle == markerStyle) {
                 index = i
                 break
             }
@@ -65,29 +66,9 @@ GridLayout {
         return index
     }
 
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
-    }
-
     function toQrc(uri)
     {
-        if (uri.indexOf(":") === 0)
+        if (uri.indexOf(":") == 0)
             return "qrc" + uri
 
         return "file:" + uri
@@ -262,6 +243,10 @@ GridLayout {
                 text: qsTr("Blur Outer")
                 markerType: "blurouter"
             }
+            ListElement {
+                text: qsTr("Background Image")
+                markerType: "imageouter"
+            }
         }
 
         onCurrentIndexChanged: FaceDetect.markerType = cbxMarkerType.model.get(currentIndex).markerType
@@ -307,12 +292,17 @@ GridLayout {
     Label {
         text: qsTr("Marker color")
     }
-    AkColorButton {
-        currentColor: fromRgba(FaceDetect.markerColor)
-        title: qsTr("Select marker color")
-        showAlphaChannel: true
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(FaceDetect.markerColor)
+            title: qsTr("Select marker color")
+            showAlphaChannel: true
 
-        onCurrentColorChanged: FaceDetect.markerColor = toRgba(currentColor)
+            onCurrentColorChanged: FaceDetect.markerColor = AkUtils.toRgba(currentColor)
+        }
     }
 
     // Marker width.
@@ -519,7 +509,7 @@ GridLayout {
 
             onTextChanged: {
                 for (var i = 0; i < cbxMasks.model.count; i++) {
-                    if (cbxMasks.model.get(i).mask === FaceDetect.markerImage) {
+                    if (cbxMasks.model.get(i).mask == FaceDetect.markerImage) {
                         cbxMasks.currentIndex = i
 
                         break
@@ -532,11 +522,76 @@ GridLayout {
                 }
             }
         }
-        AkButton {
-            label: qsTr("Search")
-            iconRc: "image://icons/edit-find"
+        Button {
+            text: qsTr("Search")
+            icon.source: "image://icons/search"
 
-            onClicked: pictureDialog.open()
+            onClicked: fileDialog.open()
+        }
+    }
+
+    // Background picture.
+    Label {
+        text: qsTr("Backgrounds")
+    }
+    ComboBox {
+        id: cbxBackgrounds
+        textRole: "text"
+        Layout.fillWidth: true
+
+        model: ListModel {
+            ListElement {
+                text: qsTr("Black Square")
+                background: ":/FaceDetect/share/background/black_square.png"
+            }
+            ListElement {
+                text: qsTr("Custom")
+                background: ""
+            }
+        }
+
+        onCurrentIndexChanged: FaceDetect.backgroundImage = cbxBackgrounds.model.get(currentIndex).background
+    }
+
+    Label {
+        text: qsTr("Background picture")
+    }
+    RowLayout {
+        Image {
+            width: 16
+            height: 16
+            fillMode: Image.PreserveAspectFit
+            sourceSize.width: 16
+            sourceSize.height: 16
+            source: toQrc(txtBackgroundImage.text)
+        }
+        TextField {
+            id: txtBackgroundImage
+            text: FaceDetect.backgroundImage
+            placeholderText: qsTr("Replace background with this picture")
+            selectByMouse: true
+            Layout.fillWidth: true
+
+            onTextChanged: {
+                for (var i = 0; i < cbxBackgrounds.model.count; i++) {
+                    if (cbxBackgrounds.model.get(i).background == FaceDetect.backgroundImage) {
+                        cbxBackgrounds.currentIndex = i
+
+                        break
+                    } else if (i == cbxBackgrounds.model.count - 1) {
+                        cbxBackgrounds.model.get(i).background = FaceDetect.backgroundImage
+                        cbxBackgrounds.currentIndex = i
+
+                        break
+                    }
+                }
+            }
+        }
+        Button {
+            text: qsTr("Search")
+            icon.source: "image://icons/search"
+
+            onClicked: fileDialogBGImage.open()
         }
     }
 
@@ -572,12 +627,354 @@ GridLayout {
         onTextChanged: FaceDetect.blurRadius = Number(text)
     }
 
-    FileDialog {
-        id: pictureDialog
+    Label {
+        text: qsTr("Face Area Settings")
+    }
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        Label {
+            text: qsTr("Advanced face area settings for \nbackground blur or image below.")
+        }
+        Item {
+            Layout.fillWidth: true
+        }
+    }
+
+    // Face area size scale.
+    Label {
+        text: qsTr("Scale")
+    }
+    RowLayout {
+        Slider {
+            id: sldScale
+            value: FaceDetect.scale
+            from: 0.5
+            to: 2
+            stepSize: 0.05
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.scale = value
+        }
+        SpinBox {
+            property int decimals: 2
+            property real factor: Math.pow(10,decimals);
+            id: spbScale
+            value: FaceDetect.scale * factor
+            from: sldScale.from * factor
+            to: sldScale.to * factor
+            stepSize: sldScale.stepSize * factor
+            editable: true
+
+            onValueChanged: FaceDetect.scale = Number(value*1.0/spbScale.factor)
+            validator: DoubleValidator {
+                bottom: Math.min(spbScale.from, spbScale.to)*spbScale.factor
+                top:  Math.max(spbScale.from, spbScale.to)*spbScale.factor
+            }
+            textFromValue: function(value, locale) {
+                var num = parseFloat(value*1.0/spbScale.factor).toFixed(spbScale.decimals);
+                return num
+                //return Number(value / 100).toLocaleString(locale, 'f', spinbox.decimals)
+            }
+            valueFromText: function(text, locale) {
+                return parseFloat(text) * spbScale.factor
+                //return Number.fromLocaleString(locale, text) * spbScale.factor
+            }
+        }
+    }
+
+    // Configure face area offsets.
+    Label {
+        text: qsTr("H-Offset")
+    }
+    RowLayout {
+        Slider {
+            id: sldHOffset
+            value: FaceDetect.hOffset
+            from: -150
+            to: 150
+            stepSize: 1
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.hOffset = value
+        }
+        SpinBox {
+            id: spbHOffset
+            value: FaceDetect.hOffset
+            from: sldHOffset.from
+            to: sldHOffset.to
+            stepSize: sldHOffset.stepSize
+            editable: true
+
+            onValueChanged: FaceDetect.hOffset = Number(value)
+        }
+    }
+
+    Label {
+        text: qsTr("V-Offset")
+    }
+    RowLayout {
+        Slider {
+            id: sldVOffset
+            value: FaceDetect.vOffset
+            from: -150
+            to: 150
+            stepSize: 1
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.vOffset = value
+        }
+        SpinBox {
+            id: spbVOffset
+            value: FaceDetect.vOffset
+            from: sldVOffset.from
+            to: sldVOffset.to
+            stepSize: sldVOffset.stepSize
+            editable: true
+
+            onValueChanged: FaceDetect.vOffset = Number(value)
+        }
+    }
+
+    // Configure face area width/height.
+    Label {
+        text: qsTr("Width Adjust %")
+    }
+    RowLayout {
+        Slider {
+            id: sldWAdjust
+            value: FaceDetect.wAdjust
+            from: 1
+            to: 200
+            stepSize: 1
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.wAdjust = value
+        }
+        SpinBox {
+            id: spbWAdjust
+            value: FaceDetect.wAdjust
+            from: sldWAdjust.from
+            to: sldWAdjust.to
+            stepSize: sldWAdjust.stepSize
+            editable: true
+
+            onValueChanged: FaceDetect.wAdjust = Number(value)
+        }
+    }
+
+    Label {
+        text: qsTr("Height Adjust %")
+    }
+    RowLayout {
+        Slider {
+            id: sldHAdjust
+            value: FaceDetect.hAdjust
+            from: 1
+            to: 200
+            stepSize: 1
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.hAdjust = value
+        }
+        SpinBox {
+            id: spbHAdjust
+            value: FaceDetect.hAdjust
+            from: sldHAdjust.from
+            to: sldHAdjust.to
+            stepSize: sldHAdjust.stepSize
+            editable: true
+
+            onValueChanged: FaceDetect.hAdjust = Number(value)
+        }
+    }
+
+    // Round face area overlay.
+    Label {
+        text: qsTr("Round Area")
+    }
+    Switch {
+        id: chkSmotheEdges
+        checked: FaceDetect.smootheEdges
+
+        onCheckedChanged: FaceDetect.smootheEdges = checked
+    }
+
+    // Edge smothing size scale.
+    Label {
+        text: qsTr("Scale")
+    }
+    RowLayout {
+        Slider {
+            id: sldRScale
+            value: FaceDetect.rScale
+            from: 0.5
+            to: 2
+            stepSize: 0.05
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.rScale = value
+        }
+        SpinBox {
+            property int decimals: 2
+            property real factor: Math.pow(10,decimals);
+            id: spbRScale
+            value: FaceDetect.rScale * factor
+            from: sldRScale.from * factor
+            to: sldRScale.to * factor
+            stepSize: sldRScale.stepSize * factor
+            editable: true
+
+            onValueChanged: FaceDetect.rScale = Number(value*1.0/spbRScale.factor)
+            validator: DoubleValidator {
+                bottom: Math.min(spbRScale.from, spbRScale.to)*spbRScale.factor
+                top:  Math.max(spbRScale.from, spbRScale.to)*spbRScale.factor
+            }
+            textFromValue: function(value, locale) {
+                return parseFloat(value*1.0/spbRScale.factor).toFixed(decimals);
+                //return Number(value / 100).toLocaleString(locale, 'f', spinbox.decimals)
+            }
+            valueFromText: function(text, locale) {
+                return parseFloat(text) * spbRScale.factor
+                //return Number.fromLocaleString(locale, text) * spbRScale.factor
+            }
+        }
+    }
+
+    // Configure rounded face area width/height.
+    Label {
+        text: qsTr("Width Adjust %")
+    }
+    RowLayout {
+        Slider {
+            id: sldRWAdjust
+            value: FaceDetect.rWAdjust
+            from: 1
+            to: 200
+            stepSize: 1
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.rWAdjust = value
+        }
+        SpinBox {
+            id: spbRWAdjust
+            value: FaceDetect.rWAdjust
+            from: sldRWAdjust.from
+            to: sldRWAdjust.to
+            stepSize: sldRWAdjust.stepSize
+            editable: true
+
+            onValueChanged: FaceDetect.rWAdjust = Number(value)
+        }
+    }
+
+    Label {
+        text: qsTr("Height Adjust %")
+    }
+    RowLayout {
+        Slider {
+            id: sldRHAdjust
+            value: FaceDetect.rHAdjust
+            from: 1
+            to: 200
+            stepSize: 1
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.rHAdjust = value
+        }
+        SpinBox {
+            id: spbRHAdjust
+            value: FaceDetect.rHAdjust
+            from: sldRHAdjust.from
+            to: sldRHAdjust.to
+            stepSize: sldRHAdjust.stepSize
+            editable: true
+
+            onValueChanged: FaceDetect.rHAdjust = Number(value)
+        }
+    }
+
+    // Configure rounded face area radius
+    Label {
+        text: qsTr("H-Radius %")
+    }
+    RowLayout {
+        Slider {
+            id: sldHRad
+            value: FaceDetect.rHRadius
+            to: 100
+            stepSize: 1
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.rHRadius = value
+        }
+        SpinBox {
+            id: spbHRad
+            value: FaceDetect.rHRadius
+            to: sldHRad.to
+            stepSize: sldHRad.stepSize
+            editable: true
+
+            onValueChanged: FaceDetect.rHRadius = Number(value)
+        }
+    }
+
+    Label {
+        text: qsTr("V-Radius %")
+    }
+    RowLayout {
+        Slider {
+            id: sldVRad
+            value: FaceDetect.rVRadius
+            to: 100
+            stepSize: 1
+            Layout.fillWidth: true
+
+            onValueChanged: FaceDetect.rVRadius = value
+        }
+        SpinBox {
+            id: spbVRad
+            value: FaceDetect.rVRadius
+            to: sldVRad.to
+            stepSize: sldVRad.stepSize
+            editable: true
+
+            onValueChanged: FaceDetect.rVRadius = Number(value)
+        }
+    }
+
+    LABS.FileDialog {
+        id: fileDialog
         title: qsTr("Please choose an image file")
         nameFilters: ["Image files (*.bmp *.gif *.jpg *.jpeg *.png *.pbm *.pgm *.ppm *.xbm *.xpm)"]
         folder: "file://" + picturesPath
 
-        onAccepted: FaceDetect.markerImage = String(fileUrl).replace("file://", "")
+        onAccepted: {
+            var curFile = String(file)
+            if (curFile.match("file:\/\/\/[A-Za-z]{1,2}:")) {
+                FaceDetect.markerImage = curFile.replace("file:///", "")
+            } else {
+                FaceDetect.markerImage = curFile.replace("file://", "")
+            }
+        }
+    }
+
+    LABS.FileDialog {
+        id: fileDialogBGImage
+        title: qsTr("Please choose an image file")
+        nameFilters: ["Image files (*.bmp *.gif *.jpg *.jpeg *.png *.pbm *.pgm *.ppm *.xbm *.xpm)"]
+        folder: "file://" + picturesPath
+
+        onAccepted: {
+            var curFile = String(file)
+            if (curFile.match("file:\/\/\/[A-Za-z]{1,2}:")) {
+                FaceDetect.backgroundImage = curFile.replace("file:///", "")
+            } else {
+                FaceDetect.backgroundImage = curFile.replace("file://", "")
+            }
+        }
     }
 }
+
+

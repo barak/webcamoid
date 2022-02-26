@@ -60,6 +60,11 @@ bool MediaSource::loop() const
     return false;
 }
 
+bool MediaSource::sync() const
+{
+    return true;
+}
+
 int MediaSource::defaultStream(const QString &mimeType)
 {
     Q_UNUSED(mimeType)
@@ -81,6 +86,16 @@ AkCaps MediaSource::caps(int stream)
     return AkCaps();
 }
 
+qint64 MediaSource::durationMSecs()
+{
+    return 0;
+}
+
+qint64 MediaSource::currentTimeMSecs()
+{
+    return 0;
+}
+
 qint64 MediaSource::maxPacketQueueSize() const
 {
     return 0;
@@ -89,6 +104,17 @@ qint64 MediaSource::maxPacketQueueSize() const
 bool MediaSource::showLog() const
 {
     return false;
+}
+
+AkElement::ElementState MediaSource::state() const
+{
+    return AkElement::ElementStateNull;
+}
+
+void MediaSource::seek(qint64 seekTo, MultiSrcElement::SeekPosition position)
+{
+    Q_UNUSED(seekTo)
+    Q_UNUSED(position)
 }
 
 void MediaSource::setMedia(const QString &media)
@@ -116,24 +142,9 @@ void MediaSource::setLoop(bool loop)
     Q_UNUSED(loop)
 }
 
-void MediaSource::resetMedia()
+void MediaSource::setSync(bool sync)
 {
-}
-
-void MediaSource::resetStreams()
-{
-}
-
-void MediaSource::resetMaxPacketQueueSize()
-{
-}
-
-void MediaSource::resetShowLog()
-{
-}
-
-void MediaSource::resetLoop()
-{
+    Q_UNUSED(sync)
 }
 
 bool MediaSource::setState(AkElement::ElementState state)
@@ -141,6 +152,41 @@ bool MediaSource::setState(AkElement::ElementState state)
     Q_UNUSED(state)
 
     return false;
+}
+
+void MediaSource::resetMedia()
+{
+    this->setMedia({});
+}
+
+void MediaSource::resetStreams()
+{
+    this->setStreams({});
+}
+
+void MediaSource::resetMaxPacketQueueSize()
+{
+    this->setMaxPacketQueueSize(0);
+}
+
+void MediaSource::resetShowLog()
+{
+    this->setShowLog(false);
+}
+
+void MediaSource::resetLoop()
+{
+    this->setLoop(false);
+}
+
+void MediaSource::resetSync()
+{
+    this->setSync(true);
+}
+
+void MediaSource::resetState()
+{
+    this->setState(AkElement::ElementStateNull);
 }
 
 #include "moc_mediasource.cpp"

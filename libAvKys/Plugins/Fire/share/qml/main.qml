@@ -17,10 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
@@ -30,7 +29,7 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbxMode.model.count; i++)
-            if (cbxMode.model.get(i).mode === mode) {
+            if (cbxMode.model.get(i).mode == mode) {
                 index = i
                 break
             }
@@ -41,29 +40,40 @@ GridLayout {
     Connections {
         target: Fire
 
-        onCoolChanged: {
+        function onCoolChanged(cool)
+        {
             sldCool.value = cool
-            spbCool.rvalue = cool
+            spbCool.value = cool
         }
-        onThresholdChanged: {
+
+        function onThresholdChanged(threshold)
+        {
             sldThreshold.value = threshold
-            spbThreshold.rvalue = threshold
+            spbThreshold.value = threshold
         }
-        onLumaThresholdChanged: {
+
+        function onLumaThresholdChanged(lumaThreshold)
+        {
             sldLumaThreshold.value = lumaThreshold
-            spbLumaThreshold.rvalue = lumaThreshold
+            spbLumaThreshold.value = lumaThreshold
         }
-        onAlphaDiffChanged: {
+
+        function onAlphaDiffChanged(alphaDiff)
+        {
             sldAlphaDiff.value = alphaDiff
-            spbAlphaDiff.rvalue = alphaDiff
+            spbAlphaDiff.value = alphaDiff
         }
-        onAlphaVariationChanged: {
+
+        function onAlphaVariationChanged(alphaVariation)
+        {
             sldAlphaVariation.value = alphaVariation
-            spbAlphaVariation.rvalue = alphaVariation
+            spbAlphaVariation.value = alphaVariation
         }
-        onNColorsChanged: {
+
+        function onNColorsChanged(nColors)
+        {
             sldNColors.value = nColors
-            spbNColors.rvalue = nColors
+            spbNColors.value = nColors
         }
     }
 
@@ -106,14 +116,15 @@ GridLayout {
 
         onValueChanged: Fire.cool = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbCool
-        rvalue: Fire.cool
-        minimumValue: sldCool.from
-        maximumValue: sldCool.to
-        step: sldCool.stepSize
+        value: Fire.cool
+        from: sldCool.from
+        to: sldCool.to
+        stepSize: sldCool.stepSize
+        editable: true
 
-        onRvalueChanged: Fire.cool = rvalue
+        onValueChanged: Fire.cool = value
     }
 
     // Dissolving factor.
@@ -122,13 +133,15 @@ GridLayout {
     }
     TextField {
         text: Fire.dissolve
+        placeholderText: qsTr("Dissolve")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
 
-        onTextChanged: Fire.dissolve = text
+        onTextChanged: Fire.dissolve = Number(text)
     }
 
     // Blur.
@@ -137,13 +150,15 @@ GridLayout {
     }
     TextField {
         text: Fire.blur
+        placeholderText: qsTr("Blur")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
 
-        onTextChanged: Fire.blur = text
+        onTextChanged: Fire.blur = Number(text)
     }
 
     // Zoom.
@@ -152,13 +167,15 @@ GridLayout {
     }
     TextField {
         text: Fire.zoom
+        placeholderText: qsTr("Zoom")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
 
-        onTextChanged: Fire.zoom = text
+        onTextChanged: Fire.zoom = Number(text)
     }
 
     // Threshold.
@@ -174,17 +191,23 @@ GridLayout {
 
         onValueChanged: Fire.threshold = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbThreshold
-        rvalue: Fire.threshold
-        maximumValue: sldThreshold.to
-        step: sldThreshold.stepSize
+        value: Fire.threshold
+        to: sldThreshold.to
+        stepSize: sldThreshold.stepSize
+        editable: true
 
-        onRvalueChanged: Fire.threshold = rvalue
+        onValueChanged: Fire.threshold = value
     }
 
     // Luma threshold.
     Label {
+        /*: Minimum luminance/light/white level/intensity in a gray or black and
+            white picture.
+
+            https://en.wikipedia.org/wiki/Luma_(video)
+         */
         text: qsTr("Luma threshold")
     }
     Slider {
@@ -196,17 +219,21 @@ GridLayout {
 
         onValueChanged: Fire.lumaThreshold = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbLumaThreshold
-        rvalue: Fire.lumaThreshold
-        maximumValue: sldLumaThreshold.to
-        step: sldLumaThreshold.stepSize
+        value: Fire.lumaThreshold
+        to: sldLumaThreshold.to
+        stepSize: sldLumaThreshold.stepSize
+        editable: true
 
-        onRvalueChanged: Fire.lumaThreshold = rvalue
+        onValueChanged: Fire.lumaThreshold = value
     }
 
     // Alpha diff.
     Label {
+        /*: Alpha channel, also known as the transparency component of a pixel
+            in an image.
+         */
         text: qsTr("Alpha diff")
     }
     Slider {
@@ -219,18 +246,22 @@ GridLayout {
 
         onValueChanged: Fire.alphaDiff = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbAlphaDiff
-        rvalue: Fire.alphaDiff
-        minimumValue: sldAlphaDiff.from
-        maximumValue: sldAlphaDiff.to
-        step: sldAlphaDiff.stepSize
+        value: Fire.alphaDiff
+        from: sldAlphaDiff.from
+        to: sldAlphaDiff.to
+        stepSize: sldAlphaDiff.stepSize
+        editable: true
 
-        onRvalueChanged: Fire.alphaDiff = rvalue
+        onValueChanged: Fire.alphaDiff = value
     }
 
     // Alpha variation.
     Label {
+        /*: Alpha channel, also known as the transparency component of a pixel
+            in an image.
+         */
         text: qsTr("Alpha variation")
     }
     Slider {
@@ -242,13 +273,14 @@ GridLayout {
 
         onValueChanged: Fire.alphaVariation = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbAlphaVariation
-        rvalue: Fire.alphaVariation
-        maximumValue: sldAlphaVariation.to
-        step: sldAlphaVariation.stepSize
+        value: Fire.alphaVariation
+        to: sldAlphaVariation.to
+        stepSize: sldAlphaVariation.stepSize
+        editable: true
 
-        onRvalueChanged: Fire.alphaVariation = rvalue
+        onValueChanged: Fire.alphaVariation = value
     }
 
     // N° of colors.
@@ -264,12 +296,13 @@ GridLayout {
 
         onValueChanged: Fire.nColors = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbNColors
-        rvalue: Fire.nColors
-        maximumValue: sldNColors.to
-        step: sldNColors.stepSize
+        value: Fire.nColors
+        to: sldNColors.to
+        stepSize: sldNColors.stepSize
+        editable: true
 
-        onRvalueChanged: Fire.nColors = rvalue
+        onValueChanged: Fire.nColors = value
     }
 }

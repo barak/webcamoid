@@ -168,9 +168,17 @@ class VideoStreamPrivate
 };
 
 VideoStream::VideoStream(AMediaExtractor *mediaExtractor,
-                         uint index, qint64 id, Clock *globalClock,
+                         uint index,
+                         qint64 id,
+                         Clock *globalClock,
+                         bool sync,
                          QObject *parent):
-    AbstractStream(mediaExtractor, index, id, globalClock, parent)
+    AbstractStream(mediaExtractor,
+                   index,
+                   id,
+                   globalClock,
+                   sync,
+                   parent)
 {
     this->d = new VideoStreamPrivate(this);
     this->m_maxData = 3;
@@ -219,7 +227,7 @@ bool VideoStream::decodeData()
         auto packet = this->d->readPacket(size_t(bufferIndex), info);
 
         if (packet)
-            this->avPacketEnqueue(packet);
+            this->dataEnqueue(packet);
 
         AMediaCodec_releaseOutputBuffer(this->codec(),
                                         size_t(bufferIndex),
@@ -227,7 +235,7 @@ bool VideoStream::decodeData()
     }
 
     if (info.flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM) {
-        this->avPacketEnqueue({});
+        this->dataEnqueue({});
 
         return false;
     }
@@ -235,8 +243,15 @@ bool VideoStream::decodeData()
     return true;
 }
 
-void VideoStream::processPacket(const AkPacket &packet)
+void VideoStream::processData(const AkPacket &packet)
 {
+    if (!this->sync()) {
+        auto oPacket = AkVideoPacket(packet).convert(AkVideoCaps::Format_rgb24);
+        emit this->oStream(oPacket);
+
+        return;
+    }
+
     forever {
         qreal pts = packet.pts() * packet.timeBase().value();
         qreal diff = pts - this->globalClock()->clock();

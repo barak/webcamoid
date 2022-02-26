@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 ColumnLayout {
@@ -32,6 +32,7 @@ ColumnLayout {
     }
 
     Label {
+        //: https://en.wikipedia.org/wiki/Transformation_matrix
         text: qsTr("Transform matrix")
     }
     GridLayout {
@@ -42,6 +43,7 @@ ColumnLayout {
             id: xx
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[0]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
@@ -52,6 +54,7 @@ ColumnLayout {
             id: xy
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[1]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
@@ -62,6 +65,7 @@ ColumnLayout {
             id: x0
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[2]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
@@ -74,6 +78,7 @@ ColumnLayout {
             id: yx
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[3]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
@@ -84,6 +89,7 @@ ColumnLayout {
             id: yy
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[4]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
@@ -94,6 +100,7 @@ ColumnLayout {
             id: y0
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[5]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }

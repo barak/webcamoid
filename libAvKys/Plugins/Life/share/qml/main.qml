@@ -17,60 +17,48 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 3
 
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
-    }
-
     Connections {
         target: Life
 
-        onThresholdChanged: {
+        function onThresholdChanged(threshold)
+        {
             sldThreshold.value = threshold
-            spbThreshold.rvalue = threshold
+            spbThreshold.value = threshold
         }
 
-        onLumaThresholdChanged: {
+        function onLumaThresholdChanged(lumaThreshold)
+        {
             sldLumaThreshold.value = lumaThreshold
-            spbLumaThreshold.rvalue = lumaThreshold
+            spbLumaThreshold.value = lumaThreshold
         }
     }
 
     Label {
         text: qsTr("Color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Life.lifeColor)
-        title: qsTr("Choose the automata color")
-        showAlphaChannel: true
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onCurrentColorChanged: Life.lifeColor = toRgba(currentColor)
-    }
-    Label {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Life.lifeColor)
+            //: https://en.wikipedia.org/wiki/Life-like_cellular_automaton
+            title: qsTr("Choose the automata color")
+            showAlphaChannel: true
+
+            onCurrentColorChanged: Life.lifeColor = AkUtils.toRgba(currentColor)
+        }
     }
 
     Label {
@@ -86,17 +74,22 @@ GridLayout {
 
         onValueChanged: Life.threshold = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbThreshold
-        rvalue: Life.threshold
-        maximumValue: sldThreshold.to
-        step: sldThreshold.stepSize
+        value: Life.threshold
+        to: sldThreshold.to
+        stepSize: sldThreshold.stepSize
+        editable: true
 
-        onRvalueChanged: Life.threshold = rvalue
+        onValueChanged: Life.threshold = value
     }
 
     Label {
-        id: lblLumaThreshold
+        /*: Minimum luminance/light/white level/intensity in a gray or black and
+            white picture.
+
+            https://en.wikipedia.org/wiki/Luma_(video)
+         */
         text: qsTr("Luma Threshold")
     }
     Slider {
@@ -108,12 +101,13 @@ GridLayout {
 
         onValueChanged: Life.lumaThreshold = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbLumaThreshold
-        rvalue: Life.lumaThreshold
-        maximumValue: sldLumaThreshold.to
-        step: sldLumaThreshold.stepSize
+        value: Life.lumaThreshold
+        to: sldLumaThreshold.to
+        stepSize: sldLumaThreshold.stepSize
+        editable: true
 
-        onRvalueChanged: Life.lumaThreshold = rvalue
+        onValueChanged: Life.lumaThreshold = value
     }
 }

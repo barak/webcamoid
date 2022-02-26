@@ -17,726 +17,589 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Window 2.2
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Window 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQml 1.0
+import Qt.labs.settings 1.0 as LABS
+import Ak 1.0
 import Webcamoid 1.0
-import WebcamoidUpdates 1.0
-import AkQmlControls 1.0
 
 ApplicationWindow {
     id: wdgMainWidget
-    title: Webcamoid.applicationName()
+    title: mediaTools.applicationName
            + " "
-           + Webcamoid.applicationVersion()
+           + version()
            + " - "
-           + MediaSource.description(MediaSource.stream)
+           + videoLayer.description(videoLayer.videoInput)
     visible: true
-    x: (Screen.desktopAvailableWidth - width) / 2
-    y: (Screen.desktopAvailableHeight - height) / 2
-    width: Webcamoid.windowWidth
-    height: Webcamoid.windowHeight
-    color: palette.window
+    x: (Screen.width - mediaTools.windowWidth) / 2
+    y: (Screen.height - mediaTools.windowHeight) / 2
+    width: mediaTools.windowWidth
+    height: mediaTools.windowHeight
 
-    property bool showEffectBar: false
-
-    function rgbChangeAlpha(color, alpha)
+    function version()
     {
-        return Qt.rgba(color.r, color.g, color.b, alpha);
-    }
+        if (mediaTools.isDailyBuild) {
+            let versionStr = qsTr("Daily Build")
 
-    function togglePlay() {
-        if (MediaSource.state === AkElement.ElementStatePlaying) {
-            Webcamoid.virtualCameraState = AkElement.ElementStateNull;
-            Recording.state = AkElement.ElementStateNull;
-            MediaSource.state = AkElement.ElementStateNull;
+            if (mediaTools.projectGitShortCommit.length > 0)
+                versionStr += " (" + mediaTools.projectGitShortCommit + ")"
 
-            if (splitView.state == "showRecordPanels")
-                splitView.state = "";
-        } else {
-            MediaSource.state = AkElement.ElementStatePlaying;
-
-            if (Webcamoid.enableVirtualCamera)
-                Webcamoid.virtualCameraState = AkElement.ElementStatePlaying;
+            return versionStr
         }
+
+        return mediaTools.applicationVersion
     }
 
-    function notifyUpdate(versionType)
+    function savePhoto()
     {
-        if (Updates.notifyNewVersion
-            && versionType == UpdatesT.VersionTypeOld) {
-            trayIcon.show();
-            trayIcon.showMessage(qsTr("New version available!"),
-                                 qsTr("Download %1 %2 NOW!")
-                                    .arg(Webcamoid.applicationName())
-                                    .arg(Updates.latestVersion));
-            notifyTimer.start();
+        recording.takePhoto()
+        recording.savePhoto(qsTr("%1/Picture %2.%3")
+                            .arg(recording.imagesDirectory)
+                            .arg(mediaTools.currentTime())
+                            .arg(recording.imageFormat))
+        photoPreviewSaveAnimation.start()
+    }
+
+    function pathToUrl(path)
+    {
+        if (path.length < 1)
+            return ""
+
+        return "file://" + path
+    }
+
+    onWidthChanged: mediaTools.windowWidth = width
+    onHeightChanged: mediaTools.windowHeight = height
+
+    Component.onCompleted: chkFlash.updateVisibility()
+
+    Connections {
+        target: videoLayer
+
+        function onVideoInputChanged()
+        {
+            chkFlash.updateVisibility()
         }
-    }
-
-    SystemPalette {
-        id: palette
-    }
-    Timer {
-        id: notifyTimer
-        repeat: false
-        triggeredOnStart: false
-        interval: 10000
-
-        onTriggered: trayIcon.hide()
-    }
-
-    onWidthChanged: Webcamoid.windowWidth = width
-    onHeightChanged: Webcamoid.windowHeight = height
-    onClosing: trayIcon.hide()
-
-    Component.onCompleted: {
-        if (MediaSource.playOnStart)
-            togglePlay();
-
-        notifyUpdate(Updates.versionType);
-    }
-
-    Connections {
-        target: MediaSource
-
-        onStateChanged: {
-            if (state === AkElement.ElementStatePlaying) {
-                itmPlayStopButton.text = qsTr("Stop")
-                itmPlayStopButton.icon = "image://icons/webcamoid-stop"
-                videoDisplay.visible = true
-            } else {
-                itmPlayStopButton.text = qsTr("Play")
-                itmPlayStopButton.icon = "image://icons/webcamoid-play"
-                videoDisplay.visible = false
-            }
-        }
-    }
-    Connections {
-        target: Recording
-
-        onStateChanged: recordingNotice.visible = state === AkElement.ElementStatePlaying
-    }
-    Connections {
-        target: Updates
-
-        onVersionTypeChanged: notifyUpdate(versionType);
-    }
-    Connections {
-        target: trayIcon
-
-        onMessageClicked: Qt.openUrlExternally(Webcamoid.projectDownloadsUrl())
     }
 
     VideoDisplay {
         id: videoDisplay
         objectName: "videoDisplay"
-        visible: false
+        visible: videoLayer.state == AkElement.ElementStatePlaying
         smooth: true
         anchors.fill: parent
     }
+    Image {
+        id: photoPreviewThumbnail
+        source: pathToUrl(recording.lastPhotoPreview)
+        sourceSize: Qt.size(width, height)
+        cache: false
+        smooth: true
+        mipmap: true
+        fillMode: Image.PreserveAspectFit
+        x: k * AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        y: k * (controlsLayout.y
+                + (controlsLayout.height - photoPreview.height) / 2)
+        width: k * (photoPreview.width - parent.width) + parent.width
+        height: k * (photoPreview.height - parent.height) + parent.height
+        visible: false
 
-    Rectangle {
-        id: recordingNotice
-        color: "black"
-        width: 128
-        height: 60
-        radius: 4
+        property real k: 0
+    }
+    Image {
+        id: videoPreviewThumbnail
+        source: pathToUrl(recording.lastVideoPreview)
+        sourceSize: Qt.size(width, height)
+        cache: false
+        smooth: true
+        mipmap: true
+        fillMode: Image.PreserveAspectFit
+        x: k * (parent.width
+                - videoPreview.width
+                - AkUnit.create(16 * AkTheme.controlScale, "dp").pixels)
+        y: k * (controlsLayout.y
+                + (controlsLayout.height - videoPreview.height) / 2)
+        width: k * (videoPreview.width - parent.width) + parent.width
+        height: k * (videoPreview.height - parent.height) + parent.height
+        visible: false
+
+        property real k: 0
+    }
+
+    ColumnLayout {
+        id: leftControls
+        width: AkUnit.create(150 * AkTheme.controlScale, "dp").pixels
         anchors.top: parent.top
-        anchors.topMargin: 16
-        anchors.horizontalCenter: parent.horizontalCenter
-        visible: false
+        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        anchors.left: parent.left
+        anchors.leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        state: cameraControls.state
 
-        onVisibleChanged: {
-            if (visible) {
-                recordingTimer.startTime = new Date().getTime()
-                recordingTimer.start()
-            } else
-                recordingTimer.stop()
+        Button {
+            icon.source: "image://icons/video-effects"
+            display: AbstractButton.IconOnly
+            flat: true
+
+            onClicked: videoEffectsPanel.open()
         }
-
-        Image {
-            id: recordingIcon
-            source: "image://icons/webcamoid-recording"
-            sourceSize: Qt.size(width, height)
-            width: height
-            anchors.left: parent.left
-            anchors.leftMargin: 8
-            anchors.top: parent.top
-            anchors.topMargin: 8
-            anchors.bottom: recordingTime.top
-        }
-        Label {
-            text: qsTr("Recording")
-            color: "white"
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            anchors.left: recordingIcon.right
-            anchors.leftMargin: 8
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            anchors.top: parent.top
-            anchors.topMargin: 8
-            anchors.bottom: recordingTime.top
-        }
-        Label {
-            id: recordingTime
-            color: "white"
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            anchors.left: parent.left
-            anchors.leftMargin: 8
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 8
-        }
-
-        Timer {
-            id: recordingTimer
-            interval: 500
-            repeat: true
-
-            property double startTime: new Date().getTime()
-
-            function pad(x)
-            {
-                return x < 10? "0" + x: x
-            }
-
-            onTriggered: {
-                var diffTime = (new Date().getTime() - startTime) / 1000
-                diffTime = parseInt(diffTime, 10)
-
-                var ss = diffTime % 60;
-                diffTime = (diffTime - ss) / 60;
-                var mm = diffTime % 60;
-                var hh = (diffTime - mm) / 60;
-
-                recordingTime.text = pad(hh) + ":" + pad(mm) + ":" + pad(ss)
-            }
-        }
-
-        SequentialAnimation on opacity {
-            loops: Animation.Infinite
-            running: recordingNotice.visible
-
-            PropertyAnimation {
-                easing.type: Easing.OutSine
-                to: 0
-                duration: 1000
-            }
-            PropertyAnimation {
-                easing.type: Easing.InSine
-                to: 1
-                duration: 1000
-            }
-        }
-    }
-
-    PhotoWidget {
-        id: photoWidget
-        anchors.bottom: iconBarRect.top
-        anchors.bottomMargin: 16
-        anchors.horizontalCenter: parent.horizontalCenter
-        visible: false
-
-        function savePhoto()
-        {
-            Recording.takePhoto()
-            var suffix = "png";
-            var fileName = qsTr("Picture %1.%2")
-                                .arg(Webcamoid.currentTime())
-                                .arg(suffix)
-
-            var filters = ["PNG file (*.png)",
-                           "JPEG file (*.jpg)",
-                           "BMP file (*.bmp)",
-                           "GIF file (*.gif)"]
-
-            var fileUrl = Webcamoid.saveFileDialog(qsTr("Save photo as..."),
-                                     fileName,
-                                     Webcamoid.standardLocations("pictures")[0],
-                                     "." + suffix,
-                                     filters.join(";;"))
-
-            if (fileUrl !== "")
-                Recording.savePhoto(fileUrl)
-        }
-
-        onTakePhoto: {
-            if (useFlash)
-                flash.show()
-            else
-                savePhoto()
-        }
-    }
-
-    AkSplitView {
-        id: splitView
-        anchors.fill: parent
-        orientation: Qt.Horizontal
-        Layout.minimumWidth: 600
-
-        RowLayout {
-            id: leftPanel
-            width: 200
+        Switch {
+            id: chkFlash
+            text: qsTr("Use flash")
+            checked: true
+            Layout.fillWidth: true
             visible: false
 
-            Rectangle {
-                color: rgbChangeAlpha(palette.window, 0.9)
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                MediaBar {
-                    id: mdbMediaBar
-                    visible: false
-                    anchors.fill: parent
-                }
-                AudioConfig {
-                    id: audioConfig
-                    visible: false
-                    anchors.fill: parent
-                }
-                EffectBar {
-                    id: effectBar
-                    visible: false
-                    anchors.fill: parent
-                    onCurEffectChanged: effectConfig.curEffect = curEffect
-                    onCurEffectIndexChanged: effectConfig.curEffectIndex = curEffectIndex
-                }
-                RecordBar {
-                    id: recordBar
-                    visible: false
-                    anchors.fill: parent
-                }
-                ConfigBar {
-                    id: configBar
-                    visible: false
-                    anchors.fill: parent
-
-                    onOptionChanged: {
-                        if (generalConfig.children[0])
-                            generalConfig.children[0].destroy()
-
-                        var options = {
-                            "output": "OutputConfig.qml",
-                            "general": "GeneralConfig.qml",
-                            "plugins": "PluginConfig.qml",
-                            "updates": "UpdatesConfig.qml",
-                        }
-
-                        if (options[option]) {
-                            var component = Qt.createComponent(options[option]);
-
-                            if (component.status === Component.Ready) {
-                                var object = component.createObject(generalConfig);
-                                object.anchors.fill = generalConfig;
-                            }
-                        }
-                    }
-                }
+            function updateVisibility()
+            {
+                visible =
+                        videoLayer.deviceType(videoLayer.videoInput) == VideoLayer.InputCamera
             }
         }
+        ComboBox {
+            id: cbxTimeShot
+            textRole: "text"
+            Layout.fillWidth: true
+            visible: chkFlash.visible
+            model: ListModel {
+                id: lstTimeOptions
+
+                ListElement {
+                    text: qsTr("Now")
+                    time: 0
+                }
+            }
+
+            Component.onCompleted: {
+                for (var i = 5; i < 35; i += 5)
+                    lstTimeOptions.append({text: qsTr("%1 seconds").arg(i),
+                                           time: i})
+            }
+        }
+
+        states: [
+            State {
+                name: "Video"
+
+                PropertyChanges {
+                    target: chkFlash
+                    visible: false
+                }
+            }
+        ]
+
+        transitions: Transition {
+            PropertyAnimation {
+                target: chkFlash
+                properties: "visible"
+                duration: cameraControls.animationTime
+            }
+        }
+    }
+
+    Button {
+        id: rightControls
+        icon.source: "image://icons/settings"
+        display: AbstractButton.IconOnly
+        flat: true
+        anchors.top: parent.top
+        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        anchors.right: parent.right
+        anchors.rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+
+        onClicked: settings.popup()
+    }
+    SettingsMenu {
+        id: settings
+        width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
+
+        onOpenAudioSettings: audioVideoPanel.openAudioSettings()
+        onOpenVideoSettings: audioVideoPanel.openVideoSettings()
+        onOpenSettings: settingsDialog.open()
+        onOpenDonationsDialog: Qt.openUrlExternally(mediaTools.projectDonationsUrl)
+        onOpenAboutDialog: aboutDialog.open()
+    }
+    RecordingNotice {
+        anchors.top: parent.top
+        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: recording.state == AkElement.ElementStatePlaying
+    }
+    ColumnLayout {
+        id: controlsLayout
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
         Item {
+            id: cameraControls
+            Layout.margins:
+                AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            height: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
             Layout.fillWidth: true
-        }
 
-        RowLayout {
-            id: rightPanel
-            visible: false
-            width: 400
+            readonly property int animationTime: 200
 
-            Rectangle {
-                color: rgbChangeAlpha(palette.window, 0.9)
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+            Image {
+                id: photoPreview
+                source: pathToUrl(recording.lastPhotoPreview)
+                width: AkUnit.create(32 * AkTheme.controlScale, "dp").pixels
+                height: AkUnit.create(32 * AkTheme.controlScale, "dp").pixels
+                sourceSize: Qt.size(width, height)
+                asynchronous: true
+                cache: false
+                smooth: true
+                mipmap: true
+                fillMode: Image.PreserveAspectCrop
+                y: (parent.height - height) / 2
 
-                MediaConfig {
-                    id: mediaConfig
-                    visible: false
-                    anchors.fill: parent
-                }
-                AudioInfo {
-                    id: audioInfo
-                    visible: false
-                    anchors.fill: parent
-                    state: audioConfig.state
-                }
-                EffectConfig {
-                    id: effectConfig
-                    curEffect: effectBar.curEffect
-                    curEffectIndex: effectBar.curEffectIndex
-                    editMode: !effectBar.editMode
-                    visible: false
-                    anchors.fill: parent
-                }
-                RecordConfig {
-                    id: recordConfig
-                    anchors.fill: parent
-                    visible: false
-                }
-                ColumnLayout {
-                    id: generalConfig
-                    anchors.fill: parent
-                    visible: false
-                }
-            }
-        }
-
-        states: [
-            State {
-                name: "showMediaPanels"
-                PropertyChanges {
-                    target: leftPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: rightPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: mdbMediaBar
-                    visible: true
-                }
-                PropertyChanges {
-                    target: mediaConfig
-                    visible: true
-                }
-            },
-            State {
-                name: "showAudioPanels"
-                PropertyChanges {
-                    target: leftPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: rightPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: audioConfig
-                    visible: true
-                }
-                PropertyChanges {
-                    target: audioInfo
-                    visible: true
-                }
-            },
-            State {
-                name: "showPhotoWidget"
-                PropertyChanges {
-                    target: photoWidget
-                    visible: true
-                }
-            },
-            State {
-                name: "showEffectPanels"
-                PropertyChanges {
-                    target: leftPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: rightPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: effectBar
-                    visible: true
-                }
-                PropertyChanges {
-                    target: effectConfig
-                    visible: true
-                }
-            },
-            State {
-                name: "showRecordPanels"
-                PropertyChanges {
-                    target: leftPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: rightPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: recordBar
-                    visible: true
-                }
-                PropertyChanges {
-                    target: recordConfig
-                    visible: true
-                }
-            },
-            State {
-                name: "showConfigPanels"
-                PropertyChanges {
-                    target: leftPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: rightPanel
-                    visible: true
-                }
-                PropertyChanges {
-                    target: configBar
-                    visible: true
-                }
-                PropertyChanges {
-                    target: generalConfig
-                    visible: true
-                }
-            }
-        ]
-    }
-
-    Rectangle {
-        id: iconBarRect
-        width: height * nIcons
-        height: 48
-        radius: height / 2
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        opacity: 0.5
-
-        property real nIcons: 8
-
-        gradient: Gradient {
-            GradientStop {
-                position: 0
-                color: Qt.rgba(0.25, 0.25, 0.25, 1)
-            }
-            GradientStop {
-                position: 1
-                color: Qt.rgba(0, 0, 0, 1)
-            }
-        }
-
-        MouseArea {
-            id: mouseArea
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.top: parent.top
-            hoverEnabled: true
-            onEntered: iconBarRect.opacity = 1
-            onExited: iconBarRect.opacity = 0.5
-
-            Rectangle {
-                id: btnGoBack
-                height: parent.height
-                width: height
-                color: "#00000000"
-                visible: false
-
-                property int margins: 8
-
-                Component.onCompleted: {
-                    btnGoBack.width = imgGoBack.width + txtGoBack.width + 3 * btnGoBack.margins
-                }
-
-                Rectangle {
-                    id: highlighter
-                    radius: iconBarRect.radius
-                    anchors.fill: parent
-                    visible: false
-                    gradient: Gradient {
-                        GradientStop {
-                            position: 0
-                            color: Qt.rgba(0.67, 0.5, 1, 0.5)
-                        }
-
-                        GradientStop {
-                            position: 1
-                            color: Qt.rgba(0.5, 0.25, 1, 1)
-                        }
-                    }
-                }
-                Image {
-                    id: imgGoBack
-                    height: parent.height - 2 * btnGoBack.margins
-                    anchors.left: parent.left
-                    anchors.leftMargin: btnGoBack.margins
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: height
-                    source: "image://icons/webcamoid-go-back"
-                    sourceSize: Qt.size(width, height)
-                }
-                Label {
-                    id: txtGoBack
-                    text: qsTr("Go back")
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: imgGoBack.right
-                    anchors.leftMargin: btnGoBack.margins
-                    color: "white"
-                }
                 MouseArea {
+                    cursorShape: enabled?
+                                     Qt.PointingHandCursor:
+                                     Qt.ArrowCursor
                     anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
+                    enabled: photoPreview.visible
+                             && photoPreview.status == Image.Ready
 
                     onClicked: {
-                        iconBarRect.state = ""
-                        splitView.state = ""
+                        if (photoPreview.status == Image.Ready)
+                            Qt.openUrlExternally(photoPreview.source)
                     }
-                    onPressed: {
-                        imgGoBack.scale = 0.75
-                        txtGoBack.scale = 0.75
+                }
+            }
+            RoundButton {
+                id: photoButton
+                icon.source: "image://icons/photo"
+                width: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+                height: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+                x: (parent.width - width) / 2
+                y: (parent.height - height) / 2
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Take a photo")
+                focus: true
+                enabled: recording.state == AkElement.ElementStateNull
+                         && (videoLayer.state == AkElement.ElementStatePlaying
+                             || cameraControls.state == "Video")
+
+                onClicked: {
+                    if (cameraControls.state == "Video") {
+                        cameraControls.state = ""
+                    } else {
+                        if (!chkFlash.visible) {
+                            savePhoto()
+
+                            return
+                        }
+
+                        if (cbxTimeShot.currentIndex == 0) {
+                            if (chkFlash.checked)
+                                flash.show()
+                            else
+                                savePhoto()
+
+                            return
+                        }
+
+                        if (updateProgress.running) {
+                            updateProgress.stop()
+                            pgbPhotoShot.value = 0
+                            cbxTimeShot.enabled = true
+                            chkFlash.enabled = true
+                        } else {
+                            cbxTimeShot.enabled = false
+                            chkFlash.enabled = false
+                            pgbPhotoShot.start = new Date().getTime()
+                            updateProgress.start()
+                        }
                     }
-                    onReleased: {
-                        imgGoBack.scale = 1
-                        txtGoBack.scale = 1
+                }
+            }
+            RoundButton {
+                id: videoButton
+                icon.source: recording.state == AkElement.ElementStateNull?
+                                 "image://icons/video":
+                                 "image://icons/record-stop"
+                width: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
+                height: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
+                x: parent.width - width
+                y: (parent.height - height) / 2
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Record video")
+                enabled: videoLayer.state == AkElement.ElementStatePlaying
+                         || cameraControls.state == ""
+
+                onClicked: {
+                    if (cameraControls.state == "") {
+                        cameraControls.state = "Video"
+                    } else if (recording.state == AkElement.ElementStateNull) {
+                        recording.state = AkElement.ElementStatePlaying
+                    } else {
+                        recording.state = AkElement.ElementStateNull
+                        videoPreviewSaveAnimation.start()
                     }
-                    onEntered: {
-                        highlighter.visible = true
-                    }
-                    onExited: {
-                        imgGoBack.scale = 1
-                        txtGoBack.scale = 1
-                        highlighter.visible = false
+                }
+            }
+            Image {
+                id: videoPreview
+                source: pathToUrl(recording.lastVideoPreview)
+                width: 0
+                height: 0
+                sourceSize: Qt.size(width, height)
+                asynchronous: true
+                cache: false
+                smooth: true
+                mipmap: true
+                fillMode: Image.PreserveAspectCrop
+                visible: false
+                x: parent.width - width
+                y: (parent.height - height) / 2
+
+                MouseArea {
+                    cursorShape: enabled?
+                                     Qt.PointingHandCursor:
+                                     Qt.ArrowCursor
+                    anchors.fill: parent
+                    enabled: videoPreview.visible
+                             && videoPreview.status == Image.Ready
+
+                    onClicked: {
+                        if (videoPreview.status == Image.Ready)
+                            Qt.openUrlExternally("file://" + recording.lastVideo)
                     }
                 }
             }
 
-            Row {
-                id: iconBar
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
-                anchors.top: parent.top
-                objectName: "IconBar"
+            states: [
+                State {
+                    name: "Video"
 
-                IconBarItem {
-                    id: itmPlayStopButton
-                    width: iconBarRect.height
-                    height: iconBarRect.height
-                    text: qsTr("Play")
-                    icon: "image://icons/webcamoid-play"
-
-                    onClicked: togglePlay()
-                }
-                IconBarItem {
-                    width: iconBarRect.height
-                    height: iconBarRect.height
-                    text: qsTr("Configure sources")
-                    icon: "image://icons/webcamoid-camera-web"
-
-                    onClicked: {
-                        if (splitView.state == "showMediaPanels")
-                            splitView.state = ""
-                        else
-                            splitView.state = "showMediaPanels"
+                    PropertyChanges {
+                        target: photoPreview
+                        width: 0
+                        height: 0
+                        visible: false
+                    }
+                    PropertyChanges {
+                        target: photoButton
+                        width: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
+                        height: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
+                        x: 0
+                    }
+                    PropertyChanges {
+                        target: videoButton
+                        width: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+                        height: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+                        x: (parent.width - width) / 2
+                    }
+                    PropertyChanges {
+                        target: videoPreview
+                        width: AkUnit.create(32 * AkTheme.controlScale, "dp").pixels
+                        height: AkUnit.create(32 * AkTheme.controlScale, "dp").pixels
+                        visible: true
                     }
                 }
-                IconBarItem {
-                    width: iconBarRect.height
-                    height: iconBarRect.height
-                    text: qsTr("Configure audio")
-                    icon: "image://icons/webcamoid-sound"
+            ]
 
-                    onClicked: {
-                        if (splitView.state == "showAudioPanels")
-                            splitView.state = ""
-                        else
-                            splitView.state = "showAudioPanels"
-                    }
+            transitions: Transition {
+                PropertyAnimation {
+                    target: photoPreview
+                    properties: "width,height,visible"
+                    duration: cameraControls.animationTime
                 }
-                IconBarItem {
-                    width: iconBarRect.height
-                    height: iconBarRect.height
-                    text: qsTr("Take a photo")
-                    icon: "image://icons/webcamoid-picture"
-                    enabled: MediaSource.state === AkElement.ElementStatePlaying
-
-                    onClicked: {
-                        if (splitView.state == "showPhotoWidget")
-                            splitView.state = ""
-                        else
-                            splitView.state = "showPhotoWidget"
-                    }
+                PropertyAnimation {
+                    target: photoButton
+                    properties: "radius,x"
+                    duration: cameraControls.animationTime
                 }
-                IconBarItem {
-                    width: iconBarRect.height
-                    height: iconBarRect.height
-                    text: qsTr("Record video")
-                    icon: "image://icons/webcamoid-video"
-                    enabled: MediaSource.state === AkElement.ElementStatePlaying
-
-                    onClicked: {
-                        if (splitView.state == "showRecordPanels")
-                            splitView.state = ""
-                        else
-                            splitView.state = "showRecordPanels"
-                    }
+                PropertyAnimation {
+                    target: videoButton
+                    properties: "radius,x"
+                    duration: cameraControls.animationTime
                 }
-                IconBarItem {
-                    width: iconBarRect.height
-                    height: iconBarRect.height
-                    text: qsTr("Configure Effects")
-                    icon: "image://icons/webcamoid-effects"
-
-                    onClicked: {
-                        if (splitView.state == "showEffectPanels")
-                            splitView.state = ""
-                        else
-                            splitView.state = "showEffectPanels"
-                    }
-                }
-                IconBarItem {
-                    width: iconBarRect.height
-                    height: iconBarRect.height
-                    text: qsTr("Preferences")
-                    icon: "image://icons/webcamoid-setup"
-
-                    onClicked: {
-                        if (splitView.state == "showConfigPanels")
-                            splitView.state = ""
-                        else
-                            splitView.state = "showConfigPanels"
-                    }
-                }
-                IconBarItem {
-                    width: iconBarRect.height
-                    height: iconBarRect.height
-                    text: qsTr("About")
-                    icon: "image://icons/webcamoid-help-about"
-
-                    onClicked: about.show()
+                PropertyAnimation {
+                    target: videoPreview
+                    properties: "width,height,visible"
+                    duration: cameraControls.animationTime
                 }
             }
         }
+        ProgressBar {
+            id: pgbPhotoShot
+            Layout.fillWidth: true
+            visible: updateProgress.running
 
-        states: [
-            State {
-                name: "showOptions"
-                PropertyChanges {
-                    target: iconBarRect
-                    width: btnGoBack.width
-                    radius: 4
-                }
-                PropertyChanges {
-                    target: iconBar
-                    visible: false
-                }
-                PropertyChanges {
-                    target: btnGoBack
-                    visible: true
+            property double start: 0
+
+            onValueChanged: {
+                if (value >= 1) {
+                    updateProgress.stop()
+                    value = 0
+                    cbxTimeShot.enabled = true
+                    chkFlash.enabled = true
+
+                    if (chkFlash.checked)
+                        flash.show()
+                    else
+                        savePhoto()
                 }
             }
-        ]
+        }
+    }
+    VideoEffectsPanel {
+        id: videoEffectsPanel
+
+        onOpenVideoEffectsDialog: videoEffectsDialog.open()
+    }
+    AudioVideoPanel {
+        id: audioVideoPanel
+
+        onOpenErrorDialog: videoOutputError.openError(title, message)
     }
 
+    SequentialAnimation {
+        id: photoPreviewSaveAnimation
+
+        PropertyAnimation {
+            target: photoPreviewThumbnail
+            property: "k"
+            to: 0
+            duration: 0
+        }
+        PropertyAnimation {
+            target: photoPreview
+            property: "visible"
+            to: false
+            duration: 0
+        }
+        PropertyAnimation {
+            target: photoPreviewThumbnail
+            property: "visible"
+            to: true
+            duration: 0
+        }
+        PropertyAnimation {
+            target: photoPreviewThumbnail
+            property: "k"
+            to: 1
+            duration: 500
+        }
+        PropertyAnimation {
+            target: photoPreviewThumbnail
+            property: "visible"
+            to: false
+            duration: 0
+        }
+        PropertyAnimation {
+            target: photoPreview
+            property: "visible"
+            to: true
+            duration: 0
+        }
+    }
+    SequentialAnimation {
+        id: videoPreviewSaveAnimation
+
+        PropertyAnimation {
+            target: videoPreviewThumbnail
+            property: "k"
+            to: 0
+            duration: 0
+        }
+        PropertyAnimation {
+            target: videoPreview
+            property: "visible"
+            to: false
+            duration: 0
+        }
+        PropertyAnimation {
+            target: videoPreviewThumbnail
+            property: "visible"
+            to: true
+            duration: 0
+        }
+        PropertyAnimation {
+            target: videoPreviewThumbnail
+            property: "k"
+            to: 1
+            duration: 500
+        }
+        PropertyAnimation {
+            target: videoPreviewThumbnail
+            property: "visible"
+            to: false
+            duration: 0
+        }
+        PropertyAnimation {
+            target: videoPreview
+            property: "visible"
+            to: true
+            duration: 0
+        }
+    }
+    Timer {
+        id: updateProgress
+        interval: 100
+        repeat: true
+
+        onTriggered: {
+            var timeout = 1000 * lstTimeOptions.get(cbxTimeShot.currentIndex).time
+            pgbPhotoShot.value = (new Date().getTime() - pgbPhotoShot.start) / timeout
+        }
+    }
     Flash {
         id: flash
 
-        onTriggered: photoWidget.savePhoto()
+        onTriggered: savePhoto()
     }
-    About {
-        id: about
+    VideoEffectsDialog {
+        id: videoEffectsDialog
+        width: parent.width
+        height: parent.height
+    }
+    SettingsDialog {
+        id: settingsDialog
+        width: parent.width
+        height: parent.height
+
+        onOpenVideoFormatDialog: videoFormatOptions.open()
+        onOpenVideoCodecDialog: videoCodecOptions.open()
+        onOpenAudioCodecDialog: audioCodecOptions.open()
+    }
+    VideoFormatOptions {
+        id: videoFormatOptions
+        width: parent.width
+        height: parent.height
+    }
+    VideoCodecOptions {
+        id: videoCodecOptions
+        width: parent.width
+        height: parent.height
+    }
+    AudioCodecOptions {
+        id: audioCodecOptions
+        width: parent.width
+        height: parent.height
+    }
+    VideoOutputError {
+        id: videoOutputError
+
+        anchors.centerIn: Overlay.overlay
+    }
+    UpdatesDialog {
+        id: updatesDialog
+
+        anchors.centerIn: Overlay.overlay
+    }
+    AboutDialog {
+        id: aboutDialog
+
+        anchors.centerIn: Overlay.overlay
+    }
+    LABS.Settings {
+        category: "GeneralConfigs"
+
+        property alias useFlash: chkFlash.checked
+        property alias photoTimeout: cbxTimeShot.currentIndex
     }
 }

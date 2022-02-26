@@ -4,2195 +4,2826 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../qml/About.qml" line="27"/>
+        <location filename="../qml/About.qml" line="58"/>
+        <source>Version %1</source>
+        <translation>版本 %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="66"/>
+        <source>Built from</source>
+        <extracomment>Built from &quot;short commit hash&quot;</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="76"/>
+        <source>Using Qt %1</source>
+        <translation>使用 Qt %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="80"/>
+        <source>Website</source>
+        <translation>網站</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="89"/>
+        <source>Webcam capture application.</source>
+        <translation>網路攝影機抓取應用程式。</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="92"/>
+        <source>A simple webcam application for picture and video capture.</source>
+        <translation>一個簡單地網路攝影機應用程式，用於抓取照片與影片。</translation>
+    </message>
+</context>
+<context>
+    <name>AboutDialog</name>
+    <message>
+        <location filename="../qml/AboutDialog.qml" line="32"/>
         <source>About %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="46"/>
-        <source>Information</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/AboutDialog.qml" line="45"/>
+        <source>About</source>
+        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
+        <translation type="unfinished">關於</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="49"/>
-        <source>Thanks!</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/AboutDialog.qml" line="51"/>
+        <source>Contributors</source>
+        <extracomment>List of people contributing to the project: software developers, translators, designers, etc..</extracomment>
+        <translation type="unfinished">貢獻者</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="52"/>
+        <location filename="../qml/AboutDialog.qml" line="55"/>
         <source>License</source>
-        <translation type="unfinished"></translation>
+        <extracomment>Program license.</extracomment>
+        <translation type="unfinished">許可證</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="86"/>
-        <source>Version %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/About.qml" line="90"/>
-        <source>Using Qt %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/About.qml" line="94"/>
-        <source>Website</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/About.qml" line="103"/>
-        <source>Webcam capture application.</source>
-        <translation type="unfinished">網路攝影機抓取應用程式。</translation>
-    </message>
-    <message>
-        <location filename="../qml/About.qml" line="106"/>
-        <source>A simple webcam application for picture and video capture.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/About.qml" line="122"/>
-        <source>Thanks to all these cool people that helped contributing to Webcamoid all these years.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/About.qml" line="149"/>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/AboutDialog.qml" line="61"/>
+        <source>3rd Party Licenses</source>
+        <extracomment>License for 3rd party components used in Webcamoid, like libraries and code snippets.</extracomment>
+        <translation type="unfinished">第三方許可證</translation>
     </message>
 </context>
 <context>
-    <name>AddMedia</name>
+    <name>AddVideoFormat</name>
     <message>
-        <location filename="../qml/AddMedia.qml" line="28"/>
-        <source>Add new media</source>
-        <translation>新增新媒體</translation>
+        <location filename="../qml/AddVideoFormat.qml" line="42"/>
+        <source>Add Video Format</source>
+        <translation>新增影片格式</translation>
     </message>
     <message>
-        <location filename="../qml/AddMedia.qml" line="67"/>
-        <source>Description</source>
-        <translation>說明</translation>
+        <location filename="../qml/AddVideoFormat.qml" line="43"/>
+        <source>Change Video Format</source>
+        <translation>更改影片格式</translation>
     </message>
     <message>
-        <location filename="../qml/AddMedia.qml" line="74"/>
-        <source>Insert media description</source>
-        <translation>插入媒體說明</translation>
+        <location filename="../qml/AddVideoFormat.qml" line="95"/>
+        <source>Remove format</source>
+        <translation>移除格式</translation>
     </message>
     <message>
-        <location filename="../qml/AddMedia.qml" line="81"/>
-        <source>Media file</source>
-        <translation>媒體檔案</translation>
+        <location filename="../qml/AddVideoFormat.qml" line="106"/>
+        <source>Format</source>
+        <translation>格式</translation>
     </message>
     <message>
-        <location filename="../qml/AddMedia.qml" line="89"/>
-        <source>Select media file</source>
-        <translation>選擇媒體檔案</translation>
+        <location filename="../qml/AddVideoFormat.qml" line="115"/>
+        <source>Width</source>
+        <translation>寬度</translation>
     </message>
     <message>
-        <location filename="../qml/AddMedia.qml" line="96"/>
-        <source>Search</source>
-        <translation>搜尋</translation>
+        <location filename="../qml/AddVideoFormat.qml" line="126"/>
+        <source>Height</source>
+        <translation>高度</translation>
     </message>
     <message>
-        <location filename="../qml/AddMedia.qml" line="116"/>
-        <source>Ok</source>
-        <translation>確定</translation>
-    </message>
-    <message>
-        <location filename="../qml/AddMedia.qml" line="141"/>
-        <source>Cancel</source>
-        <translation>取消</translation>
-    </message>
-    <message>
-        <location filename="../qml/AddMedia.qml" line="151"/>
-        <source>Choose the file to add as media</source>
-        <translation>選擇要增加媒體的檔案</translation>
+        <location filename="../qml/AddVideoFormat.qml" line="137"/>
+        <source>Frame rate</source>
+        <translation>影格率</translation>
     </message>
 </context>
 <context>
-    <name>AudioConfig</name>
+    <name>AudioCodecOptions</name>
     <message>
-        <location filename="../qml/AudioConfig.qml" line="117"/>
+        <location filename="../qml/AudioCodecOptions.qml" line="27"/>
+        <source>Audio Codec Options</source>
+        <translation>音訊編解碼器選項</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="164"/>
+        <source>Bitrate</source>
+        <translation>位元率</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="168"/>
+        <source>Bitrate (bits/secs)</source>
+        <translation>位元率 （bits/秒）</translation>
+    </message>
+</context>
+<context>
+    <name>AudioDeviceOptions</name>
+    <message>
+        <location filename="../qml/AudioDeviceOptions.qml" line="27"/>
+        <source>Audio Device Options</source>
+        <translation>音訊裝置選項</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioDeviceOptions.qml" line="134"/>
+        <source>Sample Format</source>
+        <extracomment>An sample represents the strength of the wave at a certain time. A sample can be expressed as the number of bits defining it (more bits better sound), the type of data representing it (signed integer, unsigned integer, floating point), and the endianness of the data (big endian, little endian). The sample format is the representation of that information. For example, &apos;s16le&apos; means that each sample format is represented by a 16 bits signed integer arranged as little endian.</extracomment>
+        <translation>樣本格式</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioDeviceOptions.qml" line="156"/>
+        <source>Channels</source>
+        <translation type="unfinished">頻道</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioDeviceOptions.qml" line="179"/>
+        <source>Sample Rate</source>
+        <extracomment>Number of audio samples per channel to be played per second.</extracomment>
+        <translation type="unfinished">採樣率</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioDeviceOptions.qml" line="210"/>
+        <source>Latency (ms)</source>
+        <extracomment>The latency is the amount of accumulated audio ready to play, measured in time. Higher latency == smoother audio playback, but more desynchronization with the video. Lowerer latency == audio synchronization near to the video, but glitchy audio playback. https://en.wikipedia.org/wiki/Latency_(audio)</extracomment>
+        <translation>延遲（ms）</translation>
+    </message>
+</context>
+<context>
+    <name>AudioLayer</name>
+    <message>
+        <location filename="../../src/audiolayer.cpp" line="248"/>
+        <source>Silence</source>
+        <translation type="unfinished">靜音</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOptions</name>
+    <message>
+        <location filename="../qml/AudioOptions.qml" line="30"/>
         <source>Outputs</source>
         <translation>輸出</translation>
     </message>
     <message>
-        <location filename="../qml/AudioConfig.qml" line="121"/>
-        <source>Select the output device for audio playing</source>
-        <translation>選擇用於播放音訊的輸出設備</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioConfig.qml" line="134"/>
-        <source>Inputs</source>
-        <translation>輸入</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioConfig.qml" line="137"/>
-        <source>Select the device for audio capturing</source>
-        <translation>選擇用於音訊擷取的裝置</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioConfig.qml" line="193"/>
-        <location filename="../qml/AudioConfig.qml" line="295"/>
-        <source>Silence</source>
-        <translation>靜音</translation>
+        <location filename="../qml/AudioOptions.qml" line="33"/>
+        <source>Sources</source>
+        <translation>來源</translation>
     </message>
 </context>
 <context>
-    <name>AudioInfo</name>
+    <name>AudioVideoPanel</name>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="193"/>
-        <source>Description</source>
-        <translation>說明</translation>
+        <location filename="../qml/AudioVideoPanel.qml" line="27"/>
+        <source>Audio</source>
+        <translation>音訊</translation>
     </message>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="208"/>
-        <location filename="../qml/AudioInfo.qml" line="215"/>
-        <source>Device description</source>
-        <translation>裝置說明</translation>
+        <location filename="../qml/AudioVideoPanel.qml" line="29"/>
+        <source>Video</source>
+        <translation>視訊</translation>
     </message>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="223"/>
-        <location filename="../qml/AudioInfo.qml" line="238"/>
-        <location filename="../qml/AudioInfo.qml" line="245"/>
-        <source>Device id</source>
-        <translation>裝置 id</translation>
+        <location filename="../qml/AudioVideoPanel.qml" line="31"/>
+        <source>Video Source Options</source>
+        <translation>視訊來源選項</translation>
     </message>
     <message>
-        <location filename="../qml/AudioInfo.qml" line="260"/>
-        <source>Sample Format</source>
-        <translation>樣本格式</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioInfo.qml" line="286"/>
-        <source>Channels</source>
-        <translation>頻道</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioInfo.qml" line="312"/>
-        <source>Sample Rate</source>
-        <translation>採樣率</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioInfo.qml" line="338"/>
-        <source>Latency (ms)</source>
-        <translatorcomment>Is the amount of accumulated audio ready to play, measured in time. Higher latency == smoother audio playback, but more desynchronization with the video; Lowerer latency == audio desynchronization near to the video, but glitchy audio playback. https://en.wikipedia.org/wiki/Latency_(audio)</translatorcomment>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/AudioVideoPanel.qml" line="32"/>
+        <source>Video Output Options</source>
+        <translation>視訊輸出選項</translation>
     </message>
 </context>
 <context>
-    <name>CodecConfigs</name>
+    <name>Commons</name>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/CodecConfigs.qml" line="27"/>
-        <source>Configure %1</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/Commons.qml" line="28"/>
+        <source>The virtual camera is in use by the following applications:</source>
+        <translation>虛擬相機正在被下列應用程式使用：</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/CodecConfigs.qml" line="112"/>
-        <source>Search option</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/CodecConfigs.qml" line="126"/>
-        <source>Reset</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/CodecConfigs.qml" line="141"/>
-        <source>Cancel</source>
-        <translation type="unfinished">取消</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/CodecConfigs.qml" line="151"/>
-        <source>OK</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/Commons.qml" line="40"/>
+        <source>Stop the camera in those applications or close them and try again.</source>
+        <translation>在那些應用程式中停止相機，或者直接關閉該程式，並再試一次。</translation>
     </message>
 </context>
 <context>
-    <name>ConfigBar</name>
+    <name>Contributors</name>
     <message>
-        <location filename="../qml/ConfigBar.qml" line="44"/>
-        <source>Output</source>
-        <translation>輸出</translation>
-    </message>
-    <message>
-        <location filename="../qml/ConfigBar.qml" line="48"/>
-        <source>General Options</source>
-        <translation>一般選項</translation>
-    </message>
-    <message>
-        <location filename="../qml/ConfigBar.qml" line="52"/>
-        <source>Plugins Configs</source>
-        <translation>外掛配置</translation>
-    </message>
-    <message>
-        <location filename="../qml/ConfigBar.qml" line="56"/>
-        <source>Updates</source>
-        <translation>更新</translation>
+        <location filename="../qml/Contributors.qml" line="36"/>
+        <source>Thanks to all these cool people that helped contributing to Webcamoid all these years.</source>
+        <translation>謝謝這些超酷的傢伙，在這幾年來幫忙以及為 Webcamoid 貢獻。</translation>
     </message>
 </context>
 <context>
-    <name>EffectBar</name>
+    <name>DownloadDialog</name>
     <message>
-        <location filename="../qml/EffectBar.qml" line="122"/>
-        <source>Search effect...</source>
-        <translation>搜尋效果…</translation>
+        <location filename="../qml/DownloadDialog.qml" line="32"/>
+        <source>Downloading %1</source>
+        <translation>正在下載 %1</translation>
     </message>
     <message>
-        <location filename="../qml/EffectBar.qml" line="168"/>
-        <source>None</source>
-        <translation>無</translation>
+        <location filename="../qml/DownloadDialog.qml" line="148"/>
+        <source>From: %1</source>
+        <translation>來源：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="152"/>
+        <source>To: %1</source>
+        <translation>目的地：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="156"/>
+        <source>Size: %1 %2B / %3 %4B</source>
+        <translation>大小：%1 %2B / %3 %4B</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="164"/>
+        <source>Speed: %1 %2B/s</source>
+        <translation>速率：%1 %2B/s</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="170"/>
+        <source>Time remaining: %1</source>
+        <translation type="unfinished">剩餘時間: %1</translation>
     </message>
 </context>
 <context>
-    <name>EffectConfig</name>
+    <name>DownloadFailedDialog</name>
     <message>
-        <location filename="../qml/EffectConfig.qml" line="96"/>
-        <location filename="../qml/EffectConfig.qml" line="103"/>
-        <source>Plugin id</source>
-        <translation>外掛程式 ID</translation>
+        <location filename="../qml/DownloadFailedDialog.qml" line="31"/>
+        <source>Download failed</source>
+        <translation>下載失敗</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadSucceededDialog</name>
+    <message>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="31"/>
+        <source>Download ready</source>
+        <translation>下載已就緒</translation>
     </message>
     <message>
-        <location filename="../qml/EffectConfig.qml" line="83"/>
-        <source>Description</source>
-        <translation>說明</translation>
-    </message>
-    <message>
-        <location filename="../qml/EffectConfig.qml" line="90"/>
-        <source>Plugin description</source>
-        <translation>外掛程式說明</translation>
-    </message>
-    <message>
-        <location filename="../qml/EffectConfig.qml" line="119"/>
-        <source>Remove</source>
-        <translation>移除</translation>
-    </message>
-    <message>
-        <location filename="../qml/EffectConfig.qml" line="119"/>
-        <source>Add</source>
-        <translation>新增</translation>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="46"/>
+        <source>Install the virtual camera?</source>
+        <translation>是否安裝虛擬攝影機？</translation>
     </message>
 </context>
 <context>
     <name>GeneralConfig</name>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="52"/>
-        <source>Play webcam on start</source>
-        <translation>在開始時播放網路攝影機</translation>
-    </message>
-    <message>
-        <location filename="../qml/GeneralConfig.qml" line="58"/>
-        <source>Enable advanced effects mode</source>
-        <translation>啟用進階效果模式</translation>
-    </message>
-    <message>
-        <location filename="../qml/GeneralConfig.qml" line="64"/>
-        <source>Frameworks &amp; libraries</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/GeneralConfig.qml" line="74"/>
+        <location filename="../qml/GeneralConfig.qml" line="91"/>
         <source>Video capture</source>
-        <translation type="unfinished"></translation>
+        <translation>視訊抓取</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="84"/>
+        <location filename="../qml/GeneralConfig.qml" line="108"/>
         <source>Desktop capture</source>
-        <translation type="unfinished"></translation>
+        <translation>桌面抓取</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="94"/>
+        <location filename="../qml/GeneralConfig.qml" line="125"/>
         <source>Audio capture/play</source>
-        <translation type="unfinished"></translation>
+        <translation>音訊抓取／播放</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="104"/>
+        <location filename="../qml/GeneralConfig.qml" line="142"/>
         <source>Video convert</source>
-        <translation type="unfinished"></translation>
+        <translation>視訊轉換</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="114"/>
-        <source>Audio convert</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/GeneralConfig.qml" line="155"/>
+        <location filename="../qml/GeneralConfig.qml" line="193"/>
         <source>Virtual camera driver</source>
-        <translation type="unfinished"></translation>
+        <translation>虛擬相機驅動程式</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="124"/>
+        <location filename="../qml/GeneralConfig.qml" line="159"/>
         <source>Video playback</source>
-        <translation type="unfinished"></translation>
+        <translation>視訊回放</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="134"/>
+        <location filename="../qml/GeneralConfig.qml" line="72"/>
+        <source>Play sources on start</source>
+        <extracomment>Start playing the webcam and other sources right after * opening Webcamoid.</extracomment>
+        <translation>當開始時，播放其它來源</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="82"/>
+        <source>Frameworks and libraries</source>
+        <translation>框架與函式庫</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="176"/>
         <source>Video record</source>
-        <translation type="unfinished"></translation>
+        <translation>視訊錄製</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="144"/>
+        <location filename="../qml/GeneralConfig.qml" line="213"/>
         <source>Root method</source>
-        <translation type="unfinished"></translation>
+        <extracomment>The preferred method for executing commands with elevated privileges in the system.</extracomment>
+        <translation type="unfinished">根模式（Root method）</translation>
     </message>
 </context>
 <context>
-    <name>MediaBar</name>
+    <name>ImageCapture</name>
     <message>
-        <location filename="../qml/MediaBar.qml" line="62"/>
-        <source>No webcams found</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/ImageCapture.qml" line="39"/>
+        <source>Images directory</source>
+        <translation>圖片資料夾</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="49"/>
+        <source>Search</source>
+        <translation>搜尋</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="57"/>
+        <source>File format</source>
+        <translation>檔案格式</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="86"/>
+        <source>Quality</source>
+        <translation>品質</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="111"/>
+        <source>Select the folder to save your photos</source>
+        <translation>選擇一個資料夾，以存放你的照片</translation>
     </message>
 </context>
 <context>
-    <name>MediaConfig</name>
+    <name>PipewireScreenDev</name>
     <message>
-        <location filename="../qml/MediaConfig.qml" line="54"/>
-        <source>Description</source>
-        <translation>說明</translation>
-    </message>
-    <message>
-        <location filename="../qml/MediaConfig.qml" line="61"/>
-        <source>Insert media description</source>
-        <translation type="unfinished">插入媒體說明</translation>
-    </message>
-    <message>
-        <location filename="../qml/MediaConfig.qml" line="68"/>
-        <source>Media UID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/MediaConfig.qml" line="75"/>
-        <source>Select media file</source>
-        <translation type="unfinished">選擇媒體檔案</translation>
-    </message>
-    <message>
-        <location filename="../qml/MediaConfig.qml" line="90"/>
-        <source>Edit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/MediaConfig.qml" line="98"/>
-        <source>Remove</source>
-        <translation type="unfinished">移除</translation>
-    </message>
-</context>
-<context>
-    <name>MediaTools</name>
-    <message>
-        <location filename="../../src/mediatools.cpp" line="224"/>
-        <source>Daily Build</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>OutputConfig</name>
-    <message>
-        <location filename="../qml/OutputConfig.qml" line="55"/>
-        <source>Virtual camera</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>PhotoWidget</name>
-    <message>
-        <location filename="../qml/PhotoWidget.qml" line="35"/>
-        <source>%1 seconds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/PhotoWidget.qml" line="56"/>
-        <source>Now</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/PhotoWidget.qml" line="80"/>
-        <source>Cancel</source>
-        <translation type="unfinished">取消</translation>
-    </message>
-    <message>
-        <location filename="../qml/PhotoWidget.qml" line="80"/>
-        <source>Shot!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/PhotoWidget.qml" line="111"/>
-        <source>Use flash</source>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/pipewire/src/pipewirescreendev.cpp" line="217"/>
+        <source>PipeWire Screen</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>PluginConfig</name>
     <message>
+        <location filename="../qml/PluginConfig.qml" line="35"/>
+        <source>Paths</source>
+        <translation>路徑</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="38"/>
+        <source>Plugins</source>
+        <translation>擴充功能</translation>
+    </message>
+    <message>
         <location filename="../qml/PluginConfig.qml" line="110"/>
-        <source>Use this page for configuring the plugins search paths.&lt;br /&gt;&lt;b&gt;Don&apos;t touch nothing unless you know what you are doing&lt;/b&gt;.</source>
-        <translation type="unfinished"></translation>
+        <source>Search plugins in subfolders</source>
+        <translation>在子資料夾中尋找擴充功能</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="115"/>
-        <source>Extra search paths</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/PluginConfig.qml" line="119"/>
+        <source>Add path</source>
+        <translation>新增路徑</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="124"/>
-        <source>Search plugins in subfolders.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/PluginConfig.qml" line="134"/>
-        <source>Add</source>
-        <translation type="unfinished">新增</translation>
-    </message>
-    <message>
-        <location filename="../qml/PluginConfig.qml" line="141"/>
+        <location filename="../qml/PluginConfig.qml" line="162"/>
         <source>Remove</source>
-        <translation type="unfinished">移除</translation>
+        <translation>移除</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="207"/>
-        <source>Plugins list</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/PluginConfig.qml" line="196"/>
+        <source>Update</source>
+        <translation>更新</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="216"/>
-        <source>Refresh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/PluginConfig.qml" line="226"/>
-        <source>Disable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/PluginConfig.qml" line="226"/>
-        <source>Enable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/PluginConfig.qml" line="308"/>
+        <location filename="../qml/PluginConfig.qml" line="246"/>
         <source>Add plugins search path</source>
-        <translation type="unfinished"></translation>
+        <translation>新增擴充功能搜尋路徑</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../src/clioptions.cpp" line="45"/>
+        <location filename="../../src/clioptions.cpp" line="44"/>
         <source>Webcam capture application.</source>
-        <translation type="unfinished">網路攝影機抓取應用程式。</translation>
+        <translation>網路攝影機抓取應用程式。</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="48"/>
+        <location filename="../../src/clioptions.cpp" line="47"/>
         <source>Load settings from PATH. If PATH is empty, load configs from application directory.</source>
-        <translation type="unfinished"></translation>
+        <translation>從 PATH 讀取設定。如果 PATH 是空的，就從程式資料夾讀取配置。</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="50"/>
+        <location filename="../../src/clioptions.cpp" line="49"/>
         <source>PATH</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="54"/>
-        <source>Semi-colon separated list of paths to search the Qml interface.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/clioptions.cpp" line="56"/>
-        <location filename="../../src/clioptions.cpp" line="68"/>
-        <location filename="../../src/clioptions.cpp" line="74"/>
-        <location filename="../../src/clioptions.cpp" line="80"/>
+        <location filename="../../src/clioptions.cpp" line="61"/>
+        <location filename="../../src/clioptions.cpp" line="70"/>
         <source>PATH1;PATH2;PATH3;...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="61"/>
+        <location filename="../../src/clioptions.cpp" line="75"/>
+        <source>Send debug output to a file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="76"/>
+        <source>FILE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="54"/>
         <source>Search in the specified plugins paths recursively.</source>
-        <translation type="unfinished"></translation>
+        <translation>在指定的擴充功能路徑中，遞歸地尋找。</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="66"/>
+        <location filename="../../src/clioptions.cpp" line="59"/>
         <source>Semi-colon separated list of paths to search for plugins.</source>
-        <translation type="unfinished"></translation>
+        <translation>以分號（;）分割的路徑列表，用於搜尋擴充功能。</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="72"/>
+        <location filename="../../src/clioptions.cpp" line="68"/>
         <source>Semi-colon separated list of paths to avoid loading.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/clioptions.cpp" line="78"/>
-        <source>Semi-colon separated list of paths to search for virtual camera driver</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>RecordBar</name>
-    <message>
-        <location filename="../qml/RecordBar.qml" line="101"/>
-        <source>Search format...</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>RecordConfig</name>
-    <message>
-        <location filename="../qml/RecordConfig.qml" line="71"/>
-        <source>Video %1.%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/RecordConfig.qml" line="88"/>
-        <source>Stop recording video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/RecordConfig.qml" line="91"/>
-        <location filename="../qml/RecordConfig.qml" line="128"/>
-        <source>Start recording video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/RecordConfig.qml" line="99"/>
-        <source>Description</source>
-        <translation type="unfinished">說明</translation>
-    </message>
-    <message>
-        <location filename="../qml/RecordConfig.qml" line="106"/>
-        <source>Insert format description</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/RecordConfig.qml" line="193"/>
-        <source>Save video as...</source>
-        <translation type="unfinished"></translation>
+        <extracomment>Blacklist of plugins that could have conflicts when loading in Webcamoid.</extracomment>
+        <translation>以分號（;）分割的路徑列表，用以避免用以避免被讀取。（載入至 Webcamoid 時可能造成衝突的插件黑名單）。</translation>
     </message>
 </context>
 <context>
     <name>Recording</name>
     <message>
-        <location filename="../../src/recording.cpp" line="616"/>
-        <source>Audio</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/recording.cpp" line="617"/>
-        <source>Video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/recording.cpp" line="618"/>
-        <source>Subtitle</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/recording.cpp" line="683"/>
-        <location filename="../../src/recording.cpp" line="849"/>
-        <source>audio</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/recording.cpp" line="684"/>
-        <location filename="../../src/recording.cpp" line="850"/>
-        <source>video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/recording.cpp" line="685"/>
-        <location filename="../../src/recording.cpp" line="851"/>
-        <source>subtitle</source>
-        <translation type="unfinished"></translation>
+        <location filename="../../src/recording.cpp" line="372"/>
+        <source>%1/Video %2.%3</source>
+        <translation>%1/視訊 %2.%3</translation>
     </message>
 </context>
 <context>
-    <name>StreamOptions</name>
+    <name>RecordingNotice</name>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="28"/>
-        <source>Stream #%1 (%2)</source>
+        <location filename="../qml/RecordingNotice.qml" line="55"/>
+        <source>Recording</source>
+        <translation>錄製中</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/SettingsDialog.qml" line="76"/>
+        <source>Image Capture</source>
+        <translation>圖片抓取</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsDialog.qml" line="77"/>
+        <source>Video Recording</source>
+        <translation>視訊錄製</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsDialog.qml" line="78"/>
+        <source>General Options</source>
+        <translation>一般選項</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsDialog.qml" line="79"/>
+        <source>Plugins</source>
+        <translation>擴充功能</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsDialog.qml" line="80"/>
+        <source>Updates</source>
+        <translation>更新</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMenu</name>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="40"/>
+        <source>Video</source>
+        <translation>視訊</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="46"/>
+        <source>Audio</source>
+        <translation>音訊</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="52"/>
+        <source>Preferences</source>
+        <translation>偏好設定</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="58"/>
+        <source>Donate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="29"/>
-        <source>Stream #%1</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/SettingsMenu.qml" line="64"/>
+        <source>About</source>
+        <translation type="unfinished">關於</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="64"/>
-        <source>Codec</source>
-        <translation type="unfinished"></translation>
+        <location filename="../qml/SettingsMenu.qml" line="71"/>
+        <source>Play sources</source>
+        <translation>播放來源</translation>
     </message>
+</context>
+<context>
+    <name>TableColor</name>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="85"/>
-        <source>Bitrate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="105"/>
-        <source>GOP</source>
-        <translatorcomment>Group of pictures. https://en.wikipedia.org/wiki/Group_of_pictures</translatorcomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="110"/>
-        <source>Separation between keyframes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="126"/>
-        <source>Advanced Codec Options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="150"/>
-        <source>Size of the audio (bits) / duration (seconds)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/StreamOptions.qml" line="171"/>
-        <source>Size of the video (bits) / duration (seconds)</source>
-        <translation type="unfinished"></translation>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="36"/>
+        <source>Select the new color</source>
+        <translation type="unfinished">選擇新色彩</translation>
     </message>
 </context>
 <context>
     <name>UpdatesConfig</name>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="68"/>
+        <location filename="../qml/UpdatesConfig.qml" line="83"/>
         <source>Notify about new versions</source>
-        <translation type="unfinished"></translation>
+        <translation>通知新版本</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="82"/>
+        <location filename="../qml/UpdatesConfig.qml" line="93"/>
+        <source>Show updates dialog</source>
+        <translation>顯示更新對話框</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="101"/>
         <source>Check new versions</source>
-        <translation type="unfinished"></translation>
+        <translation>檢查新版本</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="90"/>
+        <location filename="../qml/UpdatesConfig.qml" line="109"/>
         <source>Daily</source>
-        <translation type="unfinished"></translation>
+        <translation>每日</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="94"/>
+        <location filename="../qml/UpdatesConfig.qml" line="113"/>
         <source>Every two days</source>
-        <translation type="unfinished"></translation>
+        <translation>每兩日</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="98"/>
+        <location filename="../qml/UpdatesConfig.qml" line="117"/>
         <source>Weekly</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/UpdatesConfig.qml" line="102"/>
-        <source>Every two weeks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/UpdatesConfig.qml" line="106"/>
-        <source>Monthly</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/UpdatesConfig.qml" line="110"/>
-        <source>Never</source>
-        <translation type="unfinished"></translation>
+        <translation>每週</translation>
     </message>
     <message>
         <location filename="../qml/UpdatesConfig.qml" line="121"/>
-        <source>Last updated</source>
-        <translation type="unfinished"></translation>
+        <source>Every two weeks</source>
+        <translation>每兩週</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="125"/>
+        <source>Monthly</source>
+        <translation>每月</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="129"/>
+        <source>Never</source>
+        <translation>永不</translation>
     </message>
     <message>
         <location filename="../qml/UpdatesConfig.qml" line="142"/>
-        <source>Your version of %1 is outdated. Latest version is &lt;b&gt;%2&lt;/b&gt;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/UpdatesConfig.qml" line="148"/>
-        <source>Upgrade Now!</source>
-        <translation type="unfinished"></translation>
+        <source>Last updated</source>
+        <translation>最後一次更新</translation>
     </message>
     <message>
         <location filename="../qml/UpdatesConfig.qml" line="163"/>
+        <source>Your version of %1 is outdated. Latest version is &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation>你的版本 %1 過舊。最新版本是 &lt;b&gt;%2&lt;/b&gt;。</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="169"/>
+        <source>Upgrade Now!</source>
+        <translation>立即升級！</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="184"/>
         <source>Thanks for using a &lt;b&gt;development version&lt;/b&gt;!&lt;br /&gt;It will be very helpful if you can report any bug and suggestions you have.</source>
+        <translation>感謝使用&lt;b&gt;開發板&lt;/b&gt;！&lt;br /&gt;如果你可以回報錯誤以及建議，那對我們非常有幫助。</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="189"/>
+        <source>Report a Bug</source>
+        <translation>回報錯誤</translation>
+    </message>
+</context>
+<context>
+    <name>UpdatesDialog</name>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="33"/>
+        <source>New version available!</source>
+        <translation>有新版本了！</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="71"/>
+        <source>Download %1 %2 NOW!</source>
+        <translation>現在下載 %1 %2！</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="78"/>
+        <source>Show this dialog next time</source>
+        <translation>下次顯示這個對話框</translation>
+    </message>
+</context>
+<context>
+    <name>VCamInstallFailedDialog</name>
+    <message>
+        <location filename="../qml/VCamInstallFailedDialog.qml" line="31"/>
+        <source>Installation failed</source>
+        <translation>安裝失敗</translation>
+    </message>
+</context>
+<context>
+    <name>VCamInstallSucceededDialog</name>
+    <message>
+        <location filename="../qml/VCamInstallSucceededDialog.qml" line="31"/>
+        <source>Installation succeeded</source>
+        <translation>安裝成功</translation>
+    </message>
+    <message>
+        <location filename="../qml/VCamInstallSucceededDialog.qml" line="38"/>
+        <source>Restart Webcamoid?</source>
+        <translation>是否重新啟動 Webcamoid？</translation>
+    </message>
+</context>
+<context>
+    <name>VCamManualDownloadDialog</name>
+    <message>
+        <location filename="../qml/VCamManualDownloadDialog.qml" line="31"/>
+        <source>Can&apos;t get latest version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="168"/>
-        <source>Report a Bug</source>
+        <location filename="../qml/VCamManualDownloadDialog.qml" line="38"/>
+        <source>Download the virtual camera manually?</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>VideoCodecOptions</name>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="27"/>
+        <source>Video Codec Options</source>
+        <translation>視訊編解碼器選項</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="167"/>
+        <source>Bitrate</source>
+        <translation>位元率</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="171"/>
+        <source>Bitrate (bits/secs)</source>
+        <translation>位元率（bits/秒）</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="182"/>
+        <location filename="../qml/VideoCodecOptions.qml" line="186"/>
+        <source>Keyframes stride</source>
+        <translation>關鍵幀步幅</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectOptions</name>
+    <message>
+        <location filename="../qml/VideoEffectOptions.qml" line="53"/>
+        <source>Remove</source>
+        <translation>移除</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsDialog</name>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="36"/>
+        <source>Add video effect</source>
+        <translation>新增視訊效果</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="69"/>
+        <source>Search effect</source>
+        <translation>搜尋效果</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="188"/>
+        <source>Chain effect</source>
+        <extracomment>Apply the effect over the other effects.</extracomment>
+        <translation>效果鏈（效果應用的先後順序）</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsList</name>
+    <message>
+        <location filename="../qml/VideoEffectsList.qml" line="35"/>
+        <source>Add effect</source>
+        <translation>新增效果</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsList.qml" line="42"/>
+        <source>Remove all effects</source>
+        <translation>移除所有效果</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsPanel</name>
+    <message>
+        <location filename="../qml/VideoEffectsPanel.qml" line="27"/>
+        <source>Effects</source>
+        <translation>效果</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsPanel.qml" line="28"/>
+        <source>%1 options</source>
+        <translation>%1 選項</translation>
+    </message>
+</context>
+<context>
+    <name>VideoFormatOptions</name>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="27"/>
+        <source>Video Format Options</source>
+        <translation>視訊格式選項</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="169"/>
+        <source>File extension</source>
+        <translation>檔案擴展名</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddEdit</name>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="55"/>
+        <source>Edit Source</source>
+        <translation>編輯來源</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="56"/>
+        <source>Add Source</source>
+        <translation>新增來源</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="84"/>
+        <source>File</source>
+        <translation>檔案</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="87"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="170"/>
+        <source>URL</source>
+        <translation>網址</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="108"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="156"/>
+        <source>Description</source>
+        <translation>說明</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="114"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="162"/>
+        <source>Source title</source>
+        <translation>來源標題</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="122"/>
+        <source>Path</source>
+        <translation>路徑</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="129"/>
+        <source>File path</source>
+        <translation>檔案路徑</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="136"/>
+        <source>Search</source>
+        <translation>搜尋</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="215"/>
+        <source>Choose the file to add as source</source>
+        <translation>選擇要新增為來源的檔案</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="218"/>
+        <source>All Video Files</source>
+        <translation>所有影片檔案</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="221"/>
+        <source>3GP Video</source>
+        <translation>3GP 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="222"/>
+        <source>AVI Video</source>
+        <translation>AVI 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="224"/>
+        <source>Flash Video</source>
+        <extracomment>Adobe FLV Flash video</extracomment>
+        <translation>Flash 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="225"/>
+        <source>Animated GIF</source>
+        <translation>GIF 動畫</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="226"/>
+        <source>MKV Video</source>
+        <translation>MKV 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="227"/>
+        <source>Animated PNG</source>
+        <translation>PNG 動畫</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="228"/>
+        <source>QuickTime Video</source>
+        <translation>QuickTime 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="229"/>
+        <source>MP4 Video</source>
+        <translation>MP4 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="230"/>
+        <source>MPEG Video</source>
+        <translation>MPEG 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="231"/>
+        <source>Ogg Video</source>
+        <translation>Ogg 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="233"/>
+        <source>RealMedia Video</source>
+        <extracomment>Don&apos;t translate &quot;RealMedia&quot;, leave it as is.</extracomment>
+        <translation>RealMedia 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="234"/>
+        <source>DVD Video</source>
+        <translation>DVD 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="235"/>
+        <source>WebM Video</source>
+        <translation>WebM 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="237"/>
+        <source>Windows Media Video</source>
+        <extracomment>Also known as WMV, is a video file format.</extracomment>
+        <translation>WMV 影片</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="238"/>
+        <source>All Files</source>
+        <translation>所有檔案</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputOptions</name>
+    <message>
+        <location filename="../qml/VideoInputOptions.qml" line="60"/>
+        <source>Edit</source>
+        <translation>編輯</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputOptions.qml" line="72"/>
+        <source>Remove</source>
+        <translation>移除</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputs</name>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="56"/>
+        <source>Add source</source>
+        <translation>新增來源</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="67"/>
+        <source>No webcams found</source>
+        <translation>找不到網路攝影機</translation>
+    </message>
+</context>
+<context>
+    <name>VideoLayer</name>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="261"/>
+        <source>No Output</source>
+        <extracomment>Disable video output, don&apos;t send the video to the output device.</extracomment>
+        <translation>不要輸出</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="593"/>
+        <source>Virtual Camera</source>
+        <translation>虛擬攝影機</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOptions</name>
+    <message>
+        <location filename="../qml/VideoOptions.qml" line="41"/>
+        <source>Sources</source>
+        <translation>來源</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOptions.qml" line="44"/>
+        <source>Outputs</source>
+        <translation>輸出</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputAddEdit</name>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="143"/>
+        <source>Edit Virtual Camera</source>
+        <translation>編輯虛擬攝影機</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="144"/>
+        <source>Add Virtual Camera</source>
+        <translation>新增虛擬攝影機</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="169"/>
+        <source>Virtual camera name</source>
+        <translation>虛擬攝影機名稱</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="178"/>
+        <source>Add format</source>
+        <translation>新增格式</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="188"/>
+        <source>Clear formats</source>
+        <translation>清除格式</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="230"/>
+        <source>Can&apos;t edit the virtual camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="231"/>
+        <source>Can&apos;t add the virtual camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="240"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="267"/>
+        <source>Error editing the virtual camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="241"/>
+        <source>Error adding the virtual camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="279"/>
+        <source>Error creating the virtual camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="242"/>
+        <source>Camera description and formats can&apos;t be empty.</source>
+        <translation>攝影機描述與格式不能留白。</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputOptions</name>
+    <message>
+        <location filename="../qml/VideoOutputOptions.qml" line="61"/>
+        <source>Edit</source>
+        <translation>編輯</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputOptions.qml" line="73"/>
+        <source>Can&apos;t Edit The Virtual Camera</source>
+        <translation>無法編輯虛擬攝影機</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputOptions.qml" line="80"/>
+        <source>Remove</source>
+        <translation>移除</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputOptions.qml" line="95"/>
+        <source>Error removing the virtual camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputOptions.qml" line="99"/>
+        <source>Can&apos;t Remove The Virtual Camera</source>
+        <translation>無法移除虛擬攝影機</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputPicture</name>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="28"/>
+        <source>Virtual camera output picture</source>
+        <translation>虛擬攝影機輸出圖像</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="63"/>
+        <source>Virtual camera default output picture</source>
+        <translation>虛擬攝影機預設輸出圖像</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="68"/>
+        <source>Search</source>
+        <translation>搜尋</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="91"/>
+        <source>Can&apos;t set virtual camera picture</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="95"/>
+        <source>Error Removing Virtual Cameras</source>
+        <translation>移除虛擬攝影機時出錯</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="107"/>
+        <source>Please choose an image file</source>
+        <translation>請選擇圖像檔</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputs</name>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="74"/>
+        <source>The virtual camera is outdated (%1), install the latest version (%2)?</source>
+        <translation>虛擬攝影機版本過舊（%1），是否安裝最新版本（%2）？</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="83"/>
+        <location filename="../qml/VideoOutputs.qml" line="242"/>
+        <source>Install</source>
+        <translation>安裝</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="98"/>
+        <source>Add output</source>
+        <translation>新增輸出</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="106"/>
+        <source>Error Creating Virtual Camera</source>
+        <translation>建立虛擬攝影機時出錯</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="113"/>
+        <source>Remove all outputs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="120"/>
+        <source>Error removing virtual cameras</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="125"/>
+        <source>Error Removing Virtual Cameras</source>
+        <translation type="unfinished">移除虛擬攝影機時出錯</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="132"/>
+        <source>Set output picture</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="235"/>
+        <source>The virtual camera is not installed, do you want to install it?</source>
+        <translation>虛擬攝影機尚未安裝，您是否要安裝？</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="261"/>
+        <source>The virtual camera is not supported in this platform</source>
+        <translation>在此系統上，虛擬攝影機並不受支援</translation>
+    </message>
+</context>
+<context>
+    <name>VideoRecording</name>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="118"/>
+        <source>Videos directory</source>
+        <translation>影片資料夾</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="128"/>
+        <source>Search</source>
+        <translation>搜尋</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="136"/>
+        <source>Record audio</source>
+        <translation>錄製音訊</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="146"/>
+        <source>File format</source>
+        <translation>檔案格式</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="175"/>
+        <location filename="../qml/VideoRecording.qml" line="210"/>
+        <location filename="../qml/VideoRecording.qml" line="247"/>
+        <source>Configure</source>
+        <translation>配置</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="181"/>
+        <source>Video codec</source>
+        <translation>視訊編解碼器</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="216"/>
+        <source>Audio codec</source>
+        <translation>音訊編解碼器</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="257"/>
+        <source>Select the folder to save your videos</source>
+        <translation>選擇資料夾，以儲存您的影片</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
-        <location filename="../qml/main.qml" line="172"/>
-        <source>Recording</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="111"/>
-        <location filename="../qml/main.qml" line="618"/>
-        <source>Play</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="652"/>
-        <source>Take a photo</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="252"/>
-        <source>Picture %1.%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="71"/>
-        <source>New version available!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="72"/>
-        <source>Download %1 %2 NOW!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="107"/>
-        <source>Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="572"/>
-        <source>Go back</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="626"/>
-        <source>Configure sources</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="639"/>
-        <source>Configure audio</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="666"/>
-        <source>Record video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="680"/>
-        <source>Configure Effects</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="693"/>
-        <source>Preferences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="706"/>
-        <source>About</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="261"/>
-        <source>Save photo as...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../../libAvKys/Plugins/Aging/share/qml/main.qml" line="40"/>
         <source>Number of scratches</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">scratch 的數量</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Aging/share/qml/main.qml" line="62"/>
+        <location filename="../../../libAvKys/Plugins/Aging/share/qml/main.qml" line="63"/>
         <source>Add dust</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">新增灰塵（dust）</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Blur/share/qml/main.qml" line="40"/>
-        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="77"/>
-        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="93"/>
-        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="84"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="45"/>
         <location filename="../../../libAvKys/Plugins/OilPaint/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/OilPaint/share/qml/main.qml" line="32"/>
         <source>Radius</source>
-        <translation type="unfinished"></translation>
+        <translation>半徑</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="85"/>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="256"/>
+        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="288"/>
         <source>N° of colors</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">色彩的 N°</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="107"/>
+        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="95"/>
         <source>Color difference</source>
-        <translation type="unfinished"></translation>
+        <translation>色彩差異</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="128"/>
+        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="117"/>
         <source>Show edges</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示邊界</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="141"/>
-        <source>Threshold low</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="166"/>
-        <source>Threshold high</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="190"/>
+        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="177"/>
         <source>Line color</source>
-        <translation type="unfinished"></translation>
+        <translation>線條色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="205"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="216"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="220"/>
+        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="197"/>
+        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="201"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="197"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="201"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="164"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="168"/>
         <source>Scan block</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">掃描區塊（block）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="195"/>
+        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="188"/>
         <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="163"/>
         <source>Choose a color</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇一個色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="36"/>
-        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="36"/>
-        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="35"/>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="37"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="37"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="36"/>
         <source>Transform matrix</source>
-        <translatorcomment>https://en.wikipedia.org/wiki/Transformation_matrix</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>https://en.wikipedia.org/wiki/Transformation_matrix</extracomment>
+        <translation>變換矩陣</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="63"/>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="82"/>
         <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="52"/>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="43"/>
         <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="41"/>
         <source>Mode</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">模式（mode）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="73"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="54"/>
         <source>Natural</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">自然（Natural）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="77"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="58"/>
         <source>Fixed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">固定（fixed）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="86"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="76"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="67"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="58"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="62"/>
         <source>Symbols</source>
-        <translation type="unfinished"></translation>
+        <translation>符號</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="96"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="85"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="79"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="85"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="76"/>
         <source>Font</source>
-        <translation type="unfinished"></translation>
+        <translation>字體</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="107"/>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="122"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="536"/>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="140"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="92"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="125"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="526"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="591"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="142"/>
         <source>Search</source>
-        <translation type="unfinished">搜尋</translation>
+        <translation>搜尋</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="115"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="104"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="100"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="91"/>
         <source>Hinting</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">提示（Hinting）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="125"/>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="156"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="114"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="145"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="110"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="101"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="133"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>預設</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="129"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="118"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="114"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="105"/>
         <source>No hinting</source>
-        <translation type="unfinished"></translation>
+        <translation>無提示</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="133"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="122"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="118"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="109"/>
         <source>Vertical hinting</source>
-        <translation type="unfinished"></translation>
+        <translation>垂直提示</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="137"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="126"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="122"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="113"/>
         <source>Full hinting</source>
-        <translation type="unfinished"></translation>
+        <translation>完全提示</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="123"/>
+        <source>Style</source>
+        <extracomment>Different font rendering strategies</extracomment>
+        <translation>風格</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="146"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="135"/>
-        <source>Style</source>
-        <translatorcomment>Different font rendering strategies</translatorcomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="160"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="149"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="137"/>
         <source>Bitmap</source>
-        <translation type="unfinished"></translation>
+        <translation>點陣圖</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="164"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="153"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="141"/>
         <source>Device</source>
-        <translation type="unfinished"></translation>
+        <translation>裝置</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="168"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="157"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="154"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="145"/>
         <source>Outline</source>
-        <translation type="unfinished"></translation>
+        <translation>輪廓</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="172"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="161"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="149"/>
         <source>Force outline</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">強制輪廓</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="176"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="165"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="162"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="153"/>
         <source>Match</source>
-        <translation type="unfinished"></translation>
+        <translation>匹配</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="180"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="169"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="166"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="157"/>
         <source>Quality</source>
-        <translation type="unfinished"></translation>
+        <translation>品質</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="184"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="161"/>
         <source>Antialias</source>
-        <translation type="unfinished"></translation>
+        <translation>抗鋸齒</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="188"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="177"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="165"/>
         <source>No antialias</source>
-        <translation type="unfinished"></translation>
+        <translation>無抗鋸齒</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="192"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="181"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="178"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="169"/>
         <source>Compatible with OpenGL</source>
-        <translation type="unfinished"></translation>
+        <translation>與 OpenGL 兼容</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="196"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="185"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="173"/>
         <source>Force integer metrics</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">強制整數指標（Force integer metrics）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="200"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="189"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="186"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="177"/>
         <source>No subpixel antialias</source>
-        <translation type="unfinished"></translation>
+        <translation>無子像素抗鋸齒</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="204"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="193"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="190"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="181"/>
         <source>No font merging</source>
-        <translation type="unfinished"></translation>
+        <translation>無字體合併</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="213"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="212"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="199"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="205"/>
         <source>Foreground color</source>
-        <translation type="unfinished"></translation>
+        <translation>前景色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="224"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="222"/>
-        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="138"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="215"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="220"/>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="162"/>
         <source>Background color</source>
-        <translation type="unfinished"></translation>
+        <translation>背景色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="235"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="231"/>
         <source>Reversed</source>
-        <translation type="unfinished"></translation>
+        <translation>逆轉</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="245"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="294"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="246"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="307"/>
         <source>Please choose a font</source>
-        <translation type="unfinished"></translation>
+        <translation>請選擇一個字體</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="217"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="216"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="207"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="213"/>
         <source>Choose the foreground color</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇前景色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="228"/>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="226"/>
-        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="223"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="228"/>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="172"/>
         <source>Choose the background color</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇背景色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Cinema/share/qml/main.qml" line="61"/>
+        <location filename="../../../libAvKys/Plugins/Cinema/share/qml/main.qml" line="42"/>
         <location filename="../../../libAvKys/Plugins/Dice/share/qml/main.qml" line="39"/>
         <source>Size</source>
-        <translation type="unfinished"></translation>
+        <translation>大小</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Cinema/share/qml/main.qml" line="84"/>
-        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="60"/>
-        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="64"/>
-        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="69"/>
+        <location filename="../../../libAvKys/Plugins/Cinema/share/qml/main.qml" line="78"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="41"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="52"/>
         <source>Color</source>
-        <translation type="unfinished"></translation>
+        <translation>色彩</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Cinema/share/qml/main.qml" line="88"/>
         <source>Choose the strips color</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇條紋色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="100"/>
-        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="102"/>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="87"/>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="69"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="93"/>
         <source>Soft</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">柔和</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="64"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="51"/>
         <source>Select the color to filter</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇色彩過濾器</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="60"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="41"/>
         <source>Old color</source>
-        <translation type="unfinished"></translation>
+        <translation>舊色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="76"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="62"/>
         <source>New color</source>
-        <translation type="unfinished"></translation>
+        <translation>新色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="64"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="51"/>
         <source>Select the color to replace</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇替代色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="80"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="72"/>
         <source>Select the new color</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇新色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="37"/>
-        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="75"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="36"/>
         <source>Color table</source>
-        <translation type="unfinished"></translation>
+        <translation>色彩表</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="46"/>
         <source>Base</source>
-        <translatorcomment>Base color, show the image without modifications</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>Base color, show the image without modifications</extracomment>
+        <translation>基礎色彩（原色）</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="50"/>
         <source>Metal</source>
-        <translation type="unfinished"></translation>
+        <translation>金屬</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="54"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="55"/>
         <source>Heat</source>
-        <translatorcomment>https://en.wikipedia.org/wiki/Heat_map</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>https://en.wikipedia.org/wiki/Heat_map</extracomment>
+        <translation type="unfinished">熱度（熱圖）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="58"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="59"/>
         <source>Old Photo</source>
-        <translation type="unfinished"></translation>
+        <translation>舊圖片</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="62"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="63"/>
         <source>Red &amp; Green</source>
-        <translation type="unfinished"></translation>
+        <translation>紅、綠</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="66"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="68"/>
         <source>Sepia</source>
-        <translatorcomment>https://en.wikipedia.org/wiki/Sepia_(color)</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>https://en.wikipedia.org/wiki/Sepia_(color)</extracomment>
+        <translation type="unfinished">紅褐色（Sepia）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="72"/>
         <source>X-Pro</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="74"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="76"/>
         <source>X-Ray</source>
-        <translation type="unfinished"></translation>
+        <translation>X 光</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="78"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="80"/>
         <source>Yellow &amp; Blue</source>
-        <translation type="unfinished"></translation>
+        <translation>黃、藍</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="82"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="493"/>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="101"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="84"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="483"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="548"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="99"/>
         <source>Custom</source>
-        <translation type="unfinished"></translation>
+        <translation>自訂</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="103"/>
-        <source>16x16 bitmap...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="105"/>
+        <source>Source palette</source>
+        <translation>來源調色板</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="131"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="577"/>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="202"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="134"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="949"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="965"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="209"/>
         <source>Please choose an image file</source>
-        <translation type="unfinished"></translation>
+        <translation>請選擇一個圖片檔</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="47"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="48"/>
         <source>Convolve matrix</source>
-        <translatorcomment>https://en.wikipedia.org/wiki/Kernel_(image_processing)</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>https://en.wikipedia.org/wiki/Kernel_(image_processing)</extracomment>
+        <translation type="unfinished">卷積矩陣（Convolve matrix）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="153"/>
-        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="64"/>
-        <location filename="../../../libAvKys/Plugins/Emboss/share/qml/main.qml" line="29"/>
-        <location filename="../../../libAvKys/Plugins/PrimariesColors/share/qml/main.qml" line="28"/>
-        <source>Factor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="163"/>
         <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="167"/>
-        <location filename="../../../libAvKys/Plugins/Emboss/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="67"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/Emboss/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/Emboss/share/qml/main.qml" line="33"/>
+        <location filename="../../../libAvKys/Plugins/PrimariesColors/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/PrimariesColors/share/qml/main.qml" line="32"/>
+        <source>Factor</source>
+        <translation type="unfinished">因素（Factor）</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="178"/>
+        <location filename="../../../libAvKys/Plugins/Emboss/share/qml/main.qml" line="45"/>
+        <location filename="../../../libAvKys/Plugins/Emboss/share/qml/main.qml" line="49"/>
         <source>Bias</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">偏差（Bias）</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="42"/>
         <source>Grab mode</source>
-        <translation type="unfinished"></translation>
+        <translation>抓取模式</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="52"/>
         <source>Random square</source>
-        <translation type="unfinished"></translation>
+        <translation>隨機矩形</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="56"/>
         <source>Vertical increase</source>
-        <translation type="unfinished"></translation>
+        <translation>垂直增加</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="60"/>
         <source>Horizontal increase</source>
-        <translation type="unfinished"></translation>
+        <translation>水平增加</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="64"/>
         <source>Rings increase</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">環形增加</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="73"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="77"/>
         <location filename="../../../libAvKys/Plugins/Pixelate/share/qml/main.qml" line="41"/>
+        <location filename="../../../libAvKys/Plugins/Pixelate/share/qml/main.qml" line="45"/>
         <source>Block size</source>
-        <translation type="unfinished"></translation>
+        <translation>區塊大小</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="86"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="88"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="92"/>
         <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="33"/>
         <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="32"/>
         <location filename="../../../libAvKys/Plugins/Quark/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Quark/share/qml/main.qml" line="32"/>
         <location filename="../../../libAvKys/Plugins/Warhol/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Warhol/share/qml/main.qml" line="32"/>
         <source>N° of frames</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">幀的 N°</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="78"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="88"/>
         <source>Mu</source>
-        <translatorcomment>Mu factor (µ letter from greek), represents the average of a group of values (https://en.wikipedia.org/wiki/Arithmetic_mean)</translatorcomment>
+        <extracomment>Mu factor (µ letter from greek), represents the average of a group of values. https://en.wikipedia.org/wiki/Arithmetic_mean</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="92"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="109"/>
         <source>Sigma</source>
-        <translatorcomment>Sigma factor (σ letter from greek), represents the standard deviation of a group of values (https://en.wikipedia.org/wiki/Standard_deviation)</translatorcomment>
+        <extracomment>Sigma factor (σ letter from greek), represents the standard deviation of a group of values. https://en.wikipedia.org/wiki/Standard_deviation</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/DesktopCapture/share/qml/main.qml" line="48"/>
         <source>Frame rate</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">幀率</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="33"/>
         <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="64"/>
-        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="68"/>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="53"/>
         <source>Amplitude</source>
-        <translation type="unfinished"></translation>
+        <translation>振幅</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="43"/>
-        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="93"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="45"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="91"/>
         <source>Frequency</source>
-        <translation type="unfinished"></translation>
+        <translation>頻率</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="57"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="61"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="65"/>
         <source>Grid size</source>
-        <translation type="unfinished"></translation>
+        <translation>網格大小</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="51"/>
         <source>Speed</source>
-        <translation type="unfinished"></translation>
+        <translation>速度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="74"/>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="89"/>
         <source>Zoom rate</source>
-        <translation type="unfinished"></translation>
+        <translation>縮放比率</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="97"/>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="125"/>
         <source>Strength</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">力量</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="46"/>
         <source>Canny mode</source>
-        <translatorcomment>https://en.wikipedia.org/wiki/Canny_edge_detector</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>https://en.wikipedia.org/wiki/Canny_edge_detector</extracomment>
+        <translation>Canny 邊緣檢測模式</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="57"/>
-        <source>Lower Canny threshold</source>
-        <translation type="unfinished"></translation>
+        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="62"/>
+        <source>Canny threshold</source>
+        <translation>Canny 極限值</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="82"/>
-        <source>Higger Canny threshold</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="107"/>
+        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="103"/>
         <source>Equalize</source>
-        <translatorcomment>https://en.wikipedia.org/wiki/Histogram_equalization</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>https://en.wikipedia.org/wiki/Histogram_equalization</extracomment>
+        <translation>均衡化（對比度）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/Plugins/Edge/share/qml/main.qml" line="118"/>
         <source>Invert</source>
-        <translation type="unfinished"></translation>
+        <translation>倒置</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="112"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="93"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="59"/>
         <source>Haar file</source>
         <extracomment>https://en.wikipedia.org/wiki/Haar-like_feature</extracomment>
-        <translatorcomment>https://en.wikipedia.org/wiki/Haar-like_feature</translatorcomment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">哈爾檔案（類哈爾之特徵偵測，Haar-like features）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="122"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="103"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="69"/>
         <source>Eye</source>
-        <translation type="unfinished"></translation>
+        <translation>眼睛</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="126"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="107"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="73"/>
         <source>Eye glasses</source>
-        <translation type="unfinished"></translation>
+        <translation>眼鏡</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="130"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="111"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="77"/>
         <source>Frontal face alternative 1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">正臉替換 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="134"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="115"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="81"/>
         <source>Frontal face alternative 2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">正臉替換 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="138"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="85"/>
         <source>Frontal face alternative 3</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">正臉替換 3</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="123"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="89"/>
         <source>Frontal face default</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">正臉預設</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="127"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="93"/>
         <source>Full body</source>
-        <translation type="unfinished"></translation>
+        <translation>全身</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="131"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="97"/>
         <source>Left Eye 1</source>
-        <translation type="unfinished"></translation>
+        <translation>左眼 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="154"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="135"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="101"/>
         <source>Lower body</source>
-        <translation type="unfinished"></translation>
+        <translation>下半身</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="139"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="105"/>
         <source>Eye pair big</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">眼睛配對（大）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="162"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="143"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="109"/>
         <source>Eye pair small</source>
-        <translation type="unfinished"></translation>
+        <translation>眼睛配對（小）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="166"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="147"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="113"/>
         <source>Left ear</source>
-        <translation type="unfinished"></translation>
+        <translation>左耳</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="151"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="117"/>
         <source>Left eye 2</source>
-        <translation type="unfinished"></translation>
+        <translation>左眼 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="155"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="121"/>
         <source>Mouth</source>
-        <translation type="unfinished"></translation>
+        <translation>嘴巴</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="178"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="159"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="125"/>
         <source>Nose</source>
-        <translation type="unfinished"></translation>
+        <translation>鼻子</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="163"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="129"/>
         <source>Right ear</source>
-        <translation type="unfinished"></translation>
+        <translation>右耳</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="186"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="167"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="133"/>
         <source>Right Eye 1</source>
-        <translation type="unfinished"></translation>
+        <translation>右眼 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="190"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="171"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="137"/>
         <source>Upper body 1</source>
-        <translation type="unfinished"></translation>
+        <translation>上半身</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="194"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="175"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="141"/>
         <source>Profile face</source>
-        <translation type="unfinished"></translation>
+        <translation>側臉</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="198"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="179"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="145"/>
         <source>Right eye 2</source>
-        <translation type="unfinished"></translation>
+        <translation>右眼 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="202"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="183"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="149"/>
         <source>Smile</source>
-        <translation type="unfinished"></translation>
+        <translation>微笑</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="206"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="187"/>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="153"/>
         <source>Upper body</source>
-        <translation type="unfinished"></translation>
+        <translation>上半身</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="232"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="213"/>
         <source>Marker type</source>
-        <translation type="unfinished"></translation>
+        <translation>標記類型</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="242"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="223"/>
         <source>Rectangle</source>
-        <translation type="unfinished"></translation>
+        <translation>矩形</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="246"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="227"/>
         <source>Ellipse</source>
-        <translation type="unfinished"></translation>
+        <translation>橢圓形</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="250"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="231"/>
         <source>Image</source>
-        <translation type="unfinished"></translation>
+        <translation>圖像</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="254"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="235"/>
         <source>Pixelate</source>
-        <translation type="unfinished"></translation>
+        <translation>像素化</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="258"/>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="136"/>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="94"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="239"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="149"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="153"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="74"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="78"/>
         <source>Blur</source>
-        <translation type="unfinished"></translation>
+        <translation>模糊</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="262"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="243"/>
         <source>Blur Outer</source>
-        <translation type="unfinished"></translation>
+        <translation>模糊外部</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="272"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="247"/>
+        <source>Background Image</source>
+        <translation>背景圖片</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="257"/>
         <source>Marker style</source>
-        <translation type="unfinished"></translation>
+        <translation>標記風格</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="282"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="267"/>
         <source>Solid</source>
-        <translation type="unfinished"></translation>
+        <translation>實心</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="286"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="271"/>
         <source>Dash</source>
-        <translation type="unfinished"></translation>
+        <translation>虛線</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="290"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="275"/>
         <source>Dot</source>
-        <translation type="unfinished"></translation>
+        <translation>點</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="294"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="279"/>
         <source>Dash dot</source>
-        <translation type="unfinished"></translation>
+        <translation>虛線與點</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="298"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="283"/>
         <source>Dash dot dot</source>
-        <translation type="unfinished"></translation>
+        <translation>虛線、點、點</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="308"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="293"/>
         <source>Marker color</source>
-        <translation type="unfinished"></translation>
+        <translation>標記色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="320"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="324"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="310"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="314"/>
         <source>Marker width</source>
-        <translation type="unfinished"></translation>
+        <translation>標記寬度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="336"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="326"/>
         <source>Masks</source>
-        <translation type="unfinished"></translation>
+        <translation>遮罩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="345"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="335"/>
         <source>Angel</source>
-        <translation type="unfinished"></translation>
+        <translation>天使</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="349"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="339"/>
         <source>Bear</source>
-        <translation type="unfinished"></translation>
+        <translation>熊熊</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="353"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="343"/>
         <source>Beaver</source>
-        <translation type="unfinished"></translation>
+        <translation>海/河狸</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="357"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="347"/>
         <source>Cat</source>
-        <translation type="unfinished"></translation>
+        <translation>貓咪</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="361"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="351"/>
         <source>Chicken</source>
-        <translation type="unfinished"></translation>
+        <translation>雞</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="365"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="355"/>
         <source>Cow</source>
-        <translation type="unfinished"></translation>
+        <translation>牛</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="369"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="359"/>
         <source>Devil</source>
-        <translation type="unfinished"></translation>
+        <translation>魔鬼</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="373"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="363"/>
         <source>Dog</source>
-        <translation type="unfinished"></translation>
+        <translation>狗勾</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="377"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="367"/>
         <source>Dalmatian dog</source>
-        <translation type="unfinished"></translation>
+        <translation>點點狗</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="381"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="371"/>
         <source>Happy dog</source>
-        <translation type="unfinished"></translation>
+        <translation>開心的狗勾</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="385"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="375"/>
         <source>Dragon</source>
-        <translation type="unfinished"></translation>
+        <translation>龍</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="389"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="379"/>
         <source>Elephant 1</source>
-        <translation type="unfinished"></translation>
+        <translation>大象 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="393"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="383"/>
         <source>Elephant 2</source>
-        <translation type="unfinished"></translation>
+        <translation>大象 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="397"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="387"/>
         <source>Elk</source>
-        <translation type="unfinished"></translation>
+        <translation>麋鹿</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="401"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="391"/>
         <source>Frog</source>
-        <translation type="unfinished"></translation>
+        <translation>青蛙</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="405"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="395"/>
         <source>Ghost</source>
-        <translation type="unfinished"></translation>
+        <translation>鬼</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="409"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="399"/>
         <source>Giraffe</source>
-        <translation type="unfinished"></translation>
+        <translation>長頸鹿</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="413"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="403"/>
         <source>Gnu</source>
-        <translation type="unfinished"></translation>
+        <translation>牛羚</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="417"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="407"/>
         <source>Goat</source>
-        <translation type="unfinished"></translation>
+        <translation>山羊</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="421"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="411"/>
         <source>Hippo</source>
-        <translation type="unfinished"></translation>
+        <translation>河馬</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="425"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="415"/>
         <source>Horse</source>
-        <translation type="unfinished"></translation>
+        <translation>馬</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="429"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="419"/>
         <source>Gray horse</source>
-        <translation type="unfinished"></translation>
+        <translation>灰馬</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="433"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="423"/>
         <source>Koala</source>
-        <translation type="unfinished"></translation>
+        <translation>無尾熊</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="437"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="427"/>
         <source>Monkey</source>
-        <translation type="unfinished"></translation>
+        <translation>猴子</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="441"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="431"/>
         <source>Gray mouse</source>
-        <translation type="unfinished"></translation>
+        <translation>灰老鼠</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="445"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="435"/>
         <source>White mouse</source>
-        <translation type="unfinished"></translation>
+        <translation>白老鼠</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="449"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="439"/>
         <source>Panda</source>
-        <translation type="unfinished"></translation>
+        <translation>熊貓</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="453"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="443"/>
         <source>Penguin</source>
-        <translation type="unfinished"></translation>
+        <translation>企鵝</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="457"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="447"/>
         <source>Pumpkin 1</source>
-        <translation type="unfinished"></translation>
+        <translation>南瓜 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="461"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="451"/>
         <source>Pumpkin 2</source>
-        <translation type="unfinished"></translation>
+        <translation>南瓜 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="465"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="455"/>
         <source>Raccoon</source>
-        <translation type="unfinished"></translation>
+        <translation>浣熊</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="469"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="459"/>
         <source>Rhino</source>
-        <translation type="unfinished"></translation>
+        <translation>犀牛</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="473"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="463"/>
         <source>Sheep</source>
-        <translation type="unfinished"></translation>
+        <translation>羊咩咩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="477"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="467"/>
         <source>Skull 1</source>
-        <translation type="unfinished"></translation>
+        <translation>骷髏頭 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="481"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="471"/>
         <source>Skull 2</source>
-        <translation type="unfinished"></translation>
+        <translation>骷髏頭 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="485"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="475"/>
         <source>Triceratops</source>
-        <translation type="unfinished"></translation>
+        <translation>三角龍</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="489"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="479"/>
         <source>Zebra</source>
-        <translation type="unfinished"></translation>
+        <translation>斑馬</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="502"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="492"/>
         <source>Marker picture</source>
-        <translation type="unfinished"></translation>
+        <translation>標記圖像</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="516"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="506"/>
         <source>Replace face with this picture</source>
-        <translation type="unfinished"></translation>
+        <translation>用這張圖換掉臉</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="545"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="549"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="535"/>
+        <source>Backgrounds</source>
+        <translation>背景</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="544"/>
+        <source>Black Square</source>
+        <translation>黑色矩形</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="557"/>
+        <source>Background picture</source>
+        <translation>背景圖像</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="571"/>
+        <source>Replace background with this picture</source>
+        <translation>用這張圖換掉背景</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="600"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="604"/>
         <source>Pixel grid size</source>
-        <translation type="unfinished"></translation>
+        <translation>像素網格大小</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="561"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="565"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="616"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="620"/>
         <source>Blur radius</source>
+        <translation>模糊半徑</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="631"/>
+        <source>Face Area Settings</source>
+        <translation>臉部區域設定</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="638"/>
+        <source>Advanced face area settings for 
+background blur or image below.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="312"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="689"/>
+        <source>H-Offset</source>
+        <translation>水平偏移量</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="715"/>
+        <source>V-Offset</source>
+        <translation>垂直偏移量</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="742"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="847"/>
+        <source>Width Adjust %</source>
+        <translation>寬度調整 %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="768"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="873"/>
+        <source>Height Adjust %</source>
+        <translation>高度調整 %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="795"/>
+        <source>Round Area</source>
+        <translation>圓形區域</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="900"/>
+        <source>H-Radius %</source>
+        <translation>水平半徑 %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="924"/>
+        <source>V-Radius %</source>
+        <translation>垂直半徑 %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="301"/>
         <source>Select marker color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="87"/>
-        <source>Hard</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇標記色彩</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="97"/>
+        <source>Hard</source>
+        <translation type="unfinished">硬</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="107"/>
         <source>Cooling</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">冷卻中</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="121"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="136"/>
         <source>Dissolve</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="151"/>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="107"/>
-        <source>Zoom</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">溶解</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="166"/>
-        <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="98"/>
-        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="78"/>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="120"/>
-        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="90"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="88"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="92"/>
+        <source>Zoom</source>
+        <translation>縮放</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="136"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="183"/>
+        <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="99"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="66"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="102"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="106"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="92"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="96"/>
         <source>Threshold</source>
-        <translation type="unfinished"></translation>
+        <translation>極限值</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="188"/>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="133"/>
-        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="103"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="211"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="122"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="112"/>
         <source>Luma threshold</source>
-        <translatorcomment>Minimum luminance/light/white level/intensity in a gray or black and white picture (https://en.wikipedia.org/wiki/Luma_(video))</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>Minimum luminance/light/white level/intensity in a gray or black and white picture. https://en.wikipedia.org/wiki/Luma_(video)</extracomment>
+        <translation>亮度極限值</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="210"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="237"/>
         <source>Alpha diff</source>
-        <translatorcomment>Alpha channel, also known as the transparency component of a pixel in an image</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Alpha（透明度）差異</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="234"/>
+        <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="265"/>
         <source>Alpha variation</source>
-        <translatorcomment>Alpha channel, also known as the transparency component of a pixel in an image</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>透明度變化</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="45"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="49"/>
         <source>Stride</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">步幅</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="51"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="50"/>
         <source>Pattern</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">圖案（Pattern）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="61"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="59"/>
         <source>90° Halftone 6x6</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">90° 半色調 6x6</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="65"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="63"/>
         <source>Cluster 3</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">群集 3</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="69"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="67"/>
         <source>Cluster 4</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">群集 4</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="73"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="71"/>
         <source>Cluster 8</source>
-        <translation type="unfinished"></translation>
+        <translation>群集 8</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="77"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="75"/>
         <source>Lines 4x4</source>
-        <translation type="unfinished"></translation>
+        <translation>線條 4x4</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="81"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="79"/>
         <source>Magic 2x2</source>
-        <translation type="unfinished"></translation>
+        <translation>魔法 2x2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="85"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="83"/>
         <source>Magic 4x4</source>
-        <translation type="unfinished"></translation>
+        <translation>魔法 4x4</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="89"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="87"/>
         <source>Ordered 4x4</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">順序 4x4</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="93"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="91"/>
         <source>Ordered 6x6</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">順序 6x6</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="97"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="95"/>
         <source>Ordered 8x8</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">順序 8x8</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="120"/>
-        <source>pattern bitmap...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="121"/>
+        <source>Bitmap pattern</source>
+        <translation type="unfinished">點陣圖圖形</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="149"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="151"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="155"/>
         <source>Pattern size</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">圖形大小</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="162"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="165"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="169"/>
         <source>Lightness</source>
-        <translation type="unfinished"></translation>
+        <translation>亮度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="175"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="179"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="183"/>
         <source>Slope</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">斜率</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="188"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="193"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="197"/>
         <source>Intercept</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">截距</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="63"/>
         <source>Spiral 1</source>
-        <translation type="unfinished"></translation>
+        <translation>螺旋 1</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="67"/>
         <source>Spiral 2</source>
-        <translation type="unfinished"></translation>
+        <translation>螺旋 2</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="71"/>
         <source>Parabola</source>
-        <translation type="unfinished"></translation>
+        <translation>拋物線</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="75"/>
         <source>Horizontal stripe</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">水平步幅</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="84"/>
+        <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/Hypnotic/share/qml/main.qml" line="87"/>
         <source>Speed increment</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">速度增量</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Implode/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Implode/share/qml/main.qml" line="32"/>
         <source>Amount</source>
-        <translation type="unfinished"></translation>
+        <translation>數量</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="100"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="93"/>
         <source>Luma Threshold</source>
-        <translatorcomment>Minimum luminance/light/white level/intensity in a gray or black and white picture (https://en.wikipedia.org/wiki/Luma_(video))</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>Minimum luminance/light/white level/intensity in a gray or black and white picture. https://en.wikipedia.org/wiki/Luma_(video)</extracomment>
+        <translation>亮度極限值</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="68"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="57"/>
         <source>Choose the automata color</source>
-        <translatorcomment>https://en.wikipedia.org/wiki/Life-like_cellular_automaton</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>https://en.wikipedia.org/wiki/Life-like_cellular_automaton</extracomment>
+        <translation type="unfinished">選擇自動機（automata）色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="48"/>
         <source>N° of drops</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">水滴的 N°</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="96"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="83"/>
         <source>Select</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="202"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="190"/>
         <source>Cursor color</source>
-        <translation type="unfinished"></translation>
+        <translation>遊標色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="206"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="198"/>
         <source>Choose the cursor color</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇遊標色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="232"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="235"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="239"/>
         <source>Min. drop length</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">最小水滴長度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="245"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="249"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="253"/>
         <source>Max. drop length</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">最大水滴長度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="258"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="263"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="267"/>
         <source>Min. speed</source>
-        <translation type="unfinished"></translation>
+        <translation>最小速度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="271"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="277"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="281"/>
         <source>Max. speed</source>
-        <translation type="unfinished"></translation>
+        <translation>最大速度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="284"/>
+        <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="292"/>
         <source>Show cursor</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示遊標</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/main.qml" line="165"/>
-        <source>Output format</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/main.qml" line="194"/>
-        <source>File extensions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/main.qml" line="200"/>
-        <source>This output format has not specific extensions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSink/share/qml/main.qml" line="206"/>
-        <source>Advanced Format Options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="121"/>
         <source>Video track</source>
-        <translation type="unfinished"></translation>
+        <translation>視訊軌</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="134"/>
         <source>Audio track</source>
-        <translation type="unfinished"></translation>
+        <translation>音訊軌</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="145"/>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="147"/>
         <source>Subtitles track</source>
-        <translation type="unfinished"></translation>
+        <translation>字幕軌</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="41"/>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="43"/>
         <source>Simple</source>
-        <translation type="unfinished"></translation>
+        <translation>簡易</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="32"/>
         <source>Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>亮度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="41"/>
+        <location filename="../../../libAvKys/Plugins/Contrast/share/qml/main.qml" line="40"/>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="42"/>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="46"/>
         <source>Contrast</source>
-        <translation type="unfinished"></translation>
+        <translation>對比度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="73"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="53"/>
         <source>Soft normal</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">柔和正常</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="77"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="57"/>
         <source>Hard normal</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">堅硬正常</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="81"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="61"/>
         <source>Soft color</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">柔和色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="85"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="65"/>
         <source>Hard color</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">堅硬色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="140"/>
         <source>Alpha differential</source>
-        <translatorcomment>Alpha channel, also known as the transparency component of a pixel in an image</translatorcomment>
-        <translation type="unfinished"></translation>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation type="unfinished">透明度（alpha）差異</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="159"/>
+        <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="155"/>
         <source>Radiation color</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">放射性色彩</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="51"/>
         <source>Motion detect</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">動作偵測</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="55"/>
         <source>Rain</source>
-        <translation type="unfinished"></translation>
+        <translation>雨</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="77"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="78"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="82"/>
         <source>Decay</source>
-        <translation type="unfinished"></translation>
+        <translation>衰變</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="54"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="38"/>
         <source>Show lines</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示線條</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="67"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="52"/>
         <source>Hide lines</source>
-        <translation type="unfinished"></translation>
+        <translation>隱藏線條</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="80"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="62"/>
         <source>Hide color</source>
-        <translation type="unfinished"></translation>
+        <translation>隱藏色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="84"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="70"/>
         <source>Choose the hide color</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">選擇隱藏色彩</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Scroll/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/Plugins/Scroll/share/qml/main.qml" line="45"/>
         <source>Vertical Sync</source>
-        <translation type="unfinished"></translation>
+        <translation>垂直同步</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Scroll/share/qml/main.qml" line="69"/>
+        <location filename="../../../libAvKys/Plugins/Scroll/share/qml/main.qml" line="83"/>
         <source>Noise</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">噪點</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Shagadelic/share/qml/main.qml" line="33"/>
+        <location filename="../../../libAvKys/Plugins/Shagadelic/share/qml/main.qml" line="37"/>
         <source>Mask</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">遮罩</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Swirl/share/qml/main.qml" line="38"/>
         <source>Degrees</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">角度</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Temperature/share/qml/main.qml" line="38"/>
         <source>Temperature</source>
-        <translation type="unfinished"></translation>
+        <translation>溫度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="283"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="281"/>
         <source>Video format</source>
-        <translation type="unfinished"></translation>
+        <translation>視訊格式</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="302"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="300"/>
         <source>Resolution</source>
-        <translation type="unfinished"></translation>
+        <translation>解析度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="321"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="319"/>
         <source>FPS</source>
-        <translation type="unfinished"></translation>
+        <translation>幀率（FPS, frames per second）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="344"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="342"/>
         <source>Reset</source>
-        <translation type="unfinished"></translation>
+        <translation>重設</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="72"/>
         <source>Aspect</source>
-        <translation type="unfinished"></translation>
+        <extracomment>Aspect ratio</extracomment>
+        <translation>長寬比</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="106"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="647"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="806"/>
+        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="108"/>
         <source>Scale</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">尺度（Scale）</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="129"/>
+        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="144"/>
         <source>Softness</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">柔和度</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="73"/>
+        <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="62"/>
         <source>Choose the vignette color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="61"/>
-        <source>Devices</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="78"/>
-        <source>Add</source>
-        <translation type="unfinished">新增</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="89"/>
-        <source>Edit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="102"/>
-        <source>Remove</source>
-        <translation type="unfinished">移除</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="113"/>
-        <source>Remove All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="134"/>
-        <source>Description</source>
-        <translation type="unfinished">說明</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="140"/>
-        <source>Camera name (optional)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="264"/>
-        <source>Error creating camera: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="152"/>
-        <source>Ok</source>
-        <translation type="unfinished">確定</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="195"/>
-        <source>Cancel</source>
-        <translation type="unfinished">取消</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/VirtualCamera/share/qml/main.qml" line="250"/>
-        <source>This system is not supported yet</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">選擇插圖（vignette）色彩</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="32"/>
         <source>Ripples</source>
+        <translation>漣漪</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="127"/>
+        <source>Phase</source>
+        <translation type="unfinished">層次（Phase）</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="149"/>
+        <source>Use flash</source>
+        <translation type="unfinished">使用閃光（flash）</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="169"/>
+        <source>Now</source>
+        <translation>現在</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="176"/>
+        <source>%1 seconds</source>
+        <translation>%1 秒</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="279"/>
+        <source>Take a photo</source>
+        <translation>照相</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="58"/>
+        <source>%1/Picture %2.%3</source>
+        <translation>%1/圖像 %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="44"/>
+        <source>Daily Build</source>
+        <translation type="unfinished">每日構建</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="328"/>
+        <source>Record video</source>
+        <translation>錄影</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="402"/>
+        <source>Aspect ratio</source>
+        <translation>長寬比</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="180"/>
+        <source>Face bracketing
+duration (seconds)</source>
+        <translation type="unfinished">臉部標框
+時長（秒）</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="195"/>
+        <source>Face bracket count</source>
+        <translation type="unfinished">臉部標框數量</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="210"/>
+        <source>Zoom out rate</source>
+        <translation>縮小率</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="225"/>
+        <source>Zoom in rate</source>
+        <translation>放大率</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="240"/>
+        <source>Face padding (% of face size)</source>
+        <translation>臉部內距（臉大小的幾 %）</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="320"/>
+        <source>Face margin (% of face size)</source>
+        <translation>臉部外距（臉大小的幾 %）</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="410"/>
+        <source>e.g. 16:9, 4:3</source>
+        <translation>例如 16:9、4:3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="434"/>
+        <source>Lock viewport</source>
+        <translation>鎖定視口</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="445"/>
+        <source>Debug mode</source>
+        <translation>除錯模式</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Flip/share/qml/main.qml" line="28"/>
+        <source>Flip horizontally</source>
+        <translation>水平翻轉</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Flip/share/qml/main.qml" line="37"/>
+        <source>Flip vertically</source>
+        <translation>垂直翻轉</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="42"/>
+        <source>Width</source>
+        <translation>寬度</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="32"/>
+        <source>Aspect ratio width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="116"/>
-        <source>Phase</source>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="42"/>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="55"/>
+        <source>Height</source>
+        <translation>高度</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="46"/>
+        <source>Aspect ratio height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="68"/>
+        <source>Scaling mode</source>
+        <translation>縮放模式</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="76"/>
+        <source>Fast</source>
+        <translation>快速</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="80"/>
+        <source>Linear</source>
+        <translation>線性</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="88"/>
+        <source>Aspect ratio mode</source>
+        <translation>長寬比模式</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="96"/>
+        <source>Ignore</source>
+        <translation>忽略</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="100"/>
+        <source>Keep</source>
+        <translation>保持</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Scale/share/qml/main.qml" line="104"/>
+        <source>Expanding</source>
+        <translation>擴大</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Otsu/share/qml/main.qml" line="40"/>
+        <source>Levels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="83"/>
+        <source>Add color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="91"/>
+        <source>Clear all colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="107"/>
+        <source>Select the color to add</source>
+        <extracomment>Select the color to add to the color table</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="106"/>
+        <source></source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Gamma/share/qml/main.qml" line="40"/>
+        <source>Gamma</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="51"/>
+        <source>Hue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="74"/>
+        <source>Saturation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="97"/>
+        <source>Luminance</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

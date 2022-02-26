@@ -26,6 +26,7 @@
 #include <gst/audio/audio.h>
 #include <gst/video/video.h>
 #include <ak.h>
+#include <akcaps.h>
 #include <akfrac.h>
 #include <akpacket.h>
 #include <akaudiocaps.h>
@@ -34,7 +35,24 @@
 #include <akvideopacket.h>
 
 #include "mediasourcegstreamer.h"
-#include "stream.h"
+
+class Stream
+{
+    public:
+        Stream()
+        {
+        }
+
+        Stream(const AkCaps &caps,
+               const QString &language):
+            caps(caps),
+            language(language)
+        {
+        }
+
+        AkCaps caps;
+        QString language;
+};
 
 class MediaSourceGStreamerPrivate
 {
@@ -53,8 +71,9 @@ class MediaSourceGStreamerPrivate
         QList<Stream> m_streamInfo;
         qint64 m_maxPacketQueueSize {15 * 1024 * 1024};
         guint m_busWatchId {0};
-        AkElement::ElementState m_curState {AkElement::ElementStateNull};
+        AkElement::ElementState m_state {AkElement::ElementStateNull};
         bool m_loop {false};
+        bool m_sync {true};
         bool m_run {false};
         bool m_showLog {false};
 
@@ -76,7 +95,33 @@ class MediaSourceGStreamerPrivate
 MediaSourceGStreamer::MediaSourceGStreamer(QObject *parent):
     MediaSource(parent)
 {
-//    setenv("GST_DEBUG", "2", 1);
+    //qputenv("GST_DEBUG", "2");
+    auto binDir = QDir(BINDIR).absolutePath();
+    auto gstPluginsDir = QDir(GST_PLUGINS_PATH).absolutePath();
+    auto relGstPluginsDir = QDir(binDir).relativeFilePath(gstPluginsDir);
+    QDir appDir = QCoreApplication::applicationDirPath();
+
+    if (appDir.cd(relGstPluginsDir)) {
+        auto path = appDir.absolutePath();
+        path.replace("/", QDir::separator());
+
+        if (QFileInfo::exists(path)) {
+            if (qEnvironmentVariableIsEmpty("GST_PLUGIN_PATH"))
+                qputenv("GST_PLUGIN_PATH", path.toLocal8Bit());
+
+            auto scanner = QFileInfo(GST_PLUGINS_SCANNER_PATH).baseName();
+
+            if (!scanner.isEmpty()) {
+                auto scannerPath = path + "/" + scanner;
+
+                if (QFileInfo::exists(scannerPath)) {
+                    if (qEnvironmentVariableIsEmpty("GST_PLUGIN_SCANNER"))
+                        qputenv("GST_PLUGIN_SCANNER", scannerPath.toLocal8Bit());
+                }
+            }
+        }
+    }
+
     gst_init(nullptr, nullptr);
 
     this->d = new MediaSourceGStreamerPrivate;
@@ -151,6 +196,11 @@ bool MediaSourceGStreamer::loop() const
     return this->d->m_loop;
 }
 
+bool MediaSourceGStreamer::sync() const
+{
+    return this->d->m_sync;
+}
+
 int MediaSourceGStreamer::defaultStream(const QString &mimeType)
 {
     bool isRunning = this->d->m_run;
@@ -200,6 +250,33 @@ AkCaps MediaSourceGStreamer::caps(int stream)
     return streamInfo.caps;
 }
 
+qint64 MediaSourceGStreamer::durationMSecs()
+{
+    bool isStopped = this->d->m_state == AkElement::ElementStateNull;
+
+    if (isStopped)
+        this->setState(AkElement::ElementStatePaused);
+
+    gint64 duration = 0;
+    gst_element_query_duration(this->d->m_pipeline, GST_FORMAT_TIME, &duration);
+
+    if (isStopped)
+        this->setState(AkElement::ElementStateNull);
+
+    return duration / 1000000;
+}
+
+qint64 MediaSourceGStreamer::currentTimeMSecs()
+{
+    if (this->d->m_state == AkElement::ElementStateNull)
+        return 0;
+
+    gint64 position = 0;
+    gst_element_query_position(this->d->m_pipeline, GST_FORMAT_TIME, &position);
+
+    return position / 1000000;
+}
+
 qint64 MediaSourceGStreamer::maxPacketQueueSize() const
 {
     return this->d->m_maxPacketQueueSize;
@@ -208,6 +285,566 @@ qint64 MediaSourceGStreamer::maxPacketQueueSize() const
 bool MediaSourceGStreamer::showLog() const
 {
     return this->d->m_showLog;
+}
+
+AkElement::ElementState MediaSourceGStreamer::state() const
+{
+    return this->d->m_state;
+}
+
+void MediaSourceGStreamer::seek(qint64 mSecs,
+                                MultiSrcElement::SeekPosition position)
+{
+    if (this->d->m_state == AkElement::ElementStateNull)
+        return;
+
+    int64_t pts = mSecs;
+
+    switch (position) {
+    case MultiSrcElement::SeekCur:
+        pts += this->currentTimeMSecs();
+
+        break;
+
+    case MultiSrcElement::SeekEnd:
+        pts += this->durationMSecs();
+
+        break;
+
+    default:
+        break;
+    }
+
+    pts = qBound<qint64>(0, pts, this->durationMSecs()) * 1000000;
+    gst_element_seek_simple(this->d->m_pipeline,
+                            GST_FORMAT_TIME,
+                            GstSeekFlags(GST_SEEK_FLAG_FLUSH
+                                         | GST_SEEK_FLAG_KEY_UNIT
+                                         | GST_SEEK_FLAG_SNAP_NEAREST),
+                            pts);
+}
+
+void MediaSourceGStreamer::setMedia(const QString &media)
+{
+    if (media == this->d->m_media)
+        return;
+
+    bool isRunning = this->d->m_run;
+    this->setState(AkElement::ElementStateNull);
+    this->d->m_media = media;
+
+    if (isRunning && !this->d->m_media.isEmpty())
+        this->setState(AkElement::ElementStatePlaying);
+
+    emit this->mediaChanged(media);
+    emit this->mediasChanged(this->medias());
+    emit this->durationMSecsChanged(this->durationMSecs());
+    emit this->mediaLoaded(media);
+}
+
+void MediaSourceGStreamer::setStreams(const QList<int> &streams)
+{
+    if (this->d->m_streams == streams)
+        return;
+
+    this->d->m_streams = streams;
+
+    if (this->d->m_run)
+        this->updateStreams();
+
+    emit this->streamsChanged(streams);
+}
+
+void MediaSourceGStreamer::setMaxPacketQueueSize(qint64 maxPacketQueueSize)
+{
+    if (this->d->m_maxPacketQueueSize == maxPacketQueueSize)
+        return;
+
+    this->d->m_maxPacketQueueSize = maxPacketQueueSize;
+    emit this->maxPacketQueueSizeChanged(maxPacketQueueSize);
+}
+
+void MediaSourceGStreamer::setShowLog(bool showLog)
+{
+    if (this->d->m_showLog == showLog)
+        return;
+
+    this->d->m_showLog = showLog;
+    emit this->showLogChanged(showLog);
+}
+
+void MediaSourceGStreamer::setLoop(bool loop)
+{
+    if (this->d->m_loop == loop)
+        return;
+
+    this->d->m_loop = loop;
+    emit this->loopChanged(loop);
+}
+
+void MediaSourceGStreamer::setSync(bool sync)
+{
+    if (this->d->m_sync == sync)
+        return;
+
+    this->d->m_sync = sync;
+    emit this->syncChanged(sync);
+}
+
+void MediaSourceGStreamer::resetMedia()
+{
+    this->setMedia("");
+}
+
+void MediaSourceGStreamer::resetStreams()
+{
+    if  (this->d->m_streams.isEmpty())
+        return;
+
+    this->d->m_streams.clear();
+    emit this->streamsChanged(this->d->m_streams);
+}
+
+void MediaSourceGStreamer::resetMaxPacketQueueSize()
+{
+    this->setMaxPacketQueueSize(15 * 1024 * 1024);
+}
+
+void MediaSourceGStreamer::resetShowLog()
+{
+    this->setShowLog(false);
+}
+
+void MediaSourceGStreamer::resetLoop()
+{
+    this->setLoop(false);
+}
+
+void MediaSourceGStreamer::resetSync()
+{
+    this->setSync(true);
+}
+
+bool MediaSourceGStreamer::setState(AkElement::ElementState state)
+{
+    switch (this->d->m_state) {
+    case AkElement::ElementStateNull: {
+        if (state == AkElement::ElementStatePaused
+            || state == AkElement::ElementStatePlaying) {
+            // Create pipeline.
+            this->d->m_pipeline =
+                    gst_element_factory_make("playbin", "mediaBin");
+
+            // Else, try to open it anyway.
+
+            // Set the media file to play.
+            if (gst_uri_is_valid(this->d->m_media.toStdString().c_str())) {
+                g_object_set(G_OBJECT(this->d->m_pipeline),
+                             "uri",
+                             this->d->m_media.toStdString().c_str(),
+                             nullptr);
+            } else {
+                auto uri = gst_filename_to_uri(this->d->m_media.toStdString().c_str(),
+                                               nullptr);
+                g_object_set(G_OBJECT(this->d->m_pipeline), "uri", uri, nullptr);
+                g_free(uri);
+            }
+
+            g_object_set(G_OBJECT(this->d->m_pipeline),
+                         "buffer-size", this->d->m_maxPacketQueueSize, nullptr);
+
+            // Append the appsinks to grab audio and video frames, and subtitles.
+            GstElement *audioOutput = gst_element_factory_make("appsink",
+                                                               "audioOutput");
+            g_object_set(G_OBJECT(this->d->m_pipeline), "audio-sink", audioOutput, nullptr);
+            GstElement *videoOutput = gst_element_factory_make("appsink", "videoOutput");
+            g_object_set(G_OBJECT(this->d->m_pipeline), "video-sink", videoOutput, nullptr);
+            GstElement *subtitlesOutput = gst_element_factory_make("appsink",
+                                                                   "subtitlesOutput");
+            g_object_set(G_OBJECT(this->d->m_pipeline), "text-sink", subtitlesOutput, nullptr);
+
+            // Emmit the signals when a frame is available.
+            g_object_set(G_OBJECT(audioOutput), "emit-signals", TRUE, nullptr);
+            g_object_set(G_OBJECT(videoOutput), "emit-signals", TRUE, nullptr);
+            g_object_set(G_OBJECT(subtitlesOutput), "emit-signals", TRUE, nullptr);
+
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+            const char gstFormat[] = "S32LE";
+#else
+            const char gstFormat[] = "S32BE";
+#endif
+
+            // Convert audio to a standard format.
+            GstCaps *audioCaps =
+                    gst_caps_new_simple("audio/x-raw",
+                                        "format", G_TYPE_STRING, gstFormat,
+                                        "channels", G_TYPE_INT, 2,
+                                        "layout", G_TYPE_STRING, "interleaved",
+                                        nullptr);
+
+            gst_app_sink_set_caps(GST_APP_SINK(audioOutput), audioCaps);
+            gst_caps_unref(audioCaps);
+
+            // Convert video to a standard format.
+            GstCaps *videoCaps =
+                    gst_caps_new_simple("video/x-raw",
+                                         "format", G_TYPE_STRING, "RGB",
+                                         nullptr);
+
+            gst_app_sink_set_caps(GST_APP_SINK(videoOutput), videoCaps);
+            gst_caps_unref(videoCaps);
+
+            // Connect signals
+            g_signal_connect(this->d->m_pipeline,
+                             "about-to-finish",
+                             G_CALLBACK(this->d->aboutToFinish),
+                             this);
+            g_signal_connect(audioOutput,
+                             "new-sample",
+                             G_CALLBACK(this->d->audioBufferCallback),
+                             this);
+            g_signal_connect(videoOutput,
+                             "new-sample",
+                             G_CALLBACK(this->d->videoBufferCallback),
+                             this);
+            g_signal_connect(subtitlesOutput,
+                             "new-sample",
+                             G_CALLBACK(this->d->subtitlesBufferCallback),
+                             this);
+
+            // Synchronize streams?
+            g_object_set(G_OBJECT(audioOutput),
+                         "sync",
+                         this->d->m_sync? TRUE: FALSE,
+                         nullptr);
+            g_object_set(G_OBJECT(videoOutput),
+                         "sync",
+                         this->d->m_sync? TRUE: FALSE,
+                         nullptr);
+            g_object_set(G_OBJECT(subtitlesOutput),
+                         "sync",
+                         this->d->m_sync? TRUE: FALSE,
+                         nullptr);
+
+            // Configure the message bus.
+            GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->d->m_pipeline));
+            this->d->m_busWatchId = gst_bus_add_watch(bus, this->d->busCallback, this);
+            gst_object_unref(bus);
+
+            // Run the main GStreamer loop.
+            this->d->m_mainLoop = g_main_loop_new(nullptr, FALSE);
+            QtConcurrent::run(&this->d->m_threadPool,
+                              g_main_loop_run,
+                              this->d->m_mainLoop);
+            GstState gstState = state == AkElement::ElementStatePaused?
+                                 GST_STATE_PAUSED: GST_STATE_PLAYING;
+            gst_element_set_state(this->d->m_pipeline, gstState);
+            this->d->m_run = true;
+
+            // Wait until paused/playing state is reached.
+            this->d->waitState(gstState);
+
+            // Read the number of tracks in the file.
+            int audioTracks = 0;
+            g_object_get(G_OBJECT(this->d->m_pipeline),
+                         "n-audio",
+                         &audioTracks,
+                         nullptr);
+            int videoTracks = 0;
+            g_object_get(G_OBJECT(this->d->m_pipeline),
+                         "n-video",
+                         &videoTracks,
+                         nullptr);
+            int subtitlesTracks = 0;
+            g_object_get(G_OBJECT(this->d->m_pipeline),
+                         "n-text",
+                         &subtitlesTracks,
+                         nullptr);
+
+            int totalTracks = audioTracks + videoTracks + subtitlesTracks;
+
+            // Read info of all possible streams.
+            GstPad *pad = nullptr;
+            int curStream = -1;
+            this->d->m_streamInfo.clear();
+
+            auto languages = this->d->languageCodes();
+
+            for (int stream = 0; stream < totalTracks; stream++) {
+                if (stream < audioTracks) {
+                    g_object_get(G_OBJECT(this->d->m_pipeline),
+                                 "current-audio",
+                                 &curStream,
+                                 nullptr);
+
+                    int streamId = stream;
+
+                    g_object_set(G_OBJECT(this->d->m_pipeline),
+                                 "current-audio",
+                                 streamId,
+                                 nullptr);
+
+                    g_signal_emit_by_name(this->d->m_pipeline,
+                                          "get-audio-pad",
+                                          streamId,
+                                          &pad);
+
+                    if (pad) {
+                        GstCaps *caps = gst_pad_get_current_caps(pad);
+                        GstAudioInfo *audioInfo = gst_audio_info_new();
+                        gst_audio_info_from_caps(audioInfo, caps);
+
+                        AkAudioCaps audioCaps(AkAudioCaps::SampleFormat_s32,
+                                              AkAudioCaps::Layout_stereo,
+                                              audioInfo->rate);
+                        this->d->m_streamInfo << Stream(audioCaps,
+                                                        languages[stream]);
+
+                        gst_audio_info_free(audioInfo);
+                    }
+
+                    g_object_set(G_OBJECT(this->d->m_pipeline),
+                                 "current-audio",
+                                 curStream,
+                                 nullptr);
+                } else if (stream < audioTracks + videoTracks) {
+                    g_object_get(G_OBJECT(this->d->m_pipeline),
+                                 "current-video",
+                                 &curStream,
+                                 nullptr);
+
+                    int streamId = stream - audioTracks;
+
+                    g_object_set(G_OBJECT(this->d->m_pipeline),
+                                 "current-video",
+                                 streamId,
+                                 nullptr);
+
+                    g_signal_emit_by_name(this->d->m_pipeline,
+                                          "get-video-pad",
+                                          streamId,
+                                          &pad);
+
+                    if (pad) {
+                        if (auto caps = gst_pad_get_current_caps(pad)) {
+                            auto videoInfo = gst_video_info_new();
+                            gst_video_info_from_caps(videoInfo, caps);
+
+                            AkVideoCaps videoCaps(AkVideoCaps::Format_rgb24,
+                                                  videoInfo->width,
+                                                  videoInfo->height,
+                                                  AkFrac(videoInfo->fps_n,
+                                                         videoInfo->fps_d));
+                            this->d->m_streamInfo << Stream(videoCaps,
+                                                            languages[stream]);
+
+                            gst_video_info_free(videoInfo);
+                        }
+                    }
+
+                    g_object_set(G_OBJECT(this->d->m_pipeline),
+                                 "current-video",
+                                 curStream,
+                                 nullptr);
+                } else {
+                    g_object_get(G_OBJECT(this->d->m_pipeline),
+                                 "current-text",
+                                 &curStream,
+                                 nullptr);
+
+                    int streamId = stream - audioTracks - videoTracks;
+
+                    g_object_set(G_OBJECT(this->d->m_pipeline),
+                                 "current-text",
+                                 streamId,
+                                 nullptr);
+
+                    g_signal_emit_by_name(this->d->m_pipeline,
+                                          "get-text-pad",
+                                          streamId,
+                                          &pad);
+
+                    if (pad) {
+                        GstCaps *caps = gst_pad_get_current_caps(pad);
+                        GstStructure *capsStructure = gst_caps_get_structure(caps, 0);
+                        const gchar *format = gst_structure_get_string(capsStructure, "format");
+
+                        AkCaps subtitlesCaps("text/x-raw");
+                        subtitlesCaps.setProperty("type", format);
+                        this->d->m_streamInfo << Stream(subtitlesCaps,
+                                                        languages[stream]);
+                    }
+
+                    g_object_set(G_OBJECT(this->d->m_pipeline),
+                                 "current-text",
+                                 curStream,
+                                 nullptr);
+                }
+            }
+
+            this->updateStreams();
+
+            this->d->m_audioId = Ak::id();
+            this->d->m_videoId = Ak::id();
+            this->d->m_subtitlesId = Ak::id();
+            this->d->m_state = state;
+            emit this->stateChanged(state);
+
+            return true;
+        }
+
+        break;
+    }
+    case AkElement::ElementStatePaused: {
+        switch (state) {
+        case AkElement::ElementStateNull: {
+            this->d->m_run = false;
+
+            if (this->d->m_pipeline) {
+                gst_element_set_state(this->d->m_pipeline, GST_STATE_NULL);
+                this->d->waitState(GST_STATE_NULL);
+                gst_object_unref(GST_OBJECT(this->d->m_pipeline));
+                g_source_remove(this->d->m_busWatchId);
+                this->d->m_pipeline = nullptr;
+                this->d->m_busWatchId = 0;
+            }
+
+            if (this->d->m_mainLoop) {
+                g_main_loop_quit(this->d->m_mainLoop);
+                g_main_loop_unref(this->d->m_mainLoop);
+                this->d->m_mainLoop = nullptr;
+            }
+
+            this->d->m_state = state;
+            emit this->stateChanged(state);
+
+            return true;
+        }
+        case AkElement::ElementStatePlaying: {
+            gst_element_set_state(this->d->m_pipeline, GST_STATE_PLAYING);
+            this->d->waitState(GST_STATE_PLAYING);
+            this->d->m_state = state;
+            emit this->stateChanged(state);
+
+            return true;
+        }
+        case AkElement::ElementStatePaused:
+            break;
+        }
+
+        break;
+    }
+    case AkElement::ElementStatePlaying: {
+        switch (state) {
+        case AkElement::ElementStateNull: {
+            this->d->m_run = false;
+
+            if (this->d->m_pipeline) {
+                gst_element_set_state(this->d->m_pipeline, GST_STATE_NULL);
+                this->d->waitState(GST_STATE_NULL);
+                gst_object_unref(GST_OBJECT(this->d->m_pipeline));
+                g_source_remove(this->d->m_busWatchId);
+                this->d->m_pipeline = nullptr;
+                this->d->m_busWatchId = 0;
+            }
+
+            if (this->d->m_mainLoop) {
+                g_main_loop_quit(this->d->m_mainLoop);
+                g_main_loop_unref(this->d->m_mainLoop);
+                this->d->m_mainLoop = nullptr;
+            }
+
+            this->d->m_state = state;
+            emit this->stateChanged(state);
+
+            return true;
+        }
+        case AkElement::ElementStatePaused: {
+            gst_element_set_state(this->d->m_pipeline, GST_STATE_PAUSED);
+            this->d->waitState(GST_STATE_PAUSED);
+            this->d->m_state = state;
+            emit this->stateChanged(state);
+
+            return true;
+        }
+        case AkElement::ElementStatePlaying:
+            break;
+        }
+
+        break;
+    }
+    }
+
+    return false;
+}
+
+void MediaSourceGStreamer::updateStreams()
+{
+    // Read the number of tracks in the file.
+    int audioTracks = 0;
+    g_object_get(G_OBJECT(this->d->m_pipeline),
+                 "n-audio",
+                 &audioTracks,
+                 nullptr);
+    int videoTracks = 0;
+    g_object_get(G_OBJECT(this->d->m_pipeline),
+                 "n-video",
+                 &videoTracks,
+                 nullptr);
+    int subtitlesTracks = 0;
+    g_object_get(G_OBJECT(this->d->m_pipeline),
+                 "n-text",
+                 &subtitlesTracks,
+                 nullptr);
+
+    // Set default streams
+    this->d->m_audioIndex = -1;
+    this->d->m_videoIndex = -1;
+    this->d->m_subtitlesIndex = -1;
+
+    if (this->d->m_streams.isEmpty()) {
+        if (audioTracks > 0) {
+            this->d->m_audioIndex = 0;
+            g_object_set(G_OBJECT(this->d->m_pipeline),
+                         "current-audio",
+                         0,
+                         nullptr);
+        }
+
+        if (videoTracks > 0) {
+            this->d->m_videoIndex = audioTracks;
+            g_object_set(G_OBJECT(this->d->m_pipeline),
+                         "current-video",
+                         0,
+                         nullptr);
+        }
+
+    } else {
+        for (auto &stream: this->d->m_streams) {
+            if (stream < audioTracks) {
+                this->d->m_audioIndex = stream;
+
+                g_object_set(G_OBJECT(this->d->m_pipeline),
+                             "current-audio",
+                             stream,
+                             nullptr);
+            } else if (stream < audioTracks + videoTracks) {
+                this->d->m_videoIndex = stream;
+
+                g_object_set(G_OBJECT(this->d->m_pipeline),
+                             "current-video",
+                             stream - audioTracks,
+                             nullptr);
+            } else {
+                this->d->m_subtitlesIndex = stream;
+
+                g_object_set(G_OBJECT(this->d->m_pipeline),
+                             "current-text",
+                             stream - audioTracks - videoTracks,
+                             nullptr);
+            }
+        }
+    }
 }
 
 void MediaSourceGStreamerPrivate::waitState(GstState state)
@@ -577,494 +1214,6 @@ QStringList MediaSourceGStreamerPrivate::languageCodes()
     languages << languageCodes("text");
 
     return languages;
-}
-
-void MediaSourceGStreamer::setMedia(const QString &media)
-{
-    if (media == this->d->m_media)
-        return;
-
-    bool isRunning = this->d->m_run;
-    this->setState(AkElement::ElementStateNull);
-    this->d->m_media = media;
-
-    if (isRunning && !this->d->m_media.isEmpty())
-        this->setState(AkElement::ElementStatePlaying);
-
-    emit this->mediaChanged(media);
-    emit this->mediasChanged(this->medias());
-}
-
-void MediaSourceGStreamer::setStreams(const QList<int> &streams)
-{
-    if (this->d->m_streams == streams)
-        return;
-
-    this->d->m_streams = streams;
-
-    if (this->d->m_run)
-        this->updateStreams();
-
-    emit this->streamsChanged(streams);
-}
-
-void MediaSourceGStreamer::setMaxPacketQueueSize(qint64 maxPacketQueueSize)
-{
-    if (this->d->m_maxPacketQueueSize == maxPacketQueueSize)
-        return;
-
-    this->d->m_maxPacketQueueSize = maxPacketQueueSize;
-    emit this->maxPacketQueueSizeChanged(maxPacketQueueSize);
-}
-
-void MediaSourceGStreamer::setShowLog(bool showLog)
-{
-    if (this->d->m_showLog == showLog)
-        return;
-
-    this->d->m_showLog = showLog;
-    emit this->showLogChanged(showLog);
-}
-
-void MediaSourceGStreamer::setLoop(bool loop)
-{
-    if (this->d->m_loop == loop)
-        return;
-
-    this->d->m_loop = loop;
-    emit this->loopChanged(loop);
-}
-
-void MediaSourceGStreamer::resetMedia()
-{
-    this->setMedia("");
-}
-
-void MediaSourceGStreamer::resetStreams()
-{
-    if  (this->d->m_streams.isEmpty())
-        return;
-
-    this->d->m_streams.clear();
-    emit this->streamsChanged(this->d->m_streams);
-}
-
-void MediaSourceGStreamer::resetMaxPacketQueueSize()
-{
-    this->setMaxPacketQueueSize(15 * 1024 * 1024);
-}
-
-void MediaSourceGStreamer::resetShowLog()
-{
-    this->setShowLog(false);
-}
-
-void MediaSourceGStreamer::resetLoop()
-{
-    this->setLoop(false);
-}
-
-bool MediaSourceGStreamer::setState(AkElement::ElementState state)
-{
-    switch (this->d->m_curState) {
-    case AkElement::ElementStateNull: {
-        if (state == AkElement::ElementStatePaused
-            || state == AkElement::ElementStatePlaying) {
-            // Create pipeline.
-            this->d->m_pipeline =
-                    gst_element_factory_make("playbin", "mediaBin");
-
-            // Else, try to open it anyway.
-
-            // Set the media file to play.
-            if (gst_uri_is_valid(this->d->m_media.toStdString().c_str())) {
-                g_object_set(G_OBJECT(this->d->m_pipeline),
-                             "uri",
-                             this->d->m_media.toStdString().c_str(),
-                             nullptr);
-            } else {
-                auto uri = gst_filename_to_uri(this->d->m_media.toStdString().c_str(),
-                                               nullptr);
-                g_object_set(G_OBJECT(this->d->m_pipeline), "uri", uri, nullptr);
-                g_free(uri);
-            }
-
-            g_object_set(G_OBJECT(this->d->m_pipeline),
-                         "buffer-size", this->d->m_maxPacketQueueSize, nullptr);
-
-            // Append the appsinks to grab audio and video frames, and subtitles.
-            GstElement *audioOutput = gst_element_factory_make("appsink",
-                                                               "audioOutput");
-            g_object_set(G_OBJECT(this->d->m_pipeline), "audio-sink", audioOutput, nullptr);
-            GstElement *videoOutput = gst_element_factory_make("appsink", "videoOutput");
-            g_object_set(G_OBJECT(this->d->m_pipeline), "video-sink", videoOutput, nullptr);
-            GstElement *subtitlesOutput = gst_element_factory_make("appsink",
-                                                                   "subtitlesOutput");
-            g_object_set(G_OBJECT(this->d->m_pipeline), "text-sink", subtitlesOutput, nullptr);
-
-            // Emmit the signals when a frame is available.
-            g_object_set(G_OBJECT(audioOutput), "emit-signals", TRUE, nullptr);
-            g_object_set(G_OBJECT(videoOutput), "emit-signals", TRUE, nullptr);
-            g_object_set(G_OBJECT(subtitlesOutput), "emit-signals", TRUE, nullptr);
-
-#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-            const char gstFormat[] = "S32LE";
-#else
-            const char gstFormat[] = "S32BE";
-#endif
-
-            // Convert audio to a standard format.
-            GstCaps *audioCaps =
-                    gst_caps_new_simple("audio/x-raw",
-                                        "format", G_TYPE_STRING, gstFormat,
-                                        "channels", G_TYPE_INT, 2,
-                                        "layout", G_TYPE_STRING, "interleaved",
-                                        nullptr);
-
-            gst_app_sink_set_caps(GST_APP_SINK(audioOutput), audioCaps);
-            gst_caps_unref(audioCaps);
-
-            // Convert video to a standard format.
-            GstCaps *videoCaps =
-                    gst_caps_new_simple("video/x-raw",
-                                         "format", G_TYPE_STRING, "RGB",
-                                         nullptr);
-
-            gst_app_sink_set_caps(GST_APP_SINK(videoOutput), videoCaps);
-            gst_caps_unref(videoCaps);
-
-            // Connect signals
-            g_signal_connect(this->d->m_pipeline,
-                             "about-to-finish",
-                             G_CALLBACK(this->d->aboutToFinish),
-                             this);
-            g_signal_connect(audioOutput,
-                             "new-sample",
-                             G_CALLBACK(this->d->audioBufferCallback),
-                             this);
-            g_signal_connect(videoOutput,
-                             "new-sample",
-                             G_CALLBACK(this->d->videoBufferCallback),
-                             this);
-            g_signal_connect(subtitlesOutput,
-                             "new-sample",
-                             G_CALLBACK(this->d->subtitlesBufferCallback),
-                             this);
-
-            // Configure the message bus.
-            GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->d->m_pipeline));
-            this->d->m_busWatchId = gst_bus_add_watch(bus, this->d->busCallback, this);
-            gst_object_unref(bus);
-
-            // Run the main GStreamer loop.
-            this->d->m_mainLoop = g_main_loop_new(nullptr, FALSE);
-            QtConcurrent::run(&this->d->m_threadPool,
-                              g_main_loop_run,
-                              this->d->m_mainLoop);
-            GstState gstState = state == AkElement::ElementStatePaused?
-                                 GST_STATE_PAUSED: GST_STATE_PLAYING;
-            gst_element_set_state(this->d->m_pipeline, gstState);
-            this->d->m_run = true;
-
-            // Wait until paused/playing state is reached.
-            this->d->waitState(gstState);
-
-            // Read the number of tracks in the file.
-            int audioTracks = 0;
-            g_object_get(G_OBJECT(this->d->m_pipeline),
-                         "n-audio",
-                         &audioTracks,
-                         nullptr);
-            int videoTracks = 0;
-            g_object_get(G_OBJECT(this->d->m_pipeline),
-                         "n-video",
-                         &videoTracks,
-                         nullptr);
-            int subtitlesTracks = 0;
-            g_object_get(G_OBJECT(this->d->m_pipeline),
-                         "n-text",
-                         &subtitlesTracks,
-                         nullptr);
-
-            int totalTracks = audioTracks + videoTracks + subtitlesTracks;
-
-            // Read info of all possible streams.
-            GstPad *pad = nullptr;
-            int curStream = -1;
-            this->d->m_streamInfo.clear();
-
-            auto languages = this->d->languageCodes();
-
-            for (int stream = 0; stream < totalTracks; stream++) {
-                if (stream < audioTracks) {
-                    g_object_get(G_OBJECT(this->d->m_pipeline),
-                                 "current-audio",
-                                 &curStream,
-                                 nullptr);
-
-                    int streamId = stream;
-
-                    g_object_set(G_OBJECT(this->d->m_pipeline),
-                                 "current-audio",
-                                 streamId,
-                                 nullptr);
-
-                    g_signal_emit_by_name(this->d->m_pipeline,
-                                          "get-audio-pad",
-                                          streamId,
-                                          &pad);
-
-                    if (pad) {
-                        GstCaps *caps = gst_pad_get_current_caps(pad);
-                        GstAudioInfo *audioInfo = gst_audio_info_new();
-                        gst_audio_info_from_caps(audioInfo, caps);
-
-                        AkAudioCaps audioCaps(AkAudioCaps::SampleFormat_s32,
-                                              AkAudioCaps::Layout_stereo,
-                                              audioInfo->rate);
-                        this->d->m_streamInfo << Stream(audioCaps,
-                                                        languages[stream]);
-
-                        gst_audio_info_free(audioInfo);
-                    }
-
-                    g_object_set(G_OBJECT(this->d->m_pipeline),
-                                 "current-audio",
-                                 curStream,
-                                 nullptr);
-                } else if (stream < audioTracks + videoTracks) {
-                    g_object_get(G_OBJECT(this->d->m_pipeline),
-                                 "current-video",
-                                 &curStream,
-                                 nullptr);
-
-                    int streamId = stream - audioTracks;
-
-                    g_object_set(G_OBJECT(this->d->m_pipeline),
-                                 "current-video",
-                                 streamId,
-                                 nullptr);
-
-                    g_signal_emit_by_name(this->d->m_pipeline,
-                                          "get-video-pad",
-                                          streamId,
-                                          &pad);
-
-                    if (pad) {
-                        if (auto caps = gst_pad_get_current_caps(pad)) {
-                            auto videoInfo = gst_video_info_new();
-                            gst_video_info_from_caps(videoInfo, caps);
-
-                            AkVideoCaps videoCaps(AkVideoCaps::Format_rgb24,
-                                                  videoInfo->width,
-                                                  videoInfo->height,
-                                                  AkFrac(videoInfo->fps_n,
-                                                         videoInfo->fps_d));
-                            this->d->m_streamInfo << Stream(videoCaps,
-                                                            languages[stream]);
-
-                            gst_video_info_free(videoInfo);
-                        }
-                    }
-
-                    g_object_set(G_OBJECT(this->d->m_pipeline),
-                                 "current-video",
-                                 curStream,
-                                 nullptr);
-                } else {
-                    g_object_get(G_OBJECT(this->d->m_pipeline),
-                                 "current-text",
-                                 &curStream,
-                                 nullptr);
-
-                    int streamId = stream - audioTracks - videoTracks;
-
-                    g_object_set(G_OBJECT(this->d->m_pipeline),
-                                 "current-text",
-                                 streamId,
-                                 nullptr);
-
-                    g_signal_emit_by_name(this->d->m_pipeline,
-                                          "get-text-pad",
-                                          streamId,
-                                          &pad);
-
-                    if (pad) {
-                        GstCaps *caps = gst_pad_get_current_caps(pad);
-                        GstStructure *capsStructure = gst_caps_get_structure(caps, 0);
-                        const gchar *format = gst_structure_get_string(capsStructure, "format");
-
-                        AkCaps subtitlesCaps("text/x-raw");
-                        subtitlesCaps.setProperty("type", format);
-                        this->d->m_streamInfo << Stream(subtitlesCaps,
-                                                        languages[stream]);
-                    }
-
-                    g_object_set(G_OBJECT(this->d->m_pipeline),
-                                 "current-text",
-                                 curStream,
-                                 nullptr);
-                }
-            }
-
-            this->updateStreams();
-
-            this->d->m_audioId = Ak::id();
-            this->d->m_videoId = Ak::id();
-            this->d->m_subtitlesId = Ak::id();
-            this->d->m_curState = state;
-
-            return true;
-        }
-
-        break;
-    }
-    case AkElement::ElementStatePaused: {
-        switch (state) {
-        case AkElement::ElementStateNull: {
-            this->d->m_run = false;
-
-            if (this->d->m_pipeline) {
-                gst_element_set_state(this->d->m_pipeline, GST_STATE_NULL);
-                this->d->waitState(GST_STATE_NULL);
-                gst_object_unref(GST_OBJECT(this->d->m_pipeline));
-                g_source_remove(this->d->m_busWatchId);
-                this->d->m_pipeline = nullptr;
-                this->d->m_busWatchId = 0;
-            }
-
-            if (this->d->m_mainLoop) {
-                g_main_loop_quit(this->d->m_mainLoop);
-                g_main_loop_unref(this->d->m_mainLoop);
-                this->d->m_mainLoop = nullptr;
-            }
-
-            this->d->m_curState = state;
-
-            return true;
-        }
-        case AkElement::ElementStatePlaying: {
-            gst_element_set_state(this->d->m_pipeline, GST_STATE_PLAYING);
-            this->d->waitState(GST_STATE_PLAYING);
-            this->d->m_curState = state;
-
-            return true;
-        }
-        case AkElement::ElementStatePaused:
-            break;
-        }
-
-        break;
-    }
-    case AkElement::ElementStatePlaying: {
-        switch (state) {
-        case AkElement::ElementStateNull: {
-            this->d->m_run = false;
-
-            if (this->d->m_pipeline) {
-                gst_element_set_state(this->d->m_pipeline, GST_STATE_NULL);
-                this->d->waitState(GST_STATE_NULL);
-                gst_object_unref(GST_OBJECT(this->d->m_pipeline));
-                g_source_remove(this->d->m_busWatchId);
-                this->d->m_pipeline = nullptr;
-                this->d->m_busWatchId = 0;
-            }
-
-            if (this->d->m_mainLoop) {
-                g_main_loop_quit(this->d->m_mainLoop);
-                g_main_loop_unref(this->d->m_mainLoop);
-                this->d->m_mainLoop = nullptr;
-            }
-
-            this->d->m_curState = state;
-
-            return true;
-        }
-        case AkElement::ElementStatePaused: {
-            gst_element_set_state(this->d->m_pipeline, GST_STATE_PAUSED);
-            this->d->waitState(GST_STATE_PAUSED);
-            this->d->m_curState = state;
-
-            return true;
-        }
-        case AkElement::ElementStatePlaying:
-            break;
-        }
-
-        break;
-    }
-    }
-
-    return false;
-}
-
-void MediaSourceGStreamer::updateStreams()
-{
-    // Read the number of tracks in the file.
-    int audioTracks = 0;
-    g_object_get(G_OBJECT(this->d->m_pipeline),
-                 "n-audio",
-                 &audioTracks,
-                 nullptr);
-    int videoTracks = 0;
-    g_object_get(G_OBJECT(this->d->m_pipeline),
-                 "n-video",
-                 &videoTracks,
-                 nullptr);
-    int subtitlesTracks = 0;
-    g_object_get(G_OBJECT(this->d->m_pipeline),
-                 "n-text",
-                 &subtitlesTracks,
-                 nullptr);
-
-    // Set default streams
-    this->d->m_audioIndex = -1;
-    this->d->m_videoIndex = -1;
-    this->d->m_subtitlesIndex = -1;
-
-    if (this->d->m_streams.isEmpty()) {
-        if (audioTracks > 0) {
-            this->d->m_audioIndex = 0;
-            g_object_set(G_OBJECT(this->d->m_pipeline),
-                         "current-audio",
-                         0,
-                         nullptr);
-        }
-
-        if (videoTracks > 0) {
-            this->d->m_videoIndex = audioTracks;
-            g_object_set(G_OBJECT(this->d->m_pipeline),
-                         "current-video",
-                         0,
-                         nullptr);
-        }
-
-    } else {
-        for (auto &stream: this->d->m_streams) {
-            if (stream < audioTracks) {
-                this->d->m_audioIndex = stream;
-
-                g_object_set(G_OBJECT(this->d->m_pipeline),
-                             "current-audio",
-                             stream,
-                             nullptr);
-            } else if (stream < audioTracks + videoTracks) {
-                this->d->m_videoIndex = stream;
-
-                g_object_set(G_OBJECT(this->d->m_pipeline),
-                             "current-video",
-                             stream - audioTracks,
-                             nullptr);
-            } else {
-                this->d->m_subtitlesIndex = stream;
-
-                g_object_set(G_OBJECT(this->d->m_pipeline),
-                             "current-text",
-                             stream - audioTracks - videoTracks,
-                             nullptr);
-            }
-        }
-    }
 }
 
 #include "moc_mediasourcegstreamer.cpp"

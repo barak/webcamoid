@@ -18,14 +18,16 @@
  */
 
 #include <QDebug>
-#include <QSharedPointer>
 #include <QMutex>
+#include <QSharedPointer>
 #include <QWaitCondition>
-#include <akelement.h>
-#include <akcaps.h>
 #include <akaudiocaps.h>
-#include <akpacket.h>
+#include <akaudioconverter.h>
 #include <akaudiopacket.h>
+#include <akcaps.h>
+#include <akelement.h>
+#include <akpacket.h>
+#include <akpluginmanager.h>
 
 extern "C"
 {
@@ -41,7 +43,7 @@ using ChannelLayoutsMap = QMap<AkAudioCaps::ChannelLayout, uint64_t>;
 class AudioStreamPrivate
 {
     public:
-        AkElementPtr m_convert;
+        AkAudioConverter m_audioConvert;
         AVFrame *m_frame {nullptr};
         QMutex m_frameMutex;
         int64_t m_pts {0};
@@ -53,9 +55,7 @@ class AudioStreamPrivate
                 {AkAudioCaps::SampleFormat_u8 , AV_SAMPLE_FMT_U8 },
                 {AkAudioCaps::SampleFormat_s16, AV_SAMPLE_FMT_S16},
                 {AkAudioCaps::SampleFormat_s32, AV_SAMPLE_FMT_S32},
-#ifdef HAVE_SAMPLEFORMAT64
                 {AkAudioCaps::SampleFormat_s64, AV_SAMPLE_FMT_S64 },
-#endif
                 {AkAudioCaps::SampleFormat_flt, AV_SAMPLE_FMT_FLT},
                 {AkAudioCaps::SampleFormat_dbl, AV_SAMPLE_FMT_DBL},
             };
@@ -63,9 +63,7 @@ class AudioStreamPrivate
                 {AkAudioCaps::SampleFormat_u8 , AV_SAMPLE_FMT_U8P },
                 {AkAudioCaps::SampleFormat_s16, AV_SAMPLE_FMT_S16P},
                 {AkAudioCaps::SampleFormat_s32, AV_SAMPLE_FMT_S32P},
-#ifdef HAVE_SAMPLEFORMAT64
                 {AkAudioCaps::SampleFormat_s64, AV_SAMPLE_FMT_S64P},
-#endif
                 {AkAudioCaps::SampleFormat_flt, AV_SAMPLE_FMT_FLTP},
                 {AkAudioCaps::SampleFormat_dbl, AV_SAMPLE_FMT_DBLP},
             };
@@ -81,10 +79,7 @@ class AudioStreamPrivate
                 AV_SAMPLE_FMT_S32P,
                 AV_SAMPLE_FMT_FLTP,
                 AV_SAMPLE_FMT_DBLP,
-
-#ifdef HAVE_SAMPLEFORMAT64
                 AV_SAMPLE_FMT_S64P,
-#endif
             };
 
             return formats;
@@ -235,9 +230,7 @@ AudioStream::AudioStream(const AVFormatContext *formatContext,
     stream->time_base.num = 1;
     stream->time_base.den = audioCaps.rate();
     codecContext->time_base = stream->time_base;
-
-    this->d->m_convert = AkElement::create("ACapsConvert");
-    this->d->m_convert->setProperty("caps", QVariant::fromValue(audioCaps));
+    this->d->m_audioConvert.setOutputCaps(audioCaps);
 }
 
 AudioStream::~AudioStream()
@@ -252,7 +245,7 @@ void AudioStream::convertPacket(const AkPacket &packet)
         return;
 
     auto codecContext = this->codecContext();
-    auto iPacket = AkAudioPacket(this->d->m_convert->iStream(packet));
+    auto iPacket = AkAudioPacket(this->d->m_audioConvert.convert(packet));
 
     if (!iPacket)
         return;
@@ -280,14 +273,14 @@ void AudioStream::convertPacket(const AkPacket &packet)
 
     // Create new buffer.
     auto oFrame = av_frame_alloc();
+    oFrame->format = codecContext->sample_fmt;
+    oFrame->channel_layout = codecContext->channel_layout;
+    oFrame->sample_rate = codecContext->sample_rate;
+    oFrame->nb_samples = (this->d->m_frame? this->d->m_frame->nb_samples: 0)
+                         + iFrame.nb_samples;
+    oFrame->pts = this->d->m_frame? this->d->m_frame->pts: 0;
 
-    if (av_samples_alloc(oFrame->data,
-                         oFrame->linesize,
-                         channels,
-                         iFrame.nb_samples
-                         + (this->d->m_frame? this->d->m_frame->nb_samples: 0),
-                         AVSampleFormat(iFrame.format),
-                         1) < 0) {
+    if (av_frame_get_buffer(oFrame, 0) < 0) {
         this->deleteFrame(&oFrame);
         this->d->m_frameMutex.unlock();
 
@@ -323,13 +316,6 @@ void AudioStream::convertPacket(const AkPacket &packet)
         return;
     }
 
-    oFrame->format = codecContext->sample_fmt;
-    oFrame->channel_layout = codecContext->channel_layout;
-    oFrame->sample_rate = codecContext->sample_rate;
-    oFrame->nb_samples = (this->d->m_frame? this->d->m_frame->nb_samples: 0)
-                         + iFrame.nb_samples;
-    oFrame->pts = this->d->m_frame? this->d->m_frame->pts: 0;
-
     this->deleteFrame(&this->d->m_frame);
     this->d->m_frame = oFrame;
 
@@ -359,7 +345,6 @@ int AudioStream::encodeData(AVFrame *frame)
     auto stream = this->stream();
 
     // Compress audio packet.
-#ifdef HAVE_SENDRECV
     int result = avcodec_send_frame(codecContext, frame);
 
     if (result < 0) {
@@ -372,53 +357,24 @@ int AudioStream::encodeData(AVFrame *frame)
 
     forever {
         // Initialize audio packet.
-        AVPacket pkt;
-        memset(&pkt, 0, sizeof(AVPacket));
-        av_init_packet(&pkt);
-        result = avcodec_receive_packet(codecContext, &pkt);
+        auto pkt = av_packet_alloc();
+        result = avcodec_receive_packet(codecContext, pkt);
 
-        if (result < 0)
+        if (result < 0) {
+            av_packet_free(&pkt);
+
             break;
+        }
 
-        pkt.stream_index = this->streamIndex();
-        this->rescaleTS(&pkt, codecContext->time_base, stream->time_base);
+        pkt->stream_index = this->streamIndex();
+        this->rescaleTS(pkt, codecContext->time_base, stream->time_base);
 
         // Write the compressed frame to the media file.
-        emit this->packetReady(&pkt);
+        emit this->packetReady(pkt);
+        av_packet_free(&pkt);
     }
 
     return result;
-#else
-    // Initialize audio packet.
-    AVPacket pkt;
-    memset(&pkt, 0, sizeof(AVPacket));
-    av_init_packet(&pkt);
-
-    int gotPacket;
-    int result = avcodec_encode_audio2(codecContext,
-                                       &pkt,
-                                       frame,
-                                       &gotPacket);
-
-    if (result < 0) {
-        char error[1024];
-        av_strerror(result, error, 1024);
-        qDebug() << "Error: " << error;
-
-        return result;
-    }
-
-    if (!gotPacket)
-        return result;
-
-    pkt.stream_index = this->streamIndex();
-    this->rescaleTS(&pkt, codecContext->time_base, stream->time_base);
-
-    // Write the compressed frame to the media file.
-    emit this->packetReady(&pkt);
-
-    return result;
-#endif
 }
 
 AVFrame *AudioStream::dequeueFrame()
@@ -463,12 +419,7 @@ AVFrame *AudioStream::dequeueFrame()
         oFrame->pts = this->d->m_frame->pts;
         int channels = av_get_channel_layout_nb_channels(oFrame->channel_layout);
 
-        if (av_samples_alloc(oFrame->data,
-                             oFrame->linesize,
-                             channels,
-                             codecContext->frame_size,
-                             AVSampleFormat(oFrame->format),
-                             1) < 0) {
+        if (av_frame_get_buffer(oFrame, 0) < 0) {
             this->deleteFrame(&oFrame);
             this->d->m_frameMutex.unlock();
 
@@ -497,12 +448,7 @@ AVFrame *AudioStream::dequeueFrame()
         frame->nb_samples = this->d->m_frame->nb_samples - codecContext->frame_size;
         frame->pts = this->d->m_frame->pts + codecContext->frame_size;
 
-        if (av_samples_alloc(frame->data,
-                             frame->linesize,
-                             channels,
-                             frame->nb_samples,
-                             AVSampleFormat(frame->format),
-                             1) < 0) {
+        if (av_frame_get_buffer(frame, 0) < 0) {
             this->deleteFrame(&oFrame);
             this->deleteFrame(&frame);
             this->d->m_frameMutex.unlock();
@@ -536,11 +482,8 @@ AVFrame *AudioStream::dequeueFrame()
 
 bool AudioStream::init()
 {
-    this->d->m_convert->setState(AkElement::ElementStatePlaying);
     auto result = AbstractStream::init();
-
-    if (!result)
-        this->d->m_convert->setState(AkElement::ElementStateNull);
+    this->d->m_audioConvert.reset();
 
     return result;
 }
@@ -548,8 +491,10 @@ bool AudioStream::init()
 void AudioStream::uninit()
 {
     AbstractStream::uninit();
-    this->d->m_convert->setState(AkElement::ElementStateNull);
+
+    this->d->m_frameMutex.lock();
     this->deleteFrame(&this->d->m_frame);
+    this->d->m_frameMutex.unlock();
 }
 
 #include "moc_audiostream.cpp"

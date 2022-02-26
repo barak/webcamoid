@@ -17,170 +17,221 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <QSize>
-#include <QMutex>
-#include <QQmlContext>
-#include <QQuickItem>
-#include <QQmlProperty>
-#include <QQmlApplicationEngine>
-#include <QSystemTrayIcon>
-#include <QSettings>
-#include <QFileInfo>
-#include <QDateTime>
-#include <QStandardPaths>
-#include <QFileDialog>
 #include <QApplication>
+#include <QDateTime>
+#include <QDir>
+#include <QFileInfo>
+#include <QMutex>
+#include <QProcess>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QThread>
 #include <ak.h>
 #include <akcaps.h>
 #include <akaudiocaps.h>
 #include <akvideocaps.h>
+#include <akpluginmanager.h>
 
 #include "mediatools.h"
-#include "videodisplay.h"
+#include "audiolayer.h"
+#include "clioptions.h"
+#include "downloadmanager.h"
 #include "iconsprovider.h"
 #include "pluginconfigs.h"
-#include "mediasource.h"
-#include "audiolayer.h"
-#include "videoeffects.h"
 #include "recording.h"
 #include "updates.h"
-#include "clioptions.h"
+#include "videodisplay.h"
+#include "videoeffects.h"
+#include "videolayer.h"
 
 #define COMMONS_PROJECT_URL "https://webcamoid.github.io/"
 #define COMMONS_PROJECT_LICENSE_URL "https://raw.githubusercontent.com/webcamoid/webcamoid/master/COPYING"
 #define COMMONS_PROJECT_DOWNLOADS_URL "https://webcamoid.github.io/#downloads"
 #define COMMONS_PROJECT_ISSUES_URL "https://github.com/webcamoid/webcamoid/issues"
-#define COMMONS_COPYRIGHT_NOTICE "Copyright (C) 2011-2018  Gonzalo Exequiel Pedone"
+#define COMMONS_PROJECT_COMMIT_URL "https://github.com/webcamoid/webcamoid/commit"
+#define COMMONS_PROJECT_DONATIONS_URL "https://github.com/webcamoid/webcamoid#donations"
+#define COMMONS_COPYRIGHT_NOTICE "Copyright (C) 2011-2022  Gonzalo Exequiel Pedone"
+
+struct LogingOptions
+{
+    QMutex mutex;
+    QString logFile;
+};
+
+Q_GLOBAL_STATIC(LogingOptions, globalLogingOptions)
 
 class MediaToolsPrivate
 {
     public:
         QQmlApplicationEngine *m_engine {nullptr};
-        PluginConfigsPtr m_pluginConfigs;
-        MediaSourcePtr m_mediaSource;
         AudioLayerPtr m_audioLayer;
-        VideoEffectsPtr m_videoEffects;
+        PluginConfigsPtr m_pluginConfigs;
         RecordingPtr m_recording;
         UpdatesPtr m_updates;
-        AkElementPtr m_virtualCamera;
-        QSystemTrayIcon *m_trayIcon {nullptr};
-        CliOptions m_cliOptions;
+        VideoEffectsPtr m_videoEffects;
+        VideoLayerPtr m_videoLayer;
+        DownloadManagerPtr m_downloadManager;
         int m_windowWidth {0};
         int m_windowHeight {0};
-        bool m_enableVirtualCamera {false};
 
-        bool embedInterface(QQmlApplicationEngine *engine,
-                            QObject *ctrlInterface,
-                            const QString &where) const;
+        void loadLinks();
+        void saveLinks(const AkPluginLinks &links);
 };
 
-MediaTools::MediaTools(QObject *parent):
+MediaTools::MediaTools(const CliOptions &cliOptions, QObject *parent):
     QObject(parent)
 {
     this->d = new MediaToolsPrivate;
+    Ak::registerTypes();
+    this->d->loadLinks();
 
     // Initialize environment.
-    this->d->m_trayIcon = new QSystemTrayIcon(QApplication::windowIcon(), this);
     this->d->m_engine = new QQmlApplicationEngine();
-    this->d->m_engine->addImageProvider(QLatin1String("icons"), new IconsProvider);
-    this->d->m_engine->addImportPath(":/Ak/share/qml");
+    this->d->m_engine->addImageProvider(QLatin1String("icons"),
+                                        new IconsProvider);
     Ak::setQmlEngine(this->d->m_engine);
     this->d->m_pluginConfigs =
-            PluginConfigsPtr(new PluginConfigs(this->d->m_cliOptions,
+            PluginConfigsPtr(new PluginConfigs(cliOptions,
                                                this->d->m_engine));
-    this->d->m_mediaSource = MediaSourcePtr(new MediaSource(this->d->m_engine));
+    this->d->m_videoLayer =
+            VideoLayerPtr(new VideoLayer(this->d->m_engine));
     this->d->m_audioLayer = AudioLayerPtr(new AudioLayer(this->d->m_engine));
-    this->d->m_videoEffects = VideoEffectsPtr(new VideoEffects(this->d->m_engine));
+    this->d->m_videoEffects =
+            VideoEffectsPtr(new VideoEffects(this->d->m_engine));
     this->d->m_recording = RecordingPtr(new Recording(this->d->m_engine));
     this->d->m_updates = UpdatesPtr(new Updates(this->d->m_engine));
-    this->d->m_virtualCamera = AkElement::create("VirtualCamera");
+    this->d->m_downloadManager =
+            DownloadManagerPtr(new DownloadManager(this->d->m_engine));
+    this->d->m_updates->watch("Webcamoid",
+                              COMMONS_VERSION,
+                              "https://api.github.com/repos/webcamoid/webcamoid/releases/latest");
+    this->d->m_updates->watch("VirtualCamera",
+                              this->d->m_videoLayer->currentVCamVersion(),
+                              this->d->m_videoLayer->vcamUpdateUrl());
+    QObject::connect(this->d->m_updates.data(),
+                     &Updates::newVersionAvailable,
+                     this,
+                     [this] (const QString &component,
+                             const QString &latestVersion) {
+        if (component == "VirtualCamera")
+            this->d->m_videoLayer->setLatestVCamVersion(latestVersion);
+    });
 
-    if (this->d->m_virtualCamera) {
-        AkElement::link(this->d->m_videoEffects.data(),
-                        this->d->m_virtualCamera.data(),
-                        Qt::DirectConnection);
-        QObject::connect(this->d->m_virtualCamera.data(),
-                         SIGNAL(stateChanged(AkElement::ElementState)),
-                         this,
-                         SIGNAL(virtualCameraStateChanged(AkElement::ElementState)));
-    }
-
-    AkElement::link(this->d->m_mediaSource.data(),
+    AkElement::link(this->d->m_videoLayer.data(),
                     this->d->m_videoEffects.data(),
                     Qt::DirectConnection);
-    AkElement::link(this->d->m_mediaSource.data(),
+    AkElement::link(this->d->m_videoLayer.data(),
                     this->d->m_audioLayer.data(),
                     Qt::DirectConnection);
     AkElement::link(this->d->m_videoEffects.data(),
                     this->d->m_recording.data(),
                     Qt::DirectConnection);
+    AkElement::link(this->d->m_videoEffects.data(),
+                    this->d->m_videoLayer.data(),
+                    Qt::DirectConnection);
     AkElement::link(this->d->m_audioLayer.data(),
                     this->d->m_recording.data(),
                     Qt::DirectConnection);
-    QObject::connect(this->d->m_mediaSource.data(),
-                     &MediaSource::error,
-                     this,
-                     &MediaTools::error);
-    QObject::connect(this->d->m_mediaSource.data(),
-                     &MediaSource::stateChanged,
+    QObject::connect(this->d->m_videoLayer.data(),
+                     &VideoLayer::stateChanged,
                      this->d->m_videoEffects.data(),
                      &VideoEffects::setState);
-    QObject::connect(this->d->m_mediaSource.data(),
-                     &MediaSource::stateChanged,
+    QObject::connect(this->d->m_videoLayer.data(),
+                     &VideoLayer::stateChanged,
                      this->d->m_audioLayer.data(),
                      &AudioLayer::setOutputState);
     QObject::connect(this->d->m_recording.data(),
                      &Recording::stateChanged,
                      this->d->m_audioLayer.data(),
                      &AudioLayer::setInputState);
-    QObject::connect(this->d->m_mediaSource.data(),
-                     &MediaSource::audioCapsChanged,
+    QObject::connect(this->d->m_videoLayer.data(),
+                     &VideoLayer::startVCamDownload,
+                     this,
+                     [this] (const QString &title,
+                             const QString &fromUrl,
+                             const QString &toFile) {
+        this->d->m_downloadManager->clear();
+        this->d->m_downloadManager->enqueue(title, fromUrl, toFile);
+    });
+    QObject::connect(this->d->m_videoLayer.data(),
+                     &VideoLayer::inputAudioCapsChanged,
                      this->d->m_audioLayer.data(),
-                     &AudioLayer::setInputCaps);
-    QObject::connect(this->d->m_mediaSource.data(),
-                     &MediaSource::streamChanged,
+                     [this] (const AkAudioCaps &audioCaps)
+                     {
+                        auto stream = this->d->m_videoLayer->videoInput();
+
+                        if (stream.isEmpty())
+                            this->d->m_audioLayer->resetInput();
+                        else
+                            this->d->m_audioLayer->setInput(stream,
+                                                            this->d->m_videoLayer->description(stream),
+                                                            audioCaps);
+                     });
+    QObject::connect(this->d->m_videoLayer.data(),
+                     &VideoLayer::videoInputChanged,
                      this->d->m_audioLayer.data(),
                      [this] (const QString &stream)
                      {
-                         this->d->m_audioLayer->setInputDescription(this->d->m_mediaSource->description(stream));
+                        if (stream.isEmpty())
+                            this->d->m_audioLayer->resetInput();
+                        else
+                            this->d->m_audioLayer->setInput(stream,
+                                                            this->d->m_videoLayer->description(stream),
+                                                            this->d->m_videoLayer->inputAudioCaps());
                      });
-    QObject::connect(this->d->m_mediaSource.data(),
-                     &MediaSource::streamChanged,
-                     this,
-                     &MediaTools::updateVCamState);
-    QObject::connect(this->d->m_mediaSource.data(),
-                     &MediaSource::videoCapsChanged,
-                     this,
-                     &MediaTools::updateVCamCaps);
-    QObject::connect(this,
-                     &MediaTools::enableVirtualCameraChanged,
-                     this,
-                     &MediaTools::updateVCamState);
-    QObject::connect(this->d->m_pluginConfigs.data(),
-                     &PluginConfigs::pluginsChanged,
+    QObject::connect(akPluginManager,
+                     &AkPluginManager::pluginsChanged,
                      this->d->m_videoEffects.data(),
-                     &VideoEffects::updateEffects);
+                     &VideoEffects::updateAvailableEffects);
     QObject::connect(this->d->m_audioLayer.data(),
                      &AudioLayer::outputCapsChanged,
                      this->d->m_recording.data(),
                      &Recording::setAudioCaps);
-    QObject::connect(this->d->m_mediaSource.data(),
-                     &MediaSource::videoCapsChanged,
+    QObject::connect(this->d->m_videoLayer.data(),
+                     &VideoLayer::inputVideoCapsChanged,
                      this->d->m_recording.data(),
                      &Recording::setVideoCaps);
     QObject::connect(qApp,
                      &QCoreApplication::aboutToQuit,
-                     this->d->m_mediaSource.data(),
+                     this->d->m_videoLayer.data(),
                      [this] () {
-                        this->d->m_mediaSource->setState(AkElement::ElementStateNull);
+                        this->d->m_videoLayer->setState(AkElement::ElementStateNull);
                      });
+    QObject::connect(akPluginManager,
+                     &AkPluginManager::linksChanged,
+                     this,
+                     [this] (const AkPluginLinks &links) {
+                        this->d->saveLinks(links);
+                     });
+    QObject::connect(this->d->m_downloadManager.data(),
+                     &DownloadManager::finished,
+                     this,
+                     [this] (const QString &url) {
+        auto filePath = this->d->m_downloadManager->downloadFile(url);
+        auto status = this->d->m_downloadManager->downloadStatus(url);
+        auto error = this->d->m_downloadManager->downloadErrorString(url);
+        this->d->m_videoLayer->checkVCamDownloadReady(url,
+                                                      filePath,
+                                                      status,
+                                                      error);
+    });
 
     this->loadConfigs();
-    this->updateVCamCaps(this->d->m_mediaSource->videoCaps());
-    this->d->m_recording->setVideoCaps(this->d->m_mediaSource->videoCaps());
+    this->d->m_recording->setVideoCaps(this->d->m_videoLayer->inputVideoCaps());
     this->d->m_recording->setAudioCaps(this->d->m_audioLayer->outputCaps());
-    this->d->m_audioLayer->setInputCaps(this->d->m_mediaSource->audioCaps());
-    this->d->m_audioLayer->setInputDescription(this->d->m_mediaSource->description(this->d->m_mediaSource->stream()));
+    auto stream = this->d->m_videoLayer->videoInput();
+
+    if (stream.isEmpty())
+        this->d->m_audioLayer->resetInput();
+    else
+        this->d->m_audioLayer->setInput(stream,
+                                        this->d->m_videoLayer->description(stream),
+                                        this->d->m_videoLayer->inputAudioCaps());
+
+    this->d->m_videoLayer->setLatestVCamVersion(this->d->m_updates->latestVersion("VirtualCamera"));
+    this->d->m_updates->start();
 }
 
 MediaTools::~MediaTools()
@@ -200,19 +251,6 @@ int MediaTools::windowHeight() const
     return this->d->m_windowHeight;
 }
 
-bool MediaTools::enableVirtualCamera() const
-{
-    return this->d->m_enableVirtualCamera;
-}
-
-AkElement::ElementState MediaTools::virtualCameraState() const
-{
-    if (this->d->m_virtualCamera)
-        return this->d->m_virtualCamera->state();
-
-    return AkElement::ElementStateNull;
-}
-
 QString MediaTools::applicationName() const
 {
     return QCoreApplication::applicationName();
@@ -220,10 +258,15 @@ QString MediaTools::applicationName() const
 
 QString MediaTools::applicationVersion() const
 {
-#ifdef DAILY_BUILD
-    return QString(tr("Daily Build"));
-#else
     return QCoreApplication::applicationVersion();
+}
+
+bool MediaTools::isDailyBuild() const
+{
+#ifdef DAILY_BUILD
+    return true;
+#else
+    return false;
 #endif
 }
 
@@ -257,6 +300,38 @@ QString MediaTools::projectIssuesUrl() const
     return COMMONS_PROJECT_ISSUES_URL;
 }
 
+QString MediaTools::projectGitCommit() const
+{
+#ifdef GIT_COMMIT_HASH
+    return {GIT_COMMIT_HASH};
+#else
+    return {};
+#endif
+}
+
+QString MediaTools::projectGitShortCommit() const
+{
+#ifdef GIT_COMMIT_HASH
+    return QString(GIT_COMMIT_HASH).left(7);
+#else
+    return {};
+#endif
+}
+
+QString MediaTools::projectGitCommitUrl() const
+{
+#ifdef GIT_COMMIT_HASH
+    return {COMMONS_PROJECT_COMMIT_URL "/" GIT_COMMIT_HASH};
+#else
+    return {};
+#endif
+}
+
+QString MediaTools::projectDonationsUrl() const
+{
+    return {COMMONS_PROJECT_DONATIONS_URL};
+}
+
 QString MediaTools::fileNameFromUri(const QString &uri) const
 {
     return QFileInfo(uri).baseName();
@@ -268,7 +343,7 @@ bool MediaTools::matches(const QString &pattern,
     if (pattern.isEmpty())
         return true;
 
-    for (const QString &str: strings)
+    for (auto &str: strings)
         if (str.contains(QRegExp(pattern,
                                  Qt::CaseInsensitive,
                                  QRegExp::Wildcard)))
@@ -282,9 +357,14 @@ QString MediaTools::currentTime() const
     return QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss");
 }
 
+QString MediaTools::currentTime(const QString &format) const
+{
+    return QDateTime::currentDateTime().toString(format);
+}
+
 QStringList MediaTools::standardLocations(const QString &type) const
 {
-    static const QMap<QString, QStandardPaths::StandardLocation> stdPaths = {
+    static const QMap<QString, QStandardPaths::StandardLocation> stdPaths {
         {"movies"  , QStandardPaths::MoviesLocation  },
         {"pictures", QStandardPaths::PicturesLocation},
     };
@@ -292,33 +372,10 @@ QStringList MediaTools::standardLocations(const QString &type) const
     if (stdPaths.contains(type))
         return QStandardPaths::standardLocations(stdPaths[type]);
 
-    return QStringList();
+    return {};
 }
 
-QString MediaTools::saveFileDialog(const QString &caption,
-                                   const QString &fileName,
-                                   const QString &directory,
-                                   const QString &suffix,
-                                   const QString &filters) const
-{
-    QFileDialog saveFileDialog(nullptr,
-                               caption,
-                               fileName,
-                               filters);
-
-    saveFileDialog.setModal(true);
-    saveFileDialog.setDefaultSuffix(suffix);
-    saveFileDialog.setDirectory(directory);
-    saveFileDialog.setFileMode(QFileDialog::AnyFile);
-    saveFileDialog.setAcceptMode(QFileDialog::AcceptSave);
-
-    if (saveFileDialog.exec() == QDialog::Accepted)
-        return saveFileDialog.selectedFiles().value(0);
-
-    return QString();
-}
-
-QString MediaTools::readFile(const QString &fileName) const
+QString MediaTools::readFile(const QString &fileName)
 {
     QFile file(fileName);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -333,84 +390,68 @@ QString MediaTools::urlToLocalFile(const QUrl &url) const
     return url.toLocalFile();
 }
 
-bool MediaTools::embedVirtualCameraControls(const QString &where,
-                                            const QString &name)
-{
-    if (!this->d->m_virtualCamera)
-        return false;
-
-    auto ctrlInterface = this->d->m_virtualCamera->controlInterface(this->d->m_engine, "");
-
-    if (!ctrlInterface)
-        return false;
-
-    if (!name.isEmpty())
-        ctrlInterface->setObjectName(name);
-
-    return this->d->embedInterface(this->d->m_engine, ctrlInterface, where);
-}
-
-void MediaTools::removeInterface(const QString &where,
-                                 QQmlApplicationEngine *engine)
-{
-    if (!engine)
-        engine = this->d->m_engine;
-
-    if (!engine)
-        return;
-
-    for (auto &obj: engine->rootObjects()) {
-        auto item = obj->findChild<QQuickItem *>(where);
-
-        if (!item)
-            continue;
-
-        auto childItems = item->childItems();
-
-        for (QQuickItem *child: childItems) {
-            child->setParentItem(nullptr);
-            child->setParent(nullptr);
-
-            delete child;
-        }
-    }
-}
-
 QString MediaTools::convertToAbsolute(const QString &path)
 {
     if (!QDir::isRelativePath(path))
         return QDir::cleanPath(path);
 
     static const QDir applicationDir(QCoreApplication::applicationDirPath());
-    QString absPath = applicationDir.absoluteFilePath(path);
+    auto absPath = applicationDir.absoluteFilePath(path);
 
     return QDir::cleanPath(absPath).replace('/', QDir::separator());
 }
 
-bool MediaToolsPrivate::embedInterface(QQmlApplicationEngine *engine,
-                                       QObject *ctrlInterface,
-                                       const QString &where) const
+void MediaTools::setLogFile(const QString &logFile)
 {
-    if (!engine || !ctrlInterface)
-        return false;
+    globalLogingOptions->mutex.lock();
+    globalLogingOptions->logFile = logFile;
+    globalLogingOptions->mutex.unlock();
+}
 
-    for (auto &obj: engine->rootObjects()) {
-        // First, find where to embed the UI.
-        auto item = obj->findChild<QQuickItem *>(where);
+void MediaTools::messageHandler(QtMsgType type,
+                                const QMessageLogContext &context,
+                                const QString &msg)
+{
+    static const QMap<QtMsgType, QString> typeToStr {
+        {QtDebugMsg   , "debug"   },
+        {QtWarningMsg , "warning" },
+        {QtCriticalMsg, "critical"},
+        {QtFatalMsg   , "fatal"   },
+        {QtInfoMsg    , "info"    },
+    };
+    QString log;
+    QTextStream ss(&log);
+    ss << "["
+       << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz")
+       << ", "
+       << QCoreApplication::applicationName()
+       << ", "
+       << QThread::currentThreadId()
+       << ", "
+       << QFileInfo(context.file).fileName()
+       << " ("
+       << context.line
+       << ")] "
+       << typeToStr[type]
+       << ": "
+       << msg
+       << Qt::endl;
 
-        if (!item)
-            continue;
+    globalLogingOptions->mutex.lock();
 
-        // Create an item with the plugin context.
-        auto interfaceItem = qobject_cast<QQuickItem *>(ctrlInterface);
+    if (globalLogingOptions->logFile.isEmpty()) {
+        fprintf(stderr, "%s", log.toStdString().c_str());
+    } else {
+        QFile file(globalLogingOptions->logFile);
 
-        // Finally, embed the plugin item UI in the desired place.
-        interfaceItem->setParentItem(item);
-
-        return true;
+        if (file.open(QIODevice::WriteOnly
+                      | QIODevice::Text
+                      | QIODevice::Append)) {
+            file.write(log.toUtf8());
+        }
     }
 
-    return false;
+    globalLogingOptions->mutex.unlock();
 }
 
 void MediaTools::setWindowWidth(int windowWidth)
@@ -431,33 +472,6 @@ void MediaTools::setWindowHeight(int windowHeight)
     emit this->windowHeightChanged(windowHeight);
 }
 
-void MediaTools::setEnableVirtualCamera(bool enableVirtualCamera)
-{
-    if (this->d->m_enableVirtualCamera == enableVirtualCamera)
-        return;
-
-    this->d->m_enableVirtualCamera = enableVirtualCamera;
-    emit this->enableVirtualCameraChanged(enableVirtualCamera);
-}
-
-void MediaTools::setVirtualCameraState(AkElement::ElementState virtualCameraState)
-{
-    if (this->d->m_virtualCamera) {
-        auto state = virtualCameraState;
-        auto vcamStream = this->d->m_virtualCamera->property("media").toString();
-
-        if (this->d->m_enableVirtualCamera
-            && virtualCameraState == AkElement::ElementStatePlaying
-            && this->d->m_mediaSource->state() == AkElement::ElementStatePlaying
-            && this->d->m_mediaSource->stream() == vcamStream) {
-            // Prevents self blocking by pausing the virtual camera.
-            state = AkElement::ElementStatePaused;
-        }
-
-        this->d->m_virtualCamera->setState(state);
-    }
-}
-
 void MediaTools::resetWindowWidth()
 {
     this->setWindowWidth(0);
@@ -468,59 +482,23 @@ void MediaTools::resetWindowHeight()
     this->setWindowHeight(0);
 }
 
-void MediaTools::resetEnableVirtualCamera()
-{
-    this->setEnableVirtualCamera(false);
-}
-
-void MediaTools::resetVirtualCameraState()
-{
-    this->setVirtualCameraState(AkElement::ElementStateNull);
-}
-
 void MediaTools::loadConfigs()
 {
     QSettings config;
 
     config.beginGroup("GeneralConfigs");
-    QSize windowSize = config.value("windowSize", QSize(1024, 600)).toSize();
+    auto windowSize = config.value("windowSize", QSize(1024, 600)).toSize();
     this->d->m_windowWidth = windowSize.width();
     this->d->m_windowHeight = windowSize.height();
     config.endGroup();
-
-    config.beginGroup("VirtualCamera");
-    this->setEnableVirtualCamera(config.value("enable", false).toBool());
-    config.endGroup();
-
-    auto optPaths =
-            this->d->m_cliOptions.value(this->d->m_cliOptions.vcamPathOpt()).split(';');
-
-    QStringList driverPaths;
-
-    for (auto path: optPaths) {
-        path = this->convertToAbsolute(path);
-
-        if (QFileInfo::exists(path))
-            driverPaths << path;
-    }
-
-    if (this->d->m_virtualCamera)
-        QMetaObject::invokeMethod(this->d->m_virtualCamera.data(),
-                                  "addDriverPaths",
-                                  Q_ARG(QStringList, driverPaths));
 }
 
 void MediaTools::saveConfigs()
 {
     QSettings config;
-
     config.beginGroup("GeneralConfigs");
     config.setValue("windowSize", QSize(this->d->m_windowWidth,
                                         this->d->m_windowHeight));
-    config.endGroup();
-
-    config.beginGroup("VirtualCamera");
-    config.setValue("enable", this->enableVirtualCamera());
     config.endGroup();
 }
 
@@ -528,17 +506,7 @@ void MediaTools::show()
 {
     // @uri Webcamoid
     qmlRegisterType<VideoDisplay>("Webcamoid", 1, 0, "VideoDisplay");
-    this->d->m_engine->rootContext()->setContextProperty("Webcamoid", this);
-
-    // Map tray icon to QML
-    this->d->m_engine->rootContext()->setContextProperty("trayIcon", this->d->m_trayIcon);
-
-    // Map tray icon enums to QML
-    this->d->m_engine->rootContext()->setContextProperty("TrayIcon_NoIcon", QSystemTrayIcon::NoIcon);
-    this->d->m_engine->rootContext()->setContextProperty("TrayIcon_Information", QSystemTrayIcon::Information);
-    this->d->m_engine->rootContext()->setContextProperty("TrayIcon_Warning", QSystemTrayIcon::Warning);
-    this->d->m_engine->rootContext()->setContextProperty("TrayIcon_Critical", QSystemTrayIcon::Critical);
-
+    this->d->m_engine->rootContext()->setContextProperty("mediaTools", this);
     this->d->m_engine->load(QUrl(QStringLiteral("qrc:/Webcamoid/share/qml/main.qml")));
 
     for (auto &obj: this->d->m_engine->rootObjects()) {
@@ -557,36 +525,61 @@ void MediaTools::show()
     emit this->interfaceLoaded();
 }
 
-void MediaTools::updateVCamCaps(const AkCaps &videoCaps)
+void MediaTools::makedirs(const QString &path)
 {
-    if (!this->d->m_virtualCamera)
-        return;
-
-    QMetaObject::invokeMethod(this->d->m_virtualCamera.data(),
-                              "clearStreams");
-    QMetaObject::invokeMethod(this->d->m_virtualCamera.data(),
-                              "addStream",
-                              Q_ARG(int, 0),
-                              Q_ARG(AkCaps, videoCaps));
+    QDir().mkpath(path);
 }
 
-void MediaTools::updateVCamState()
+void MediaTools::restartApp()
 {
-    if (!this->d->m_virtualCamera)
-        return;
+    qApp->quit();
+    auto args = qApp->arguments();
 
-    if (this->d->m_enableVirtualCamera) {
-        if (this->d->m_mediaSource->state() == AkElement::ElementStatePlaying) {
-            auto vcamStream = this->d->m_virtualCamera->property("media").toString();
+    if (args.size() > 1)
+        QProcess::startDetached(args.first(), args.mid(1));
+    else
+        QProcess::startDetached(args.first(), {});
+}
 
-            // Prevents self blocking by pausing the virtual camera.
-            auto state = this->d->m_mediaSource->stream() == vcamStream?
-                             AkElement::ElementStatePaused:
-                             AkElement::ElementStatePlaying;
-            this->d->m_virtualCamera->setState(state);
-        }
-    } else
-        this->d->m_virtualCamera->setState(AkElement::ElementStateNull);
+void MediaToolsPrivate::loadLinks()
+{
+    QSettings config;
+
+    config.beginGroup("PluginsLinks");
+    int nlinks = config.beginReadArray("links");
+    AkPluginLinks links;
+
+    for (int i = 0; i < nlinks; i++) {
+        config.setArrayIndex(i);
+        auto from = config.value("from").toString();
+        auto to = config.value("to").toString();
+
+        if (!from.isEmpty() && !to.isEmpty())
+            links[from] = to;
+    }
+
+    akPluginManager->setLinks(links);
+    config.endArray();
+    config.endGroup();
+}
+
+void MediaToolsPrivate::saveLinks(const AkPluginLinks &links)
+{
+    QSettings config;
+
+    config.beginGroup("PluginsLinks");
+    config.beginWriteArray("links");
+    int i = 0;
+
+    for (auto it = links.begin(); it != links.end(); it++) {
+        config.setArrayIndex(i);
+        config.setValue("from", it.key());
+        config.setValue("to", it.value());
+        i++;
+    }
+
+    config.endArray();
+    config.endGroup();
 }
 
 #include "moc_mediatools.cpp"

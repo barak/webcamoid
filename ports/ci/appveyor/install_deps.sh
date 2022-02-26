@@ -20,11 +20,15 @@
 
 [ -f environment.sh ] && source environment.sh
 
-pacman -Syy
+pacman --noconfirm -Syyu \
+    --ignore filesystem,mintty,msys2-runtime,msys2-runtime-devel,pacman,pacman-mirrors
 pacman --noconfirm --needed -S \
+    ccache \
+    clang \
+    cmake \
     git \
     make \
-    pkg-config \
+    pkgconf \
     python3
 
 if [ "${PLATFORM}" = x86 ]; then
@@ -34,14 +38,16 @@ else
 fi
 
 pacman --noconfirm --needed -S \
-    mingw-w64-${packagesArch}-pkg-config \
+    mingw-w64-${packagesArch}-binutils \
+    mingw-w64-${packagesArch}-ccache \
+    mingw-w64-${packagesArch}-clang \
+    mingw-w64-${packagesArch}-cmake \
+    mingw-w64-${packagesArch}-pkgconf \
     mingw-w64-${packagesArch}-qt5 \
     mingw-w64-${packagesArch}-ffmpeg
 
 if [ -z "${DAILY_BUILD}" ] && [ -z "${RELEASE_BUILD}" ]; then
     pacman --noconfirm --needed -S \
         mingw-w64-${packagesArch}-gst-plugins-base \
-        mingw-w64-${packagesArch}-gst-plugins-good \
-        mingw-w64-${packagesArch}-gst-plugins-bad \
-        mingw-w64-${packagesArch}-gst-plugins-ugly
+        mingw-w64-${packagesArch}-gst-plugins-good
 fi

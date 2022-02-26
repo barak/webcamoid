@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -30,12 +30,14 @@ GridLayout {
     }
     TextField {
         text: Distort.amplitude
+        placeholderText: qsTr("Amplitude")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Distort.amplitude = text
+        onTextChanged: Distort.amplitude = Number(text)
     }
 
     // Configure frequency.
@@ -44,12 +46,14 @@ GridLayout {
     }
     TextField {
         text: Distort.frequency
+        placeholderText: qsTr("Frequency")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Distort.frequency = text
+        onTextChanged: Distort.frequency = Number(text)
     }
 
     // Configure grid size.
@@ -58,11 +62,13 @@ GridLayout {
     }
     TextField {
         text: Distort.gridSizeLog
+        placeholderText: qsTr("Grid size")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Distort.gridSizeLog = text
+        onTextChanged: Distort.gridSizeLog = Number(text)
     }
 }

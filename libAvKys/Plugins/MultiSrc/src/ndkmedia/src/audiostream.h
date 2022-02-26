@@ -32,18 +32,20 @@ class AudioStream: public AbstractStream
 
     public:
         AudioStream(AMediaExtractor *mediaExtractor=nullptr,
-                    uint index=0, qint64 id=-1,
+                    uint index=0,
+                    qint64 id=-1,
                     Clock *globalClock=nullptr,
+                    bool sync=true,
                     QObject *parent=nullptr);
         ~AudioStream();
 
         Q_INVOKABLE AkCaps caps() const;
+        Q_INVOKABLE bool decodeData();
         Q_INVOKABLE static AkAudioCaps::SampleFormat sampleFormatFromEncoding(int32_t encoding);
         Q_INVOKABLE static AkAudioCaps::ChannelLayout layoutFromChannelMask(int32_t channelMask);
-        Q_INVOKABLE bool decodeData();
 
     protected:
-        void processPacket(const AkPacket &packet);
+        void processData(const AkPacket &packet);
 
     private:
         AudioStreamPrivate *d;

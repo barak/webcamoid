@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -30,12 +30,14 @@ GridLayout {
     }
     TextField {
         text: Emboss.factor
+        placeholderText: qsTr("Factor")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Emboss.factor = text
+        onTextChanged: Emboss.factor = Number(text)
     }
 
     // Configure frequency.
@@ -44,11 +46,13 @@ GridLayout {
     }
     TextField {
         text: Emboss.bias
+        placeholderText: qsTr("Bias")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Emboss.bias = text
+        onTextChanged: Emboss.bias = Number(text)
     }
 }

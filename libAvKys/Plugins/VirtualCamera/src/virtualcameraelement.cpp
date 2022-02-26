@@ -21,50 +21,78 @@
 #include <QDateTime>
 #include <QDir>
 #include <QImage>
+#include <QQmlComponent>
 #include <QQmlContext>
+#include <QQmlEngine>
 #include <QSharedPointer>
 #include <QMutex>
 #include <akcaps.h>
 #include <akfrac.h>
 #include <akpacket.h>
+#include <akplugininfo.h>
+#include <akpluginmanager.h>
 #include <akvideopacket.h>
 
 #include "virtualcameraelement.h"
-#include "ipcbridge.h"
-#include "VCamUtils/src/image/videoformat.h"
-#include "VCamUtils/src/image/videoframe.h"
+#include "vcam.h"
 
 #define MAX_CAMERAS 64
 #define PREFERRED_ROUNDING 32
 
-inline int roundTo(int value, int n)
-{
-    return n * qRound(value / qreal(n));
-}
-
 class VirtualCameraElementPrivate
 {
     public:
-        AkVCam::IpcBridge m_ipcBridge;
-        AkCaps m_streamCaps;
+        VirtualCameraElement *self;
+        VCamPtr m_vcam;
+        QString m_vcamImpl;
         QMutex m_mutex;
-        QString m_curDevice;
-        QDir m_applicationDir;
         int m_streamIndex {-1};
         bool m_playing {false};
 
-        VirtualCameraElementPrivate();
-        ~VirtualCameraElementPrivate();
-        std::vector<std::wstring> *driverPaths();
-        QString convertToAbsolute(const QString &path) const;
-        static void serverStateChanged(void *userData,
-                                       AkVCam::IpcBridge::ServerState state);
+        explicit VirtualCameraElementPrivate(VirtualCameraElement *self);
+        static inline int roundTo(int value, int n);
+        void linksChanged(const AkPluginLinks &links);
 };
 
 VirtualCameraElement::VirtualCameraElement():
     AkElement()
 {
-    this->d = new VirtualCameraElementPrivate;
+    this->d = new VirtualCameraElementPrivate(this);
+    QObject::connect(akPluginManager,
+                     &AkPluginManager::linksChanged,
+                     this,
+                     [this] (const AkPluginLinks &links) {
+                        this->d->linksChanged(links);
+                     });
+
+    if (this->d->m_vcam) {
+        QObject::connect(this->d->m_vcam.data(),
+                         &VCam::errorChanged,
+                         this,
+                         &VirtualCameraElement::errorChanged);
+        QObject::connect(this->d->m_vcam.data(),
+                         &VCam::webcamsChanged,
+                         this,
+                         &VirtualCameraElement::mediasChanged);
+        QObject::connect(this->d->m_vcam.data(),
+                         &VCam::deviceChanged,
+                         this,
+                         &VirtualCameraElement::mediaChanged);
+        QObject::connect(this->d->m_vcam.data(),
+                         &VCam::pictureChanged,
+                         this,
+                         &VirtualCameraElement::pictureChanged);
+        QObject::connect(this->d->m_vcam.data(),
+                         &VCam::rootMethodChanged,
+                         this,
+                         &VirtualCameraElement::rootMethodChanged);
+
+        this->d->m_vcam->setPicture(":/VirtualCamera/share/TestFrame/TestFrame.bmp");
+        auto medias = this->d->m_vcam->webcams();
+
+        if (!medias.isEmpty())
+            this->d->m_vcam->setDevice(medias.first());
+    }
 }
 
 VirtualCameraElement::~VirtualCameraElement()
@@ -73,34 +101,43 @@ VirtualCameraElement::~VirtualCameraElement()
     delete this->d;
 }
 
-QString VirtualCameraElement::errorMessage() const
+QString VirtualCameraElement::error() const
 {
-    return QString::fromStdWString(this->d->m_ipcBridge.errorMessage());
-}
+    this->d->m_mutex.lock();
+    QString error;
 
-QStringList VirtualCameraElement::driverPaths() const
-{
-    QStringList driverPaths;
+    if (this->d->m_vcam)
+        error = this->d->m_vcam->error();
 
-    for (auto &path: *this->d->driverPaths())
-        driverPaths << QString::fromStdWString(path);
+    this->d->m_mutex.unlock();
 
-    return driverPaths;
+    return error;
 }
 
 QStringList VirtualCameraElement::medias() const
 {
-    QStringList webcams;
+    this->d->m_mutex.lock();
+    QStringList medias;
 
-    for (auto &device: this->d->m_ipcBridge.listDevices())
-        webcams << QString::fromStdString(device);
+    if (this->d->m_vcam)
+        medias = this->d->m_vcam->webcams();
 
-    return webcams;
+    this->d->m_mutex.unlock();
+
+    return medias;
 }
 
 QString VirtualCameraElement::media() const
 {
-    return this->d->m_curDevice;
+    this->d->m_mutex.lock();
+    QString media;
+
+    if (this->d->m_vcam)
+        media = this->d->m_vcam->device();
+
+    this->d->m_mutex.unlock();
+
+    return media;
 }
 
 QList<int> VirtualCameraElement::streams() const
@@ -113,34 +150,30 @@ int VirtualCameraElement::maxCameras() const
     return MAX_CAMERAS;
 }
 
-QString VirtualCameraElement::driver() const
+AkVideoCaps::PixelFormatList VirtualCameraElement::supportedOutputPixelFormats() const
 {
-    return QString::fromStdString(this->d->m_ipcBridge.driver());
+    this->d->m_mutex.lock();
+    AkVideoCaps::PixelFormatList formats;
+
+    if (this->d->m_vcam)
+        formats = this->d->m_vcam->supportedOutputPixelFormats();
+
+    this->d->m_mutex.unlock();
+
+    return formats;
 }
 
-QStringList VirtualCameraElement::availableDrivers() const
+AkVideoCaps::PixelFormat VirtualCameraElement::defaultOutputPixelFormat() const
 {
-    QStringList drivers;
+    this->d->m_mutex.lock();
+    AkVideoCaps::PixelFormat format = AkVideoCaps::Format_none;
 
-    for (auto &driver: this->d->m_ipcBridge.availableDrivers())
-        drivers << QString::fromStdString(driver);
+    if (this->d->m_vcam)
+        format = this->d->m_vcam->defaultOutputPixelFormat();
 
-    return drivers;
-}
+    this->d->m_mutex.unlock();
 
-QString VirtualCameraElement::rootMethod() const
-{
-    return QString::fromStdString(this->d->m_ipcBridge.rootMethod());
-}
-
-QStringList VirtualCameraElement::availableMethods() const
-{
-    QStringList methods;
-
-    for (auto &method: this->d->m_ipcBridge.availableRootMethods())
-        methods << QString::fromStdString(method);
-
-    return methods;
+    return format;
 }
 
 int VirtualCameraElement::defaultStream(const QString &mimeType) const
@@ -153,15 +186,44 @@ int VirtualCameraElement::defaultStream(const QString &mimeType) const
 
 QString VirtualCameraElement::description(const QString &media) const
 {
-    return QString::fromStdWString(this->d->m_ipcBridge.description(media.toStdString()));
+    this->d->m_mutex.lock();
+    QString description;
+
+    if (this->d->m_vcam)
+        description = this->d->m_vcam->description(media);
+
+    this->d->m_mutex.unlock();
+
+    return description;
 }
 
 AkCaps VirtualCameraElement::caps(int stream) const
 {
     if (stream != 0)
-        return AkCaps();
+        return {};
 
-    return this->d->m_streamCaps;
+    this->d->m_mutex.lock();
+    AkCaps caps;
+
+    if (this->d->m_vcam)
+        caps = this->d->m_vcam->currentCaps();
+
+    this->d->m_mutex.unlock();
+
+    return caps;
+}
+
+AkVideoCapsList VirtualCameraElement::outputCaps(const QString &webcam) const
+{
+    this->d->m_mutex.lock();
+    AkVideoCapsList caps;
+
+    if (this->d->m_vcam)
+        caps = this->d->m_vcam->caps(webcam);
+
+    this->d->m_mutex.unlock();
+
+    return caps;
 }
 
 QVariantMap VirtualCameraElement::addStream(int streamIndex,
@@ -175,12 +237,18 @@ QVariantMap VirtualCameraElement::addStream(int streamIndex,
 
     AkVideoCaps videoCaps(streamCaps);
     videoCaps.setFormat(AkVideoCaps::Format_rgb24);
-    videoCaps.setWidth(roundTo(videoCaps.width(), PREFERRED_ROUNDING));
-    videoCaps.setHeight(roundTo(videoCaps.height(), PREFERRED_ROUNDING));
+    videoCaps.setWidth(VirtualCameraElementPrivate::roundTo(videoCaps.width(),
+                                                            PREFERRED_ROUNDING));
+    videoCaps.setHeight(VirtualCameraElementPrivate::roundTo(videoCaps.height(),
+                                                             PREFERRED_ROUNDING));
 
     this->d->m_streamIndex = streamIndex;
-    this->d->m_streamCaps = videoCaps;
+    this->d->m_mutex.lock();
 
+    if (this->d->m_vcam)
+        this->d->m_vcam->setCurrentCaps(videoCaps);
+
+    this->d->m_mutex.unlock();
     QVariantMap outputParams = {
         {"caps", QVariant::fromValue(streamCaps)}
     };
@@ -201,11 +269,18 @@ QVariantMap VirtualCameraElement::updateStream(int streamIndex,
 
     AkVideoCaps videoCaps(streamCaps);
     videoCaps.setFormat(AkVideoCaps::Format_rgb24);
-    videoCaps.setWidth(roundTo(videoCaps.width(), PREFERRED_ROUNDING));
-    videoCaps.setHeight(roundTo(videoCaps.height(), PREFERRED_ROUNDING));
+    videoCaps.setWidth(VirtualCameraElementPrivate::roundTo(videoCaps.width(),
+                                                            PREFERRED_ROUNDING));
+    videoCaps.setHeight(VirtualCameraElementPrivate::roundTo(videoCaps.height(),
+                                                             PREFERRED_ROUNDING));
 
     this->d->m_streamIndex = streamIndex;
-    this->d->m_streamCaps = videoCaps;
+    this->d->m_mutex.lock();
+
+    if (this->d->m_vcam)
+        this->d->m_vcam->setCurrentCaps(videoCaps);
+
+    this->d->m_mutex.unlock();
 
     QVariantMap outputParams {
         {"caps", QVariant::fromValue(streamCaps)}
@@ -214,61 +289,61 @@ QVariantMap VirtualCameraElement::updateStream(int streamIndex,
     return outputParams;
 }
 
-QString VirtualCameraElement::createWebcam(const QString &description)
+QString VirtualCameraElement::createWebcam(const QString &description,
+                                           const AkVideoCapsList &formats)
 {
-    QVector<AkVCam::PixelFormat> pixelFormats = {
-        AkVCam::PixelFormatYUY2,
-        AkVCam::PixelFormatUYVY,
-        AkVCam::PixelFormatRGB32,
-        AkVCam::PixelFormatRGB24,
-    };
-    QVector<QPair<int , int>> resolutions = {
-        { 640,  480},
-        { 160,  120},
-        { 320,  240},
-        { 800,  600},
-        {1280,  720},
-        {1920, 1080},
-    };
-    std::vector<AkVCam::VideoFormat> formats;
+    QString webcam;
+    QString error;
 
-    for (auto &format: pixelFormats)
-        for (auto &resolution: resolutions)
-            formats.push_back({
-                AkVCam::FourCC(format),
-                resolution.first,
-                resolution.second,
-                {{30, 1}}
-            });
+    this->d->m_mutex.lock();
 
-    auto defaultDescription =
-            L"Virtual Camera "
-            + QDateTime::currentDateTime()
-                .toString("yyyyMMddHHmms").toStdWString();
+    if (this->d->m_vcam) {
+        webcam = this->d->m_vcam->deviceCreate(description, formats);
 
-    auto webcam =
-            this->d->m_ipcBridge.deviceCreate(description.isEmpty()?
-                                                  defaultDescription:
-                                                  description.toStdWString(),
-                                              formats);
-
-    if (webcam.empty()) {
-        auto error = this->d->m_ipcBridge.errorMessage();
-        emit this->errorMessageChanged(QString::fromStdWString(error));
-
-        return {};
+        if (webcam.isEmpty())
+            error = this->d->m_vcam->error();
+    } else {
+        error = "Invalid submodule";
     }
 
-    emit this->mediasChanged(this->medias());
+    this->d->m_mutex.unlock();
 
-    return QString::fromStdString(webcam);
+    if (error.isEmpty())
+        emit this->mediasChanged(this->medias());
+    else
+        emit this->errorChanged(error);
+
+    return webcam;
+}
+
+bool VirtualCameraElement::editWebcam(const QString &webcam,
+                                      const QString &description,
+                                      const AkVideoCapsList &formats)
+{
+    bool ok = false;
+    this->d->m_mutex.lock();
+
+    if (this->d->m_vcam)
+        ok = this->d->m_vcam->deviceEdit(webcam, description, formats);
+
+    this->d->m_mutex.unlock();
+
+    if (ok)
+        emit this->mediasChanged(this->medias());
+
+    return ok;
 }
 
 bool VirtualCameraElement::changeDescription(const QString &webcam,
-                                             const QString &description) const
+                                             const QString &description)
 {
-    bool ok = this->d->m_ipcBridge.changeDescription(webcam.toStdString(),
-                                                     description.toStdWString());
+    bool ok = false;
+    this->d->m_mutex.lock();
+
+    if (this->d->m_vcam)
+        ok = this->d->m_vcam->changeDescription(webcam, description);
+
+    this->d->m_mutex.unlock();
 
     if (ok)
         emit this->mediasChanged(this->medias());
@@ -278,7 +353,13 @@ bool VirtualCameraElement::changeDescription(const QString &webcam,
 
 bool VirtualCameraElement::removeWebcam(const QString &webcam)
 {
-    bool ok = this->d->m_ipcBridge.deviceDestroy(webcam.toStdString());
+    bool ok = false;
+    this->d->m_mutex.lock();
+
+    if (this->d->m_vcam)
+        ok = this->d->m_vcam->deviceDestroy(webcam);
+
+    this->d->m_mutex.unlock();
 
     if (ok)
         emit this->mediasChanged(this->medias());
@@ -288,12 +369,144 @@ bool VirtualCameraElement::removeWebcam(const QString &webcam)
 
 bool VirtualCameraElement::removeAllWebcams()
 {
-    bool ok = this->d->m_ipcBridge.destroyAllDevices();
+    bool ok = false;
+    this->d->m_mutex.lock();
+
+    if (this->d->m_vcam)
+        ok = this->d->m_vcam->destroyAllDevices();
+
+    this->d->m_mutex.unlock();
 
     if (ok)
         emit this->mediasChanged(this->medias());
 
     return ok;
+}
+
+QVariantList VirtualCameraElement::controls() const
+{
+    this->d->m_mutex.lock();
+    QVariantList controls;
+
+    if (this->d->m_vcam)
+        controls = this->d->m_vcam->controls();
+
+    this->d->m_mutex.unlock();
+
+    return controls;
+}
+
+bool VirtualCameraElement::setControls(const QVariantMap &controls)
+{
+    this->d->m_mutex.lock();
+    bool result = false;
+
+    if (this->d->m_vcam)
+        result = this->d->m_vcam->setControls(controls);
+
+    this->d->m_mutex.unlock();
+
+    return result;
+}
+
+bool VirtualCameraElement::resetControls()
+{
+    this->d->m_mutex.lock();
+    bool result = this->d->m_vcam != nullptr;
+    this->d->m_mutex.unlock();
+
+    return result;
+}
+
+QList<quint64> VirtualCameraElement::clientsPids() const
+{
+    this->d->m_mutex.lock();
+    QList<quint64> pids;
+
+    if (this->d->m_vcam)
+        pids = this->d->m_vcam->clientsPids();
+
+    this->d->m_mutex.unlock();
+
+    return pids;
+}
+
+QString VirtualCameraElement::clientExe(quint64 pid) const
+{
+    this->d->m_mutex.lock();
+    QString exe;
+
+    if (this->d->m_vcam)
+        exe = this->d->m_vcam->clientExe(pid);
+
+    this->d->m_mutex.unlock();
+
+    return exe;
+}
+
+bool VirtualCameraElement::driverInstalled() const
+{
+    this->d->m_mutex.lock();
+    bool installed = false;
+
+    if (this->d->m_vcam)
+        installed = this->d->m_vcam->isInstalled();
+
+    this->d->m_mutex.unlock();
+
+    return installed;
+}
+
+QString VirtualCameraElement::driverVersion() const
+{
+    this->d->m_mutex.lock();
+    QString version;
+
+    if (this->d->m_vcam)
+        version = this->d->m_vcam->installedVersion();
+
+    this->d->m_mutex.unlock();
+
+    return version;
+}
+
+QString VirtualCameraElement::picture() const
+{
+    this->d->m_mutex.lock();
+    QString picture;
+
+    if (this->d->m_vcam)
+        picture = this->d->m_vcam->picture();
+
+    this->d->m_mutex.unlock();
+
+    return picture;
+}
+
+QString VirtualCameraElement::rootMethod() const
+{
+    this->d->m_mutex.lock();
+    QString rootMethod;
+
+    if (this->d->m_vcam)
+        rootMethod = this->d->m_vcam->rootMethod();
+
+    this->d->m_mutex.unlock();
+
+    return rootMethod;
+}
+
+QStringList VirtualCameraElement::availableRootMethods() const
+{
+    this->d->m_mutex.lock();
+    QStringList methods;
+
+    if (this->d->m_vcam)
+        methods = this->d->m_vcam->availableRootMethods();
+
+    this->d->m_mutex.unlock();
+
+    return methods;
 }
 
 QString VirtualCameraElement::controlInterfaceProvide(const QString &controlId) const
@@ -308,191 +521,107 @@ void VirtualCameraElement::controlInterfaceConfigure(QQmlContext *context,
 {
     Q_UNUSED(controlId)
 
-    context->setContextProperty("VirtualCamera", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
+    context->setContextProperty("virtualCamera", const_cast<QObject *>(qobject_cast<const QObject *>(this)));
     context->setContextProperty("controlId", controlId);
 }
 
 AkPacket VirtualCameraElement::iVideoStream(const AkVideoPacket &packet)
 {
-    this->d->m_mutex.lock();
-
     if (this->state() == AkElement::ElementStatePlaying) {
-        auto videoPacket = packet.convert(AkVideoCaps::Format_rgb24, 32);
-        auto fps = AkVCam::Fraction {uint32_t(videoPacket.caps().fps().num()),
-                                     uint32_t(videoPacket.caps().fps().den())};
-        AkVCam::VideoFormat format(videoPacket.caps().fourCC(),
-                                   videoPacket.caps().width(),
-                                   videoPacket.caps().height(),
-                                   {fps});
-        AkVCam::VideoFrame frame(format);
-        memcpy(frame.data().data(),
-               videoPacket.buffer().constData(),
-               size_t(videoPacket.buffer().size()));
-        this->d->m_ipcBridge.write(this->d->m_curDevice.toStdString(), frame);
-    }
+        auto videoPacket = packet.convert(AkVideoCaps::Format_rgb24);
+        this->d->m_mutex.lock();
 
-    this->d->m_mutex.unlock();
+        if (this->d->m_vcam)
+            this->d->m_vcam->write(videoPacket);
+
+        this->d->m_mutex.unlock();
+    }
 
     akSend(packet)
 }
 
-void VirtualCameraElement::setDriverPaths(const QStringList &driverPaths)
+bool VirtualCameraElement::applyPicture()
 {
-    std::vector<std::wstring> paths;
+    bool result = false;
+    this->d->m_mutex.lock();
 
-    for (auto &path: driverPaths)
-        if (QFileInfo::exists(path))
-            paths.push_back(path.toStdWString());
+    if (this->d->m_vcam)
+        result = this->d->m_vcam->applyPicture();
 
-    if (paths != *this->d->driverPaths()) {
-        *this->d->driverPaths() = paths;
-        this->d->m_ipcBridge.setDriverPaths(paths);
-        emit this->driverPathsChanged(this->driverPaths());
-    }
-}
+    this->d->m_mutex.unlock();
 
-void VirtualCameraElement::addDriverPath(const QString &driverPath)
-{
-    if (QFileInfo::exists(driverPath))
-        return;
-
-    auto paths = *this->d->driverPaths();
-    paths.push_back(driverPath.toStdWString());
-    *this->d->driverPaths() = paths;
-    this->d->m_ipcBridge.setDriverPaths(paths);
-    emit this->driverPathsChanged(this->driverPaths());
-}
-
-void VirtualCameraElement::addDriverPaths(const QStringList &driverPaths)
-{
-    auto paths = *this->d->driverPaths();
-
-    for (auto &path: driverPaths)
-        if (QFileInfo::exists(path))
-            paths.push_back(path.toStdWString());
-
-    if (paths != *this->d->driverPaths()) {
-        *this->d->driverPaths() = paths;
-        this->d->m_ipcBridge.setDriverPaths(paths);
-        emit this->driverPathsChanged(this->driverPaths());
-    }
-}
-
-void VirtualCameraElement::removeDriverPath(const QString &driverPath)
-{
-    std::vector<std::wstring> paths;
-
-    for (auto &path: *this->d->driverPaths())
-        if (QString::fromStdWString(path) != driverPath)
-            paths.push_back(path);
-
-    if (paths != *this->d->driverPaths()) {
-        *this->d->driverPaths() = paths;
-        this->d->m_ipcBridge.setDriverPaths(paths);
-        emit this->driverPathsChanged(this->driverPaths());
-    }
-}
-
-void VirtualCameraElement::removeDriverPaths(const QStringList &driverPaths)
-{
-    std::vector<std::wstring> paths;
-
-    for (auto &path: *this->d->driverPaths())
-        if (!driverPaths.contains(QString::fromStdWString(path)))
-            paths.push_back(path);
-
-    if (paths != *this->d->driverPaths()) {
-        *this->d->driverPaths() = paths;
-        this->d->m_ipcBridge.setDriverPaths(paths);
-        emit this->driverPathsChanged(this->driverPaths());
-    }
+    return result;
 }
 
 void VirtualCameraElement::setMedia(const QString &media)
 {
-    if (this->d->m_curDevice == media)
-        return;
+    this->d->m_mutex.lock();
 
-    this->d->m_curDevice = media;
-    emit this->mediaChanged(media);
+    if (this->d->m_vcam)
+        this->d->m_vcam->setDevice(media);
+
+    this->d->m_mutex.unlock();
 }
 
-void VirtualCameraElement::setDriver(const QString &driver)
+void VirtualCameraElement::setPicture(const QString &picture)
 {
-    if (this->driver() == driver)
-        return;
+    this->d->m_mutex.lock();
 
-    this->d->m_ipcBridge.setDriver(driver.toStdString());
-    emit this->driverChanged(driver);
+    if (this->d->m_vcam)
+        this->d->m_vcam->setPicture(picture);
+
+    this->d->m_mutex.unlock();
 }
 
 void VirtualCameraElement::setRootMethod(const QString &rootMethod)
 {
-    if (this->rootMethod() == rootMethod)
-        return;
+    this->d->m_mutex.lock();
 
-    this->d->m_ipcBridge.setRootMethod(rootMethod.toStdString());
-    emit this->rootMethodChanged(rootMethod);
-}
+    if (this->d->m_vcam)
+        this->d->m_vcam->setRootMethod(rootMethod);
 
-void VirtualCameraElement::resetDriverPaths()
-{
-#if defined(Q_OS_OSX) || defined(Q_OS_WIN32)
-    std::vector<std::wstring> paths = {
-        QString(DATAROOTDIR).toStdWString(),
-        this->d->convertToAbsolute("../share").toStdWString(),
-#ifdef Q_OS_OSX
-        this->d->convertToAbsolute("../Resources").toStdWString(),
-#endif
-    };
-#else
-    std::vector<std::wstring> paths;
-#endif
-
-    if (paths != *this->d->driverPaths()) {
-        *this->d->driverPaths() = paths;
-        this->d->m_ipcBridge.setDriverPaths(paths);
-        emit this->driverPathsChanged(this->driverPaths());
-    }
+    this->d->m_mutex.unlock();
 }
 
 void VirtualCameraElement::resetMedia()
 {
-    auto devices = this->d->m_ipcBridge.listDevices();
+    this->d->m_mutex.lock();
 
-    if (devices.empty())
-        this->d->m_curDevice.clear();
-    else
-        this->d->m_curDevice = QString::fromStdString(devices.front());
+    if (this->d->m_vcam)
+        this->d->m_vcam->resetPicture();
+
+    this->d->m_mutex.unlock();
 }
 
-void VirtualCameraElement::resetDriver()
+void VirtualCameraElement::resetPicture()
 {
-    auto drivers = this->d->m_ipcBridge.availableDrivers();
+    this->d->m_mutex.lock();
 
-    if (drivers.empty())
-        this->d->m_ipcBridge.setDriver({});
-    else
-        this->d->m_ipcBridge.setDriver(drivers.front());
+    if (this->d->m_vcam)
+        this->d->m_vcam->setPicture(":/VirtualCamera/share/TestFrame/TestFrame.bmp");
 
-    auto driver = this->d->m_ipcBridge.driver();
-    emit this->driverChanged(QString::fromStdString(driver));
+    this->d->m_mutex.unlock();
 }
 
 void VirtualCameraElement::resetRootMethod()
 {
-    auto rootMethods = this->d->m_ipcBridge.availableRootMethods();
+    this->d->m_mutex.lock();
 
-    if (rootMethods.empty())
-        this->d->m_ipcBridge.setRootMethod({});
-    else
-        this->d->m_ipcBridge.setRootMethod(rootMethods.front());
+    if (this->d->m_vcam)
+        this->d->m_vcam->resetRootMethod();
+
+    this->d->m_mutex.unlock();
 }
 
 void VirtualCameraElement::clearStreams()
 {
     this->d->m_streamIndex = -1;
-    this->d->m_streamCaps.clear();
+    this->d->m_mutex.lock();
+
+    if (this->d->m_vcam)
+        this->d->m_vcam->resetCurrentCaps();
+
+    this->d->m_mutex.unlock();
 }
 
 bool VirtualCameraElement::setState(AkElement::ElementState state)
@@ -505,28 +634,14 @@ bool VirtualCameraElement::setState(AkElement::ElementState state)
         case AkElement::ElementStatePaused:
         case AkElement::ElementStatePlaying: {
             this->d->m_mutex.lock();
-            if (this->d->m_curDevice.isEmpty()) {
-                QStringList webcams = this->medias();
 
-                if (webcams.isEmpty()) {
-                    this->d->m_mutex.unlock();
+            if (!this->d->m_vcam) {
+                this->d->m_mutex.unlock();
 
-                    return false;
-                }
-
-                this->d->m_curDevice = webcams.front();
+                return false;
             }
 
-            AkVideoCaps caps = this->d->m_streamCaps;
-            auto fps = AkVCam::Fraction {uint32_t(caps.fps().num()),
-                                         uint32_t(caps.fps().den())};
-            AkVCam::VideoFormat format(AkVCam::PixelFormatRGB24,
-                                       caps.width(),
-                                       caps.height(),
-                                       {fps});
-
-            if (!this->d->m_ipcBridge.deviceStart(this->d->m_curDevice.toStdString(),
-                                                  format)) {
+            if (!this->d->m_vcam->init()) {
                 this->d->m_mutex.unlock();
 
                 return false;
@@ -549,7 +664,10 @@ bool VirtualCameraElement::setState(AkElement::ElementState state)
             this->d->m_playing = false;
 
             this->d->m_mutex.lock();
-            this->d->m_ipcBridge.deviceStop(this->d->m_curDevice.toStdString());
+
+            if (this->d->m_vcam)
+                this->d->m_vcam->uninit();
+
             this->d->m_mutex.unlock();
 
             return AkElement::setState(state);
@@ -567,7 +685,10 @@ bool VirtualCameraElement::setState(AkElement::ElementState state)
             this->d->m_playing = false;
 
             this->d->m_mutex.lock();
-            this->d->m_ipcBridge.deviceStop(this->d->m_curDevice.toStdString());
+
+            if (this->d->m_vcam)
+                this->d->m_vcam->uninit();
+
             this->d->m_mutex.unlock();
 
             return AkElement::setState(state);
@@ -584,88 +705,89 @@ bool VirtualCameraElement::setState(AkElement::ElementState state)
     return false;
 }
 
-void VirtualCameraElement::rootMethodUpdated(const QString &rootMethod)
+VirtualCameraElementPrivate::VirtualCameraElementPrivate(VirtualCameraElement *self):
+    self(self)
 {
-    this->d->m_ipcBridge.setRootMethod(rootMethod.toStdString());
+    this->m_vcam =
+            akPluginManager->create<VCam>("VideoSink/VirtualCamera/Impl/*");
+    this->m_vcamImpl =
+            akPluginManager->defaultPlugin("VideoSink/VirtualCamera/Impl/*",
+                                           {"VirtualCameraImpl"}).id();
 }
 
-VirtualCameraElementPrivate::VirtualCameraElementPrivate()
+int VirtualCameraElementPrivate::roundTo(int value, int n)
 {
-    this->m_applicationDir.setPath(QCoreApplication::applicationDirPath());
-    this->m_ipcBridge.connectServerStateChanged(this,
-                                                &VirtualCameraElementPrivate::serverStateChanged);
-    this->m_ipcBridge.connectService(false);
-    auto devices = this->m_ipcBridge.listDevices();
-
-    if (!devices.empty())
-        this->m_curDevice = QString::fromStdString(devices.front());
+    return n * qRound(value / qreal(n));
 }
 
-VirtualCameraElementPrivate::~VirtualCameraElementPrivate()
+void VirtualCameraElementPrivate::linksChanged(const AkPluginLinks &links)
 {
-    this->m_ipcBridge.disconnectService();
-}
+    if (!links.contains("VideoSink/VirtualCamera/Impl/*")
+        || links["VideoSink/VirtualCamera/Impl/*"] == this->m_vcamImpl)
+        return;
 
-std::vector<std::wstring> *VirtualCameraElementPrivate::driverPaths()
-{
-#if defined(Q_OS_OSX) || defined(Q_OS_WIN32)
-    static std::vector<std::wstring> paths = {
-        QString(DATAROOTDIR).toStdWString(),
-        this->convertToAbsolute("../share").toStdWString(),
-#ifdef Q_OS_OSX
-        this->convertToAbsolute("../Resources").toStdWString(),
-#endif
-    };
-#else
-    static std::vector<std::wstring> paths;
-#endif
+    auto state = self->state();
+    self->setState(AkElement::ElementStateNull);
+    this->m_mutex.lock();
 
-    static bool driverPathsSet = false;
+    AkVideoCaps videoCaps;
+    QString rootMethod;
+    QString picture;
 
-    if (!driverPathsSet) {
-        this->m_ipcBridge.setDriverPaths(paths);
-        driverPathsSet = true;
+    if (this->m_vcam) {
+        videoCaps = this->m_vcam->currentCaps();
+        picture = this->m_vcam->picture();
+        rootMethod = this->m_vcam->rootMethod();
     }
 
-    return &paths;
-}
+    this->m_vcam = akPluginManager->create<VCam>("VideoSink/VirtualCamera/Impl/*");
+    this->m_mutex.unlock();
+    this->m_vcamImpl = links["VideoSink/VirtualCamera/Impl/*"];
 
-QString VirtualCameraElementPrivate::convertToAbsolute(const QString &path) const
-{
-    if (!QDir::isRelativePath(path))
-        return QDir::cleanPath(path);
+    if (!this->m_vcam)
+        return;
 
-    auto absPath = this->m_applicationDir.absoluteFilePath(path);
+    QObject::connect(this->m_vcam.data(),
+                     &VCam::errorChanged,
+                     self,
+                     &VirtualCameraElement::errorChanged);
+    QObject::connect(this->m_vcam.data(),
+                     &VCam::webcamsChanged,
+                     self,
+                     &VirtualCameraElement::mediasChanged);
+    QObject::connect(this->m_vcam.data(),
+                     &VCam::deviceChanged,
+                     self,
+                     &VirtualCameraElement::mediaChanged);
+    QObject::connect(this->m_vcam.data(),
+                     &VCam::pictureChanged,
+                     self,
+                     &VirtualCameraElement::pictureChanged);
+    QObject::connect(this->m_vcam.data(),
+                     &VCam::rootMethodChanged,
+                     self,
+                     &VirtualCameraElement::rootMethodChanged);
 
-    return QDir::cleanPath(absPath);
-}
+    this->m_vcam->setCurrentCaps(videoCaps);
+    this->m_vcam->setRootMethod(rootMethod);
+    auto medias = this->m_vcam->webcams();
 
-void VirtualCameraElementPrivate::serverStateChanged(void *userData,
-                                                     AkVCam::IpcBridge::ServerState state)
-{
-    auto self = reinterpret_cast<VirtualCameraElementPrivate *>(userData);
-
-    switch (state) {
-        case AkVCam::IpcBridge::ServerStateAvailable:
-            self->m_ipcBridge.deviceStop(self->m_curDevice.toStdString());
-
-            if (self->m_playing) {
-                AkVideoCaps caps = self->m_streamCaps;
-                auto fps = AkVCam::Fraction {uint32_t(caps.fps().num()),
-                                             uint32_t(caps.fps().den())};
-                AkVCam::VideoFormat format(AkVCam::PixelFormatRGB24,
-                                           caps.width(),
-                                           caps.height(),
-                                           {fps});
-                self->m_ipcBridge.deviceStart(self->m_curDevice.toStdString(),
-                                              format);
-            }
-
-            break;
-
-        case AkVCam::IpcBridge::ServerStateGone:
-            break;
+    if (this->m_vcam->picture().isEmpty()) {
+        if (picture.isEmpty())
+            this->m_vcam->setPicture(":/VirtualCamera/share/TestFrame/TestFrame.bmp");
+        else
+            this->m_vcam->setPicture(picture);
     }
+
+    emit self->mediasChanged(medias);
+    emit self->streamsChanged(self->streams());
+    emit self->supportedOutputPixelFormatsChanged(this->m_vcam->supportedOutputPixelFormats());
+    emit self->defaultOutputPixelFormatChanged(this->m_vcam->defaultOutputPixelFormat());
+
+    if (!medias.isEmpty())
+        self->setMedia(medias.first());
+
+    self->setState(state);
 }
 
 #include "moc_virtualcameraelement.cpp"

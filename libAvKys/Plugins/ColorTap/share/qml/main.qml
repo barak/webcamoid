@@ -17,16 +17,15 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
+import Qt.labs.platform 1.1 as LABS
 
 ColumnLayout {
     function toQrc(uri)
     {
-        if (uri.indexOf(":") === 0)
+        if (uri.indexOf(":") == 0)
             return "qrc" + uri
 
         return "file:" + uri
@@ -43,6 +42,7 @@ ColumnLayout {
 
             model: ListModel {
                 ListElement {
+                    //: Base color, show the image without modifications
                     text: qsTr("Base")
                     table: ":/ColorTap/share/tables/base.bmp"
                 }
@@ -51,6 +51,7 @@ ColumnLayout {
                     table: ":/ColorTap/share/tables/metal.bmp"
                 }
                 ListElement {
+                    //: https://en.wikipedia.org/wiki/Heat_map
                     text: qsTr("Heat")
                     table: ":/ColorTap/share/tables/heat.bmp"
                 }
@@ -63,6 +64,7 @@ ColumnLayout {
                     table: ":/ColorTap/share/tables/redgreen.bmp"
                 }
                 ListElement {
+                    //: https://en.wikipedia.org/wiki/Sepia_(color)
                     text: qsTr("Sepia")
                     table: ":/ColorTap/share/tables/sepia.bmp"
                 }
@@ -100,12 +102,13 @@ ColumnLayout {
         TextField {
             id: txtTable
             text: ColorTap.table
-            placeholderText: qsTr("16x16 bitmap...")
+            placeholderText: qsTr("Source palette")
+            selectByMouse: true
             Layout.fillWidth: true
 
             onTextChanged: {
                 for (var i = 0; i < cbxTable.model.count; i++) {
-                    if (cbxTable.model.get(i).table === ColorTap.table) {
+                    if (cbxTable.model.get(i).table == ColorTap.table) {
                         cbxTable.currentIndex = i
 
                         break
@@ -118,20 +121,20 @@ ColumnLayout {
                 }
             }
         }
-        AkButton {
-            label: qsTr("Search")
-            iconRc: "image://icons/edit-find"
+        Button {
+            text: qsTr("Search")
+            icon.source: "image://icons/search"
 
             onClicked: fileDialog.open()
         }
     }
 
-    FileDialog {
+    LABS.FileDialog {
         id: fileDialog
         title: qsTr("Please choose an image file")
         nameFilters: ["Image files (*.bmp *.gif *.jpg *.jpeg *.png *.pbm *.pgm *.ppm *.xbm *.xpm)"]
         folder: "file://" + picturesPath
 
-        onAccepted: ColorTap.table = String(fileUrl).replace("file://", "")
+        onAccepted: ColorTap.table = String(file).replace("file://", "")
     }
 }

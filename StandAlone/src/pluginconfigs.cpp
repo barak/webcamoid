@@ -23,6 +23,7 @@
 #include <QQmlApplicationEngine>
 #include <ak.h>
 #include <akelement.h>
+#include <akpluginmanager.h>
 
 #include "pluginconfigs.h"
 #include "clioptions.h"
@@ -31,17 +32,9 @@ class PluginConfigsPrivate
 {
     public:
         QQmlApplicationEngine *m_engine {nullptr};
-        QStringList m_plugins;
 
         QString convertToAbsolute(const QString &path) const;
 };
-
-PluginConfigs::PluginConfigs(QQmlApplicationEngine *engine, QObject *parent):
-    QObject(parent)
-{
-    this->d = new PluginConfigsPrivate;
-    this->setQmlEngine(engine);
-}
 
 PluginConfigs::PluginConfigs(const CliOptions &cliOptions,
                              QQmlApplicationEngine *engine,
@@ -65,7 +58,7 @@ QString PluginConfigsPrivate::convertToAbsolute(const QString &path) const
         return QDir::cleanPath(path);
 
     static const QDir applicationDir(QCoreApplication::applicationDirPath());
-    QString absPath = applicationDir.absoluteFilePath(path);
+    auto absPath = applicationDir.absoluteFilePath(path);
 
     return QDir::cleanPath(absPath).replace('/', QDir::separator());
 }
@@ -78,7 +71,7 @@ void PluginConfigs::setQmlEngine(QQmlApplicationEngine *engine)
     this->d->m_engine = engine;
 
     if (engine)
-        engine->rootContext()->setContextProperty("PluginConfigs", this);
+        engine->rootContext()->setContextProperty("pluginConfigs", this);
 }
 
 void PluginConfigs::loadProperties(const CliOptions &cliOptions)
@@ -86,90 +79,45 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
     QSettings config;
 
     // Load the list of plugins to be avoided.
-    config.beginGroup("PluginBlackList");
-    auto blackList = AkElement::pluginsBlackList();
+    config.beginGroup("DisabledPlugins");
+    QStringList disabledPlugins;
 
     if (cliOptions.isSet(cliOptions.blackListOpt())) {
-        auto blackListPaths = cliOptions.value(cliOptions.blackListOpt()).split(';');
-
-        for (QString &path: blackListPaths) {
-#ifdef Q_OS_WIN32
-            path = this->d->convertToAbsolute(path);
-#endif
-
-            path = QDir::toNativeSeparators(path);
-
-            if (!blackList.contains(path))
-                blackList << path;
-        }
+        auto blackListIds = cliOptions.value(cliOptions.blackListOpt()).split(';');
+        disabledPlugins << blackListIds;
     } else {
-        int size = config.beginReadArray("paths");
+        int size = config.beginReadArray("plugins");
 
         for (int i = 0; i < size; i++) {
             config.setArrayIndex(i);
-            auto path = config.value("path").toString();
+            auto id = config.value("id").toString();
 
-#ifdef Q_OS_WIN32
-            path = this->d->convertToAbsolute(path);
-#endif
-
-            path = QDir::toNativeSeparators(path);
-
-            if (!blackList.contains(path))
-                blackList << path;
+            if (!disabledPlugins.contains(id))
+                disabledPlugins << id;
         }
 
         config.endArray();
     }
 
-    AkElement::setPluginsBlackList(blackList);
+    akPluginManager->setPluginStatus(disabledPlugins,
+                                     AkPluginManager::Disabled);
     config.endGroup();
 
     config.beginGroup("PluginConfigs");
 
-    // Set Qml plugins search path.
-    QStringList qmlImportPaths;
-
-    if (cliOptions.isSet(cliOptions.qmlPathOpt())) {
-        for (auto &path: cliOptions.value(cliOptions.qmlPathOpt()).split(';'))
-            if (QFileInfo::exists(path))
-                qmlImportPaths << path;
-    } else {
-        int size = config.beginReadArray("qmlPaths");
-
-        for (int i = 0; i < size; i++) {
-            config.setArrayIndex(i);
-            auto path = config.value("path").toString();
-
-#ifdef Q_OS_WIN32
-            path = this->d->convertToAbsolute(path);
-#endif
-
-            path = QDir::toNativeSeparators(path);
-
-            if (!qmlImportPaths.contains(path) && QFileInfo::exists(path))
-                qmlImportPaths << path;
-        }
-
-        config.endArray();
-    }
-
-    if (!qmlImportPaths.isEmpty())
-        Ak::setQmlImportPathList(qmlImportPaths);
-
-    // Set recusive search.
+    // Set recursive search.
     if (cliOptions.isSet(cliOptions.recursiveOpt()))
-        AkElement::setRecursiveSearch(true);
+        akPluginManager->setRecursiveSearch(true);
     else if (config.contains("recursive"))
-        AkElement::setRecursiveSearch(config.value("recursive").toBool());
+        akPluginManager->setRecursiveSearch(config.value("recursive").toBool());
 
     // Set alternative paths to search for plugins.
-    auto searchPaths = AkElement::searchPaths();
+    QStringList searchPaths;
 
     if (cliOptions.isSet(cliOptions.pluginPathsOpt())) {
         auto pluginPaths = cliOptions.value(cliOptions.pluginPathsOpt()).split(';');
 
-        for (QString &path: pluginPaths) {
+        for (auto &path: pluginPaths) {
 #ifdef Q_OS_WIN32
             path = this->d->convertToAbsolute(path);
 #endif
@@ -200,63 +148,38 @@ void PluginConfigs::loadProperties(const CliOptions &cliOptions)
         config.endArray();
     }
 
-    AkElement::setSearchPaths(searchPaths);
-
+    akPluginManager->setSearchPaths(searchPaths);
     config.endGroup();
 
-    // Use separate settings for plugins cache
-    QSettings cacheConfig(COMMONS_APPNAME, "PluginsCache");
-
-    // Load plugins hashes
-    cacheConfig.beginGroup("PluginsPaths");
-    int size = cacheConfig.beginReadArray("paths");
-    QStringList pluginsPaths;
+    // Load cached plugins
+    config.beginGroup("CachedPlugins");
+    int size = config.beginReadArray("plugins");
+    QStringList cachedPlugins;
 
     for (int i = 0; i < size; i++) {
-        cacheConfig.setArrayIndex(i);
-        pluginsPaths << cacheConfig.value("path").toString();
+        config.setArrayIndex(i);
+        cachedPlugins << config.value("id").toString();
     }
 
-    AkElement::setPluginPaths(pluginsPaths);
-    cacheConfig.endArray();
-    cacheConfig.endGroup();
-
-    for (auto &path: pluginsPaths) {
-        cacheConfig.beginGroup(QString("Plugin_%1").arg(AkElement::pluginId(path)));
-        QVariantMap pluginInfo;
-
-        for (auto &key: cacheConfig.allKeys())
-            pluginInfo[key] = cacheConfig.value(key);
-
-        AkElement::setPluginInfo(path, pluginInfo);
-        cacheConfig.endGroup();
-    }
-
-    this->d->m_plugins = AkElement::listPluginPaths();
+    akPluginManager->setCachedPlugins(cachedPlugins);
+    config.endArray();
+    config.endGroup();
 }
 
 void PluginConfigs::saveProperties()
 {
     QSettings config;
-
-#ifdef Q_OS_WIN32
-    static const QDir applicationDir(QCoreApplication::applicationDirPath());
-#endif
-
-    config.beginGroup("PluginBlackList");
-    config.beginWriteArray("paths");
-
+    config.beginGroup("DisabledPlugins");
+    config.beginWriteArray("plugins");
+    auto disabledPlugins =
+            akPluginManager->listPlugins({},
+                                         {},
+                                         AkPluginManager::FilterDisabled);
     int i = 0;
 
-    for (auto &path: AkElement::pluginsBlackList()) {
+    for (auto &id: disabledPlugins) {
         config.setArrayIndex(i);
-
-#ifdef Q_OS_WIN32
-        config.setValue("path", applicationDir.relativeFilePath(path));
-#else
-        config.setValue("path", path);
-#endif
-
+        config.setValue("id", id);
         i++;
     }
 
@@ -264,30 +187,17 @@ void PluginConfigs::saveProperties()
     config.endGroup();
 
     config.beginGroup("PluginConfigs");
-    config.beginWriteArray("qmlPaths");
-    i = 0;
-
-    for (auto &path: Ak::qmlImportPathList()) {
-        config.setArrayIndex(i);
-
-#ifdef Q_OS_WIN32
-        config.setValue("path", applicationDir.relativeFilePath(path));
-#else
-        config.setValue("path", path);
-#endif
-
-        i++;
-    }
-
-    config.endArray();
-
-    config.setValue("recursive", AkElement::recursiveSearch());
+    config.setValue("recursive", akPluginManager->recursiveSearch());
 
     config.beginWriteArray("paths");
 
     i = 0;
 
-    for (auto &path: AkElement::searchPaths()) {
+#ifdef Q_OS_WIN32
+    QDir applicationDir(QCoreApplication::applicationDirPath());
+#endif
+
+    for (auto &path: akPluginManager->searchPaths()) {
         config.setArrayIndex(i);
 
 #ifdef Q_OS_WIN32
@@ -302,40 +212,21 @@ void PluginConfigs::saveProperties()
     config.endArray();
     config.endGroup();
 
-    // Use separate settings for plugins cache
-    QSettings cacheConfig(COMMONS_APPNAME, "PluginsCache");
+    // Save plugins cache
+    config.beginGroup("CachedPlugins");
+    config.beginWriteArray("plugins");
 
-    // Save plugins hashes
-    cacheConfig.beginGroup("PluginsPaths");
-    cacheConfig.beginWriteArray("paths");
-
-    auto pluginsPaths = AkElement::listPluginPaths();
+    auto pluginsPaths = akPluginManager->listPlugins();
     i = 0;
 
     for (auto &path: pluginsPaths) {
-        cacheConfig.setArrayIndex(i);
-        cacheConfig.setValue("path", path);
+        config.setArrayIndex(i);
+        config.setValue("id", path);
         i++;
     }
 
-    cacheConfig.endArray();
-    cacheConfig.endGroup();
-
-    for (auto &path: pluginsPaths) {
-        auto pluginId = AkElement::pluginId(path);
-        cacheConfig.beginGroup(QString("Plugin_%1").arg(pluginId));
-        auto pluginInfo = AkElement::pluginInfo(pluginId);
-
-        for (auto it = pluginInfo.begin(); it != pluginInfo.end(); it++)
-            cacheConfig.setValue(it.key(), it.value());
-
-        cacheConfig.endGroup();
-    }
-
-    if (this->d->m_plugins != pluginsPaths) {
-        this->d->m_plugins = pluginsPaths;
-        emit this->pluginsChanged(pluginsPaths);
-    }
+    config.endArray();
+    config.endGroup();
 }
 
 #include "moc_pluginconfigs.cpp"

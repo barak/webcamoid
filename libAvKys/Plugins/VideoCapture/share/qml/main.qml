@@ -17,11 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQml 1.0
-import AkQmlControls 1.0
+import Ak 1.0
 
 GridLayout {
     id: recCameraControls
@@ -29,16 +28,16 @@ GridLayout {
 
     function filterBy(caps, prop, filters)
     {
-        var vals = []
+        let vals = []
 
-        for (var i in caps) {
-            var videoCaps = caps[i]
-            var filterCaps = {fourcc: videoCaps.fourcc,
+        for (let i in caps) {
+            let videoCaps = caps[i]
+            let filterCaps = {fourcc: videoCaps.fourcc,
                               size: Qt.size(videoCaps.width, videoCaps.height),
                               fps: videoCaps.fps}
-            var pass = false
+            let pass = false
 
-            for (var filterProp in filters)
+            for (let filterProp in filters)
                 if (filterCaps[filterProp] != filters[filterProp]) {
                     pass = true
 
@@ -48,7 +47,7 @@ GridLayout {
             if (pass)
                 continue
 
-            var val = filterCaps[prop]
+            let val = filterCaps[prop]
 
             if (vals.indexOf(val) < 0)
                 vals.push(val)
@@ -59,14 +58,14 @@ GridLayout {
 
     function filterCaps(caps, filters)
     {
-        for (var i in caps) {
-            var videoCaps = caps[i]
-            var filterCaps = {fourcc: videoCaps.fourcc,
+        for (let i in caps) {
+            let videoCaps = caps[i]
+            let filterCaps = {fourcc: videoCaps.fourcc,
                               size: Qt.size(videoCaps.width, videoCaps.height),
                               fps: videoCaps.fps}
-            var pass = false
+            let pass = false
 
-            for (var filterProp in filters)
+            for (let filterProp in filters)
                 if (filterCaps[filterProp] != filters[filterProp]) {
                     pass = true
 
@@ -84,9 +83,9 @@ GridLayout {
 
     function indexOf(capsList, caps)
     {
-        for (var i in capsList) {
-            var videoCaps = capsList[i]
-            var size = Qt.size(videoCaps.width, videoCaps.height)
+        for (let i in capsList) {
+            let videoCaps = capsList[i]
+            let size = Qt.size(videoCaps.width, videoCaps.height)
 
             if (videoCaps.fourcc == caps.fourcc
                 && size == caps.size
@@ -106,7 +105,7 @@ GridLayout {
 
     function createModel(list, prop)
     {
-        var maps = {
+        let maps = {
             fourcc: function (value) {
                 return {description: value,
                         value: value}
@@ -116,7 +115,7 @@ GridLayout {
                         value: value}
             },
             fps: function (value) {
-                return {description: Number(Ak.newFrac(value).value.toFixed(2)),
+                return {description: Number(AkFrac.create(value).value.toFixed(2)),
                         value: value}
             }
         }
@@ -130,21 +129,21 @@ GridLayout {
         cbxResolution.onCurrentIndexChanged.disconnect(cbxResolution.update)
         cbxFps.onCurrentIndexChanged.disconnect(cbxFps.update)
 
-        var ncaps = VideoCapture.listTracks().length
-        var rawCaps = []
+        let ncaps = VideoCapture.listTracks().length
+        let rawCaps = []
 
-        for (var i = 0; i < ncaps; i++)
-            rawCaps.push(Ak.newCaps(VideoCapture.rawCaps(i)).toMap())
+        for (let i = 0; i < ncaps; i++)
+            rawCaps.push(AkCaps.create(VideoCapture.rawCaps(i)).toMap())
 
-        var index = mediaChanged || VideoCapture.streams.length < 1?
+        let index = mediaChanged || VideoCapture.streams.length < 1?
                     0: VideoCapture.streams[0]
 
         if (index >= ncaps)
             index = 0;
 
-        var currentCaps = Ak.newCaps(VideoCapture.rawCaps(index)).toMap()
+        let currentCaps = AkCaps.create(VideoCapture.rawCaps(index)).toMap()
 
-        var filters = {}
+        let filters = {}
         cbxFormat.model = createModel(filterBy(rawCaps, "fourcc", filters),
                                       "fourcc")
         filters.fourcc = currentCaps.fourcc
@@ -166,13 +165,13 @@ GridLayout {
 
     function updateStreams(filters)
     {
-        var ncaps = VideoCapture.listTracks().length
-        var rawCaps = []
+        let ncaps = VideoCapture.listTracks().length
+        let rawCaps = []
 
-        for (var i = 0; i < ncaps; i++)
-            rawCaps.push(Ak.newCaps(VideoCapture.rawCaps(i)).toMap())
+        for (let i = 0; i < ncaps; i++)
+            rawCaps.push(AkCaps.create(VideoCapture.rawCaps(i)).toMap())
 
-        var maps = {
+        let maps = {
             fourcc: cbxFormat.model[cbxFormat.currentIndex]?
                     cbxFormat.model[cbxFormat.currentIndex].value:
                     cbxFormat.model[0].value,
@@ -184,12 +183,12 @@ GridLayout {
                     cbxFps.model[0].value
         }
 
-        var capsFilters = {}
+        let capsFilters = {}
 
-        for (var i in filters)
+        for (let i in filters)
             capsFilters[filters[i]] = maps[filters[i]]
 
-        var index = filterCaps(rawCaps, capsFilters);
+        let index = filterCaps(rawCaps, capsFilters);
 
         if (index < 0)
             return
@@ -200,27 +199,26 @@ GridLayout {
 
     function createControls(controls, where)
     {
-        var minimumLeftWidth = lblFormat.width
-        var minimumRightWidth = btnReset.width
-
         // Remove old controls.
-        for(var i = where.children.length - 1; i >= 0 ; i--)
+        for(let i = where.children.length - 1; i >= 0 ; i--)
             where.children[i].destroy()
 
+        let minimumLeftWidth = lblFormat.width
+        let minimumRightWidth = btnReset.width
+
         // Create new ones.
-        for (var control in controls) {
-            var component = Qt.createComponent("CameraControl.qml")
+        for (let control in controls) {
+            let component = Qt.createComponent("CameraControl.qml")
 
             if (component.status !== Component.Ready)
                 continue
 
-            var obj = component.createObject(where)
+            let obj = component.createObject(where)
             obj.controlParams = controls[control]
-
 
             obj.onControlChanged.connect(function (controlName, value)
             {
-                var ctrl = {}
+                let ctrl = {}
                 ctrl[controlName] = value
                 VideoCapture.setImageControls(ctrl)
                 VideoCapture.setCameraControls(ctrl)
@@ -238,26 +236,25 @@ GridLayout {
 
     function createCameraControls()
     {
-        var minimumImageWidth =
+        let minimumImageWidth =
                 recCameraControls.createControls(VideoCapture.imageControls(),
                                                  clyImageControls)
-        var minimumCameraWidth =
+        let minimumCameraWidth =
                 recCameraControls.createControls(VideoCapture.cameraControls(),
                                                  clyCameraControls)
 
-        var minimumLeftWidth = Math.max(minimumImageWidth[0],
+        let minimumLeftWidth = Math.max(minimumImageWidth[0],
                                         minimumCameraWidth[0])
-        var minimumRightWidth = Math.max(minimumImageWidth[1],
+        let minimumRightWidth = Math.max(minimumImageWidth[1],
                                          minimumCameraWidth[1])
 
-        var controls = [clyImageControls, clyCameraControls]
+        let controls = [clyImageControls, clyCameraControls]
 
-        for (var where in controls)
-            for (var child in controls[where].children) {
-                controls[where].children[child].minimumLeftWidth =
-                        minimumLeftWidth
-                controls[where].children[child].minimumRightWidth =
-                        minimumRightWidth
+        for (let where in controls)
+            for (let child in controls[where].children) {
+                let ctrl = controls[where].children[child];
+                ctrl.minimumLeftWidth = minimumLeftWidth
+                ctrl.minimumRightWidth = minimumRightWidth
             }
 
         lblFormat.minimumWidth = minimumLeftWidth
@@ -272,7 +269,8 @@ GridLayout {
     Connections {
         target: VideoCapture
 
-        onMediaChanged: {
+        function onMediaChanged()
+        {
             recCameraControls.createCameraControls()
             recCameraControls.updateFormatControls(true)
         }
@@ -339,10 +337,10 @@ GridLayout {
         Layout.fillWidth: true
         Layout.columnSpan: 2
     }
-    AkButton {
+    Button {
         id: btnReset
-        label: qsTr("Reset")
-        iconRc: "image://icons/reset"
+        text: qsTr("Reset")
+        icon.source: "image://icons/reset"
         Layout.minimumWidth: minimumWidth
 
         property int minimumWidth: 75

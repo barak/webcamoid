@@ -18,10 +18,9 @@
  */
 
 #include <limits>
-#include <algorithm>
+#include <QApplication>
 #include <QIcon>
 #include <QSettings>
-#include <QtMath>
 
 #include "iconsprovider.h"
 
@@ -29,6 +28,8 @@ class IconsProviderPrivate
 {
     public:
         QList<QSize> m_availableSizes;
+        QString m_iconsPath {":/Webcamoid/share/themes/WebcamoidTheme/icons"};
+        QString m_themeName {"hicolor"};
 
         QSize nearestSize(const QSize &requestedSize) const;
         QSize nearestSize(const QList<QSize> &availableSizes,
@@ -45,7 +46,11 @@ IconsProvider::IconsProvider():
     QQuickImageProvider(QQuickImageProvider::Pixmap)
 {
     this->d = new IconsProviderPrivate;
-    QSettings theme(":/icons/hicolor/index.theme", QSettings::IniFormat);
+    QSettings theme(this->d->m_iconsPath
+                    + "/"
+                    + this->d->m_themeName
+                    + "/index.theme",
+                    QSettings::IniFormat);
     theme.beginGroup("Icon Theme");
 
     for (auto &size: theme.value("Directories").toStringList()) {
@@ -54,8 +59,8 @@ IconsProvider::IconsProvider():
         if (dims.size() < 2)
             continue;
 
-        auto width = dims[0].toInt();
-        auto height = dims[0].toInt();
+        auto width = dims.value(0).toInt();
+        auto height = dims.value(1).toInt();
 
         if (width < 1 || height < 1)
             continue;
@@ -64,6 +69,8 @@ IconsProvider::IconsProvider():
     }
 
     theme.endGroup();
+
+    this->themeSetup();
 }
 
 IconsProvider::~IconsProvider()
@@ -71,38 +78,73 @@ IconsProvider::~IconsProvider()
     delete this->d;
 }
 
+QImage IconsProvider::requestImage(const QString &id,
+                                   QSize *size,
+                                   const QSize &requestedSize)
+{
+    auto iconSize = this->d->nearestSize(requestedSize);
+    *size = iconSize;
+
+    if (iconSize.isEmpty())
+        return {};
+
+    auto path = QString("%1/%2/%3x%4/%5.png")
+                .arg(this->d->m_iconsPath)
+                .arg(this->d->m_themeName)
+                .arg(iconSize.width())
+                .arg(iconSize.height())
+                .arg(id);
+    QImage icon(path);
+
+    return icon.convertToFormat(QImage::Format_ARGB32);
+}
+
 QPixmap IconsProvider::requestPixmap(const QString &id,
                                      QSize *size,
                                      const QSize &requestedSize)
 {
-    if (!QIcon::hasThemeIcon(id)) {
-        // Force icon detection.
-        auto iconSize = this->d->nearestSize(requestedSize);
-        *size = iconSize;
+    auto iconSize = this->d->nearestSize(requestedSize);
+    *size = iconSize;
 
-        if (iconSize.isEmpty())
-            return QPixmap();
+    if (iconSize.isEmpty())
+        return QPixmap();
 
-        QPixmap icon(QString(":/icons/hicolor/%1x%2/%3.png")
-                     .arg(iconSize.width()).arg(iconSize.height()).arg(id));
+    auto path = QString("%1/%2/%3x%4/%5.png")
+                .arg(this->d->m_iconsPath)
+                .arg(this->d->m_themeName)
+                .arg(iconSize.width())
+                .arg(iconSize.height())
+                .arg(id);
+    QImage icon(path);
 
-        return icon;
-    }
+    return QPixmap::fromImage(icon.convertToFormat(QImage::Format_ARGB32));
+}
 
-    QIcon icon = QIcon::fromTheme(id);
-    QList<QSize> availableSizes = icon.availableSizes();
-    QSize nearestSize;
+void IconsProvider::themeSetup()
+{
+    auto paths = QIcon::fallbackSearchPaths();
 
-    if (requestedSize.isEmpty())
-        nearestSize = *std::max_element(availableSizes.begin(),
-                                        availableSizes.end());
-    else
-        nearestSize = this->d->nearestSize(availableSizes, requestedSize);
+    if (!paths.contains(this->d->m_iconsPath))
+        QIcon::setFallbackSearchPaths(paths +
+                                      QStringList {this->d->m_iconsPath});
 
-    QPixmap pixmap = icon.pixmap(nearestSize);
-    *size = pixmap.size();
+#ifdef Q_OS_OSX
+    QIcon fallbackIcon(QString("%1/%2.icns")
+                       .arg(this->d->m_iconsPath,
+                            COMMONS_TARGET));
+#elif defined(Q_OS_WIN32)
+    QIcon fallbackIcon(QString("%1/%2/256x256/%3.ico")
+                       .arg(this->d->m_iconsPath,
+                            this->d->m_themeName,
+                            COMMONS_TARGET));
+#else
+    QIcon fallbackIcon(QString("%1/%2/scalable/%3.svg")
+                       .arg(this->d->m_iconsPath,
+                            this->d->m_themeName,
+                            COMMONS_TARGET));
+#endif
 
-    return pixmap;
+    QApplication::setWindowIcon(QIcon::fromTheme("webcamoid", fallbackIcon));
 }
 
 QSize IconsProviderPrivate::nearestSize(const QSize &requestedSize) const
@@ -114,18 +156,30 @@ QSize IconsProviderPrivate::nearestSize(const QList<QSize> &availableSizes,
                                         const QSize &requestedSize) const
 {
     QSize nearestSize;
-    int q = std::numeric_limits<int>::max();
+    QSize nearestGreaterSize;
+    int r = std::numeric_limits<int>::max();
+    int s = std::numeric_limits<int>::max();
+    int requestedArea = requestedSize.width() * requestedSize.height();
 
     for (auto &size: availableSizes) {
+        int area = size.width() * size.height();
         int diffWidth = size.width() - requestedSize.width();
         int diffHeight = size.height() - requestedSize.height();
         int k = diffWidth * diffWidth + diffHeight * diffHeight;
 
-        if (k < q) {
+        if (k < r) {
             nearestSize = size;
-            q = k;
+            r = k;
+        }
+
+        if (area >= requestedArea && k < s) {
+            nearestGreaterSize = size;
+            s = k;
         }
     }
 
-    return nearestSize;
+    if (nearestGreaterSize.isEmpty())
+        nearestGreaterSize = nearestSize;
+
+    return nearestGreaterSize;
 }

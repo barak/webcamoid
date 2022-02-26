@@ -1,3 +1,15 @@
 {
-    "pluginType": "Ak.Element"
+    "type": "WebcamoidPluginsCollection",
+    "plugins": [
+        {
+            "name": "AudioDevice",
+            "description": "Capture audio from system devices",
+            "id": "AudioSource/AudioDevice",
+            "implements": ["Element"],
+            "depends": [
+                "AudioSource/AudioDevice/Impl/*"
+            ],
+            "type": "qtplugin"
+        }
+    ]
 }

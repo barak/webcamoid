@@ -17,10 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
@@ -28,14 +27,16 @@ GridLayout {
     Connections {
         target: Scroll
 
-        onSpeedChanged: {
+        function onSpeedChanged(speed)
+        {
             sldSpeed.value = speed
-            spbSpeed.rvalue = speed
+            spbSpeed.value = spbSpeed.multiplier * speed
         }
 
-        onNoiseChanged: {
+        function onNoiseChanged(noise)
+        {
             sldNoise.value = noise
-            spbNoise.rvalue = noise
+            spbNoise.value = spbNoise.multiplier * noise
         }
     }
 
@@ -53,15 +54,28 @@ GridLayout {
 
         onValueChanged: Scroll.speed = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbSpeed
-        decimals: 2
-        rvalue: Scroll.speed
-        minimumValue: sldSpeed.from
-        maximumValue: sldSpeed.to
-        step: sldSpeed.stepSize
+        value: multiplier * Scroll.speed
+        from: multiplier * sldSpeed.from
+        to: multiplier * sldSpeed.to
+        stepSize: multiplier * sldSpeed.stepSize
+        editable: true
 
-        onRvalueChanged: Scroll.speed = rvalue
+        readonly property int decimals: 2
+        readonly property int multiplier: Math.pow(10, decimals)
+
+        validator: DoubleValidator {
+            bottom: Math.min(spbSpeed.from, spbSpeed.to)
+            top:  Math.max(spbSpeed.from, spbSpeed.to)
+        }
+        textFromValue: function(value, locale) {
+            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
+        }
+        valueFromText: function(text, locale) {
+            return Number.fromLocaleString(locale, text) * multiplier
+        }
+        onValueModified: Scroll.speed = value / multiplier
     }
 
     Label {
@@ -77,13 +91,26 @@ GridLayout {
 
         onValueChanged: Scroll.noise = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbNoise
-        decimals: 2
-        rvalue: Scroll.noise
-        maximumValue: sldNoise.to
-        step: sldNoise.stepSize
+        value: multiplier * Scroll.noise
+        to: multiplier * sldNoise.to
+        stepSize: multiplier * sldNoise.stepSize
+        editable: true
 
-        onRvalueChanged: Scroll.noise = rvalue
+        readonly property int decimals: 2
+        readonly property int multiplier: Math.pow(10, decimals)
+
+        validator: DoubleValidator {
+            bottom: Math.min(spbNoise.from, spbNoise.to)
+            top:  Math.max(spbNoise.from, spbNoise.to)
+        }
+        textFromValue: function(value, locale) {
+            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
+        }
+        valueFromText: function(text, locale) {
+            return Number.fromLocaleString(locale, text) * multiplier
+        }
+        onValueModified: Scroll.noise = value / multiplier
     }
 }

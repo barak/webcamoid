@@ -1,41 +1,82 @@
+a1346054 <36859588+a1346054@users.noreply.github.com>
 Adam Magnier <adam@magnier.io>
+Adolfo Jayme Barrientos <fitojb@ubuntu.com>
 Ale-Ma <alemassimiani@gmail.com>
+Alex <alexander.simm@posteo.de>
+Alexey Napalkov <flynbit@gmail.com>
+aliereny <aeren.myper@gmail.com>
 Allan Nordhøy <epost@anotheragency.no>
 Antonino Murabito <antoninomurabito@gmail.com>
+Artem <KovalevArtem.ru@gmail.com>
+Artem <Localizer_in_Russian@protonmail.com>
 Ascaf0 <fa0sck@gmail.com>
+CE4 <chregger@gmail.com>
+Chris Barth <chrisjbarth@hotmail.com>
+Continuity <continuity@gmx.net>
+Daniel Lerch <daniel.p.lerch@gmail.com>
+David Jiménez Santonja <david.jimenez.santonja@gmail.com>
+E-Akcaer <gurbetcii_@hotmail.com>
 Edoardo Rosa <edoardo.rosa90@gmail.com>
+Eduardo Rodrigues <edu.rodrigues2580@gmail.com>
 Edwar Tikhonov <letih@vivaldi.net>
 Elizabeth Sherrock <lizzyd710@gmail.com>
+Elton Viana Gonçalves da Luz <eltongoncalves94@hotmail.com>
+Erich Schubert <erich.schubert@tu-dortmund.de>
 Ettore Atalan <atalanttore@googlemail.com>
 ezjerry liao <ezjerry@gmail.com>
+gordonel <45173186+gordonel@users.noreply.github.com>
 Gruni Lala <ro.gruni@hotmail.de>
+Heimen Stoffels <vistausss@fastmail.com>
 Heimen Stoffels <vistausss@outlook.com>
 hpfn <hpfn@users.noreply.github.com>
+J. Lavoie <j.lavoie@net-c.ca>
 Jan Beich <jbeich@FreeBSD.org>
+Jeannette L <j.lavoie@net-c.ca>
+Joel Barrios <darkshram@gmail.com>
 John Vandenberg <jayvdb@gmail.com>
 josep constanti <jconstanti@yahoo.es>
 Knusper <cherenz@aip.de>
 Kozioł Marcin <koziol.martin@gmail.com>
 Kristjan Räts <kristjanrats@gmail.com>
+lefiston <live@blachet.com>
 Livia Andriana Lohanda <chocolate.coffee@outlook.com>
 LL <lu.lecocq@free.fr>
 LNDDYL <lnddyl@outlook.com>
+Luca De Falco <deffo89@gmail.com>
 Luigi Baldoni <aloisio@gmx.com>
 luigino <aloisio@gmx.com>
+Luna Jernberg <droidbittin@gmail.com>
+MananPyJava <67302570+MananPyJava@users.noreply.github.com>
 Marc Delisle <marc@infomarc.info>
 Michal Čihař <michal@cihar.com>
 MS-PC <jhovanywalas@hotmail.com>
+Nathan <bonnemainsnathan@gmail.com>
+nautilusx <mail.ka@mailbox.org>
+nautilusx <translate@disroot.org>
+ovari <ovari123@zoho.com>
+Oğuz Ersen <oguzersen@protonmail.com>
 paperspaceBen <benjamin@paperspace.io>
 pCsOrI <pcsori@gmail.com>
 Peppernrino <pepperandrino@gmail.com>
+Priit Jõerüüt <hwlate@joeruut.com>
+Quentin PAGÈS <quentinantonin@free.fr>
+Raúl González García <rgonzalez5@ucam.edu>
+Robin Kunze <robinkunze@outlook.com>
 Rui Mendes <xz9@protonmail.com>
 Sebastian Freiman <sebafreiman@gmail.com>
 ssantos <ssantos@web.de>
+Stepan <36489863+Stepan881@users.noreply.github.com>
 Swann Martinet <swann.ranskassa@laposte.net>
+Szylu <chipolade@gmail.com>
+Takuya Ohe <hi@tohe.xyz>
 TheSimplyOwl <thesimplyowl@gmail.com>
+trungnt2910 <trungnt282910@gmail.com>
+Tymofij Lytvynenko <till.svit@gmail.com>
 WaldiS <admin@sto.ugu.pl>
+XiaoPanPanKevinPan <sn00151200@gmail.com>
 Yaron Shahrabani <sh.yaron@gmail.com>
 YFdyh000 <yfdyh000@gmail.com>
+Yuqi Wang <claywang@live.com>
 zhcjsjz <zhcj@yeah.net>
 Étienne Gilli <etienne.gilli@gmail.com>
 Володимир Бриняк <bardvv@gmail.com>
@@ -44,3 +85,4 @@ zhcjsjz <zhcj@yeah.net>
 Роман Хрущ <hrushch.rr57@gmail.com>
 吴绮 <rs2.free@qq.com>
 이피시소리 <pcsori@gmail.com>
+조현퇴 <hyuntoe@gmail.com>

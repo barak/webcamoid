@@ -17,284 +17,222 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Dialogs 1.2
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import Qt.labs.platform 1.1 as LABS
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQml 1.0
-import AkQmlControls 1.0
+import Ak 1.0
 
-AkScrollView {
-    id: scrollView
-    clip: true
-    contentHeight: pluginConfigs.height
-
-    function fillSearchPaths()
-    {
-        searchPathsTable.model.clear()
-        var searchPaths = globalElement.searchPaths()
-
-        for (var path in searchPaths) {
-            searchPathsTable.model.append({
-                path: searchPaths[path]
-            })
-        }
-    }
-
-    function fillPluginList()
-    {
-        pluginsTable.model.clear()
-        var pluginsPaths = globalElement.listPluginPaths()
-
-        for (var path in pluginsPaths) {
-            pluginsTable.model.append({
-                path: pluginsPaths[path],
-                pluginEnabled: true
-            })
-        }
-
-        var blackList = globalElement.pluginsBlackList()
-
-        for (var path in blackList) {
-            pluginsTable.model.append({
-                path: blackList[path],
-                pluginEnabled: false
-            })
-        }
-    }
-
-    function refreshCache()
-    {
-        globalElement.clearCache()
-        fillPluginList()
-        PluginConfigs.saveProperties()
-    }
-
-    function refreshAll()
-    {
-        fillSearchPaths()
-        refreshCache()
-    }
-
-    function colorForIndex(index, pluginEnabled, table) {
-        var pal = pluginEnabled? palette: paletteDisabled;
-
-        return index === table.currentIndex?
-                           pal.highlight: index & 1?
-                               pal.alternateBase: pal.base
-    }
-
-    AkElement {
-        id: globalElement
-    }
-    SystemPalette {
-        id: palette
-    }
-    SystemPalette {
-        id: paletteDisabled
-        colorGroup: SystemPalette.Disabled
-    }
-
-    Component.onCompleted: {
-        fillSearchPaths()
-        fillPluginList()
-    }
-
+Page {
     ColumnLayout {
-        id: pluginConfigs
-        width: scrollView.width
-               - (scrollView.ScrollBar.vertical.visible?
-                      scrollView.ScrollBar.vertical.width: 0)
+        anchors.fill: parent
 
-        Label {
-            text: qsTr("Use this page for configuring the plugins search paths.<br /><b>Don't touch nothing unless you know what you are doing</b>.")
-            wrapMode: Text.WordWrap
+        TabBar {
+            id: tabBar
             Layout.fillWidth: true
+
+            TabButton {
+                text: qsTr("Paths")
+            }
+            TabButton {
+                text: qsTr("Plugins")
+            }
         }
-        GroupBox {
-            title: qsTr("Extra search paths")
+        StackLayout {
+            id: stack
             Layout.fillWidth: true
-            clip: true
+            Layout.fillHeight: true
+            currentIndex: tabBar.currentIndex
 
-            GridLayout {
-                columns: 3
-                anchors.fill: parent
+            function fillSearchPaths()
+            {
+                searchPathsTable.model.clear()
+                let searchPaths = AkPluginManager.searchPaths
 
-                CheckBox {
-                    text: qsTr("Search plugins in subfolders.")
-                    checked: globalElement.recursiveSearch()
-                    Layout.fillWidth: true
+                for (let path in searchPaths) {
+                    searchPathsTable.model.append({
+                        path: searchPaths[path]
+                    })
+                }
+            }
 
-                    onCheckedChanged: {
-                        globalElement.setRecursiveSearch(checked)
-                        refreshCache()
+            function fillPluginList()
+            {
+                pluginsTable.model.clear()
+                let plugins = AkPluginManager.listPlugins()
+                plugins.sort(function(a, b) {
+                    if (a < b)
+                        return -1
+                    else if (a > b)
+                        return 1
+
+                    return 0
+                })
+
+                for (let plugin in plugins) {
+                    pluginsTable.model.append({
+                        pluginId: plugins[plugin],
+                        pluginEnabled: AkPluginManager.pluginStatus(plugins[plugin]) == AkPluginManager.Enabled
+                    })
+                }
+            }
+
+            function refreshCache()
+            {
+                AkPluginManager.setCachedPlugins([])
+                AkPluginManager.scanPlugins()
+                fillPluginList()
+                pluginConfigs.saveProperties()
+            }
+
+            function refreshAll()
+            {
+                fillSearchPaths()
+                refreshCache()
+            }
+
+            Component.onCompleted: {
+                fillSearchPaths()
+                fillPluginList()
+            }
+
+            // Paths tab
+            ScrollView {
+                id: pathsScrollView
+                contentHeight: pathsConfigs.height
+                clip: true
+
+                ColumnLayout {
+                    id: pathsConfigs
+                    width: pathsScrollView.width
+
+                    Switch {
+                        text: qsTr("Search plugins in subfolders")
+                        checked: AkPluginManager.recursiveSearch
+
+                        onCheckedChanged: {
+                            AkPluginManager.recursiveSearch = checked
+                            stack.refreshCache()
+                        }
                     }
-                }
-                AkButton {
-                    label: qsTr("Add")
-                    iconRc: "image://icons/add"
+                    Button {
+                        text: qsTr("Add path")
+                        icon.source: "image://icons/add"
+                        flat: true
 
-                    onClicked: fileDialog.open()
-                }
-                AkButton {
-                    id: btnRemove
-                    label: qsTr("Remove")
-                    iconRc: "image://icons/remove"
-                    enabled: searchPathsTable.currentIndex >= 0
-
-                    onClicked: {
-                        var searchPaths = globalElement.searchPaths();
-                        var sp = []
-
-                        for (var path in searchPaths)
-                            if (path != searchPathsTable.currentIndex)
-                                sp.push(searchPaths[path])
-
-                        globalElement.setSearchPaths(sp);
-                        refreshAll()
-                        searchPathsTable.currentIndex = -1
+                        onClicked: fileDialog.open()
                     }
-                }
-                Rectangle {
-                    color: palette.base
-                    height: 150
-                    Layout.columnSpan: 3
-                    Layout.fillWidth: true
-
-                    AkScrollView {
-                        id: searchPathsTableScroll
+                    ListView {
+                        id: searchPathsTable
+                        Layout.fillWidth: true
+                        implicitWidth: childrenRect.width
+                        implicitHeight: childrenRect.height
                         clip: true
-                        contentHeight: searchPathsTable.height
-                        anchors.fill: parent
 
-                        ListView {
-                            id: searchPathsTable
-                            height: contentHeight
-                            width: searchPathsTableScroll.width
-                                   - (searchPathsTableScroll.ScrollBar.vertical.visible?
-                                          searchPathsTableScroll.ScrollBar.vertical.width: 0)
+                        model: ListModel {
+                            id: searchPathsModel
+                        }
+                        delegate: SwipeDelegate {
+                            id: swipeDelegate
+                            text: path
+                            anchors.right: parent.right
+                            anchors.left: parent.left
 
-                            model: ListModel {
-                                id: searchPathsModel
-                            }
-                            delegate: Rectangle {
-                                color: colorForIndex(index, true, searchPathsTable)
-                                width: parent.width
-                                height: lblPluginSearchPath.height
-
-                                Label {
-                                    id: lblPluginSearchPath
-                                    text: path
-                                    elide: Text.ElideLeft
-                                    width: parent.width
+                            ListView.onRemove: SequentialAnimation {
+                                PropertyAction {
+                                    target: swipeDelegate
+                                    property: "ListView.delayRemove"
+                                    value: true
                                 }
-                                MouseArea {
-                                    preventStealing: true
-                                    anchors.fill: parent
+                                NumberAnimation {
+                                    target: swipeDelegate
+                                    property: "height"
+                                    to: 0
+                                    easing.type: Easing.InOutQuad
+                                }
+                                PropertyAction {
+                                    target: swipeDelegate
+                                    property: "ListView.delayRemove"
+                                    value: false
+                                }
+                            }
 
-                                    onClicked: {
-                                        searchPathsTable.currentIndex = index
-                                        searchPathsTable.positionViewAtIndex(index, ListView.Contain)
-                                    }
+                            swipe.right: Button {
+                                id: deleteLabel
+                                text: qsTr("Remove")
+                                flat: true
+                                height: parent.height
+                                anchors.right: parent.right
+
+                                onClicked: {
+                                    let searchPaths = AkPluginManager.searchPaths();
+                                    let sp = []
+
+                                    for (let path in searchPaths)
+                                        if (path != index)
+                                            sp.push(searchPaths[path])
+
+                                    AkPluginManager.setSearchPaths(sp)
+                                    searchPathsModel.remove(index)
+                                    stack.refreshCache()
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        GroupBox {
-            title: qsTr("Plugins list")
-            Layout.fillWidth: true
-            clip: true
 
-            GridLayout {
-                columns: 3
-                anchors.fill: parent
+            // Plugins tabs
+            ScrollView {
+                id: pluginsScrollView
+                contentHeight: pluginConfigsLayout.height
+                clip: true
 
-                AkButton {
-                    label: qsTr("Refresh")
-                    iconRc: "image://icons/reset"
+                ColumnLayout {
+                    id: pluginConfigsLayout
+                    width: pluginsScrollView.width
 
-                    onClicked: refreshCache()
-                }
-                Label {
-                    Layout.fillWidth: true
-                }
-                Button {
-                    id: btnEnableDisable
-                    text: pluginIsEnabled? qsTr("Disable"): qsTr("Enable")
-                    enabled: pluginsTable.currentIndex >= 0
+                    Button {
+                        text: qsTr("Update")
+                        icon.source: "image://icons/reset"
+                        flat: true
 
-                    property bool pluginIsEnabled: false
+                        onClicked: stack.refreshCache()
+                    }
+                    ListView {
+                        id: pluginsTable
+                        Layout.fillWidth: true
+                        implicitWidth: childrenRect.width
+                        implicitHeight: childrenRect.height
+                        clip: true
 
-                    onClicked: {
-                        var blackList = globalElement.pluginsBlackList()
-                        var path = pluginsTable.model.get(pluginsTable.currentIndex).path
-                        var index = blackList.indexOf(path)
-
-                        if (pluginIsEnabled) {
-                            if (index < 0)
-                                blackList.push(path)
-                        } else {
-                            if (index >= 0)
-                                blackList.splice(index, 1)
+                        model: ListModel {
+                            id: pluginsModel
                         }
 
-                        globalElement.setPluginsBlackList(blackList)
-                        refreshCache()
-                        pluginsTable.currentIndex = -1
-                    }
-                }
-                Rectangle {
-                    color: palette.base
-                    height: 150
-                    Layout.columnSpan: 3
-                    Layout.fillWidth: true
+                        delegate: CheckDelegate {
+                            text: pluginId
+                            width: pluginsScrollView.width
+                            checked: pluginEnabled
 
-                    AkScrollView {
-                        id: pluginsTableScroll
-                        clip: true
-                        contentHeight: pluginsTable.height
-                        anchors.fill: parent
+                            onToggled: {
+                                let disabledPlugins =
+                                    AkPluginManager.listPlugins("",
+                                                                [],
+                                                                AkPluginManager.FilterDisabled)
 
-                        ListView {
-                            id: pluginsTable
-                            height: contentHeight
-                            width: pluginsTableScroll.width
-                                   - (pluginsTableScroll.ScrollBar.vertical.visible?
-                                          pluginsTableScroll.ScrollBar.vertical.width: 0)
+                                if (checked) {
+                                    let index = disabledPlugins.indexOf(pluginId)
 
-                            model: ListModel {
-                                id: pluginsModel
-                            }
-
-                            delegate: Rectangle {
-                                color: colorForIndex(index, pluginEnabled, pluginsTable)
-                                width: parent.width
-                                height: lblPluginPath.height
-
-                                Label {
-                                    id: lblPluginPath
-                                    text: path
-                                    elide: Text.ElideLeft
-                                    width: parent.width
-                                    enabled: pluginEnabled
+                                    if (index >= 0)
+                                        disabledPlugins.splice(index, 1)
+                                } else {
+                                    disabledPlugins.push(pluginId)
                                 }
-                                MouseArea {
-                                    preventStealing: true
-                                    anchors.fill: parent
 
-                                    onClicked: {
-                                        pluginsTable.currentIndex = index
-                                        pluginsTable.positionViewAtIndex(index, ListView.Contain)
-                                    }
-                                }
-                            }
-
-                            onCurrentIndexChanged: {
-                                btnEnableDisable.pluginIsEnabled =
-                                    currentIndex < 0? false: pluginsTable.model.get(currentIndex).pluginEnabled
+                                AkPluginManager.setPluginStatus(disabledPlugins,
+                                                                   AkPluginManager.Disabled)
+                                pluginConfigs.saveProperties()
                             }
                         }
                     }
@@ -303,15 +241,14 @@ AkScrollView {
         }
     }
 
-    FileDialog {
+    LABS.FolderDialog {
         id: fileDialog
         title: qsTr("Add plugins search path")
-        selectFolder: true
 
         onAccepted: {
-            var path = Webcamoid.urlToLocalFile(folder)
-            globalElement.addSearchPath(path)
-            refreshAll()
+            let path = mediaTools.urlToLocalFile(folder)
+            AkPluginManager.addSearchPath(path)
+            stack.refreshAll()
         }
     }
 }

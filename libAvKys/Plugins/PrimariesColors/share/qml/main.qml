@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -29,11 +29,13 @@ GridLayout {
     }
     TextField {
         text: PrimariesColors.factor
+        placeholderText: qsTr("Factor")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: PrimariesColors.factor = text
+        onTextChanged: PrimariesColors.factor = Number(text)
     }
 }

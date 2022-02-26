@@ -20,20 +20,28 @@
 
 pkg update -f
 pkg install -y \
+    alsa-lib \
+    ccache \
+    cmake \
+    ffmpeg \
     git \
+    gstreamer1 \
+    gstreamer1-plugins-good \
+    jackit \
+    libuvc \
     pkgconf \
+    patchelf \
+    pipewire \
+    pulseaudio \
     python3 \
-    qt5-qmake \
     qt5-buildtools \
     qt5-concurrent \
+    qt5-linguisttools \
     qt5-opengl \
+    qt5-qmake \
     qt5-quickcontrols \
     qt5-quickcontrols2 \
     qt5-svg \
+    qt5-wayland \
     qt5-xml \
-    ffmpeg \
-    gstreamer1 \
-    alsa-lib \
-    jackit \
-    pulseaudio \
-    libuvc
+    vlc

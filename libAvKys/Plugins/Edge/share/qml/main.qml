@@ -17,112 +17,114 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
 
 GridLayout {
-    columns: 3
+    columns: 2
 
     Connections {
         target: Edge
 
-        onThLowChanged: {
-            sldThLow.value = thLow
-            spbThLow.rvalue = thLow
+        function onThLowChanged(thLow)
+        {
+            sldThreshold.first.value = thLow
+            spbThresholdLow.value = thLow
         }
 
-        onThHiChanged: {
-            sldThHi.value = thHi
-            spbThHi.rvalue = thHi
+        function onThHiChanged(thHi)
+        {
+            sldThreshold.second.value = thHi
+            spbThresholdHi.value = thHi
         }
     }
 
     // Canny
     Label {
+        //: https://en.wikipedia.org/wiki/Canny_edge_detector
         text: qsTr("Canny mode")
     }
-    CheckBox {
-        id: chkCanny
-        checked: Edge.canny
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            id: chkCanny
+            checked: Edge.canny
 
-        onCheckedChanged: Edge.canny = checked
+            onCheckedChanged: Edge.canny = checked
+        }
     }
+
+    // Threshold
     Label {
-    }
-
-    // thLow
-    Label {
-        text: qsTr("Lower Canny threshold")
+        text: qsTr("Canny threshold")
         enabled: chkCanny.checked
     }
-    Slider {
-        id: sldThLow
-        enabled: chkCanny.checked
-        value: Edge.thLow
-        stepSize: 1
-        to: 1530
-        Layout.fillWidth: true
+    RowLayout {
+        SpinBox {
+            id: spbThresholdLow
+            value: Edge.thLow
+            to: sldThreshold.to
+            stepSize: sldThreshold.stepSize
+            enabled: chkCanny.checked
+            editable: true
 
-        onValueChanged: Edge.thLow = Math.min(value, Edge.thHi)
-    }
-    AkSpinBox {
-        id: spbThLow
-        enabled: chkCanny.checked
-        rvalue: Edge.thLow
-        maximumValue: sldThLow.to
-        step: sldThLow.stepSize
+            onValueChanged: Edge.thLow = value
+        }
+        RangeSlider {
+            id: sldThreshold
+            first.value: Edge.thLow
+            second.value: Edge.thHi
+            stepSize: 1
+            to: 1530
+            enabled: chkCanny.checked
+            Layout.fillWidth: true
 
-        onRvalueChanged: Edge.thLow = Math.min(rvalue, Edge.thHi)
-    }
+            first.onValueChanged: Edge.thLow = first.value
+            second.onValueChanged: Edge.thHi = second.value
+        }
+        SpinBox {
+            id: spbThresholdHi
+            value: Edge.thHi
+            to: sldThreshold.to
+            stepSize: sldThreshold.stepSize
+            enabled: chkCanny.checked
+            editable: true
 
-    // thHi
-    Label {
-        text: qsTr("Higger Canny threshold")
-        enabled: chkCanny.checked
-    }
-    Slider {
-        id: sldThHi
-        enabled: chkCanny.checked
-        value: Edge.thHi
-        stepSize: 1
-        to: 1530
-        Layout.fillWidth: true
-
-        onValueChanged: Edge.thHi = Math.max(value, Edge.thLow)
-    }
-    AkSpinBox {
-        id: spbThHi
-        enabled: chkCanny.checked
-        rvalue: Edge.thHi
-        maximumValue: sldThHi.to
-        step: sldThHi.stepSize
-
-        onRvalueChanged: Edge.thHi = Math.max(rvalue, Edge.thLow)
+            onValueChanged: Edge.thHi = Number(value)
+        }
     }
 
     // Equalize
     Label {
+        //: https://en.wikipedia.org/wiki/Histogram_equalization
         text: qsTr("Equalize")
     }
-    CheckBox {
-        checked: Edge.equalize
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            checked: Edge.equalize
 
-        onCheckedChanged: Edge.equalize = checked
-    }
-    Label {
+            onCheckedChanged: Edge.equalize = checked
+        }
     }
 
     // Invert
     Label {
         text: qsTr("Invert")
     }
-    CheckBox {
-        checked: Edge.invert
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            checked: Edge.invert
 
-        onCheckedChanged: Edge.invert = checked
-    }
-    Label {
+            onCheckedChanged: Edge.invert = checked
+        }
     }
 }

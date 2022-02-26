@@ -30,12 +30,18 @@ class IconsProvider: public QQuickImageProvider
         IconsProvider();
         ~IconsProvider();
 
+        QImage requestImage(const QString &id,
+                            QSize *size,
+                            const QSize &requestedSize);
         QPixmap requestPixmap(const QString &id,
                               QSize *size,
                               const QSize &requestedSize);
 
     private:
         IconsProviderPrivate *d;
+
+    public slots:
+        void themeSetup();
 };
 
 #endif // ICONSPROVIDER_H

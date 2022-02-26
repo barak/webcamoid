@@ -16,61 +16,56 @@
  *
  * Web-Site: http://webcamoid.github.io/
  */
-#include <QtDebug>
-#include <QApplication>
-#include <QTranslator>
-#include <QPalette>
-#include <QIcon>
 
+#include <QDebug>
+#include <QApplication>
+#include <QDirIterator>
+#include <QFontDatabase>
+#include <QMutex>
+#include <QQuickStyle>
+#include <QTranslator>
+
+#include "clioptions.h"
 #include "mediatools.h"
 
 int main(int argc, char *argv[])
 {
-    /* Force a default theme and color scheme for all platforms for UI
-       consistency. */
-    qputenv("QT_QUICK_CONTROLS_STYLE", "Universal");
-    qputenv("QT_QUICK_CONTROLS_UNIVERSAL_THEME", "Dark");
-    qputenv("QT_QUICK_CONTROLS_UNIVERSAL_ACCENT", "#472F8E");
-    qputenv("QT_QUICK_CONTROLS_UNIVERSAL_FOREGROUND", "#FFFFFF");
-    qputenv("QT_QUICK_CONTROLS_UNIVERSAL_BACKGROUND", "#262626");
-
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+    qInstallMessageHandler(MediaTools::messageHandler);
     QApplication app(argc, argv);
+    CliOptions cliOptions;
 
-    auto palette = QApplication::palette();
-    palette.setColor(QPalette::Window, QColor(31, 31, 31));
-    palette.setColor(QPalette::WindowText, QColor(255, 255, 255));
-    palette.setColor(QPalette::Base, QColor(38, 38, 38));
-    palette.setColor(QPalette::AlternateBase, QColor(31, 31, 31));
-    palette.setColor(QPalette::Text, QColor(255, 255, 255));
-    palette.setColor(QPalette::Highlight, QColor(71, 47, 142));
-    palette.setColor(QPalette::HighlightedText, QColor(255, 255, 255));
-    palette.setColor(QPalette::Button, QColor(71, 47, 142));
-    palette.setColor(QPalette::ButtonText, QColor(255, 255, 255));
-    QApplication::setPalette(palette);
+    if (cliOptions.isSet(cliOptions.logFileOpt())) {
+        auto logFile = cliOptions.value(cliOptions.logFileOpt());
+        qDebug() << "Sending log to" << logFile;
 
-    QCoreApplication::setApplicationName(COMMONS_APPNAME);
-    QCoreApplication::setApplicationVersion(COMMONS_VERSION);
-    QCoreApplication::setOrganizationName(COMMONS_APPNAME);
-    QCoreApplication::setOrganizationDomain(QString("%1.com").arg(COMMONS_APPNAME));
+        if (!logFile.isEmpty())
+            MediaTools::setLogFile(logFile);
+    }
+
+    QApplication::setApplicationName(COMMONS_APPNAME);
+    QApplication::setApplicationVersion(COMMONS_VERSION);
+    QApplication::setOrganizationName(COMMONS_APPNAME);
+    QApplication::setOrganizationDomain(QString("%1.com").arg(COMMONS_APPNAME));
 
     // Install translations.
     QTranslator translator;
     translator.load(QLocale::system().name(), ":/Webcamoid/share/ts");
     QCoreApplication::installTranslator(&translator);
 
-    // Install fallback icon theme.
-    if (QIcon::themeName().isEmpty())
-        QIcon::setThemeName("hicolor");
+    // Set theme.
+    QQuickStyle::addStylePath(":/Webcamoid/share/themes");
+    QQuickStyle::setStyle("WebcamoidTheme");
+    QDirIterator fontsDirIterator(":/Webcamoid/share/themes/WebcamoidTheme/fonts",
+                                  QStringList() << "*.ttf",
+                                  QDir::Files
+                                  | QDir::Readable
+                                  | QDir::NoDotAndDotDot,
+                                  QDirIterator::Subdirectories);
 
-#ifdef Q_OS_OSX
-    QIcon fallbackIcon(":/icons/webcamoid.icns");
-#elif defined(Q_OS_WIN32)
-    QIcon fallbackIcon(":/icons/hicolor/256x256/webcamoid.ico");
-#else
-    QIcon fallbackIcon(":/icons/hicolor/scalable/webcamoid.svg");
-#endif
-
-    QApplication::setWindowIcon(QIcon::fromTheme("webcamoid", fallbackIcon));
+    while (fontsDirIterator.hasNext())
+        QFontDatabase::addApplicationFont(fontsDirIterator.next());
 
 #if defined(Q_OS_WIN32) || defined(Q_OS_OSX)
     // NOTE: OpenGL detection in Qt is quite buggy, so use software render by default.
@@ -86,7 +81,7 @@ int main(int argc, char *argv[])
         qputenv("QML_DISABLE_DISTANCEFIELD", "1");
 #endif
 
-    MediaTools mediaTools;
+    MediaTools mediaTools(cliOptions);
     mediaTools.show();
 
     return QApplication::exec();

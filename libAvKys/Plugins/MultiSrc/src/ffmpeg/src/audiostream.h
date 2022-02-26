@@ -30,13 +30,16 @@ class AudioStream: public AbstractStream
 
     public:
         AudioStream(const AVFormatContext *formatContext=nullptr,
-                    uint index=0, qint64 id=-1,
+                    uint index=0,
+                    qint64 id=-1,
                     Clock *globalClock=nullptr,
+                    bool sync=true,
                     bool noModify=false,
                     QObject *parent=nullptr);
         ~AudioStream();
 
         Q_INVOKABLE AkCaps caps() const;
+        Q_INVOKABLE bool decodeData();
 
     protected:
         void processPacket(AVPacket *packet);

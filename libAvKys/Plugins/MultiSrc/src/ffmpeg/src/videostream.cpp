@@ -26,6 +26,7 @@
 
 extern "C"
 {
+    #include <libavcodec/avcodec.h>
     #include <libavutil/imgutils.h>
     #include <libswscale/swscale.h>
 }
@@ -55,7 +56,6 @@ class VideoStreamPrivate
         explicit VideoStreamPrivate(VideoStream *self);
         AkFrac fps() const;
         AkPacket convert(AVFrame *iFrame);
-        int64_t bestEffortTimestamp(const AVFrame *frame) const;
         AVFrame *copyFrame(AVFrame *frame) const;
 
         template<typename R, typename S>
@@ -66,9 +66,19 @@ class VideoStreamPrivate
 };
 
 VideoStream::VideoStream(const AVFormatContext *formatContext,
-                         uint index, qint64 id, Clock *globalClock,
-                         bool noModify, QObject *parent):
-    AbstractStream(formatContext, index, id, globalClock, noModify, parent)
+                         uint index,
+                         qint64 id,
+                         Clock *globalClock,
+                         bool sync,
+                         bool noModify,
+                         QObject *parent):
+    AbstractStream(formatContext,
+                   index,
+                   id,
+                   globalClock,
+                   sync,
+                   noModify,
+                   parent)
 {
     this->d = new VideoStreamPrivate(this);
     this->m_maxData = 3;
@@ -90,6 +100,31 @@ AkCaps VideoStream::caps() const
                        this->d->fps());
 }
 
+bool VideoStream::decodeData()
+{
+    if (!this->isValid())
+        return false;
+
+    bool result = false;
+
+    forever {
+        auto iFrame = av_frame_alloc();
+        int r = avcodec_receive_frame(this->codecContext(), iFrame);
+
+        if (r >= 0) {
+            this->dataEnqueue(this->d->copyFrame(iFrame));
+            result = true;
+        }
+
+        av_frame_free(&iFrame);
+
+        if (r < 0)
+            break;
+    }
+
+    return result;
+}
+
 void VideoStream::processPacket(AVPacket *packet)
 {
     if (!this->isValid())
@@ -101,38 +136,18 @@ void VideoStream::processPacket(AVPacket *packet)
         return;
     }
 
-#ifdef HAVE_SENDRECV
-    if (avcodec_send_packet(this->codecContext(), packet) >= 0)
-        forever {
-            auto iFrame = av_frame_alloc();
-            int r = avcodec_receive_frame(this->codecContext(), iFrame);
-
-            if (r >= 0) {
-                iFrame->pts = this->d->bestEffortTimestamp(iFrame);
-                this->dataEnqueue(this->d->copyFrame(iFrame));
-            }
-
-            av_frame_free(&iFrame);
-
-            if (r < 0)
-                break;
-        }
-#else
-        auto iFrame = av_frame_alloc();
-        int gotFrame;
-        avcodec_decode_video2(this->codecContext(), iFrame, &gotFrame, packet);
-
-        if (gotFrame) {
-            iFrame->pts = this->d->bestEffortTimestamp(iFrame);
-            this->dataEnqueue(this->d->copyFrame(iFrame));
-        }
-
-        av_frame_free(&iFrame);
-#endif
+    avcodec_send_packet(this->codecContext(), packet);
 }
 
 void VideoStream::processData(AVFrame *frame)
 {
+    if (!this->sync()) {
+        auto oPacket = this->d->convert(frame);
+        emit this->oStream(oPacket);
+
+        return;
+    }
+
     forever {
         qreal pts = frame->pts * this->timeBase().value();
         qreal diff = pts - this->globalClock()->clock();
@@ -168,8 +183,6 @@ void VideoStream::processData(AVFrame *frame)
         this->m_clockDiff = diff;
         auto oPacket = this->d->convert(frame);
         emit this->oStream(oPacket);
-        emit this->frameSent();
-
         this->d->m_lastPts = pts;
 
         break;
@@ -275,27 +288,13 @@ AkPacket VideoStreamPrivate::convert(AVFrame *iFrame)
     return oPacket;
 }
 
-int64_t VideoStreamPrivate::bestEffortTimestamp(const AVFrame *frame) const
-{
-#ifdef FF_API_PKT_PTS
-    return av_frame_get_best_effort_timestamp(frame);
-#else
-    if (frame->pts != AV_NOPTS_VALUE)
-        return frame->pts;
-    else if (frame->pkt_pts != AV_NOPTS_VALUE)
-        return frame->pkt_pts;
-
-    return frame->pkt_dts;
-#endif
-}
-
 AVFrame *VideoStreamPrivate::copyFrame(AVFrame *frame) const
 {
     auto oFrame = av_frame_alloc();
     oFrame->width = frame->width;
     oFrame->height = frame->height;
     oFrame->format = frame->format;
-    oFrame->pts = frame->pts;
+    oFrame->pts = frame->best_effort_timestamp;
 
     av_image_alloc(oFrame->data,
                    oFrame->linesize,

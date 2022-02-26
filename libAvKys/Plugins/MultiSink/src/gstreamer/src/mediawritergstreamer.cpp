@@ -231,7 +231,33 @@ MediaWriterGStreamer::MediaWriterGStreamer(QObject *parent):
     MediaWriter(parent)
 {
     this->d = new MediaWriterGStreamerPrivate(this);
-//    setenv("GST_DEBUG", "2", 1);
+    //qputenv("GST_DEBUG", "2");
+    auto binDir = QDir(BINDIR).absolutePath();
+    auto gstPluginsDir = QDir(GST_PLUGINS_PATH).absolutePath();
+    auto relGstPluginsDir = QDir(binDir).relativeFilePath(gstPluginsDir);
+    QDir appDir = QCoreApplication::applicationDirPath();
+
+    if (appDir.cd(relGstPluginsDir)) {
+        auto path = appDir.absolutePath();
+        path.replace("/", QDir::separator());
+
+        if (QFileInfo::exists(path)) {
+            if (qEnvironmentVariableIsEmpty("GST_PLUGIN_PATH"))
+                qputenv("GST_PLUGIN_PATH", path.toLocal8Bit());
+
+            auto scanner = QFileInfo(GST_PLUGINS_SCANNER_PATH).baseName();
+
+            if (!scanner.isEmpty()) {
+                auto scannerPath = path + "/" + scanner;
+
+                if (QFileInfo::exists(scannerPath)) {
+                    if (qEnvironmentVariableIsEmpty("GST_PLUGIN_SCANNER"))
+                        qputenv("GST_PLUGIN_SCANNER", scannerPath.toLocal8Bit());
+                }
+            }
+        }
+    }
+
     gst_init(nullptr, nullptr);
 
     this->m_formatsBlackList = QStringList {
@@ -457,7 +483,7 @@ QStringList MediaWriterGStreamer::supportedCodecs(const QString &format,
                         continue;
                     }
 
-                    auto codecType = structureType.mid(0, type.indexOf('/'));
+                    auto codecType = structureType.mid(0, type.indexOf('/')).remove("/x-raw");
 
                     if (gst_structure_has_field(capsStructure, "format")) {
                         GType fieldType = gst_structure_get_field_type(capsStructure, "format");
@@ -1102,10 +1128,6 @@ QVariantMap MediaWriterGStreamer::addStream(int streamIndex,
         return QVariantMap();
 
     QVariantMap outputParams;
-
-    if (codecParams.contains("label"))
-        outputParams["label"] = codecParams["label"];
-
     outputParams["index"] = streamIndex;
     auto codec = codecParams.value("codec").toString();
     auto supportedCodecs = this->supportedCodecs(outputFormat, streamCaps.mimeType());
@@ -1143,7 +1165,7 @@ QVariantMap MediaWriterGStreamer::addStream(int streamIndex,
     }
 
     this->d->m_streamConfigs << outputParams;
-    this->streamsChanged(this->streams());
+    emit this->streamsChanged(this->streams());
 
     return outputParams;
 }
@@ -1166,9 +1188,6 @@ QVariantMap MediaWriterGStreamer::updateStream(int index,
     if (outputFormat.isEmpty())
         return {};
 
-    if (codecParams.contains("label"))
-        this->d->m_streamConfigs[index]["label"] = codecParams["label"];
-
     auto streamCaps = this->d->m_streamConfigs[index]["caps"].value<AkCaps>();
     QString codec;
     bool streamChanged = false;
@@ -1184,7 +1203,6 @@ QVariantMap MediaWriterGStreamer::updateStream(int index,
         streamChanged = true;
 
         // Update sample format.
-        auto codecDefaults = this->defaultCodecParams(codec);
 
         if (streamCaps.mimeType() == "audio/x-raw") {
             AkAudioCaps audioCaps(streamCaps);
@@ -1198,8 +1216,9 @@ QVariantMap MediaWriterGStreamer::updateStream(int index,
 
         this->d->m_streamConfigs[index]["caps"] =
                 QVariant::fromValue(streamCaps);
-    } else
+    } else {
         codec = this->d->m_streamConfigs[index]["codec"].toString();
+    }
 
     auto codecDefaults = this->defaultCodecParams(codec);
 
@@ -1384,7 +1403,7 @@ void MediaWriterGStreamer::enqueuePacket(const AkPacket &packet)
 void MediaWriterGStreamer::clearStreams()
 {
     this->d->m_streamConfigs.clear();
-    this->streamsChanged(this->streams());
+    emit this->streamsChanged(this->streams());
 }
 
 bool MediaWriterGStreamer::init()
@@ -2249,8 +2268,10 @@ gboolean MediaWriterGStreamerPrivate::busCallback(GstBus *bus,
         break;
     }
     case GST_MESSAGE_EOS:
+        qDebug() << "EOS received";
         g_main_loop_quit(self->d->m_mainLoop);
-    break;
+
+        break;
     case GST_MESSAGE_STATE_CHANGED: {
         GstState oldstate;
         GstState newstate;
@@ -2308,30 +2329,24 @@ gboolean MediaWriterGStreamerPrivate::busCallback(GstBus *bus,
     case GST_MESSAGE_TAG: {
         GstTagList *tagList = nullptr;
         gst_message_parse_tag(message, &tagList);
-        gchar *tags = gst_tag_list_to_string(tagList);
+        auto tags = gst_tag_list_to_string(tagList);
 //        qDebug() << "Tags:" << tags;
         g_free(tags);
         gst_tag_list_unref(tagList);
+
         break;
     }
     case GST_MESSAGE_ELEMENT: {
-        const GstStructure *messageStructure = gst_message_get_structure(message);
-        gchar *structure = gst_structure_to_string(messageStructure);
+        auto messageStructure = gst_message_get_structure(message);
+        auto structure = gst_structure_to_string(messageStructure);
 //        qDebug() << structure;
         g_free(structure);
+
         break;
     }
     case GST_MESSAGE_QOS: {
         qDebug() << QString("Received QOS from element %1:")
                         .arg(GST_MESSAGE_SRC_NAME(message)).toStdString().c_str();
-
-        GstFormat format;
-        guint64 processed;
-        guint64 dropped;
-        gst_message_parse_qos_stats(message, &format, &processed, &dropped);
-        const gchar *formatStr = gst_format_get_name(format);
-        qDebug() << "    Processed" << processed << formatStr;
-        qDebug() << "    Dropped" << dropped << formatStr;
 
         gint64 jitter;
         gdouble proportion;

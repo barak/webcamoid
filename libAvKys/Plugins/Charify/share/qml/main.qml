@@ -17,11 +17,12 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
+import Qt.labs.platform 1.1 as LABS
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 2
@@ -31,32 +32,12 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbx.model.count; i++)
-            if (cbx.model.get(i).option === option) {
+            if (cbx.model.get(i).option == option) {
                 index = i
                 break
             }
 
         return index
-    }
-
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
     }
 
     Label {
@@ -87,6 +68,8 @@ GridLayout {
     }
     TextField {
         text: Charify.charTable
+        placeholderText: qsTr("Symbols")
+        selectByMouse: true
         Layout.fillWidth: true
 
         onTextChanged: Charify.charTable = text
@@ -99,13 +82,15 @@ GridLayout {
         TextField {
             id: txtTable
             text: Charify.font.family + " " + Charify.font.pointSize
+            placeholderText: qsTr("Font")
+            selectByMouse: true
             readOnly: true
             font: Charify.font
             Layout.fillWidth: true
         }
-        AkButton {
-            label: qsTr("Search")
-            iconRc: "image://icons/edit-find"
+        Button {
+            text: qsTr("Search")
+            icon.source: "image://icons/fonts"
 
             onClicked: fontDialog.open()
         }
@@ -143,6 +128,7 @@ GridLayout {
     }
 
     Label {
+        //: Different font rendering strategies
         text: qsTr("Style")
     }
     ComboBox {
@@ -212,35 +198,50 @@ GridLayout {
     Label {
         text: qsTr("Foreground color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Charify.foregroundColor)
-        title: qsTr("Choose the foreground color")
-        showAlphaChannel: true
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Charify.foregroundColor)
+            title: qsTr("Choose the foreground color")
+            showAlphaChannel: true
 
-        onCurrentColorChanged: Charify.foregroundColor = toRgba(currentColor)
+            onCurrentColorChanged: Charify.foregroundColor = AkUtils.toRgba(currentColor)
+        }
     }
 
     Label {
         text: qsTr("Background color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Charify.backgroundColor)
-        title: qsTr("Choose the background color")
-        showAlphaChannel: true
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Charify.backgroundColor)
+            title: qsTr("Choose the background color")
+            showAlphaChannel: true
 
-        onCurrentColorChanged: Charify.backgroundColor = toRgba(currentColor)
+            onCurrentColorChanged: Charify.backgroundColor = AkUtils.toRgba(currentColor)
+        }
     }
 
     Label {
         text: qsTr("Reversed")
     }
-    CheckBox {
-        checked: Charify.reversed
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            checked: Charify.reversed
 
-        onCheckedChanged: Charify.reversed = checked
+            onCheckedChanged: Charify.reversed = checked
+        }
     }
 
-    FontDialog {
+    LABS.FontDialog {
         id: fontDialog
         title: qsTr("Please choose a font")
         font: Charify.font

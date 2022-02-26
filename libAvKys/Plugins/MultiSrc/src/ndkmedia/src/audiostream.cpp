@@ -23,11 +23,13 @@
 #include <QVector>
 #include <QMap>
 #include <akelement.h>
+#include <akaudiocaps.h>
+#include <akaudioconverter.h>
+#include <akaudiopacket.h>
 #include <akcaps.h>
 #include <akfrac.h>
 #include <akpacket.h>
-#include <akaudiocaps.h>
-#include <akaudiopacket.h>
+#include <akpluginmanager.h>
 #include <media/NdkMediaExtractor.h>
 
 #include "audiostream.h"
@@ -85,7 +87,7 @@ class AudioStreamPrivate
 {
     public:
         AudioStream *self;
-        AkElementPtr m_audioConvert;
+        AkAudioConverter m_audioConvert;
         qreal audioDiffCum {0.0}; // used for AV difference average computation
         qreal audioDiffAvgCoef {exp(log(0.01) / AUDIO_DIFF_AVG_NB)};
         int audioDiffAvgCount {0};
@@ -97,13 +99,20 @@ class AudioStreamPrivate
 };
 
 AudioStream::AudioStream(AMediaExtractor *mediaExtractor,
-                         uint index, qint64 id, Clock *globalClock,
+                         uint index,
+                         qint64 id,
+                         Clock *globalClock,
+                         bool sync,
                          QObject *parent):
-    AbstractStream(mediaExtractor, index, id, globalClock, parent)
+    AbstractStream(mediaExtractor,
+                   index,
+                   id,
+                   globalClock,
+                   sync,
+                   parent)
 {
     this->d = new AudioStreamPrivate(this);
     this->m_maxData = 9;
-    this->d->m_audioConvert = AkElement::create("ACapsConvert");
 }
 
 AudioStream::~AudioStream()
@@ -145,6 +154,39 @@ AkCaps AudioStream::caps() const
     return AkAudioCaps(sampleFormat, layout, rate);
 }
 
+bool AudioStream::decodeData()
+{
+    if (!this->isValid())
+        return false;
+
+    AMediaCodecBufferInfo info;
+    memset(&info, 0, sizeof(AMediaCodecBufferInfo));
+    ssize_t timeOut = 5000;
+    auto bufferIndex =
+            AMediaCodec_dequeueOutputBuffer(this->codec(), &info, timeOut);
+
+    if (bufferIndex == AMEDIACODEC_INFO_TRY_AGAIN_LATER)
+        return true;
+    else if (bufferIndex >= 0) {
+        auto packet = this->d->readPacket(size_t(bufferIndex), info);
+
+        if (packet)
+            this->dataEnqueue(packet);
+
+        AMediaCodec_releaseOutputBuffer(this->codec(),
+                                        size_t(bufferIndex),
+                                        info.size != 0);
+    }
+
+    if (info.flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM) {
+        this->dataEnqueue({});
+
+        return false;
+    }
+
+    return true;
+}
+
 AkAudioCaps::SampleFormat AudioStream::sampleFormatFromEncoding(int32_t encoding)
 {
     static const QMap<int32_t, AkAudioCaps::SampleFormat> sampleFormatFromEncoding {
@@ -170,40 +212,7 @@ AkAudioCaps::ChannelLayout AudioStream::layoutFromChannelMask(int32_t channelMas
     return AkAudioCaps::channelLayoutFromPositions(positions);
 }
 
-bool AudioStream::decodeData()
-{
-    if (!this->isValid())
-        return false;
-
-    AMediaCodecBufferInfo info;
-    memset(&info, 0, sizeof(AMediaCodecBufferInfo));
-    ssize_t timeOut = 5000;
-    auto bufferIndex =
-            AMediaCodec_dequeueOutputBuffer(this->codec(), &info, timeOut);
-
-    if (bufferIndex == AMEDIACODEC_INFO_TRY_AGAIN_LATER)
-        return true;
-    else if (bufferIndex >= 0) {
-        auto packet = this->d->readPacket(size_t(bufferIndex), info);
-
-        if (packet)
-            this->avPacketEnqueue(packet);
-
-        AMediaCodec_releaseOutputBuffer(this->codec(),
-                                        size_t(bufferIndex),
-                                        info.size != 0);
-    }
-
-    if (info.flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM) {
-        this->avPacketEnqueue({});
-
-        return false;
-    }
-
-    return true;
-}
-
-void AudioStream::processPacket(const AkPacket &packet)
+void AudioStream::processData(const AkPacket &packet)
 {
     auto oPacket = this->d->convert(packet);
     emit this->oStream(oPacket);
@@ -276,18 +285,23 @@ AkPacket AudioStreamPrivate::readPacket(size_t bufferIndex,
 
 AkAudioPacket AudioStreamPrivate::convert(const AkAudioPacket &packet)
 {
-    if (this->m_audioConvert->state() != AkElement::ElementStatePlaying) {
-        this->m_audioConvert->setProperty("caps",
-                                          QVariant::fromValue(packet.caps()));
-        this->m_audioConvert->setState(AkElement::ElementStatePlaying);
-    }
+    auto caps = packet.caps();
+    auto layout = caps.layout();
+
+    if (layout != AkAudioCaps::Layout_mono
+        && layout != AkAudioCaps::Layout_stereo)
+        caps.setLayout(AkAudioCaps::Layout_stereo);
+
+    this->m_audioConvert.setOutputCaps(caps);
+
+    if (!self->sync())
+        return this->m_audioConvert.convert(packet);
 
     AkAudioPacket audioPacket = packet;
 
     // Synchronize audio
     qreal pts = packet.pts() * packet.timeBase().value();
     qreal diff = pts - self->globalClock()->clock();
-    int wantedSamples = audioPacket.caps().samples();
 
     if (!qIsNaN(diff) && qAbs(diff) < AV_NOSYNC_THRESHOLD) {
         this->audioDiffCum = diff + this->audioDiffAvgCoef * this->audioDiffCum;
@@ -304,11 +318,11 @@ AkAudioPacket AudioStreamPrivate::convert(const AkAudioPacket &packet)
             qreal diffThreshold = 2.0 * audioPacket.caps().samples() / audioPacket.caps().rate();
 
             if (qAbs(avgDiff) >= diffThreshold) {
-                wantedSamples = audioPacket.caps().samples() + int(diff * audioPacket.caps().rate());
+                int wantedSamples = audioPacket.caps().samples() + int(diff * audioPacket.caps().rate());
                 int minSamples = audioPacket.caps().samples() * (100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100;
                 int maxSamples = audioPacket.caps().samples() * (100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100;
                 wantedSamples = qBound(minSamples, wantedSamples, maxSamples);
-                audioPacket = audioPacket.scale(wantedSamples);
+                audioPacket = this->m_audioConvert.scale(audioPacket, wantedSamples);
             }
         }
     } else {
@@ -323,7 +337,7 @@ AkAudioPacket AudioStreamPrivate::convert(const AkAudioPacket &packet)
 
     self->clockDiff() = diff;
 
-    return this->m_audioConvert->iStream(packet);
+    return this->m_audioConvert.convert(audioPacket);
 }
 
 #include "moc_audiostream.cpp"

@@ -17,11 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 3
@@ -39,44 +39,31 @@ GridLayout {
         return Qt.size(size[0], size[1])
     }
 
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
-    }
-
     Connections {
         target: Cartoon
 
-        onNcolorsChanged: {
+        function onNcolorsChanged(ncolors)
+        {
             sldNColors.value = ncolors
-            spbNColors.rvalue = ncolors
+            spbNColors.value = ncolors
         }
-        onColorDiffChanged: {
+
+        function onColorDiffChanged(colorDiff)
+        {
             sldColorDiff.value = colorDiff
-            spbColorDiff.rvalue = colorDiff
+            spbColorDiff.value = colorDiff
         }
-        onThresholdLowChanged: {
-            sldThresholdLow.value = thresholdLow
-            spbThresholdLow.rvalue = thresholdLow
+
+        function onThresholdLowChanged(thresholdLow)
+        {
+            sldThreshold.first.value = thresholdLow
+            spbThresholdLow.value = thresholdLow
         }
-        onThresholdHiChanged: {
-            sldThresholdHi.value = thresholdHi
-            spbThresholdHi.rvalue = thresholdHi
+
+        function onThresholdHiChanged(thresholdHi)
+        {
+            sldThreshold.second.value = thresholdHi
+            spbThresholdHi.value = thresholdHi
         }
     }
 
@@ -93,13 +80,14 @@ GridLayout {
 
         onValueChanged: Cartoon.ncolors = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbNColors
-        rvalue: Cartoon.ncolors
-        maximumValue: sldNColors.to
-        step: sldNColors.stepSize
+        value: Cartoon.ncolors
+        to: sldNColors.to
+        stepSize: sldNColors.stepSize
+        editable: true
 
-        onRvalueChanged: Cartoon.ncolors = rvalue
+        onValueChanged: Cartoon.ncolors = Number(value)
     }
 
     Label {
@@ -115,89 +103,93 @@ GridLayout {
 
         onValueChanged: Cartoon.colorDiff = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbColorDiff
-        rvalue: Cartoon.colorDiff
-        maximumValue: sldColorDiff.to
-        step: sldColorDiff.stepSize
+        value: Cartoon.colorDiff
+        to: sldColorDiff.to
+        stepSize: sldColorDiff.stepSize
+        editable: true
 
-        onRvalueChanged: Cartoon.colorDiff = rvalue
+        onValueChanged: Cartoon.colorDiff = Number(value)
     }
 
     Label {
         text: qsTr("Show edges")
     }
-    CheckBox {
-        id: chkShowEdges
-        checked: Cartoon.showEdges
+    RowLayout {
         Layout.columnSpan: 2
 
-        onCheckedChanged: Cartoon.showEdges = checked
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            id: chkShowEdges
+            checked: Cartoon.showEdges
+
+            onCheckedChanged: Cartoon.showEdges = checked
+        }
     }
 
     // Configure edge thresholds.
     Label {
-        id: lblThresholdLow
-        text: qsTr("Threshold low")
+        id: lblThreshold
+        text: qsTr("Threshold")
         enabled: chkShowEdges.checked
     }
-    Slider {
-        id: sldThresholdLow
-        value: Cartoon.thresholdLow
-        stepSize: 1
-        to: 255
-        enabled: chkShowEdges.checked
-        Layout.fillWidth: true
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onValueChanged: Cartoon.thresholdLow = value
-    }
-    AkSpinBox {
-        id: spbThresholdLow
-        rvalue: Cartoon.thresholdLow
-        maximumValue: sldThresholdLow.to
-        step: sldThresholdLow.stepSize
-        enabled: chkShowEdges.checked
+        SpinBox {
+            id: spbThresholdLow
+            value: Cartoon.thresholdLow
+            to: sldThreshold.to
+            stepSize: sldThreshold.stepSize
+            enabled: chkShowEdges.checked
+            editable: true
 
-        onRvalueChanged: Cartoon.thresholdLow = rvalue
-    }
+            onValueChanged: Cartoon.thresholdLow = Number(value)
+        }
+        RangeSlider {
+            id: sldThreshold
+            first.value: Cartoon.thresholdLow
+            second.value: Cartoon.thresholdHi
+            stepSize: 1
+            to: 255
+            enabled: chkShowEdges.checked
+            Layout.fillWidth: true
 
-    Label {
-        id: lblThresholdHi
-        text: qsTr("Threshold high")
-        enabled: chkShowEdges.checked
-    }
-    Slider {
-        id: sldThresholdHi
-        value: Cartoon.thresholdHi
-        stepSize: 1
-        to: 255
-        enabled: chkShowEdges.checked
-        Layout.fillWidth: true
+            first.onValueChanged: Cartoon.thresholdLow = first.value
+            second.onValueChanged: Cartoon.thresholdHi = second.value
+        }
+        SpinBox {
+            id: spbThresholdHi
+            value: Cartoon.thresholdHi
+            to: sldThreshold.to
+            stepSize: sldThreshold.stepSize
+            enabled: chkShowEdges.checked
+            editable: true
 
-        onValueChanged: Cartoon.thresholdHi = value
-    }
-    AkSpinBox {
-        id: spbThresholdHi
-        rvalue: Cartoon.thresholdHi
-        maximumValue: sldThresholdHi.to
-        step: sldThresholdHi.stepSize
-        enabled: chkShowEdges.checked
-
-        onRvalueChanged: Cartoon.thresholdHi = rvalue
+            onValueChanged: Cartoon.thresholdHi = Number(value)
+        }
     }
 
     Label {
         text: qsTr("Line color")
         enabled: chkShowEdges.checked
     }
-    AkColorButton {
-        currentColor: fromRgba(Cartoon.lineColor)
-        title: qsTr("Choose a color")
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onCurrentColorChanged: Cartoon.lineColor = toRgba(currentColor)
-        enabled: chkShowEdges.checked
-    }
-    Label {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Cartoon.lineColor)
+            title: qsTr("Choose a color")
+            enabled: chkShowEdges.checked
+
+            onCurrentColorChanged: Cartoon.lineColor = AkUtils.toRgba(currentColor)
+        }
     }
 
     // Scan block.
@@ -206,11 +198,13 @@ GridLayout {
     }
     TextField {
         text: Cartoon.scanSize.width + "x" + Cartoon.scanSize.height
-        Layout.columnSpan: 2
+        placeholderText: qsTr("Scan block")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+x\d+/
         }
         Layout.fillWidth: true
+        Layout.columnSpan: 2
 
         onTextChanged: Cartoon.scanSize = strToSize(text)
     }

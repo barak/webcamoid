@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -29,24 +29,27 @@ GridLayout {
     }
     TextField {
         text: Photocopy.brightness
+        placeholderText: qsTr("Brightness")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Photocopy.brightness = text
+        onTextChanged: Photocopy.brightness = Number(text)
     }
-
     Label {
         text: qsTr("Contrast")
     }
     TextField {
         text: Photocopy.contrast
+        placeholderText: qsTr("Contrast")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Photocopy.contrast = text
+        onTextChanged: Photocopy.contrast = Number(text)
     }
 }

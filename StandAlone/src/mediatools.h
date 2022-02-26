@@ -25,6 +25,7 @@
 class MediaToolsPrivate;
 class QQmlApplicationEngine;
 class AkCaps;
+class CliOptions;
 
 class MediaTools: public QObject
 {
@@ -39,49 +40,78 @@ class MediaTools: public QObject
                WRITE setWindowHeight
                RESET resetWindowHeight
                NOTIFY windowHeightChanged)
-    Q_PROPERTY(bool enableVirtualCamera
-               READ enableVirtualCamera
-               WRITE setEnableVirtualCamera
-               RESET resetEnableVirtualCamera
-               NOTIFY enableVirtualCameraChanged)
-    Q_PROPERTY(AkElement::ElementState virtualCameraState
-               READ virtualCameraState
-               WRITE setVirtualCameraState
-               RESET resetVirtualCameraState
-               NOTIFY virtualCameraStateChanged)
+    Q_PROPERTY(QString applicationName
+               READ applicationName
+               CONSTANT)
+    Q_PROPERTY(QString applicationVersion
+               READ applicationVersion
+               CONSTANT)
+    Q_PROPERTY(bool isDailyBuild
+               READ isDailyBuild
+               CONSTANT)
+    Q_PROPERTY(QString qtVersion
+               READ qtVersion
+               CONSTANT)
+    Q_PROPERTY(QString copyrightNotice
+               READ copyrightNotice
+               CONSTANT)
+    Q_PROPERTY(QString projectUrl
+               READ projectUrl
+               CONSTANT)
+    Q_PROPERTY(QString projectLicenseUrl
+               READ projectLicenseUrl
+               CONSTANT)
+    Q_PROPERTY(QString projectDownloadsUrl
+               READ projectDownloadsUrl
+               CONSTANT)
+    Q_PROPERTY(QString projectIssuesUrl
+               READ projectIssuesUrl
+               CONSTANT)
+    Q_PROPERTY(QString projectGitCommit
+               READ projectGitCommit
+               CONSTANT)
+    Q_PROPERTY(QString projectGitShortCommit
+               READ projectGitShortCommit
+               CONSTANT)
+    Q_PROPERTY(QString projectGitCommitUrl
+               READ projectGitCommitUrl
+               CONSTANT)
+    Q_PROPERTY(QString projectDonationsUrl
+               READ projectDonationsUrl
+               CONSTANT)
 
     public:
-        MediaTools(QObject *parent=nullptr);
+        MediaTools(const CliOptions &cliOptions, QObject *parent=nullptr);
         ~MediaTools();
 
         Q_INVOKABLE int windowWidth() const;
         Q_INVOKABLE int windowHeight() const;
-        Q_INVOKABLE bool enableVirtualCamera() const;
-        Q_INVOKABLE AkElement::ElementState virtualCameraState() const;
         Q_INVOKABLE QString applicationName() const;
         Q_INVOKABLE QString applicationVersion() const;
+        Q_INVOKABLE bool isDailyBuild() const;
         Q_INVOKABLE QString qtVersion() const;
         Q_INVOKABLE QString copyrightNotice() const;
         Q_INVOKABLE QString projectUrl() const;
         Q_INVOKABLE QString projectLicenseUrl() const;
         Q_INVOKABLE QString projectDownloadsUrl() const;
         Q_INVOKABLE QString projectIssuesUrl() const;
+        Q_INVOKABLE QString projectGitCommit() const;
+        Q_INVOKABLE QString projectGitShortCommit() const;
+        Q_INVOKABLE QString projectGitCommitUrl() const;
+        Q_INVOKABLE QString projectDonationsUrl() const;
         Q_INVOKABLE QString fileNameFromUri(const QString &uri) const;
-        Q_INVOKABLE bool matches(const QString &pattern, const QStringList &strings) const;
+        Q_INVOKABLE bool matches(const QString &pattern,
+                                 const QStringList &strings) const;
         Q_INVOKABLE QString currentTime() const;
+        Q_INVOKABLE QString currentTime(const QString &format) const;
         Q_INVOKABLE QStringList standardLocations(const QString &type) const;
-        Q_INVOKABLE QString saveFileDialog(const QString &caption="",
-                                           const QString &fileName="",
-                                           const QString &directory="",
-                                           const QString &suffix="",
-                                           const QString &filters="") const;
-        Q_INVOKABLE QString readFile(const QString &fileName) const;
+        Q_INVOKABLE static QString readFile(const QString &fileName);
         Q_INVOKABLE QString urlToLocalFile(const QUrl &url) const;
-        Q_INVOKABLE bool embedVirtualCameraControls(const QString &where,
-                                                    const QString &name="");
-        Q_INVOKABLE void removeInterface(const QString &where,
-                                         QQmlApplicationEngine *engine=nullptr);
-        static QString convertToAbsolute(const QString &path);
+        Q_INVOKABLE static QString convertToAbsolute(const QString &path);
+        Q_INVOKABLE static void setLogFile(const QString &logFile);
+        Q_INVOKABLE static void messageHandler(QtMsgType type,
+                                               const QMessageLogContext &context,
+                                               const QString &msg);
 
     private:
         MediaToolsPrivate *d;
@@ -89,27 +119,18 @@ class MediaTools: public QObject
     signals:
         void windowWidthChanged(int windowWidth);
         void windowHeightChanged(int windowHeight);
-        void enableVirtualCameraChanged(bool enableVirtualCamera);
-        void virtualCameraStateChanged(AkElement::ElementState virtualCameraState);
-        void error(const QString &message);
         void interfaceLoaded();
 
     public slots:
         void setWindowWidth(int windowWidth);
         void setWindowHeight(int windowHeight);
-        void setEnableVirtualCamera(bool enableVirtualCamera);
-        void setVirtualCameraState(AkElement::ElementState virtualCameraState);
         void resetWindowWidth();
         void resetWindowHeight();
-        void resetEnableVirtualCamera();
-        void resetVirtualCameraState();
         void loadConfigs();
         void saveConfigs();
         void show();
-
-    private slots:
-        void updateVCamCaps(const AkCaps &videoCaps);
-        void updateVCamState();
+        void makedirs(const QString &path);
+        void restartApp();
 };
 
 #endif // MEDIATOOLS_H

@@ -24,16 +24,26 @@
 
 extern "C"
 {
+    #include <libavcodec/avcodec.h>
     #include <libavutil/imgutils.h>
 }
 
 #include "subtitlestream.h"
 
 SubtitleStream::SubtitleStream(const AVFormatContext *formatContext,
-                               uint index, qint64 id, Clock *globalClock,
+                               uint index,
+                               qint64 id,
+                               Clock *globalClock,
+                               bool sync,
                                bool noModify,
                                QObject *parent):
-    AbstractStream(formatContext, index, id, globalClock, noModify, parent)
+    AbstractStream(formatContext,
+                   index,
+                   id,
+                   globalClock,
+                   sync,
+                   noModify,
+                   parent)
 {
     this->m_maxData = 16;
 }
@@ -41,6 +51,14 @@ SubtitleStream::SubtitleStream(const AVFormatContext *formatContext,
 AkCaps SubtitleStream::caps() const
 {
     return {"text/x-raw"};
+}
+
+bool SubtitleStream::decodeData()
+{
+    if (!this->isValid())
+        return false;
+
+    return false;
 }
 
 void SubtitleStream::processPacket(AVPacket *packet)
@@ -144,13 +162,8 @@ void SubtitleStream::processData(AVSubtitle *subtitle)
 
             av_image_copy(frame.data,
                           frame.linesize,
-#ifdef HAVE_SUBTITLEDATA
                           const_cast<const uint8_t **>(subtitle->rects[i]->data),
                           subtitle->rects[i]->linesize,
-#else
-                          const_cast<const uint8_t **>(subtitle->rects[i]->pict.data),
-                          subtitle->rects[i]->pict.linesize,
-#endif
                           pixFmt,
                           subtitle->rects[i]->w,
                           subtitle->rects[i]->h);

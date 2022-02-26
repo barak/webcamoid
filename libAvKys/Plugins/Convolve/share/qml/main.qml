@@ -17,11 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQml 1.0
-import AkQmlControls 1.0
+import Ak 1.0
 
 ColumnLayout {
     id: configs
@@ -37,13 +36,15 @@ ColumnLayout {
     Connections {
         target: Convolve
 
-        onBiasChanged: {
+        function onBiasChanged(bias)
+        {
             sldBias.value = bias
-            spbBias.rvalue = bias
+            spbBias.value = bias
         }
     }
 
     Label {
+        //: https://en.wikipedia.org/wiki/Kernel_(image_processing)
         text: qsTr("Convolve matrix")
     }
     GridLayout {
@@ -52,31 +53,34 @@ ColumnLayout {
         // Row 0
         TextField {
             id: k00
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[0]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(0, text)
         }
         TextField {
             id: k01
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[1]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(1, text)
         }
         TextField {
             id: k02
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[2]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(2, text)
         }
@@ -84,31 +88,34 @@ ColumnLayout {
         // Row 1
         TextField {
             id: k10
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[3]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(3, text)
         }
         TextField {
             id: k11
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[4]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(4, text)
         }
         TextField {
             id: k12
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[5]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(5, text)
         }
@@ -116,31 +123,34 @@ ColumnLayout {
         // Row 2
         TextField {
             id: k20
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[6]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(6, text)
         }
         TextField {
             id: k21
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[7]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(7, text)
         }
         TextField {
             id: k22
-            Layout.preferredWidth: cellSize
             text: Convolve.kernel[8]
+            selectByMouse: true
             validator: RegExpValidator {
                 regExp: /-?\d+/
             }
+            Layout.preferredWidth: cellSize
 
             onTextChanged: updateKernel(8, text)
         }
@@ -153,14 +163,15 @@ ColumnLayout {
             text: qsTr("Factor")
         }
         TextField {
-            text: Ak.newFrac(Convolve.factor).string
+            text: AkFrac.create(Convolve.factor).string
+            placeholderText: qsTr("Factor")
             validator: RegExpValidator {
                 regExp: /-?\d+\/\d+/
             }
             Layout.columnSpan: 2
             Layout.fillWidth: true
 
-            onTextChanged: Convolve.factor = Ak.varFrac(Ak.newFrac(text))
+            onTextChanged: Convolve.factor = AkFrac.create(text).toVariant()
         }
 
         Label {
@@ -176,14 +187,15 @@ ColumnLayout {
 
             onValueChanged: Convolve.bias = value
         }
-        AkSpinBox {
+        SpinBox {
             id: spbBias
-            rvalue: Convolve.bias
-            step: sldBias.stepSize
-            minimumValue: sldBias.from
-            maximumValue: sldBias.to
+            value: Convolve.bias
+            stepSize: sldBias.stepSize
+            from: sldBias.from
+            to: sldBias.to
+            editable: true
 
-            onRvalueChanged: Convolve.bias = rvalue
+            onValueChanged: Convolve.bias = Number(value)
         }
     }
 }

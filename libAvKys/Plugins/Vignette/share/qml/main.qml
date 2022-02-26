@@ -17,69 +17,58 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 3
 
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
-    }
-
     Connections {
         target: Vignette
 
-        onAspectChanged: {
+        function onAspectChanged(aspect)
+        {
             sldAspect.value = aspect
-            spbAspect.rvalue = aspect
+            spbAspect.value = spbAspect.multiplier * aspect
         }
 
-        onScaleChanged: {
+        function onScaleChanged(scale)
+        {
             sldScale.value = scale
-            spbScale.rvalue = scale
+            spbScale.value = spbScale.multiplier * scale
         }
 
-        onSoftnessChanged: {
+        function onSoftnessChanged(softness)
+        {
             sldSoftness.value = softness
-            spbSoftness.rvalue = softness
+            spbSoftness.value = spbSoftness.multiplier * softness
         }
     }
 
     Label {
         text: qsTr("Color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Vignette.color)
-        title: qsTr("Choose the vignette color")
-        showAlphaChannel: true
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onCurrentColorChanged: Vignette.color = toRgba(currentColor)
-    }
-    Label {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Vignette.color)
+            title: qsTr("Choose the vignette color")
+            showAlphaChannel: true
+
+            onCurrentColorChanged: Vignette.color = AkUtils.toRgba(currentColor)
+        }
     }
 
     Label {
         id: lblAspect
+        //: Aspect ratio
         text: qsTr("Aspect")
     }
     Slider {
@@ -91,14 +80,27 @@ GridLayout {
 
         onValueChanged: Vignette.aspect = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbAspect
-        decimals: 2
-        rvalue: Vignette.aspect
-        maximumValue: sldAspect.to
-        step: sldAspect.stepSize
+        value: multiplier * Vignette.aspect
+        to: multiplier * sldAspect.to
+        stepSize: multiplier * sldAspect.stepSize
+        editable: true
 
-        onRvalueChanged: Vignette.aspect = rvalue
+        readonly property int decimals: 2
+        readonly property int multiplier: Math.pow(10, decimals)
+
+        validator: DoubleValidator {
+            bottom: Math.min(spbAspect.from, spbAspect.to)
+            top:  Math.max(spbAspect.from, spbAspect.to)
+        }
+        textFromValue: function(value, locale) {
+            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
+        }
+        valueFromText: function(text, locale) {
+            return Number.fromLocaleString(locale, text) * multiplier
+        }
+        onValueModified: Vignette.aspect = value / multiplier
     }
 
     Label {
@@ -114,14 +116,27 @@ GridLayout {
 
         onValueChanged: Vignette.scale = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbScale
-        decimals: 2
-        rvalue: Vignette.scale
-        maximumValue: sldScale.to
-        step: sldScale.stepSize
+        value: multiplier * Vignette.scale
+        to: multiplier * sldScale.to
+        stepSize: multiplier * sldScale.stepSize
+        editable: true
 
-        onRvalueChanged: Vignette.scale = rvalue
+        readonly property int decimals: 2
+        readonly property int multiplier: Math.pow(10, decimals)
+
+        validator: DoubleValidator {
+            bottom: Math.min(spbScale.from, spbScale.to)
+            top:  Math.max(spbScale.from, spbScale.to)
+        }
+        textFromValue: function(value, locale) {
+            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
+        }
+        valueFromText: function(text, locale) {
+            return Number.fromLocaleString(locale, text) * multiplier
+        }
+        onValueModified: Vignette.scale = value / multiplier
     }
 
     Label {
@@ -137,13 +152,26 @@ GridLayout {
 
         onValueChanged: Vignette.softness = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbSoftness
-        decimals: 2
-        rvalue: Vignette.softness
-        maximumValue: sldSoftness.to
-        step: sldSoftness.stepSize
+        value: multiplier * Vignette.softness
+        to: multiplier * sldSoftness.to
+        stepSize: multiplier * sldSoftness.stepSize
+        editable: true
 
-        onRvalueChanged: Vignette.softness = rvalue
+        readonly property int decimals: 2
+        readonly property int multiplier: Math.pow(10, decimals)
+
+        validator: DoubleValidator {
+            bottom: Math.min(spbSoftness.from, spbSoftness.to)
+            top:  Math.max(spbSoftness.from, spbSoftness.to)
+        }
+        textFromValue: function(value, locale) {
+            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
+        }
+        valueFromText: function(text, locale) {
+            return Number.fromLocaleString(locale, text) * multiplier
+        }
+        onValueModified: Vignette.softness = value / multiplier
     }
 }

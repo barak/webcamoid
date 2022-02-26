@@ -17,10 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
 
 GridLayout {
     id: configs
@@ -29,13 +28,16 @@ GridLayout {
     Connections {
         target: Denoise
 
-        onRadiusChanged: {
+        function onRadiusChanged(radius)
+        {
             sldRadius.value = radius
-            spbRadius.rvalue = radius
+            spbRadius.value = radius
         }
-        onSigmaChanged: {
+
+        function onSigmaChanged(sigma)
+        {
             sldSigma.value = sigma
-            spbSigma.rvalue = sigma
+            spbSigma.value = spbSigma.multiplier * sigma
         }
     }
 
@@ -51,13 +53,14 @@ GridLayout {
 
         onValueChanged: Denoise.radius = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbRadius
-        rvalue: Denoise.radius
-        maximumValue: sldRadius.to
-        step: sldRadius.stepSize
+        value: Denoise.radius
+        to: sldRadius.to
+        stepSize: sldRadius.stepSize
+        editable: true
 
-        onRvalueChanged: Denoise.radius = rvalue
+        onValueChanged: Denoise.radius = Number(value)
     }
 
     Label {
@@ -65,30 +68,44 @@ GridLayout {
     }
     TextField {
         text: Denoise.factor
+        placeholderText: qsTr("Factor")
         validator: RegExpValidator {
             regExp: /-?\d+/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
 
-        onTextChanged: Denoise.factor = text
+        onTextChanged: Denoise.factor = Number(text)
     }
 
     Label {
+        id: muLabel
+        /*: Mu factor (µ letter from greek), represents the average of a group
+            of values.
+
+            https://en.wikipedia.org/wiki/Arithmetic_mean
+         */
         text: qsTr("Mu")
     }
     TextField {
         text: Denoise.mu
+        placeholderText: muLabel.text
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?\d+/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
 
-        onTextChanged: Denoise.mu = text
+        onTextChanged: Denoise.mu = Number(text)
     }
 
     Label {
+        /*: Sigma factor (σ letter from greek), represents the standard
+            deviation of a group of values.
+
+            https://en.wikipedia.org/wiki/Standard_deviation
+         */
         text: qsTr("Sigma")
     }
     Slider {
@@ -101,14 +118,27 @@ GridLayout {
 
         onValueChanged: Denoise.sigma = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbSigma
-        rvalue: Denoise.sigma
-        decimals: 1
-        step: sldSigma.stepSize
-        minimumValue: sldSigma.from
-        maximumValue: sldSigma.to
+        value: multiplier * Denoise.sigma
+        from: multiplier * sldSigma.from
+        to: multiplier * sldSigma.to
+        stepSize: multiplier * sldSigma.stepSize
+        editable: true
 
-        onRvalueChanged: Denoise.sigma = rvalue
+        readonly property int decimals: 1
+        readonly property int multiplier: Math.pow(10, decimals)
+
+        validator: DoubleValidator {
+            bottom: Math.min(spbSigma.from, spbSigma.to)
+            top:  Math.max(spbSigma.from, spbSigma.to)
+        }
+        textFromValue: function(value, locale) {
+            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
+        }
+        valueFromText: function(text, locale) {
+            return Number.fromLocaleString(locale, text) * multiplier
+        }
+        onValueModified: Denoise.sigma = value / multiplier
     }
 }

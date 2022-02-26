@@ -101,7 +101,7 @@ AbstractStream::AbstractStream(const AVFormatContext *formatContext,
                 formatContext->streams[index]: nullptr;
 
     QString codecName = configs["codec"].toString();
-    AVCodec *codec = avcodec_find_encoder_by_name(codecName.toStdString().c_str());
+    auto codec = avcodec_find_encoder_by_name(codecName.toStdString().c_str());
     this->d->m_codecContext = avcodec_alloc_context3(codec);
 
     // Some formats want stream headers to be separate.
@@ -130,10 +130,11 @@ AbstractStream::AbstractStream(const AVFormatContext *formatContext,
     for (auto it = options.begin(); it != options.end(); it++) {
         QString value = it.value().toString();
 
-        av_dict_set(&this->d->m_codecOptions,
-                    it.key().toStdString().c_str(),
-                    value.toStdString().c_str(),
-                    0);
+        if (!value.isEmpty())
+            av_dict_set(&this->d->m_codecOptions,
+                        it.key().toStdString().c_str(),
+                        value.toStdString().c_str(),
+                        0);
     }
 
     if (this->d->m_threadPool.maxThreadCount() < 2)
@@ -224,13 +225,12 @@ void AbstractStream::rescaleTS(AVPacket *pkt, AVRational src, AVRational dst)
 
 void AbstractStream::deleteFrame(AVFrame **frame)
 {
-    if (frame && *frame) {
-        av_freep(&((*frame)->data[0]));
-        (*frame)->data[0] = nullptr;
-    }
+    if (!frame || !*frame)
+        return;
 
     av_frame_unref(*frame);
     av_frame_free(frame);
+    *frame = nullptr;
 }
 
 void AbstractStreamPrivate::convertLoop()
@@ -276,18 +276,20 @@ bool AbstractStream::init()
     if (!this->d->m_codecContext)
         return false;
 
-    if (avcodec_open2(this->d->m_codecContext,
-                      this->d->m_codecContext->codec,
-                      &this->d->m_codecOptions) < 0)
-        return false;
+    int result = avcodec_open2(this->d->m_codecContext,
+                               this->d->m_codecContext->codec,
+                               &this->d->m_codecOptions);
 
-#ifdef HAVE_CODECPAR
+    if (result < 0) {
+        char error[1024];
+        av_strerror(result, error, 1024);
+        qDebug() << "Error: " << error;
+
+        return false;
+    }
+
     avcodec_parameters_from_context(this->d->m_stream->codecpar,
                                     this->d->m_codecContext);
-#else
-    avcodec_copy_context(this->d->m_stream->codec, this->d->m_codecContext);
-#endif
-
     this->d->m_runEncodeLoop = true;
     this->d->m_encodeLoopResult =
             QtConcurrent::run(&this->d->m_threadPool,

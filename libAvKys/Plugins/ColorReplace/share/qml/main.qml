@@ -17,41 +17,22 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 3
 
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
-    }
-
     Connections {
         target: ColorReplace
 
-        onRadiusChanged: {
+        function onRadiusChanged(radius)
+        {
             sldRadius.value = radius
-            spbRadius.rvalue = radius
+            spbRadius.value = radius
         }
     }
 
@@ -59,32 +40,42 @@ GridLayout {
     Label {
         text: qsTr("Old color")
     }
-    AkColorButton {
-        currentColor: fromRgba(ColorReplace.from)
-        title: qsTr("Select the color to replace")
-        modality: Qt.NonModal
-        showAlphaChannel: true
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onCurrentColorChanged: ColorReplace.from = toRgba(currentColor)
-        onIsOpenChanged: ColorReplace.disable = isOpen
-    }
-    Label {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(ColorReplace.from)
+            title: qsTr("Select the color to replace")
+            modality: Qt.NonModal
+            showAlphaChannel: true
+
+            onCurrentColorChanged: ColorReplace.from = AkUtils.toRgba(currentColor)
+            onIsOpenChanged: ColorReplace.disable = isOpen
+        }
     }
 
     // Color to replace.
     Label {
         text: qsTr("New color")
     }
-    AkColorButton {
-        currentColor: fromRgba(ColorReplace.to)
-        title: qsTr("Select the new color")
-        modality: Qt.NonModal
-        showAlphaChannel: true
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onCurrentColorChanged: ColorReplace.to = toRgba(currentColor)
-        onIsOpenChanged: ColorReplace.disable = isOpen
-    }
-    Label {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(ColorReplace.to)
+            title: qsTr("Select the new color")
+            modality: Qt.NonModal
+            showAlphaChannel: true
+
+            onCurrentColorChanged: ColorReplace.to = AkUtils.toRgba(currentColor)
+            onIsOpenChanged: ColorReplace.disable = isOpen
+        }
     }
 
     // Configure color selection radius.
@@ -101,12 +92,13 @@ GridLayout {
 
         onValueChanged: ColorReplace.radius = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbRadius
-        rvalue: ColorReplace.radius
-        maximumValue: sldRadius.to
-        step: sldRadius.stepSize
+        value: ColorReplace.radius
+        to: sldRadius.to
+        stepSize: sldRadius.stepSize
+        editable: true
 
-        onRvalueChanged: ColorReplace.radius = rvalue
+        onValueChanged: ColorReplace.radius = Number(value)
     }
 }

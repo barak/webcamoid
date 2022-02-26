@@ -62,7 +62,14 @@ class AKCOMMONS_EXPORT AkFrac: public QObject
         AkFrac operator *(const AkFrac &other) const;
         operator bool() const;
         operator QString() const;
+        AkFrac operator *(const AkFrac &other);
 
+        Q_INVOKABLE static QObject *create();
+        Q_INVOKABLE static QObject *create(qint64 num, qint64 den);
+        Q_INVOKABLE static QObject *create(const QString &frac);
+        Q_INVOKABLE static QObject *create(const AkFrac &frac);
+        Q_INVOKABLE static QVariant createVariant(qint64 num, qint64 den);
+        Q_INVOKABLE QVariant toVariant() const;
         Q_INVOKABLE qint64 num() const;
         Q_INVOKABLE qint64 den() const;
         Q_INVOKABLE qreal value() const;
@@ -88,12 +95,15 @@ class AKCOMMONS_EXPORT AkFrac: public QObject
         void setDen(qint64 den);
         void resetNum();
         void resetDen();
+        static void registerTypes();
 };
 
 AKCOMMONS_EXPORT QDebug operator <<(QDebug debug, const AkFrac &frac);
 AKCOMMONS_EXPORT QDataStream &operator >>(QDataStream &istream, AkFrac &frac);
 AKCOMMONS_EXPORT QDataStream &operator <<(QDataStream &ostream, const AkFrac &frac);
 AKCOMMONS_EXPORT AkFrac operator *(int number, const AkFrac &frac);
+AKCOMMONS_EXPORT AkFrac operator *(qreal number, const AkFrac &frac);
+AKCOMMONS_EXPORT AkFrac operator *(const AkFrac &frac1, const AkFrac &frac2);
 AKCOMMONS_EXPORT AkFrac operator /(int number, const AkFrac &frac);
 AKCOMMONS_EXPORT AkFrac operator /(const AkFrac &fracNum, const AkFrac &fracDen);
 AKCOMMONS_EXPORT AkFrac operator +(const AkFrac &frac1, const AkFrac &frac2);

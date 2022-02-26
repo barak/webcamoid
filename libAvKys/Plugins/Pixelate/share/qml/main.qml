@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -42,6 +42,8 @@ GridLayout {
     }
     TextField {
         text: Pixelate.blockSize.width + "x" + Pixelate.blockSize.height
+        placeholderText: qsTr("Block size")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+x\d+/
         }

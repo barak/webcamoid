@@ -22,6 +22,7 @@
 #include <QMetaEnum>
 #include <QSize>
 #include <QVector>
+#include <QQmlEngine>
 
 #include "akvideocaps.h"
 #include "akfrac.h"
@@ -279,7 +280,7 @@ class AkVideoCapsPrivate
         int m_height {0};
         int m_align {1};
         AkFrac m_fps;
-        const QVector<int> *m_planes_div;
+        const QVector<int> *m_planes_div {nullptr};
         QVector<size_t> m_bypl;
         QVector<size_t> m_offset;
 
@@ -312,7 +313,13 @@ AkVideoCaps::AkVideoCaps(AkVideoCaps::PixelFormat format,
                          const AkFrac &fps,
                          int align)
 {
-    AkVideoCaps(format, size.width(), size.height(), fps, align);
+    this->d = new AkVideoCapsPrivate();
+    this->d->m_format = format;
+    this->d->m_width = size.width();
+    this->d->m_height = size.height();
+    this->d->m_fps = fps;
+    this->d->m_align = align;
+    this->d->updateParams();
 }
 
 
@@ -405,6 +412,67 @@ bool AkVideoCaps::operator ==(const AkVideoCaps &other) const
 bool AkVideoCaps::operator !=(const AkVideoCaps &other) const
 {
     return !(*this == other);
+}
+
+QObject *AkVideoCaps::create()
+{
+    return new AkVideoCaps();
+}
+
+QObject *AkVideoCaps::create(const AkCaps &caps)
+{
+    return new AkVideoCaps(caps);
+}
+
+QObject *AkVideoCaps::create(const AkVideoCaps &caps)
+{
+    return new AkVideoCaps(caps);
+}
+
+QObject *AkVideoCaps::create(AkVideoCaps::PixelFormat format,
+                             int width,
+                             int height,
+                             const AkFrac &fps,
+                             int align)
+{
+    return new AkVideoCaps(format, width, height, fps, align);
+}
+
+QObject *AkVideoCaps::create(const QString &format,
+                             int width,
+                             int height,
+                             const AkFrac &fps,
+                             int align)
+{
+    return new AkVideoCaps(AkVideoCaps::pixelFormatFromString(format),
+                           width,
+                           height,
+                           fps,
+                           align);
+}
+
+QObject *AkVideoCaps::create(AkVideoCaps::PixelFormat format,
+                             const QSize &size,
+                             const AkFrac &fps,
+                             int align)
+{
+    return new AkVideoCaps(format, size, fps, align);
+}
+
+QObject *AkVideoCaps::create(const QString &format,
+                             const QSize &size,
+                             const AkFrac &fps,
+                             int align)
+{
+    return new AkVideoCaps(AkVideoCaps::pixelFormatFromString(format),
+                           size,
+                           fps,
+                           align);
+}
+
+QVariant AkVideoCaps::toVariant() const
+{
+    return QVariant::fromValue(*this);
 }
 
 AkVideoCaps::operator AkCaps() const
@@ -579,6 +647,45 @@ size_t AkVideoCaps::planeSize(int plane) const
             / size_t(vf->planes_div[plane]);
 }
 
+AkVideoCaps AkVideoCaps::nearest(const AkVideoCapsList &caps) const
+{
+    AkVideoCaps nearestCap;
+    auto q = std::numeric_limits<uint64_t>::max();
+    auto svf = VideoFormat::byFormat(this->d->m_format);
+
+    for (auto &cap: caps) {
+        auto vf = VideoFormat::byFormat(cap.d->m_format);
+        uint64_t diffFourcc = cap.d->m_format == this->d->m_format? 0: 1;
+        auto diffWidth = cap.d->m_width - this->d->m_width;
+        auto diffHeight = cap.d->m_height - this->d->m_height;
+        auto diffBpp = vf->bpp - svf->bpp;
+        auto diffPlanes = vf->planes.size() - svf->planes.size();
+        int diffPlanesBits = 0;
+
+        if (vf->planes != svf->planes) {
+            for (auto &bits: vf->planes)
+                diffPlanesBits += bits;
+
+            for (auto &bits: svf->planes)
+                diffPlanesBits -= bits;
+        }
+
+        uint64_t k = diffFourcc
+                   + uint64_t(diffWidth * diffWidth)
+                   + uint64_t(diffHeight * diffHeight)
+                   + diffBpp * diffBpp
+                   + diffPlanes * diffPlanes
+                   + diffPlanesBits * diffPlanesBits;
+
+        if (k < q) {
+            nearestCap = cap;
+            q = k;
+        }
+    }
+
+    return nearestCap;
+}
+
 int AkVideoCaps::bitsPerPixel(AkVideoCaps::PixelFormat pixelFormat)
 {
     return VideoFormat::byFormat(pixelFormat)->bpp;
@@ -719,6 +826,24 @@ void AkVideoCaps::clear()
 {
     for (auto &property: this->dynamicPropertyNames())
         this->setProperty(property.constData(), {});
+}
+
+void AkVideoCaps::registerTypes()
+{
+    qRegisterMetaType<AkVideoCaps>("AkVideoCaps");
+    qRegisterMetaType<AkVideoCapsList>("AkVideoCapsList");
+    qRegisterMetaTypeStreamOperators<AkVideoCaps>("AkVideoCaps");
+    qRegisterMetaType<PixelFormat>("PixelFormat");
+    qRegisterMetaType<PixelFormatList>("PixelFormatList");
+    QMetaType::registerDebugStreamOperator<AkVideoCaps::PixelFormat>();
+    qmlRegisterSingletonType<AkVideoCaps>("Ak", 1, 0, "AkVideoCaps",
+                                          [] (QQmlEngine *qmlEngine,
+                                              QJSEngine *jsEngine) -> QObject * {
+        Q_UNUSED(qmlEngine)
+        Q_UNUSED(jsEngine)
+
+        return new AkVideoCaps();
+    });
 }
 
 void AkVideoCapsPrivate::updateParams()

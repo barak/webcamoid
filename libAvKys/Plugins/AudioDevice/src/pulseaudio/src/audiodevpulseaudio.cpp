@@ -19,8 +19,9 @@
 
 #include <QCoreApplication>
 #include <QMap>
-#include <QVector>
 #include <QMutex>
+#include <QVector>
+#include <QtDebug>
 #include <akaudiopacket.h>
 #include <pulse/simple.h>
 #include <pulse/context.h>
@@ -36,7 +37,7 @@ using SampleFormatMap = QMap<AkAudioCaps::SampleFormat, pa_sample_format_t>;
 inline SampleFormatMap initSampleFormatMap()
 {
     SampleFormatMap sampleFormat = {
-        {AkAudioCaps::SampleFormat_u8   , PA_SAMPLE_U8       },
+        {AkAudioCaps::SampleFormat_u8 , PA_SAMPLE_U8       },
 
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
         {AkAudioCaps::SampleFormat_s16, PA_SAMPLE_S16LE    },
@@ -589,7 +590,7 @@ void AudioDevPulseAudioPrivate::sourceInfoCallback(pa_context *context,
     audioDevice->d->m_sources[info->index] = info->name;
 
     audioDevice->d->m_pinDescriptionMap[info->name] =
-            strlen(info->description) < 1?
+            QString(info->description).isEmpty()?
                   info->name: info->description;
 
     audioDevice->d->m_pinCapsMap[info->name] =
@@ -638,7 +639,7 @@ void AudioDevPulseAudioPrivate::sinkInfoCallback(pa_context *context,
     audioDevice->d->m_sinks[info->index] = info->name;
 
     audioDevice->d->m_pinDescriptionMap[info->name] =
-            strlen(info->description) < 1?
+            QString(info->description).isEmpty()?
                   info->name: info->description;
 
     audioDevice->d->m_pinCapsMap[info->name] =

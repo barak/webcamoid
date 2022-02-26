@@ -60,9 +60,12 @@ inline quint32 AkFourCCRS(const QString &fourcc)
 
 #define AK_FOURCC_NULL AkFourCC(0, 0, 0, 0)
 
+class AkVideoCaps;
 class AkVideoCapsPrivate;
 class AkCaps;
 class AkFrac;
+
+using AkVideoCapsList = QList<AkVideoCaps>;
 
 class AKCOMMONS_EXPORT AkVideoCaps: public QObject
 {
@@ -303,6 +306,7 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_gray24,
             Format_gray32,
         };
+        using PixelFormatList = QList<PixelFormat>;
 
         AkVideoCaps(QObject *parent=nullptr);
         AkVideoCaps(PixelFormat format,
@@ -324,6 +328,29 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
         operator bool() const;
         operator AkCaps() const;
 
+        Q_INVOKABLE static QObject *create();
+        Q_INVOKABLE static QObject *create(const AkCaps &caps);
+        Q_INVOKABLE static QObject *create(const AkVideoCaps &caps);
+        Q_INVOKABLE static QObject *create(AkVideoCaps::PixelFormat format,
+                                           int width,
+                                           int height,
+                                           const AkFrac &fps,
+                                           int align=1);
+        Q_INVOKABLE static QObject *create(const QString &format,
+                                           int width,
+                                           int height,
+                                           const AkFrac &fps,
+                                           int align=1);
+        Q_INVOKABLE static QObject *create(AkVideoCaps::PixelFormat format,
+                                           const QSize &size,
+                                           const AkFrac &fps,
+                                           int align=1);
+        Q_INVOKABLE static QObject *create(const QString &format,
+                                           const QSize &size,
+                                           const AkFrac &fps,
+                                           int align=1);
+        Q_INVOKABLE QVariant toVariant() const;
+
         Q_INVOKABLE PixelFormat format() const;
         Q_INVOKABLE quint32 fourCC() const;
         Q_INVOKABLE int bpp() const;
@@ -343,6 +370,7 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
         Q_INVOKABLE size_t bytesPerLine(int plane) const;
         Q_INVOKABLE int planes() const;
         Q_INVOKABLE size_t planeSize(int plane) const;
+        Q_INVOKABLE AkVideoCaps nearest(const AkVideoCapsList &caps) const;
 
         Q_INVOKABLE static int bitsPerPixel(PixelFormat pixelFormat);
         Q_INVOKABLE static int bitsPerPixel(const QString &pixelFormat);
@@ -376,6 +404,7 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
         void resetFps();
         void resetAlign();
         void clear();
+        static void registerTypes();
 };
 
 AKCOMMONS_EXPORT QDebug operator <<(QDebug debug, const AkVideoCaps &caps);
@@ -384,6 +413,8 @@ AKCOMMONS_EXPORT QDataStream &operator >>(QDataStream &istream, AkVideoCaps &cap
 AKCOMMONS_EXPORT QDataStream &operator <<(QDataStream &ostream, const AkVideoCaps &caps);
 
 Q_DECLARE_METATYPE(AkVideoCaps)
+Q_DECLARE_METATYPE(AkVideoCapsList)
 Q_DECLARE_METATYPE(AkVideoCaps::PixelFormat)
+Q_DECLARE_METATYPE(AkVideoCaps::PixelFormatList)
 
 #endif // AKVIDEOCAPS_H

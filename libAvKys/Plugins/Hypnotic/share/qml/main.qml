@@ -17,10 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
 
 GridLayout {
     columns: 3
@@ -30,7 +29,7 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbxMode.model.count; i++)
-            if (cbxMode.model.get(i).mode === mode) {
+            if (cbxMode.model.get(i).mode == mode) {
                 index = i
                 break
             }
@@ -41,9 +40,10 @@ GridLayout {
     Connections {
         target: Hypnotic
 
-        onThresholdChanged: {
+        function onThresholdChanged(threshold)
+        {
             sldThreshold.value = threshold
-            spbThreshold.rvalue = threshold
+            spbThreshold.value = threshold
         }
     }
 
@@ -79,19 +79,20 @@ GridLayout {
 
         onCurrentIndexChanged: Hypnotic.mode = cbxMode.model.get(currentIndex).mode
     }
-
     Label {
         text: qsTr("Speed increment")
     }
     TextField {
         text: Hypnotic.speedInc
+        placeholderText: qsTr("Speed increment")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?\d+/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
 
-        onTextChanged: Hypnotic.speedInc = text
+        onTextChanged: Hypnotic.speedInc = Number(text)
     }
 
     Label {
@@ -106,12 +107,13 @@ GridLayout {
 
         onValueChanged: Hypnotic.threshold = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbThreshold
-        rvalue: Hypnotic.threshold
-        maximumValue: sldThreshold.to
-        step: sldThreshold.stepSize
+        value: Hypnotic.threshold
+        to: sldThreshold.to
+        stepSize: sldThreshold.stepSize
+        editable: true
 
-        onRvalueChanged: sldThreshold.value = rvalue
+        onValueChanged: sldThreshold.value = value
     }
 }

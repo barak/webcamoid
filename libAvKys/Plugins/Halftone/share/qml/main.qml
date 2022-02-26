@@ -17,18 +17,17 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
+import Qt.labs.platform 1.1 as LABS
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
 
 GridLayout {
     columns: 2
 
     function toQrc(uri)
     {
-        if (uri.indexOf(":") === 0)
+        if (uri.indexOf(":") == 0)
             return "qrc" + uri
 
         return "file:" + uri
@@ -50,61 +49,63 @@ GridLayout {
     Label {
         text: qsTr("Pattern")
     }
-    ColumnLayout {
-        ComboBox {
-            id: cbxPattern
-            textRole: "text"
-            Layout.fillWidth: true
+    ComboBox {
+        id: cbxPattern
+        textRole: "text"
+        Layout.fillWidth: true
 
-            model: ListModel {
-                ListElement {
-                    text: qsTr("90° Halftone 6x6")
-                    pattern: ":/Halftone/share/patterns/dither90Halftone6x6Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Cluster 3")
-                    pattern: ":/Halftone/share/patterns/ditherCluster3Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Cluster 4")
-                    pattern: ":/Halftone/share/patterns/ditherCluster4Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Cluster 8")
-                    pattern: ":/Halftone/share/patterns/ditherCluster8Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Lines 4x4")
-                    pattern: ":/Halftone/share/patterns/ditherLines4x4Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Magic 2x2")
-                    pattern: ":/Halftone/share/patterns/ditherMagic2x2Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Magic 4x4")
-                    pattern: ":/Halftone/share/patterns/ditherMagic4x4Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Ordered 4x4")
-                    pattern: ":/Halftone/share/patterns/ditherOrdered4x4Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Ordered 6x6")
-                    pattern: ":/Halftone/share/patterns/ditherOrdered6x6Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Ordered 8x8")
-                    pattern: ":/Halftone/share/patterns/ditherOrdered8x8Matrix.bmp"
-                }
-                ListElement {
-                    text: qsTr("Custom")
-                    pattern: ""
-                }
+        model: ListModel {
+            ListElement {
+                text: qsTr("90° Halftone 6x6")
+                pattern: ":/Halftone/share/patterns/dither90Halftone6x6Matrix.bmp"
             }
-
-            onCurrentIndexChanged: Halftone.pattern = cbxPattern.model.get(currentIndex).pattern
+            ListElement {
+                text: qsTr("Cluster 3")
+                pattern: ":/Halftone/share/patterns/ditherCluster3Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Cluster 4")
+                pattern: ":/Halftone/share/patterns/ditherCluster4Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Cluster 8")
+                pattern: ":/Halftone/share/patterns/ditherCluster8Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Lines 4x4")
+                pattern: ":/Halftone/share/patterns/ditherLines4x4Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Magic 2x2")
+                pattern: ":/Halftone/share/patterns/ditherMagic2x2Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Magic 4x4")
+                pattern: ":/Halftone/share/patterns/ditherMagic4x4Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Ordered 4x4")
+                pattern: ":/Halftone/share/patterns/ditherOrdered4x4Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Ordered 6x6")
+                pattern: ":/Halftone/share/patterns/ditherOrdered6x6Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Ordered 8x8")
+                pattern: ":/Halftone/share/patterns/ditherOrdered8x8Matrix.bmp"
+            }
+            ListElement {
+                text: qsTr("Custom")
+                pattern: ""
+            }
         }
+
+        onCurrentIndexChanged: Halftone.pattern = cbxPattern.model.get(currentIndex).pattern
+    }
+    ColumnLayout {
+        Layout.columnSpan: 2
+
         RowLayout {
             Image {
                 width: 16
@@ -117,12 +118,13 @@ GridLayout {
             TextField {
                 id: txtPattern
                 text: Halftone.pattern
-                placeholderText: qsTr("pattern bitmap...")
+                placeholderText: qsTr("Bitmap pattern")
+                selectByMouse: true
                 Layout.fillWidth: true
 
                 onTextChanged: {
                     for (var i = 0; i < cbxPattern.model.count; i++) {
-                        if (cbxPattern.model.get(i).pattern === Halftone.pattern) {
+                        if (cbxPattern.model.get(i).pattern == Halftone.pattern) {
                             cbxPattern.currentIndex = i
 
                             break
@@ -136,9 +138,9 @@ GridLayout {
                     }
                 }
             }
-            AkButton {
-                label: qsTr("Search")
-                iconRc: "image://icons/edit-find"
+            Button {
+                text: qsTr("Search")
+                icon.source: "image://icons/search"
 
                 onClicked: fileDialog.open()
             }
@@ -150,6 +152,8 @@ GridLayout {
     }
     TextField {
         text: Halftone.patternSize.width + "x" + Halftone.patternSize.height
+        placeholderText: qsTr("Pattern size")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?\d+x-?\d+/
         }
@@ -157,52 +161,55 @@ GridLayout {
 
         onTextChanged: Halftone.patternSize = strToSize(text)
     }
-
     Label {
         text: qsTr("Lightness")
     }
     TextField {
         text: Halftone.lightness
+        placeholderText: qsTr("Lightness")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Halftone.lightness = text
+        onTextChanged: Halftone.lightness = Number(text)
     }
-
     Label {
         text: qsTr("Slope")
     }
     TextField {
         text: Halftone.slope
+        placeholderText: qsTr("Slope")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Halftone.slope = text
+        onTextChanged: Halftone.slope = Number(text)
     }
-
     Label {
         text: qsTr("Intercept")
     }
     TextField {
         text: Halftone.intercept
+        placeholderText: qsTr("Intercept")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Halftone.intercept = text
+        onTextChanged: Halftone.intercept = Number(text)
     }
 
-    FileDialog {
+    LABS.FileDialog {
         id: fileDialog
         title: qsTr("Please choose an image file")
         nameFilters: ["Image files (*.bmp *.gif *.jpg *.jpeg *.png *.pbm *.pgm *.ppm *.xbm *.xpm)"]
         folder: "file://" + picturesPath
 
-        onAccepted: Halftone.pattern = String(fileUrl).replace("file://", "")
+        onAccepted: Halftone.pattern = String(file).replace("file://", "")
     }
 }

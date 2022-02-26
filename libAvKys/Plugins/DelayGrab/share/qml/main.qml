@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -30,7 +30,7 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbxMode.model.count; i++)
-            if (cbxMode.model.get(i).mode === mode) {
+            if (cbxMode.model.get(i).mode == mode) {
                 index = i
                 break
             }
@@ -74,12 +74,14 @@ GridLayout {
     }
     TextField {
         text: DelayGrab.blockSize
+        placeholderText: qsTr("Block size")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: DelayGrab.blockSize = text
+        onTextChanged: DelayGrab.blockSize = Number(text)
     }
 
     Label {
@@ -87,11 +89,13 @@ GridLayout {
     }
     TextField {
         text: DelayGrab.nFrames
+        placeholderText: qsTr("N° of frames")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: DelayGrab.nFrames = text
+        onTextChanged: DelayGrab.nFrames = Number(text)
     }
 }

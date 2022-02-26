@@ -1,4 +1,4 @@
-version: 8.8.0.{build}-{branch}
+version: 9.0.0.{build}-{branch}
 os: MinGW
 
 image: Visual Studio 2019
@@ -16,23 +16,20 @@ configuration:
 
 environment:
   global:
-    INSTALL_PREFIX: C:/projects/webcamoid/ports/deploy/temp_priv/usr
-    # api key from https://bintray.com/profile/edit
-    # encrypted with https://ci.appveyor.com/tools/encrypt
-    BT_KEY:
-      secure: UovqScFlz2shj+pxGyhQUYFiCvYJWEBGuhRCbaC3Bfxm0k9qo/pHYlp6Vx3jLIt9
-
+    NJOBS: 4
   matrix:
-    - PLATFORM: x86
-      DAILY_BUILD: 1
     - PLATFORM: x64
-      DAILY_BUILD: 1
-    - PLATFORM: x86
-      RELEASE_BUILD: 1
+      MSYSTEM: MINGW64
+      COMPILER: gcc
     - PLATFORM: x64
-      RELEASE_BUILD: 1
+      MSYSTEM: MINGW64
+      COMPILER: clang
     - PLATFORM: x86
-    - PLATFORM: x64
+      MSYSTEM: MINGW32
+      COMPILER: gcc
+    - PLATFORM: x86
+      MSYSTEM: MINGW32
+      COMPILER: clang
 
 install:
   - ports\ci\appveyor\environment_setup.bat
@@ -40,16 +37,11 @@ install:
 
 build_script:
   - ports\ci\appveyor\environment_setup.bat
-  - C:\msys64\usr\bin\bash -lc "cd /c/projects/webcamoid && ./ports/ci/appveyor/build.sh
+  - C:\msys64\usr\bin\bash -lc "cd /c/projects/webcamoid && ./ports/ci/appveyor/build.sh"
 
 after_build:
   - ports\ci\appveyor\environment_setup.bat
   - C:\msys64\usr\bin\bash -lc "cd /c/projects/webcamoid && ./ports/ci/appveyor/deploy.sh"
-  - C:\msys64\usr\bin\bash -lc "cd /c/projects/webcamoid && ./ports/ci/appveyor/push_artifacts.sh"
-
-deploy_script:
-  - ports\ci\appveyor\environment_setup.bat
-  - C:\msys64\usr\bin\bash -lc "cd /c/projects/webcamoid && ./ports/ci/appveyor/upload.sh"
 
 notifications:
   - provider: Email

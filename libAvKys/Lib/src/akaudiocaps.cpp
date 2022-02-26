@@ -22,6 +22,7 @@
 #include <QMetaEnum>
 #include <QVector>
 #include <QtMath>
+#include <QQmlEngine>
 
 #include "akaudiocaps.h"
 #include "akcaps.h"
@@ -227,7 +228,7 @@ class ChannelLayouts
 {
     public:
         AkAudioCaps::ChannelLayout layout;
-        QVector<AkAudioCaps::Position> channels;
+        QVector<AkAudioCaps::Position> positions;
         QString description;
 
         static inline const QVector<ChannelLayouts> &layouts()
@@ -279,7 +280,7 @@ class ChannelLayouts
         static inline const ChannelLayouts *byChannelCount(int channels)
         {
             for (auto &layout: layouts())
-                if (layout.channels.size() == channels)
+                if (layout.positions.size() == channels)
                     return &layout;
 
             return &layouts().front();
@@ -374,7 +375,6 @@ AkAudioCaps &AkAudioCaps::operator =(const AkAudioCaps &other)
         this->d->m_rate = other.d->m_rate;
         this->d->m_samples = other.d->m_samples;
         this->d->m_planeSize = other.d->m_planeSize;
-
         this->clear();
 
         for (auto &property: other.dynamicPropertyNames())
@@ -418,6 +418,51 @@ bool AkAudioCaps::operator ==(const AkAudioCaps &other) const
 bool AkAudioCaps::operator !=(const AkAudioCaps &other) const
 {
     return !(*this == other);
+}
+
+QObject *AkAudioCaps::create()
+{
+    return new AkAudioCaps();
+}
+
+QObject *AkAudioCaps::create(const AkCaps &caps)
+{
+    return new AkAudioCaps(caps);
+}
+
+QObject *AkAudioCaps::create(const AkAudioCaps &caps)
+{
+    return new AkAudioCaps(caps);
+}
+
+QObject *AkAudioCaps::create(AkAudioCaps::SampleFormat format,
+                             AkAudioCaps::ChannelLayout layout,
+                             int rate,
+                             int samples,
+                             bool planar,
+                             int align)
+{
+    return new AkAudioCaps(format, layout, rate, samples, planar, align);
+}
+
+QObject *AkAudioCaps::create(const QString &format,
+                             const QString &layout,
+                             int rate,
+                             int samples,
+                             bool planar,
+                             int align)
+{
+    return new AkAudioCaps(AkAudioCaps::sampleFormatFromString(format),
+                           AkAudioCaps::channelLayoutFromString(layout),
+                           rate,
+                           samples,
+                           planar,
+                           align);
+}
+
+QVariant AkAudioCaps::toVariant() const
+{
+    return QVariant::fromValue(*this);
 }
 
 AkAudioCaps::operator AkCaps() const
@@ -501,7 +546,7 @@ const QVector<AkAudioCaps::Position> AkAudioCaps::positions() const
     if (layouts->layout == Layout_none)
         return {};
 
-    return layouts->channels;
+    return layouts->positions;
 }
 
 QVariantMap AkAudioCaps::toMap() const
@@ -620,12 +665,12 @@ void AkAudioCaps::updatePlaneSize(bool planar, int align)
                                                  / 8),
                                        size_t(align));
 
-        for (int channel = 0; channel < layouts->channels.size(); channel++)
+        for (int channel = 0; channel < layouts->positions.size(); channel++)
             planes << planeSize;
     } else {
         auto planeSize =
                 SampleFormats::alignUp(size_t(af->bps
-                                                 * layouts->channels.size()
+                                                 * layouts->positions.size()
                                                  * this->d->m_samples
                                                  / 8),
                                        size_t(align));
@@ -758,13 +803,21 @@ AkAudioCaps::ChannelLayout AkAudioCaps::channelLayoutFromString(const QString &c
 
 AkAudioCaps::ChannelLayout AkAudioCaps::channelLayoutFromPositions(const QVector<Position> &positions)
 {
-    auto positionsSet = QSet<Position>::fromList(positions.toList());
+    QSet<Position> positionsSet;
+
+    for (auto &position: positions)
+        positionsSet << position;
 
     for (auto &layout: ChannelLayouts::layouts()) {
-        if (layout.channels.size() != positions.size())
+        if (layout.positions.size() != positions.size())
             continue;
 
-        if (positionsSet == QSet<Position>::fromList(layout.channels.toList()))
+        QSet<Position> layoutPositionsSet;
+
+        for (auto &position: layout.positions)
+            layoutPositionsSet << position;
+
+        if (positionsSet == layoutPositionsSet)
             return layout.layout;
     }
 
@@ -773,12 +826,12 @@ AkAudioCaps::ChannelLayout AkAudioCaps::channelLayoutFromPositions(const QVector
 
 int AkAudioCaps::channelCount(ChannelLayout channelLayout)
 {
-    return ChannelLayouts::byLayout(channelLayout)->channels.size();
+    return ChannelLayouts::byLayout(channelLayout)->positions.size();
 }
 
 int AkAudioCaps::channelCount(const QString &channelLayout)
 {
-    return ChannelLayouts::byDescription(channelLayout)->channels.size();
+    return ChannelLayouts::byDescription(channelLayout)->positions.size();
 }
 
 int AkAudioCaps::endianness(SampleFormat sampleFormat)
@@ -803,7 +856,7 @@ QString AkAudioCaps::defaultChannelLayoutString(int channelCount)
 
 const QVector<AkAudioCaps::Position> &AkAudioCaps::positions(ChannelLayout channelLayout)
 {
-    return ChannelLayouts::byLayout(channelLayout)->channels;
+    return ChannelLayouts::byLayout(channelLayout)->positions;
 }
 
 AkAudioCaps::SpeakerPosition AkAudioCaps::position(Position position)
@@ -821,6 +874,19 @@ AkAudioCaps::SpeakerPosition AkAudioCaps::position(int channel) const
     auto positions = AkAudioCaps::positions(this->d->m_layout);
 
     return AkAudioCaps::position(positions.at(channel));
+}
+
+qreal AkAudioCaps::distanceFactor(SpeakerPosition position1,
+                                  SpeakerPosition position2)
+{
+    auto d = 1.0 + (position1 - position2);
+
+    return 1.0 / (d * d);
+}
+
+qreal AkAudioCaps::distanceFactor(Position position1, Position position2)
+{
+    return distanceFactor(position(position1), position(position2));
 }
 
 void AkAudioCaps::setFormat(SampleFormat format)
@@ -902,8 +968,32 @@ void AkAudioCaps::clear()
         this->setProperty(property.constData(), QVariant());
 }
 
+void AkAudioCaps::registerTypes()
+{
+    qRegisterMetaType<AkAudioCaps>("AkAudioCaps");
+    qRegisterMetaTypeStreamOperators<AkAudioCaps>("AkAudioCaps");
+    qRegisterMetaType<SampleFormat>("SampleFormat");
+    QMetaType::registerDebugStreamOperator<SampleFormat>();
+    qRegisterMetaType<SampleFormatList>("SampleFormatList");
+    qRegisterMetaType<SampleType>("SampleType");
+    QMetaType::registerDebugStreamOperator<SampleType>();
+    qRegisterMetaType<Position>("Position");
+    QMetaType::registerDebugStreamOperator<Position>();
+    qRegisterMetaType<ChannelLayout>("ChannelLayout");
+    QMetaType::registerDebugStreamOperator<ChannelLayout>();
+    qRegisterMetaType<ChannelLayoutList>("ChannelLayoutList");
+    qmlRegisterSingletonType<AkAudioCaps>("Ak", 1, 0, "AkAudioCaps",
+                                          [] (QQmlEngine *qmlEngine,
+                                              QJSEngine *jsEngine) -> QObject * {
+        Q_UNUSED(qmlEngine)
+        Q_UNUSED(jsEngine)
+
+        return new AkAudioCaps();
+    });
+}
+
 qreal operator -(const AkAudioCaps::SpeakerPosition &pos1,
-                  const AkAudioCaps::SpeakerPosition &pos2)
+                 const AkAudioCaps::SpeakerPosition &pos2)
 {
     auto a1 = qDegreesToRadians(pos1.first);
     auto e1 = qDegreesToRadians(pos1.second);

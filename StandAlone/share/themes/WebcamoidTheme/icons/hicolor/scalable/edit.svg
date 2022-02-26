@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<title>Brown Pencil stylized</title>
+<g fill="#7f7f7f">
+<g transform="matrix(.91248 .91062 -.91248 .91062 2392.8 -1968.4)" fill="#7f7f7f" stroke="#fff">
+<path d="m-160.19 2348.7c7.6243 0 14.012 3.0776 15.693 7.2161l-31.108 1e-4c-0.0946 0-0.1888 0-0.2817 0.012 1.6733-4.1448 8.0643-7.2305 15.698-7.2258z" fill-rule="evenodd" stroke-width=".071967"/>
+<path d="m-160.07 2412.9c-7.8483 0-15.697 0.1562-15.855 0.4688-0.2126 0.4192 6.6465 14.204 11.418 23.326h8.875c4.7714-9.1218 11.631-22.907 11.418-23.326-0.15855-0.3126-8.0072-0.4688-15.855-0.4688zm-3.4141 25.74c1.8413 3.4763 3.2364 5.9882 3.4141 5.9882s1.5728-2.5119 3.4141-5.9882h-6.8281z" fill-rule="evenodd" stroke-width=".071967"/>
+<rect x="-176.13" y="2357.7" width="9.7151" height="53.661" stroke-width=".098948"/>
+<rect x="-165.04" y="2357.7" width="9.7151" height="53.661" stroke-width=".098948"/>
+<rect x="-153.94" y="2357.7" width="9.7151" height="53.661" stroke-width=".098948"/>
+</g>
+</g>
+<metadata>
+<rdf:RDF>
+<cc:Work>
+<dc:format>image/svg+xml</dc:format>
+<dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+<cc:license rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/"/>
+<dc:publisher>
+<cc:Agent rdf:about="http://openclipart.org/">
+<dc:title>Openclipart</dc:title>
+</cc:Agent>
+</dc:publisher>
+<dc:title>Brown Pencil stylized</dc:title>
+<dc:date>2011-08-31T10:25:27</dc:date>
+<dc:description>Pencil stylized yellow</dc:description>
+<dc:source>https://openclipart.org/detail/158713/pencil-stylized-brown-by-marcoqf73</dc:source>
+<dc:creator>
+<cc:Agent>
+<dc:title>marcoqf73</dc:title>
+</cc:Agent>
+</dc:creator>
+<dc:subject>
+<rdf:Bag>
+<rdf:li>brown</rdf:li>
+<rdf:li>pencil</rdf:li>
+<rdf:li>stylized</rdf:li>
+</rdf:Bag>
+</dc:subject>
+</cc:Work>
+<cc:License rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+<cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+<cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+<cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+</cc:License>
+</rdf:RDF>
+</metadata>
+</svg>

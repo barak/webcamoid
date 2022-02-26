@@ -17,41 +17,22 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 3
 
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
-    }
-
     Connections {
         target: Cinema
 
-        onStripSizeChanged: {
+        function onStripSizeChanged(stripSize)
+        {
             sldStripSize.value = stripSize
-            spbStripSize.rvalue = stripSize
+            spbStripSize.value = spbStripSize.multiplier * stripSize
         }
     }
 
@@ -69,25 +50,45 @@ GridLayout {
 
         onValueChanged: Cinema.stripSize = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbStripSize
-        decimals: 2
-        rvalue: Cinema.stripSize
-        maximumValue: sldStripSize.to
-        step: sldStripSize.stepSize
+        value: multiplier * Cinema.stripSize
+        to: multiplier * sldStripSize.to
+        stepSize: multiplier * sldStripSize.stepSize
+        editable: true
 
-        onRvalueChanged: Cinema.stripSize = rvalue
+        readonly property int decimals: 2
+        readonly property int multiplier: Math.pow(10, decimals)
+
+        validator: DoubleValidator {
+            bottom: Math.min(spbStripSize.from, spbStripSize.to)
+            top:  Math.max(spbStripSize.from, spbStripSize.to)
+        }
+        textFromValue: function(value, locale) {
+            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
+        }
+        valueFromText: function(text, locale) {
+            return Number.fromLocaleString(locale, text) * multiplier
+        }
+        onValueModified: Cinema.stripSize = value / multiplier
     }
 
     // Configure strip color.
     Label {
         text: qsTr("Color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Cinema.stripColor)
-        title: qsTr("Choose the strips color")
-        showAlphaChannel: true
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onCurrentColorChanged: Cinema.stripColor = toRgba(currentColor)
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Cinema.stripColor)
+            title: qsTr("Choose the strips color")
+            showAlphaChannel: true
+
+            onCurrentColorChanged: Cinema.stripColor = AkUtils.toRgba(currentColor)
+        }
     }
 }

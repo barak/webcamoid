@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QStringList>
 #include <QVariant>
+#include <QQmlEngine>
 
 #include "akcaps.h"
 
@@ -76,6 +77,21 @@ bool AkCaps::operator ==(const AkCaps &other) const
 bool AkCaps::operator !=(const AkCaps &other) const
 {
     return !(*this == other);
+}
+
+QObject *AkCaps::create(const QString &mimeType)
+{
+    return new AkCaps(mimeType);
+}
+
+QObject *AkCaps::create(const AkCaps &caps)
+{
+    return new AkCaps(caps);
+}
+
+QVariant AkCaps::toVariant() const
+{
+    return QVariant::fromValue(*this);
 }
 
 AkCaps::operator bool() const
@@ -165,6 +181,21 @@ void AkCaps::clear()
 {
     for (auto &property: this->dynamicPropertyNames())
         this->setProperty(property.constData(), QVariant());
+}
+
+void AkCaps::registerTypes()
+{
+    qRegisterMetaType<AkCaps>("AkCaps");
+    qRegisterMetaTypeStreamOperators<AkCaps>("AkCaps");
+    qRegisterMetaType<CapsType>("CapsType");
+    qmlRegisterSingletonType<AkCaps>("Ak", 1, 0, "AkCaps",
+                                     [] (QQmlEngine *qmlEngine,
+                                         QJSEngine *jsEngine) -> QObject * {
+        Q_UNUSED(qmlEngine)
+        Q_UNUSED(jsEngine)
+
+        return new AkCaps();
+    });
 }
 
 QDebug operator <<(QDebug debug, const AkCaps &caps)

@@ -31,11 +31,10 @@ class CliOptions: public QCommandLineParser
         ~CliOptions();
 
         QCommandLineOption configPathOpt() const;
-        QCommandLineOption qmlPathOpt() const;
         QCommandLineOption recursiveOpt() const;
         QCommandLineOption pluginPathsOpt() const;
         QCommandLineOption blackListOpt() const;
-        QCommandLineOption vcamPathOpt() const;
+        QCommandLineOption logFileOpt() const;
 
     private:
         CliOptionsPrivate *d;

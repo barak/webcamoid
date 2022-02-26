@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QRegExp>
 #include <QStringList>
+#include <QQmlEngine>
 
 #include "akfrac.h"
 
@@ -117,6 +118,41 @@ AkFrac::operator bool() const
 AkFrac::operator QString() const
 {
     return QString("%1/%2").arg(this->d->m_num).arg(this->d->m_den);
+}
+
+AkFrac AkFrac::operator *(const AkFrac &other)
+{
+    return {this->d->m_num * other.d->m_num, this->d->m_den * other.d->m_den};
+}
+
+QObject *AkFrac::create()
+{
+    return new AkFrac();
+}
+
+QObject *AkFrac::create(qint64 num, qint64 den)
+{
+    return new AkFrac(num, den);
+}
+
+QObject *AkFrac::create(const QString &frac)
+{
+    return new AkFrac(frac);
+}
+
+QObject *AkFrac::create(const AkFrac &frac)
+{
+    return new AkFrac(frac);
+}
+
+QVariant AkFrac::createVariant(qint64 num, qint64 den)
+{
+    return QVariant::fromValue(AkFrac(num, den));
+}
+
+QVariant AkFrac::toVariant() const
+{
+    return QVariant::fromValue(*this);
 }
 
 qint64 AkFrac::num() const
@@ -266,13 +302,28 @@ void AkFrac::resetDen()
     this->setDen(0);
 }
 
+void AkFrac::registerTypes()
+{
+    qRegisterMetaType<AkFrac>("AkFrac");
+    qRegisterMetaTypeStreamOperators<AkFrac>("AkFrac");
+    QMetaType::registerDebugStreamOperator<AkFrac>();
+    qmlRegisterSingletonType<AkFrac>("Ak", 1, 0, "AkFrac",
+                                     [] (QQmlEngine *qmlEngine,
+                                         QJSEngine *jsEngine) -> QObject * {
+        Q_UNUSED(qmlEngine)
+        Q_UNUSED(jsEngine)
+
+        return new AkFrac();
+    });
+}
+
 QDebug operator <<(QDebug debug, const AkFrac &frac)
 {
     debug.nospace() << "AkFrac("
                     << frac.num()
                     << ","
                     << frac.den()
-                     << ")";
+                    << ")";
 
     return debug.space();
 }
@@ -283,8 +334,7 @@ QDataStream &operator >>(QDataStream &istream, AkFrac &frac)
     qint64 den;
     istream >> num;
     istream >> den;
-    frac.setNum(num);
-    frac.setDen(den);
+    frac = {num, den};
 
     return istream;
 }
@@ -300,6 +350,16 @@ QDataStream &operator <<(QDataStream &ostream, const AkFrac &frac)
 AkFrac operator *(int number, const AkFrac &frac)
 {
     return {number * frac.num(), frac.den()};
+}
+
+AkFrac operator *(qreal number, const AkFrac &frac)
+{
+    return {qRound64(number * frac.num()), frac.den()};
+}
+
+AkFrac operator *(const AkFrac &frac1, const AkFrac &frac2)
+{
+    return {frac1.num() * frac2.num(), frac1.den() * frac2.den()};
 }
 
 AkFrac operator /(int number, const AkFrac &frac)

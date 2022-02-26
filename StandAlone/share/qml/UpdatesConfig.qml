@@ -17,182 +17,189 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import WebcamoidUpdates 1.0
-import AkQml 1.0
-import AkQmlControls 1.0
+import Qt.labs.settings 1.0 as LABS
+import Ak 1.0
+import Webcamoid 1.0
 
-GridLayout {
-    width: 300
-    height: 400
-    columns: 2
-    state: Updates.versionType == UpdatesT.VersionTypeOld?
-               "isOutdated":
-           Updates.versionType == UpdatesT.VersionTypeDevelopment?
-               "isDevelopment": ""
+Page {
+    ScrollView {
+        id: scrollView
+        anchors.fill: parent
+        contentHeight: layout.height
+        clip: true
 
-    Component.onCompleted: {
-        var ciIndex = 0;
-        var ciDiff = Number.POSITIVE_INFINITY;
+        GridLayout {
+            id: layout
+            columns: 2
+            width: scrollView.width
 
-        for (var i = 0; i < cbxCheckInterval.model.count; i++) {
-            if (cbxCheckInterval.model.get(i).interval == Updates.checkInterval) {
-                ciIndex = i;
+            property int webcamoidStatus: updates.status("Webcamoid")
+            property string webcamoidLatestVersion: updates.latestVersion("Webcamoid")
 
-                break;
-            } else {
-                var diff = Math.abs(cbxCheckInterval.model.get(i).interval - Updates.checkInterval);
+            Component.onCompleted: {
+                var ciIndex = 0
+                var ciDiff = Number.POSITIVE_INFINITY
 
-                if (diff < ciDiff) {
-                    ciIndex = i;
-                    ciDiff = diff;
+                for (var i = 0; i < cbxCheckInterval.model.count; i++) {
+                    if (cbxCheckInterval.model.get(i).interval == updates.checkInterval) {
+                        ciIndex = i
+
+                        break
+                    } else {
+                        var diff =
+                                Math.abs(cbxCheckInterval.model.get(i).interval
+                                         - updates.checkInterval)
+
+                        if (diff < ciDiff) {
+                            ciIndex = i
+                            ciDiff = diff
+                        }
+                    }
+                }
+
+                cbxCheckInterval.currentIndex = ciIndex;
+            }
+
+            Connections {
+                target: updates
+
+                function onNewVersionAvailable(component, latestVersion)
+                {
+                    if (component == "Webcamoid") {
+                        layout.webcamoidStatus = updates.status("Webcamoid");
+                        layout.webcamoidLatestVersion = latestVersion;
+                        state = layout.webcamoidStatus == Updates.ComponentOutdated?
+                                    "isOutdated":
+                                layout.webcamoidStatus == Updates.ComponentNewer?
+                                    "isDevelopment": ""
+                    }
+                }
+            }
+
+            Label {
+                text: qsTr("Notify about new versions")
+            }
+            Switch {
+                id: newVersion
+                checked: true
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+
+                onCheckedChanged: updates.notifyNewVersion = checked
+            }
+            Label {
+                text: qsTr("Show updates dialog")
+            }
+            Switch {
+                id: showUpdatesDialog
+                checked: true
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+            }
+            Label {
+                text: qsTr("Check new versions")
+            }
+            ComboBox {
+                id: cbxCheckInterval
+                Layout.fillWidth: true
+                textRole: "description"
+                model: ListModel {
+                    ListElement {
+                        description: qsTr("Daily")
+                        interval: 1
+                    }
+                    ListElement {
+                        description: qsTr("Every two days")
+                        interval: 2
+                    }
+                    ListElement {
+                        description: qsTr("Weekly")
+                        interval: 7
+                    }
+                    ListElement {
+                        description: qsTr("Every two weeks")
+                        interval: 14
+                    }
+                    ListElement {
+                        description: qsTr("Monthly")
+                        interval: 30
+                    }
+                    ListElement {
+                        description: qsTr("Never")
+                        interval: 0
+                    }
+                }
+                currentIndex: 0
+                enabled: newVersion.checked
+
+                onCurrentIndexChanged:
+                    if (currentIndex >= 0)
+                        updates.checkInterval = model.get(currentIndex).interval
+            }
+
+            Label {
+                text: qsTr("Last updated")
+            }
+            Label {
+                text: updates.lastUpdate.toLocaleString()
+                font.bold: true
+                Layout.alignment: Qt.AlignRight
+            }
+
+            Item {
+                height: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+                Layout.fillWidth: true
+                Layout.columnSpan: 2
+            }
+            ColumnLayout {
+                id: isOutdated
+                spacing: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+                Layout.fillWidth: true
+                Layout.columnSpan: 2
+                visible: !mediaTools.isDailyBuild && layout.webcamoidStatus == Updates.ComponentOutdated
+
+                Label {
+                    text: qsTr("Your version of %1 is outdated. Latest version is <b>%2</b>.")
+                            .arg(mediaTools.applicationName).arg(layout.webcamoidLatestVersion)
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+                Button {
+                    text: qsTr("Upgrade Now!")
+                    icon.source: "image://icons/internet"
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+                    onClicked: Qt.openUrlExternally(mediaTools.projectDownloadsUrl)
+                }
+            }
+            ColumnLayout {
+                id: isDevelopment
+                spacing: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+                Layout.fillWidth: true
+                Layout.columnSpan: 2
+                visible: mediaTools.isDailyBuild || layout.webcamoidStatus == Updates.ComponentNewer
+
+                Label {
+                    text: qsTr("Thanks for using a <b>development version</b>!<br />It will be very helpful if you can report any bug and suggestions you have.")
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+                Button {
+                    text: qsTr("Report a Bug")
+                    icon.source: "image://icons/bug"
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+                    onClicked: Qt.openUrlExternally(mediaTools.projectIssuesUrl)
                 }
             }
         }
-
-        cbxCheckInterval.currentIndex = ciIndex;
     }
 
-    Connections {
-        target: Updates
+    LABS.Settings {
+        category: "Updates"
 
-        onVersionTypeChanged: state = versionType == UpdatesT.VersionTypeOld?
-                                          "isOutdated":
-                                      versionType == UpdatesT.VersionTypeDevelopment?
-                                          "isDevelopment": ""
+        property alias notify: newVersion.checked
+        property alias showDialog: showUpdatesDialog.checked
     }
-
-    Label {
-        text: qsTr("Notify about new versions")
-    }
-    RowLayout {
-        CheckBox {
-            checked: Updates.notifyNewVersion
-
-            onCheckedChanged: Updates.notifyNewVersion = checked
-        }
-        Label {
-            Layout.fillWidth: true
-        }
-    }
-
-    Label {
-        text: qsTr("Check new versions")
-    }
-    ComboBox {
-        id: cbxCheckInterval
-        Layout.fillWidth: true
-        textRole: "description"
-        model: ListModel {
-            ListElement {
-                description: qsTr("Daily")
-                interval: 1
-            }
-            ListElement {
-                description: qsTr("Every two days")
-                interval: 2
-            }
-            ListElement {
-                description: qsTr("Weekly")
-                interval: 7
-            }
-            ListElement {
-                description: qsTr("Every two weeks")
-                interval: 14
-            }
-            ListElement {
-                description: qsTr("Monthly")
-                interval: 30
-            }
-            ListElement {
-                description: qsTr("Never")
-                interval: 0
-            }
-        }
-
-        onCurrentIndexChanged:
-            if (currentIndex >= 0)
-                Updates.checkInterval = model.get(currentIndex).interval
-    }
-
-    Label {
-        text: qsTr("Last updated")
-    }
-    Label {
-        text: Updates.lastUpdate.toLocaleString()
-        Layout.fillWidth: true
-        font.bold: true
-    }
-
-    Label {
-        width: 16
-        Layout.fillWidth: true
-        Layout.columnSpan: 2
-    }
-    ColumnLayout {
-        id: isOutdated
-        spacing: 16
-        Layout.fillWidth: true
-        Layout.columnSpan: 2
-        visible: false
-
-        Label {
-            text: qsTr("Your version of %1 is outdated. Latest version is <b>%2</b>.")
-                    .arg(Webcamoid.applicationName()).arg(Updates.latestVersion)
-            wrapMode: Text.WordWrap
-            Layout.fillWidth: true
-        }
-        AkButton {
-            label: qsTr("Upgrade Now!")
-            iconRc: "image://icons/applications-internet"
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-            onClicked: Qt.openUrlExternally(Webcamoid.projectDownloadsUrl())
-        }
-    }
-    ColumnLayout {
-        id: isDevelopment
-        spacing: 16
-        Layout.fillWidth: true
-        Layout.columnSpan: 2
-        visible: false
-
-        Label {
-            text: qsTr("Thanks for using a <b>development version</b>!<br />It will be very helpful if you can report any bug and suggestions you have.")
-            wrapMode: Text.WordWrap
-            Layout.fillWidth: true
-        }
-        AkButton {
-            label: qsTr("Report a Bug")
-            iconRc: "image://icons/tools-report-bug"
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-            onClicked: Qt.openUrlExternally(Webcamoid.projectIssuesUrl())
-        }
-    }
-
-    Label {
-        Layout.fillHeight: true
-    }
-
-    states: [
-        State {
-            name: "isOutdated"
-
-            PropertyChanges {
-                target: isOutdated
-                visible: true
-            }
-        },
-        State {
-            name: "isDevelopment"
-
-            PropertyChanges {
-                target: isDevelopment
-                visible: true
-            }
-        }
-    ]
 }

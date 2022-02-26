@@ -1,0 +1,93 @@
+[Package]
+name = webcamoid
+targetPlatform = @TARGET_PLATFORM@
+sourcesDir = @CMAKE_SOURCE_DIR@
+mainExecutable = @MAIN_EXECUTABLE@
+programArgs = @PROGRAM_ARGS@
+libDir = @APP_LIBDIR@
+buildInfoFile = @BUILD_INFO_FILE@
+targetArch = @TARGET_ARCH@
+version = @VERSION@
+outputFormats = @OUTPUT_FORMATS@
+modules = Qt5, GStreamer, PipeWire, Vlc
+extraLibs = @EXTRA_LIBS@
+
+[PipeWire]
+modulesDir = @PIPEWIRE_MODULES_DIR@
+outputModulesDir = @PIPEWIRE_MODULES_PATH@
+spaPluginsDir = @PIPEWIRE_SPA_PLUGINS_DIR@
+outputSpaPluginsDir = @PIPEWIRE_SPA_PLUGINS_PATH@
+
+[Qt5]
+sourcesQmlDirs = StandAlone/share/qml, StandAlone/share/themes/WebcamoidTheme, libAvKys/Plugins
+outputQmlDir = @OUTPUT_QML_DIR@
+qtQmlDir = @QT_INSTALL_QML@
+outputQtPluginsDir = @OUTPUT_QT_PLUGINS_DIR@
+qtPluginsDir = @QT_INSTALL_PLUGINS@
+sourcesDir = @QT_INSTALL_SRC@
+qtConfFile = @QT_CONF_FILE@
+
+[Vlc]
+pluginsDir = @VLC_PLUGINS_DIR@
+outputPluginsDir = @VLC_PLUGINS_PATH@
+
+[GStreamer]
+pluginsDir = @GST_PLUGINS_DIR@
+outputPluginsDir = @GST_PLUGINS_PATH@
+pluginScanner = @GST_PLUGINS_SCANNER_PATH@
+
+[AppImage]
+name = webcamoid-portable
+launcher = webcamoid.sh
+desktopFile = webcamoid.desktop
+desktopIcon = StandAlone/share/themes/WebcamoidTheme/icons/hicolor/48x48/webcamoid.png
+dirIcon = StandAlone/share/themes/WebcamoidTheme/icons/hicolor/256x256/webcamoid.png
+pkgTargetPlatform = @PKG_TARGET_PLATFORM@
+
+[CompressedTarXz]
+name = webcamoid-portable
+pkgTargetPlatform = @PKG_TARGET_PLATFORM@
+
+[CompressedZip]
+name = webcamoid-portable
+
+[Dmg]
+name = webcamoid-portable
+
+[MacPkg]
+name = webcamoid-installer
+appName = Webcamoid
+productTitle = Webcamoid
+description = Webcamoid, the ultimate webcam suite!
+identifier = org.webcamoidprj.webcamoid
+component = Webcamoid.app
+licenseFile = COPYING
+
+[Nsis]
+name = webcamoid-installer
+organization = Webcamoid
+appName = Webcamoid
+productVersion = @VERSION@.0
+description = Webcamoid, the ultimate webcam suite!
+icon = @INSTALLER_ICON@
+runProgram = @RUN_PROGRAM@
+license = COPYING
+requiresAdminRights = false
+multiUserInstall = true
+
+[QtIFW]
+name = webcamoid-installer
+organization = org.webcamoidprj
+appName = Webcamoid
+title = Webcamoid, The ultimate webcam suite!
+description = Install Webcamoid
+icon = @INSTALLER_ICON@
+url = https://webcamoid.github.io/
+targetDir = @QTIFW_TARGET_DIR@
+runProgram = @RUN_PROGRAM@
+runProgramDescription = Launch Webcamoid now!
+license = COPYING
+licenseName = GNU General Public License v3.0
+script = ports/deploy/installscript.@TARGET_PLATFORM@.qs
+changeLog = ChangeLog
+pkgTargetPlatform = @PKG_TARGET_PLATFORM@

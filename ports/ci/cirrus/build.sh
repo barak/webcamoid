@@ -18,12 +18,32 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-qmake -query
-qmake Webcamoid.pro \
-    CONFIG+=silent
-
-if [ -z "${NJOBS}" ]; then
-    NJOBS=4
+if [ "${COMPILER}" = clang ]; then
+    COMPILER_C=clang
+    COMPILER_CXX=clang++
+else
+    COMPILER_C=gcc
+    COMPILER_CXX=g++
 fi
 
-make -j${NJOBS}
+if [ -z "${DISABLE_CCACHE}" ]; then
+    EXTRA_PARAMS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OBJCXX_COMPILER_LAUNCHER=ccache"
+fi
+
+INSTALL_PREFIX=${PWD}/webcamoid-data-${COMPILER}
+buildDir=build-${COMPILER}
+mkdir "${buildDir}"
+cmake \
+    -LA \
+    -S . \
+    -B "${buildDir}" \
+    -DQT_QMAKE_EXECUTABLE=qmake-qt5 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
+    -DCMAKE_C_COMPILER="${COMPILER_C}" \
+    -DCMAKE_CXX_COMPILER="${COMPILER_CXX}" \
+    ${EXTRA_PARAMS} \
+    -DGST_PLUGINS_SCANNER_PATH=/usr/local/libexec/gstreamer-1.0/gst-plugin-scanner \
+    -DDAILY_BUILD="${DAILY_BUILD}"
+cmake --build "${buildDir}" --parallel "${NJOBS}"
+cmake --install "${buildDir}"

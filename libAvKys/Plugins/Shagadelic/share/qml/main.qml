@@ -17,8 +17,8 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 GridLayout {
@@ -34,6 +34,8 @@ GridLayout {
     }
     TextField {
         text: "0x" + Shagadelic.mask.toString(16)
+        placeholderText: qsTr("Mask")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /(0x)?[0-9a-fA-F]{1,8}/
         }

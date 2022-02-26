@@ -28,11 +28,10 @@ class CliOptionsPrivate
 {
     public:
         QCommandLineOption m_configPathOpt {{"c", "config"}};
-        QCommandLineOption m_qmlPathOpt {{"q", "qmlpaths"}};
         QCommandLineOption m_recursiveOpt {{"r", "recursive"}};
         QCommandLineOption m_pluginPathsOpt {{"p", "paths"}};
         QCommandLineOption m_blackListOpt {{"b", "no-load"}};
-        QCommandLineOption m_vcamPathOpt {"vcam"};
+        QCommandLineOption m_logFileOpt {"log-file"};
 
         QString convertToAbsolute(const QString &path) const;
 };
@@ -50,12 +49,6 @@ CliOptions::CliOptions()
     this->d->m_configPathOpt.setValueName(QObject::tr("PATH"));
     this->addOption(this->d->m_configPathOpt);
 
-    this->d->m_qmlPathOpt.setDescription(
-                QObject::tr("Semi-colon separated list of paths to search the "
-                            "Qml interface."));
-    this->d->m_qmlPathOpt.setValueName(QObject::tr("PATH1;PATH2;PATH3;..."));
-    this->addOption(this->d->m_qmlPathOpt);
-
     // Set recursive plugin path search.
     this->d->m_recursiveOpt.setDescription(
                 QObject::tr("Search in the specified plugins paths "
@@ -68,17 +61,20 @@ CliOptions::CliOptions()
     this->d->m_pluginPathsOpt.setValueName(QObject::tr("PATH1;PATH2;PATH3;..."));
     this->addOption(this->d->m_pluginPathsOpt);
 
+    /*: Blacklist of plugins that could have conflicts when loading in
+        Webcamoid.
+     */
     this->d->m_blackListOpt.setDescription(
                 QObject::tr("Semi-colon separated list of paths to avoid "
                             "loading."));
     this->d->m_blackListOpt.setValueName(QObject::tr("PATH1;PATH2;PATH3;..."));
     this->addOption(this->d->m_blackListOpt);
 
-    this->d->m_vcamPathOpt.setDescription(
-                QObject::tr("Semi-colon separated list of paths to search for "
-                            "virtual camera driver"));
-    this->d->m_vcamPathOpt.setValueName(QObject::tr("PATH1;PATH2;PATH3;..."));
-    this->addOption(this->d->m_vcamPathOpt);
+    // Debug log options
+    this->d->m_logFileOpt.setDescription(
+                QObject::tr("Send debug output to a file"));
+    this->d->m_logFileOpt.setValueName(QObject::tr("FILE"));
+    this->addOption(this->d->m_logFileOpt);
 
     this->process(*QCoreApplication::instance());
 
@@ -108,11 +104,6 @@ QCommandLineOption CliOptions::configPathOpt() const
     return this->d->m_configPathOpt;
 }
 
-QCommandLineOption CliOptions::qmlPathOpt() const
-{
-    return this->d->m_qmlPathOpt;
-}
-
 QCommandLineOption CliOptions::recursiveOpt() const
 {
     return this->d->m_recursiveOpt;
@@ -128,9 +119,9 @@ QCommandLineOption CliOptions::blackListOpt() const
     return this->d->m_blackListOpt;
 }
 
-QCommandLineOption CliOptions::vcamPathOpt() const
+QCommandLineOption CliOptions::logFileOpt() const
 {
-    return this->d->m_vcamPathOpt;
+    return this->d->m_logFileOpt;
 }
 
 QString CliOptionsPrivate::convertToAbsolute(const QString &path) const

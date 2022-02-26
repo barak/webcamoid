@@ -17,11 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 2
@@ -31,32 +31,12 @@ GridLayout {
         var index = -1
 
         for (var i = 0; i < cbxMode.model.count; i++)
-            if (cbxMode.model.get(i).mode === mode) {
+            if (cbxMode.model.get(i).mode == mode) {
                 index = i
                 break
             }
 
         return index
-    }
-
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
     }
 
     Label {
@@ -95,74 +75,95 @@ GridLayout {
     }
     TextField {
         text: Radioactive.blur
+        placeholderText: qsTr("Blur")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Radioactive.blur = text
+        onTextChanged: Radioactive.blur = Number(text)
     }
-
     Label {
         text: qsTr("Zoom")
     }
     TextField {
         text: Radioactive.zoom
+        placeholderText: qsTr("Zoom")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+\.\d+|\d+\.|\.\d+|\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Radioactive.zoom = text
+        onTextChanged: Radioactive.zoom = Number(text)
     }
-
     Label {
         text: qsTr("Threshold")
     }
     TextField {
         text: Radioactive.threshold
+        placeholderText: qsTr("Threshold")
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Radioactive.threshold = text
+        onTextChanged: Radioactive.threshold = Number(text)
     }
-
     Label {
+        id: lumaLabel
+        /*: Minimum luminance/light/white level/intensity in a gray or black and
+            white picture.
+
+            https://en.wikipedia.org/wiki/Luma_(video)
+         */
         text: qsTr("Luma threshold")
     }
     TextField {
         text: Radioactive.lumaThreshold
+        placeholderText: lumaLabel.text
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Radioactive.lumaThreshold = text
+        onTextChanged: Radioactive.lumaThreshold = Number(text)
     }
-
     Label {
+        id: alphaDiffLabel
+        /*: Alpha channel, also known as the transparency component of a pixel
+            in an image.
+         */
         text: qsTr("Alpha differential")
     }
     TextField {
         text: Radioactive.alphaDiff
+        placeholderText: alphaDiffLabel.text
+        selectByMouse: true
         validator: RegExpValidator {
             regExp: /-?\d+/
         }
         Layout.fillWidth: true
 
-        onTextChanged: Radioactive.alphaDiff = text
+        onTextChanged: Radioactive.alphaDiff = Number(text)
     }
 
     Label {
         text: qsTr("Radiation color")
     }
-    AkColorButton {
-        currentColor: fromRgba(Radioactive.radColor)
-        title: qsTr("Choose a color")
-        showAlphaChannel: true
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(Radioactive.radColor)
+            title: qsTr("Choose a color")
+            showAlphaChannel: true
 
-        onCurrentColorChanged: Radioactive.radColor = toRgba(currentColor)
+            onCurrentColorChanged: Radioactive.radColor = AkUtils.toRgba(currentColor)
+        }
     }
 }

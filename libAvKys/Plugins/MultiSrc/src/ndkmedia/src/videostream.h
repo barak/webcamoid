@@ -30,8 +30,10 @@ class VideoStream: public AbstractStream
 
     public:
         VideoStream(AMediaExtractor *mediaExtractor=nullptr,
-                    uint index=0, qint64 id=-1,
+                    uint index=0,
+                    qint64 id=-1,
                     Clock *globalClock=nullptr,
+                    bool sync=true,
                     QObject *parent=nullptr);
         ~VideoStream();
 
@@ -39,7 +41,7 @@ class VideoStream: public AbstractStream
         Q_INVOKABLE bool decodeData();
 
     protected:
-        void processPacket(const AkPacket &packet);
+        void processData(const AkPacket &packet);
 
     private:
         VideoStreamPrivate *d;

@@ -22,21 +22,16 @@
 
 #include <QVariantMap>
 #include <akelement.h>
+#include <akvideocaps.h>
 
 class VirtualCameraElementPrivate;
-class AkCaps;
 
 class VirtualCameraElement: public AkElement
 {
     Q_OBJECT
-    Q_PROPERTY(QString errorMessage
-               READ errorMessage
-               NOTIFY errorMessageChanged)
-    Q_PROPERTY(QStringList driverPaths
-               READ driverPaths
-               WRITE setDriverPaths
-               RESET resetDriverPaths
-               NOTIFY driverPathsChanged)
+    Q_PROPERTY(QString error
+               READ error
+               NOTIFY errorChanged)
     Q_PROPERTY(QStringList medias
                READ medias
                NOTIFY mediasChanged)
@@ -51,51 +46,74 @@ class VirtualCameraElement: public AkElement
     Q_PROPERTY(int maxCameras
                READ maxCameras
                NOTIFY maxCamerasChanged)
-    Q_PROPERTY(QString driver
-               READ driver
-               WRITE setDriver
-               RESET resetDriver
-               NOTIFY driverChanged)
-    Q_PROPERTY(QStringList availableDrivers
-               READ availableDrivers
-               NOTIFY availableDriversChanged)
+    Q_PROPERTY(AkVideoCaps::PixelFormatList supportedOutputPixelFormats
+               READ supportedOutputPixelFormats
+               NOTIFY supportedOutputPixelFormatsChanged)
+    Q_PROPERTY(AkVideoCaps::PixelFormat defaultOutputPixelFormat
+               READ defaultOutputPixelFormat
+               NOTIFY defaultOutputPixelFormatChanged)
+    Q_PROPERTY(QList<quint64> clientsPids
+               READ clientsPids
+               CONSTANT)
+    Q_PROPERTY(bool driverInstalled
+               READ driverInstalled
+               CONSTANT)
+    Q_PROPERTY(QString driverVersion
+               READ driverVersion
+               CONSTANT)
+    Q_PROPERTY(QString picture
+               READ picture
+               WRITE setPicture
+               RESET resetPicture
+               NOTIFY pictureChanged)
     Q_PROPERTY(QString rootMethod
                READ rootMethod
                WRITE setRootMethod
                RESET resetRootMethod
                NOTIFY rootMethodChanged)
-    Q_PROPERTY(QStringList availableMethods
-               READ availableMethods
-               NOTIFY availableMethodsChanged)
+    Q_PROPERTY(QStringList availableRootMethods
+               READ availableRootMethods
+               CONSTANT)
 
     public:
         VirtualCameraElement();
         ~VirtualCameraElement();
 
-        Q_INVOKABLE QString errorMessage() const;
-        Q_INVOKABLE QStringList driverPaths() const;
+        Q_INVOKABLE QString error() const;
         Q_INVOKABLE QStringList medias() const;
         Q_INVOKABLE QString media() const;
         Q_INVOKABLE QList<int> streams() const;
         Q_INVOKABLE int maxCameras() const;
-        Q_INVOKABLE QString driver() const;
-        Q_INVOKABLE QStringList availableDrivers() const;
-        Q_INVOKABLE QString rootMethod() const;
-        Q_INVOKABLE QStringList availableMethods() const;
-
+        Q_INVOKABLE AkVideoCaps::PixelFormatList supportedOutputPixelFormats() const;
+        Q_INVOKABLE AkVideoCaps::PixelFormat defaultOutputPixelFormat() const;
         Q_INVOKABLE int defaultStream(const QString &mimeType) const;
         Q_INVOKABLE QString description(const QString &media) const;
         Q_INVOKABLE AkCaps caps(int stream) const;
+        Q_INVOKABLE AkVideoCapsList outputCaps(const QString &webcam) const;
         Q_INVOKABLE QVariantMap addStream(int streamIndex,
                                           const AkCaps &streamCaps,
                                           const QVariantMap &streamParams={});
         Q_INVOKABLE QVariantMap updateStream(int streamIndex,
                                              const QVariantMap &streamParams={});
-        Q_INVOKABLE QString createWebcam(const QString &description={});
+        Q_INVOKABLE QString createWebcam(const QString &description,
+                                         const AkVideoCapsList &formats);
+        Q_INVOKABLE bool editWebcam(const QString &webcam,
+                                    const QString &description,
+                                    const AkVideoCapsList &formats);
         Q_INVOKABLE bool changeDescription(const QString &webcam,
-                                           const QString &description={}) const;
+                                           const QString &description={});
         Q_INVOKABLE bool removeWebcam(const QString &webcam);
         Q_INVOKABLE bool removeAllWebcams();
+        Q_INVOKABLE QVariantList controls() const;
+        Q_INVOKABLE bool setControls(const QVariantMap &controls);
+        Q_INVOKABLE bool resetControls();
+        Q_INVOKABLE QList<quint64> clientsPids() const;
+        Q_INVOKABLE QString clientExe(quint64 pid) const;
+        Q_INVOKABLE bool driverInstalled() const;
+        Q_INVOKABLE QString driverVersion() const;
+        Q_INVOKABLE QString picture() const;
+        Q_INVOKABLE QString rootMethod() const;
+        Q_INVOKABLE QStringList availableRootMethods() const;
 
     private:
         VirtualCameraElementPrivate *d;
@@ -107,36 +125,26 @@ class VirtualCameraElement: public AkElement
         AkPacket iVideoStream(const AkVideoPacket &packet);
 
     signals:
-        void errorMessageChanged(const QString &error);
-        void driverPathsChanged(const QStringList &driverPaths);
+        void errorChanged(const QString &error);
         void mediasChanged(const QStringList &medias) const;
         void mediaChanged(const QString &media);
         void streamsChanged(const QList<int> &streams);
         void maxCamerasChanged(int maxCameras);
-        void driverChanged(const QString &driver);
-        void availableDriversChanged(const QStringList &availableDrivers);
+        void supportedOutputPixelFormatsChanged(const AkVideoCaps::PixelFormatList &supportedOutputPixelFormats);
+        void defaultOutputPixelFormatChanged(const AkVideoCaps::PixelFormat &defaultOutputPixelFormat);
+        void pictureChanged(const QString &picture);
         void rootMethodChanged(const QString &rootMethod);
-        void availableMethodsChanged(const QStringList &availableMethods);
 
     public slots:
-        void setDriverPaths(const QStringList &driverPaths);
-        void addDriverPath(const QString &driverPath);
-        void addDriverPaths(const QStringList &driverPaths);
-        void removeDriverPath(const QString &driverPath);
-        void removeDriverPaths(const QStringList &driverPaths);
+        bool applyPicture();
         void setMedia(const QString &media);
-        void setDriver(const QString &driver);
+        void setPicture(const QString &picture);
         void setRootMethod(const QString &rootMethod);
-        void resetDriverPaths();
         void resetMedia();
-        void resetDriver();
+        void resetPicture();
         void resetRootMethod();
         void clearStreams();
-
         bool setState(AkElement::ElementState state);
-
-    private slots:
-        void rootMethodUpdated(const QString &rootMethod);
 };
 
 #endif // VIRTUALCAMERAELEMENT_H

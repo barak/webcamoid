@@ -17,41 +17,22 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
-import AkQmlControls 1.0
+import Ak 1.0
+import AkControls 1.0 as AK
 
 GridLayout {
     columns: 3
 
-    function fromRgba(rgba)
-    {
-        var a = ((rgba >> 24) & 0xff) / 255.0
-        var r = ((rgba >> 16) & 0xff) / 255.0
-        var g = ((rgba >> 8) & 0xff) / 255.0
-        var b = (rgba & 0xff) / 255.0
-
-        return Qt.rgba(r, g, b, a)
-    }
-
-    function toRgba(color)
-    {
-        var a = Math.round(255 * color.a) << 24
-        var r = Math.round(255 * color.r) << 16
-        var g = Math.round(255 * color.g) << 8
-        var b = Math.round(255 * color.b)
-
-        return a | r | g | b
-    }
-
     Connections {
         target: ColorFilter
 
-        onRadiusChanged: {
+        function onRadiusChanged(radius)
+        {
             sldRadius.value = radius
-            spbRadius.rvalue = radius
+            spbRadius.value = radius
         }
     }
 
@@ -59,16 +40,21 @@ GridLayout {
     Label {
         text: qsTr("Color")
     }
-    AkColorButton {
-        currentColor: fromRgba(ColorFilter.colorf)
-        title: qsTr("Select the color to filter")
-        modality: Qt.NonModal
-        showAlphaChannel: true
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onCurrentColorChanged: ColorFilter.colorf = toRgba(currentColor)
-        onIsOpenChanged: ColorFilter.disable = isOpen
-    }
-    Label {
+        Item {
+            Layout.fillWidth: true
+        }
+        AK.ColorButton {
+            currentColor: AkUtils.fromRgba(ColorFilter.colorf)
+            title: qsTr("Select the color to filter")
+            modality: Qt.NonModal
+            showAlphaChannel: true
+
+            onCurrentColorChanged: ColorFilter.colorf = AkUtils.toRgba(currentColor)
+            onIsOpenChanged: ColorFilter.disable = isOpen
+        }
     }
 
     // Configure color selection radius.
@@ -85,13 +71,14 @@ GridLayout {
 
         onValueChanged: ColorFilter.radius = value
     }
-    AkSpinBox {
+    SpinBox {
         id: spbRadius
-        rvalue: ColorFilter.radius
-        maximumValue: sldRadius.to
-        step: sldRadius.stepSize
+        value: ColorFilter.radius
+        to: sldRadius.to
+        stepSize: sldRadius.stepSize
+        editable: true
 
-        onRvalueChanged: ColorFilter.radius = rvalue
+        onValueChanged: ColorFilter.radius = Number(value)
     }
 
     // Enable soft color replacing.
@@ -99,12 +86,17 @@ GridLayout {
         id: lblSoft
         text: qsTr("Soft")
     }
-    CheckBox {
-        id: chkSoft
-        checked: ColorFilter.soft
+    RowLayout {
+        Layout.columnSpan: 2
 
-        onCheckedChanged: ColorFilter.soft = checked
-    }
-    Label {
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            id: chkSoft
+            checked: ColorFilter.soft
+
+            onCheckedChanged: ColorFilter.soft = checked
+        }
     }
 }

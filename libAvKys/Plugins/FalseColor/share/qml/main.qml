@@ -17,91 +17,95 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import AkQmlControls 1.0
+import Qt.labs.platform 1.1 as LABS
+import Ak 1.0
 
-ColumnLayout {
-    function fromRgba(rgba)
+GridLayout {
+    columns: 2
+
+    function createColorTable()
     {
-        var r = ((rgba >> 16) & 0xff)
-        var g = ((rgba >> 8) & 0xff)
-        var b = (rgba & 0xff)
+        // Remove old controls.
+        for(let i = clyColorTable.children.length - 1; i >= 0 ; i--)
+            clyColorTable.children[i].destroy()
 
-        return [r, g, b]
+        let len = FalseColor.table.length
+
+        // Create new ones.
+        for (let index = 0; index < len; index++) {
+            let component = Qt.createComponent("TableColor.qml")
+
+            if (component.status !== Component.Ready)
+                continue
+
+            let obj = component.createObject(clyColorTable)
+            obj.tableColor = AkUtils.fromRgba(FalseColor.colorAt(index))
+            obj.index = index
+            obj.onColorChanged.connect(function (index, tableColor) {
+                FalseColor.setColor(index, AkUtils.toRgba(tableColor));
+            })
+            obj.onColorRemoved.connect(function (index) {
+                FalseColor.removeColor(index);
+            })
+        }
     }
 
-    function toRgba(color)
-    {
-        var a = 0xff << 24
-        var r = color[0] << 16
-        var g = color[1] << 8
-        var b = color[2]
+    Component.onCompleted: createColorTable()
 
-        return a | r | g | b
-    }
+    Connections {
+        target: FalseColor
 
-    function tableFromStr(str)
-    {
-        if (str.length < 1)
-            return []
-
-        var colorTable = JSON.parse(str)
-        var table = []
-
-        for (var color in colorTable)
-            table.push(toRgba(colorTable[color]))
-
-        return table
-    }
-
-    function tableToStr(table)
-    {
-        var colorTable = []
-
-        for (var color in table)
-            colorTable.push(fromRgba(table[color]))
-
-        return JSON.stringify(colorTable, null, 4)
-    }
-
-    SystemPalette {
-        id: palette
-    }
-
-    // Color table.
-    Label {
-        text: qsTr("Color table")
-    }
-    Rectangle {
-        height: 400
-        Layout.fillWidth: true
-        color: palette.base
-
-        AkScrollView {
-            clip: true
-            anchors.fill: parent
-            contentWidth: colorTable.width
-            contentHeight: colorTable.height
-
-            TextEdit {
-                id: colorTable
-                text: tableToStr(FalseColor.table)
-                cursorVisible: true
-                wrapMode: TextEdit.Wrap
-                color: palette.text
-
-                onTextChanged: FalseColor.table = tableFromStr(text)
-            }
+        function onTableChanged()
+        {
+            createColorTable()
         }
     }
 
     // Soft gradient.
-    CheckBox {
+    Label {
         text: qsTr("Soft")
-        checked: FalseColor.soft
+    }
+    RowLayout {
+        Item {
+            Layout.fillWidth: true
+        }
+        Switch {
+            checked: FalseColor.soft
 
-        onCheckedChanged: FalseColor.soft = checked
+            onCheckedChanged: FalseColor.soft = checked
+        }
+    }
+
+    Button {
+        text: qsTr("Add color")
+        icon.source: "image://icons/add"
+        flat: true
+        Layout.columnSpan: 2
+
+        onClicked: colorDialog.open()
+    }
+    Button {
+        text: qsTr("Clear all colors")
+        icon.source: "image://icons/no"
+        flat: true
+        Layout.columnSpan: 2
+
+        onClicked: FalseColor.clearTable()
+    }
+    ColumnLayout {
+        id: clyColorTable
+        Layout.fillWidth: true
+        Layout.columnSpan: 2
+    }
+
+    LABS.ColorDialog {
+        id: colorDialog
+        //: Select the color to add to the color table
+        title: qsTr("Select the color to add")
+
+        onAccepted: FalseColor.addColor(AkUtils.toRgba(color))
     }
 }

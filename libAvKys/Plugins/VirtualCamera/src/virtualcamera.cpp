@@ -20,19 +20,21 @@
 #include "virtualcamera.h"
 #include "virtualcameraelement.h"
 
+VirtualCamera::VirtualCamera()
+{
+    VirtualCameraElement::registerTypes();
+}
+
 QObject *VirtualCamera::create(const QString &key, const QString &specification)
 {
     Q_UNUSED(specification)
 
-    if (key == AK_PLUGIN_TYPE_ELEMENT)
-        return new VirtualCameraElement();
-
-    return nullptr;
+    return new VirtualCameraElement();
 }
 
 QStringList VirtualCamera::keys() const
 {
-    return QStringList();
+    return {};
 }
 
 #include "moc_virtualcamera.cpp"
