@@ -5,8 +5,6 @@ export DH_VERBOSE=1
 include /usr/share/dpkg/architecture.mk
 include /usr/share/dpkg/pkg-info.mk
 
-export PVER=$(shell echo $(DEB_VERSION_UPSTREAM) | cut -d"+" -f1 )
-
 export DEB_BUILD_MAINT_OPTIONS := hardening=+all
 export DEB_LDFLAGS_MAINT_APPEND := -fPIE -pie -Wl,--as-needed
 export QT_SELECT=5
@@ -14,20 +12,5 @@ export QT_SELECT=5
 %:
 	dh $@
 
-override_dh_auto_configure:
-	dh_auto_configure -- \
-		"LIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH)" \
-		"LOCALEDIR=/usr/share/webcamoid/locale" \
-		"INSTALLQMLDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/qt5/qml"
-
 override_dh_makeshlibs:
-	dh_makeshlibs -- -v$(PVER)
-
-execute_after_dh_clean:
-	find ./libAvKys/Tests/ -name "test_auto" -delete
-	find ./libAvKys/Tests/ -name "test.o" -delete
-	find ./libAvKys/Tests/ -name "Makefile" -delete
-	rm -f ./libAvKys/config.log
-	rm -f ./libAvKys/.qmake.cache
-	rm -f ./libAvKys/.qmake.stash
-	rm -f StandAlone/share/man/webcamoid.1.gz
+	dh_makeshlibs -- -v$(DEB_VERSION_UPSTREAM)
