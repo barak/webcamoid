@@ -1,7 +1,4 @@
-#StandAlone/share/*.json usr/share/webcamoid/
-#StandAlone/share/effects.xml usr/share/webcamoid/
-StandAlone/share/icons usr/share/webcamoid/
+StandAlone/share/themes/WebcamoidTheme/icons usr/share/webcamoid/
+/usr/share/icons
 StandAlone/share/qml usr/share/webcamoid/
 StandAlone/share/ts/*.qm usr/share/webcamoid/locale
-usr/share/icons/hicolor/*x*/apps/webcamoid.png
-usr/share/icons/hicolor/scalable/apps/webcamoid.svg

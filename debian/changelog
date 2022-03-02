@@ -3,10 +3,23 @@ webcamoid (9.0.0-1) unstable; urgency=medium
   * New upstream version
   * Upstream 9.0.0 removed non-DFSG files; adjust debian/copyright
   * Remove quilt patch to nonexistant file
-  * Allow build system to default to cmake (was qmake)
-  * Simplify debian/rules for cmake and non-+dfsg upstream version
+  * Simplify debian/rules
+    - allow to default to cmake instead of hard-coding qmake
+    - remove non-+dfsg upstream version tweaks
+  * Track upstream post-release to get fix for manpage install directory
+  * Remove package akqml from debian/control; module removed upstream
+  * Bump library package version from 8 to 9
+  * Add build dependencies for:
+    - cmake
+    - pipewire
+    - vlc library and plugins
+    - libuvc
+    - libkmod
+    - See ports/ci/linux-debian/install_deps.sh
+  * Update debian/watch to upstream now being dfsg-clean
+  * Remove duplicate lintian override
 
- -- Barak A. Pearlmutter <bap@debian.org>  Tue, 01 Mar 2022 18:13:27 +0000
+ -- Barak A. Pearlmutter <bap@debian.org>  Wed, 02 Mar 2022 21:50:28 +0000
 
 webcamoid (8.8.0+dfsg-1) unstable; urgency=medium
 

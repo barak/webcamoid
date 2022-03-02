@@ -1,4 +1,3 @@
 # 'blhc --all' returns nothing
 # false positive
 webcamoid-plugins: hardening-no-fortify-functions
-webcamoid-plugins: hardening-no-fortify-functions
