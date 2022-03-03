@@ -6,7 +6,7 @@ include /usr/share/dpkg/architecture.mk
 include /usr/share/dpkg/pkg-info.mk
 
 export DEB_BUILD_MAINT_OPTIONS := hardening=+all
-export DEB_LDFLAGS_MAINT_APPEND := -fPIE -pie -Wl,--as-needed
+export DEB_LDFLAGS_MAINT_APPEND := -fPIE -pie
 export QT_SELECT=5
 
 %:

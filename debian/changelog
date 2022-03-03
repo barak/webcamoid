@@ -2,9 +2,9 @@ webcamoid (9.0.0-1) unstable; urgency=medium
 
   * New upstream version
   * Upstream 9.0.0 removed non-DFSG files; adjust debian/copyright
-  * Remove quilt patch to nonexistant file
+  * Remove quilt patch to nonexistent file
   * Simplify debian/rules
-    - allow to default to cmake instead of hard-coding qmake
+    - allow build system to default to cmake instead of hard-coding qmake
     - remove non-+dfsg upstream version tweaks
   * Track upstream post-release to get fix for manpage install directory
   * Remove package akqml from debian/control; module removed upstream
@@ -23,8 +23,10 @@ webcamoid (9.0.0-1) unstable; urgency=medium
     lintian inconsistent-appstream-metadata-license
   * Remove superflous license file
   * Rules do not require root
+  * Update usb.ids stanza in debian/copyright
+  * Lintian debian-rules-uses-as-needed-linker-flag
 
- -- Barak A. Pearlmutter <bap@debian.org>  Thu, 03 Mar 2022 09:26:09 +0000
+ -- Barak A. Pearlmutter <bap@debian.org>  Thu, 03 Mar 2022 09:39:56 +0000
 
 webcamoid (8.8.0+dfsg-1) unstable; urgency=medium
 
