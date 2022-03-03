@@ -1,0 +1,399 @@
+From: "Barak A. Pearlmutter" <barak+git@pearlmutter.net>
+Date: Thu, 3 Mar 2022 09:43:10 +0000
+Subject: spelling
+
+---
+ StandAlone/share/qml/AboutDialog.qml | 2 +-
+ StandAlone/share/ts/ca.ts            | 2 +-
+ StandAlone/share/ts/de.ts            | 2 +-
+ StandAlone/share/ts/el.ts            | 2 +-
+ StandAlone/share/ts/es.ts            | 2 +-
+ StandAlone/share/ts/et.ts            | 2 +-
+ StandAlone/share/ts/fr.ts            | 2 +-
+ StandAlone/share/ts/gl.ts            | 2 +-
+ StandAlone/share/ts/he.ts            | 2 +-
+ StandAlone/share/ts/hu.ts            | 2 +-
+ StandAlone/share/ts/it.ts            | 2 +-
+ StandAlone/share/ts/ja.ts            | 2 +-
+ StandAlone/share/ts/kab.ts           | 2 +-
+ StandAlone/share/ts/ko.ts            | 2 +-
+ StandAlone/share/ts/nb_NO.ts         | 2 +-
+ StandAlone/share/ts/nl.ts            | 2 +-
+ StandAlone/share/ts/oc.ts            | 2 +-
+ StandAlone/share/ts/pl.ts            | 2 +-
+ StandAlone/share/ts/pt.ts            | 2 +-
+ StandAlone/share/ts/pt_BR.ts         | 2 +-
+ StandAlone/share/ts/ru.ts            | 2 +-
+ StandAlone/share/ts/si.ts            | 2 +-
+ StandAlone/share/ts/sv.ts            | 2 +-
+ StandAlone/share/ts/tr.ts            | 2 +-
+ StandAlone/share/ts/uk.ts            | 2 +-
+ StandAlone/share/ts/vi.ts            | 2 +-
+ StandAlone/share/ts/zh_CN.ts         | 2 +-
+ StandAlone/share/ts/zh_TW.ts         | 2 +-
+ 28 files changed, 28 insertions(+), 28 deletions(-)
+
+diff --git a/StandAlone/share/qml/AboutDialog.qml b/StandAlone/share/qml/AboutDialog.qml
+index 3cd8905..cd91614 100644
+--- a/StandAlone/share/qml/AboutDialog.qml
++++ b/StandAlone/share/qml/AboutDialog.qml
+@@ -39,7 +39,7 @@ Dialog {
+             Layout.fillWidth: true
+ 
+             TabButton {
+-                /*: Information of the program, like name, description, vesion,
++                /*: Information of the program, like name, description, version,
+                     etc..
+                  */
+                 text: qsTr("About")
+diff --git a/StandAlone/share/ts/ca.ts b/StandAlone/share/ts/ca.ts
+index 3cfb3f2..d511fc7 100644
+--- a/StandAlone/share/ts/ca.ts
++++ b/StandAlone/share/ts/ca.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">Quant a</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/de.ts b/StandAlone/share/ts/de.ts
+index b4003f0..c7acfbe 100644
+--- a/StandAlone/share/ts/de.ts
++++ b/StandAlone/share/ts/de.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">Über</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/el.ts b/StandAlone/share/ts/el.ts
+index f539e99..6d4873c 100644
+--- a/StandAlone/share/ts/el.ts
++++ b/StandAlone/share/ts/el.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/es.ts b/StandAlone/share/ts/es.ts
+index a681c9a..5e3b481 100644
+--- a/StandAlone/share/ts/es.ts
++++ b/StandAlone/share/ts/es.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/et.ts b/StandAlone/share/ts/et.ts
+index c52ed60..49fd89a 100644
+--- a/StandAlone/share/ts/et.ts
++++ b/StandAlone/share/ts/et.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">Rakenduse teave</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/fr.ts b/StandAlone/share/ts/fr.ts
+index 79c3d66..7dc9a72 100644
+--- a/StandAlone/share/ts/fr.ts
++++ b/StandAlone/share/ts/fr.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">À propos</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/gl.ts b/StandAlone/share/ts/gl.ts
+index 29d70a3..fe4d5ee 100644
+--- a/StandAlone/share/ts/gl.ts
++++ b/StandAlone/share/ts/gl.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/he.ts b/StandAlone/share/ts/he.ts
+index ebcecaa..98d4e51 100644
+--- a/StandAlone/share/ts/he.ts
++++ b/StandAlone/share/ts/he.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation>על אודות</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/hu.ts b/StandAlone/share/ts/hu.ts
+index 151fed1..5cd92fb 100644
+--- a/StandAlone/share/ts/hu.ts
++++ b/StandAlone/share/ts/hu.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/it.ts b/StandAlone/share/ts/it.ts
+index d195c55..0a643b2 100644
+--- a/StandAlone/share/ts/it.ts
++++ b/StandAlone/share/ts/it.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/ja.ts b/StandAlone/share/ts/ja.ts
+index 2d9af9b..616ab2c 100644
+--- a/StandAlone/share/ts/ja.ts
++++ b/StandAlone/share/ts/ja.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/kab.ts b/StandAlone/share/ts/kab.ts
+index ec15a65..a00b829 100644
+--- a/StandAlone/share/ts/kab.ts
++++ b/StandAlone/share/ts/kab.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/ko.ts b/StandAlone/share/ts/ko.ts
+index f12c9a5..1810bd6 100644
+--- a/StandAlone/share/ts/ko.ts
++++ b/StandAlone/share/ts/ko.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">정보</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/nb_NO.ts b/StandAlone/share/ts/nb_NO.ts
+index 99af521..2a4d8e4 100644
+--- a/StandAlone/share/ts/nb_NO.ts
++++ b/StandAlone/share/ts/nb_NO.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">Om</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/nl.ts b/StandAlone/share/ts/nl.ts
+index ddc3480..99d9fbe 100644
+--- a/StandAlone/share/ts/nl.ts
++++ b/StandAlone/share/ts/nl.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation>Over</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/oc.ts b/StandAlone/share/ts/oc.ts
+index ad90e4c..e61a070 100644
+--- a/StandAlone/share/ts/oc.ts
++++ b/StandAlone/share/ts/oc.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">A prepaus de</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/pl.ts b/StandAlone/share/ts/pl.ts
+index 02648e2..4dee1c6 100644
+--- a/StandAlone/share/ts/pl.ts
++++ b/StandAlone/share/ts/pl.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">O programie</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/pt.ts b/StandAlone/share/ts/pt.ts
+index 81bbac9..c4c77c0 100644
+--- a/StandAlone/share/ts/pt.ts
++++ b/StandAlone/share/ts/pt.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">Sobre</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/pt_BR.ts b/StandAlone/share/ts/pt_BR.ts
+index 5370678..e0edd38 100644
+--- a/StandAlone/share/ts/pt_BR.ts
++++ b/StandAlone/share/ts/pt_BR.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">Sobre</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/ru.ts b/StandAlone/share/ts/ru.ts
+index 11ea384..d5b1c4b 100644
+--- a/StandAlone/share/ts/ru.ts
++++ b/StandAlone/share/ts/ru.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">О программе</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/si.ts b/StandAlone/share/ts/si.ts
+index 9cbf29f..ba3c3a7 100644
+--- a/StandAlone/share/ts/si.ts
++++ b/StandAlone/share/ts/si.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/sv.ts b/StandAlone/share/ts/sv.ts
+index bcc1eba..3e91233 100644
+--- a/StandAlone/share/ts/sv.ts
++++ b/StandAlone/share/ts/sv.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/tr.ts b/StandAlone/share/ts/tr.ts
+index e652a3f..b3c30eb 100644
+--- a/StandAlone/share/ts/tr.ts
++++ b/StandAlone/share/ts/tr.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation>Hakkında</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/uk.ts b/StandAlone/share/ts/uk.ts
+index 7d73515..a663a65 100644
+--- a/StandAlone/share/ts/uk.ts
++++ b/StandAlone/share/ts/uk.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">Про нас</translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/vi.ts b/StandAlone/share/ts/vi.ts
+index ab5edd2..0482f85 100644
+--- a/StandAlone/share/ts/vi.ts
++++ b/StandAlone/share/ts/vi.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/zh_CN.ts b/StandAlone/share/ts/zh_CN.ts
+index 6b3f72f..d3ab2b5 100644
+--- a/StandAlone/share/ts/zh_CN.ts
++++ b/StandAlone/share/ts/zh_CN.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished"></translation>
+     </message>
+     <message>
+diff --git a/StandAlone/share/ts/zh_TW.ts b/StandAlone/share/ts/zh_TW.ts
+index 2e3952f..f9d6722 100644
+--- a/StandAlone/share/ts/zh_TW.ts
++++ b/StandAlone/share/ts/zh_TW.ts
+@@ -45,7 +45,7 @@
+     <message>
+         <location filename="../qml/AboutDialog.qml" line="45"/>
+         <source>About</source>
+-        <extracomment>Information of the program, like name, description, vesion, etc..</extracomment>
++        <extracomment>Information of the program, like name, description, version, etc..</extracomment>
+         <translation type="unfinished">關於</translation>
+     </message>
+     <message>
