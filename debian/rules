@@ -12,5 +12,9 @@ export QT_SELECT=5
 %:
 	dh $@
 
+override_dh_install:
+	@echo "Superfluous license file."
+	-rm --verbose debian/webcamoid-data/usr/share/webcamoid/qml/License.qml
+
 override_dh_makeshlibs:
 	dh_makeshlibs -- -v$(DEB_VERSION_UPSTREAM)
