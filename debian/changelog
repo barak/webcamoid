@@ -18,8 +18,9 @@ webcamoid (9.0.0-1) unstable; urgency=medium
     - See ports/ci/linux-debian/install_deps.sh
   * Update debian/watch to upstream now being dfsg-clean
   * Remove duplicate lintian override
+  * Adjust test script for simplified debian/rules
 
- -- Barak A. Pearlmutter <bap@debian.org>  Wed, 02 Mar 2022 21:50:28 +0000
+ -- Barak A. Pearlmutter <bap@debian.org>  Thu, 03 Mar 2022 09:17:16 +0000
 
 webcamoid (8.8.0+dfsg-1) unstable; urgency=medium
 

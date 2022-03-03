@@ -4,8 +4,7 @@ exec 2>&1
 
 set -e
 
-debian/rules override_dh_auto_configure
-dh_auto_build -a -O--buildsystem=qmake
+debian/rules build-arch
 
 test_exists() {
     #assertTrue "[ -f 'libAvKys/config.log' ]"
