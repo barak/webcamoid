@@ -1,3 +1,12 @@
+webcamoid (9.0.0-3) unstable; urgency=medium
+
+  * Track upstream fixes
+    - [d58834044] Allow using an image file as video source (issue #438)
+  * Add qml-module-qt-labs-platform dependency (closes: #1007021)
+    - see https://github.com/webcamoid/webcamoid/issues/502
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Fri, 11 Mar 2022 10:51:43 +0000
+
 webcamoid (9.0.0-2) unstable; urgency=medium
 
   * Track upstream fixes
