@@ -1,3 +1,12 @@
+webcamoid (9.0.0-4) unstable; urgency=medium
+
+  * Track upstream mods, mainly translations
+  * Remove debian/tests/ (closes: #1007738) which were (a) useless, and
+    (b) failing due to upstream build system changes
+  * Install new metainfo file
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Fri, 06 May 2022 10:58:49 +0100
+
 webcamoid (9.0.0-3) unstable; urgency=medium
 
   * Track upstream fixes
