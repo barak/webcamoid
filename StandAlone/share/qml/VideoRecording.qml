@@ -18,6 +18,7 @@
  */
 
 import QtQuick 2.12
+import QtQuick.Window 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 import Qt.labs.platform 1.1 as LABS
@@ -25,10 +26,6 @@ import Ak 1.0
 
 Page {
     id: videoRecording
-
-    signal openVideoFormatDialog()
-    signal openVideoCodecDialog()
-    signal openAudioCodecDialog()
 
     ScrollView {
         id: scrollView
@@ -115,10 +112,12 @@ Page {
             columns: 3
 
             Label {
+                id: txtVideosDirectory
                 text: qsTr("Videos directory")
             }
             TextField {
                 text: recording.videoDirectory
+                Accessible.name: txtVideosDirectory.text
                 selectByMouse: true
                 Layout.fillWidth: true
 
@@ -126,6 +125,7 @@ Page {
             }
             Button {
                 text: qsTr("Search")
+                Accessible.description: qsTr("Search directory to save videos")
 
                 onClicked: {
                     mediaTools.makedirs(recording.videoDirectory)
@@ -133,9 +133,11 @@ Page {
                 }
             }
             Label {
+                id: txtRecordAudio
                 text: qsTr("Record audio")
             }
             Switch {
+                Accessible.name: txtRecordAudio.text
                 Layout.columnSpan: 2
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 checked: recording.recordAudio
@@ -143,10 +145,12 @@ Page {
                 onToggled: recording.recordAudio = checked
             }
             Label {
+                id: txtFileFormat
                 text: qsTr("File format")
             }
             ComboBox {
                 id: cbxVideoFormat
+                Accessible.description: txtFileFormat.text
                 textRole: "description"
                 Layout.fillWidth: true
                 model: ListModel {
@@ -172,16 +176,20 @@ Page {
                         recording.availableVideoFormats[currentIndex]
             }
             Button {
+                id: configureVideoFormat
                 text: qsTr("Configure")
+                Accessible.description: qsTr("Configure file format")
                 flat: true
 
-                onClicked: videoRecording.openVideoFormatDialog()
+                onClicked: videoFormatOptions.open()
             }
             Label {
+                id: txtVideoCodec
                 text: qsTr("Video codec")
             }
             ComboBox {
                 id: cbxVideoCodec
+                Accessible.description: txtVideoCodec.text
                 textRole: "description"
                 Layout.fillWidth: true
                 model: ListModel {
@@ -207,17 +215,21 @@ Page {
                         recording.availableVideoCodecs[currentIndex]
             }
             Button {
+                id: configureVideoCodec
                 text: qsTr("Configure")
+                Accessible.description: qsTr("Configure video codec")
                 flat: true
 
-                onClicked: videoRecording.openVideoCodecDialog()
+                onClicked: videoCodecOptions.open()
             }
             Label {
+                id: txtAudioCodec
                 text: qsTr("Audio codec")
                 enabled: recording.recordAudio
             }
             ComboBox {
                 id: cbxAudioCodec
+                Accessible.description: txtAudioCodec.text
                 textRole: "description"
                 Layout.fillWidth: true
                 enabled: recording.recordAudio
@@ -244,13 +256,39 @@ Page {
                         recording.availableAudioCodecs[currentIndex]
             }
             Button {
+                id: configureAudioCodec
                 text: qsTr("Configure")
+                Accessible.description: qsTr("Configure audio codec")
                 enabled: recording.recordAudio
                 flat: true
 
-                onClicked: videoRecording.openAudioCodecDialog()
+                onClicked: audioCodecOptions.open()
             }
         }
+    }
+    VideoFormatOptions {
+        id: videoFormatOptions
+        width: videoRecording.Window.width
+        height: videoRecording.Window.height
+        anchors.centerIn: Overlay.overlay
+
+        onClosed: configureVideoFormat.forceActiveFocus()
+    }
+    VideoCodecOptions {
+        id: videoCodecOptions
+        width: videoRecording.Window.width
+        height: videoRecording.Window.height
+        anchors.centerIn: Overlay.overlay
+
+        onClosed: configureVideoCodec.forceActiveFocus()
+    }
+    AudioCodecOptions {
+        id: audioCodecOptions
+        width: videoRecording.Window.width
+        height: videoRecording.Window.height
+        anchors.centerIn: Overlay.overlay
+
+        onClosed: configureAudioCodec.forceActiveFocus()
     }
     LABS.FolderDialog {
         id: folderDialog

@@ -44,6 +44,8 @@ Dialog {
     onVisibleChanged: {
         if (visible)
             txtTable.text = videoLayer.picture
+
+        btnSearch.forceActiveFocus()
     }
 
     ScrollView {
@@ -65,7 +67,9 @@ Dialog {
                 Layout.fillWidth: true
             }
             Button {
+                id: btnSearch
                 text: qsTr("Search")
+                Accessible.description: qsTr("Search image to use as default output picture")
                 icon.source: "image://icons/search"
 
                 onClicked: fileDialog.open()
