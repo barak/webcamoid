@@ -1,3 +1,9 @@
+webcamoid (9.0.0-5) unstable; urgency=medium
+
+  * Track upstream mods (closes: #1017179, #1017317)
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Wed, 14 Sep 2022 12:36:00 +0100
+
 webcamoid (9.0.0-4) unstable; urgency=medium
 
   * Track upstream mods, mainly translations
