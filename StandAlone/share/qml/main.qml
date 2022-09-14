@@ -34,8 +34,6 @@ ApplicationWindow {
            + " - "
            + videoLayer.description(videoLayer.videoInput)
     visible: true
-    x: (Screen.width - mediaTools.windowWidth) / 2
-    y: (Screen.height - mediaTools.windowHeight) / 2
     width: mediaTools.windowWidth
     height: mediaTools.windowHeight
 
@@ -63,6 +61,15 @@ ApplicationWindow {
         photoPreviewSaveAnimation.start()
     }
 
+    function snapshotToClipboard()
+	{
+        var success = false
+		snapToClipboard.focus = false
+        recording.takePhoto()
+		success = recording.copyToClipboard()
+        console.debug("Capture snapshot to Clipboard ", success ? "successful" : "failed")
+    }
+
     function pathToUrl(path)
     {
         if (path.length < 1)
@@ -74,7 +81,11 @@ ApplicationWindow {
     onWidthChanged: mediaTools.windowWidth = width
     onHeightChanged: mediaTools.windowHeight = height
 
-    Component.onCompleted: chkFlash.updateVisibility()
+    Component.onCompleted: {
+        x = (Screen.width - mediaTools.windowWidth) / 2
+        y = (Screen.height - mediaTools.windowHeight) / 2
+        chkFlash.updateVisibility()
+    }
 
     Connections {
         target: mediaTools
@@ -140,7 +151,7 @@ ApplicationWindow {
     }
     ColumnLayout {
         id: leftControls
-        width: AkUnit.create(150 * AkTheme.controlScale, "dp").pixels
+        width: AkUnit.create(childrenRect.width * AkTheme.controlScale, "dp").pixels
         anchors.top: parent.top
         anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
         anchors.left: parent.left
@@ -152,7 +163,7 @@ ApplicationWindow {
             display: AbstractButton.IconOnly
             flat: true
             Accessible.name: qsTr("Video effects")
-            Accessible.description: qsTr("Open video effects pannel")
+            Accessible.description: qsTr("Open video effects panel")
 
             onClicked: videoEffectsPanel.open()
         }
@@ -160,7 +171,6 @@ ApplicationWindow {
             id: chkFlash
             text: qsTr("Use flash")
             checked: true
-            Layout.fillWidth: true
             visible: false
             Accessible.name: text
             Accessible.description: qsTr("Use flash when taking a photo")
@@ -212,6 +222,22 @@ ApplicationWindow {
                 duration: cameraControls.animationTime
             }
         }
+    }
+
+    Button {
+        id: snapToClipboard
+        icon.source: "image://icons/paperclip"
+        display: AbstractButton.IconOnly
+        flat: true
+        anchors.top: parent.top
+        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        anchors.horizontalCenter: parent.horizontalCenter
+        Accessible.name: qsTr("Snapshot to Clipboard")
+        Accessible.description: qsTr("Captures a snapshot and copies it into the clipboard")
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("Capture Snapshot to Clipboard")
+
+        onClicked: snapshotToClipboard()
     }
 
     Button {
