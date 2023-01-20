@@ -157,23 +157,15 @@ AudioStream::AudioStream(const AVFormatContext *formatContext,
     }
 
     AkAudioCaps audioCaps(configs["caps"].value<AkCaps>());
-    auto ffFormat =
-            AudioStreamPrivate::sampleFormats(audioCaps.planar())
-            .value(audioCaps.format(), AV_SAMPLE_FMT_NONE);
-    auto sampleFormat = QString(av_get_sample_fmt_name(ffFormat));
+    auto sampleFormat = audioCaps.format();
     auto supportedSampleFormats =
-            defaultCodecParams["supportedSampleFormats"].toStringList();
+            defaultCodecParams["supportedSampleFormats"].toList();
 
     if (!supportedSampleFormats.isEmpty()
         && !supportedSampleFormats.contains(sampleFormat)) {
-        auto defaultSampleFormat = defaultCodecParams["defaultSampleFormat"].toString();
-        ffFormat = av_get_sample_fmt(defaultSampleFormat.toStdString().c_str());
-        auto planar = AudioStreamPrivate::planarFormats().contains(ffFormat);
-        auto format =
-                AudioStreamPrivate::sampleFormats(planar)
-                .key(ffFormat, AkAudioCaps::SampleFormat_none);
-        audioCaps.setFormat(format);
-        audioCaps.updatePlaneSize(planar);
+        auto defaultSampleFormat =
+                AkAudioCaps::SampleFormat(defaultCodecParams["defaultSampleFormat"].toInt());
+        audioCaps.setFormat(defaultSampleFormat);
     }
 
     auto supportedSampleRates =
@@ -196,24 +188,25 @@ AudioStream::AudioStream(const AVFormatContext *formatContext,
             }
         }
 
-        audioCaps.rate() = sampleRate;
+        audioCaps.setRate(sampleRate);
     }
 
-    auto channelLayout = AkAudioCaps::channelLayoutToString(audioCaps.layout());
+    auto channelLayout = audioCaps.layout();
     auto supportedChannelLayouts =
-            defaultCodecParams["supportedChannelLayouts"].toStringList();
+            defaultCodecParams["supportedChannelLayouts"].toList();
 
-    if (!supportedChannelLayouts.isEmpty() && !supportedChannelLayouts.contains(channelLayout)) {
-        auto defaultChannelLayout = defaultCodecParams["defaultChannelLayout"].toString();
-        auto layout = AkAudioCaps::channelLayoutFromString(defaultChannelLayout);
-        audioCaps.setLayout(layout);
+    if (!supportedChannelLayouts.isEmpty()
+        && !supportedChannelLayouts.contains(channelLayout)) {
+        auto defaultChannelLayout =
+                AkAudioCaps::ChannelLayout(defaultCodecParams["defaultChannelLayout"].toInt());
+        audioCaps.setLayout(defaultChannelLayout);
     }
 
     if (!strcmp(formatContext->oformat->name, "gxf")) {
-        audioCaps.rate() = 48000;
+        audioCaps.setRate(48000);
         audioCaps.setLayout(AkAudioCaps::Layout_mono);
     } else if (!strcmp(formatContext->oformat->name, "mxf")) {
-        audioCaps.rate() = 48000;
+        audioCaps.setRate(48000);
     } else if (!strcmp(formatContext->oformat->name, "swf")) {
         audioCaps = mediaWriter->nearestSWFCaps(audioCaps);
     }
@@ -222,9 +215,15 @@ AudioStream::AudioStream(const AVFormatContext *formatContext,
             AudioStreamPrivate::sampleFormats(audioCaps.planar())
             .value(audioCaps.format(), AV_SAMPLE_FMT_NONE);
     codecContext->sample_rate = audioCaps.rate();
-    auto layout = AkAudioCaps::channelLayoutToString(audioCaps.layout());
-    codecContext->channel_layout = av_get_channel_layout(layout.toStdString().c_str());
+    auto layout = AudioStreamPrivate::channelLayouts()
+                  .value(audioCaps.layout(), AV_CH_LAYOUT_STEREO);
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 24, 100)
+    memset(&codecContext->ch_layout, 0, sizeof(AVChannelLayout));
+    av_channel_layout_from_mask(&codecContext->ch_layout, layout);
+#else
+    codecContext->channel_layout = layout;
     codecContext->channels = audioCaps.channels();
+#endif
 
     auto stream = this->stream();
     stream->time_base.num = 1;
@@ -253,20 +252,18 @@ void AudioStream::convertPacket(const AkPacket &packet)
     AVFrame iFrame;
     memset(&iFrame, 0, sizeof(AVFrame));
     iFrame.format = codecContext->sample_fmt;
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 24, 100)
+    av_channel_layout_copy(&iFrame.ch_layout, &codecContext->ch_layout);
+#else
     iFrame.channel_layout = codecContext->channel_layout;
+#endif
     iFrame.sample_rate = codecContext->sample_rate;
-    iFrame.nb_samples = iPacket.caps().samples();
+    iFrame.nb_samples = iPacket.samples();
     iFrame.pts = iPacket.pts();
-    int channels = av_get_channel_layout_nb_channels(iFrame.channel_layout);
 
-    if (av_samples_fill_arrays(iFrame.data,
-                               iFrame.linesize,
-                               reinterpret_cast<const uint8_t *>(iPacket.buffer().constData()),
-                               channels,
-                               iPacket.caps().samples(),
-                               AVSampleFormat(iFrame.format),
-                               1) < 0) {
-        return;
+    for (int plane = 0; plane < iPacket.planes(); ++plane) {
+        iFrame.data[plane] = iPacket.plane(plane);
+        iFrame.linesize[plane] = iPacket.planeSize(plane);
     }
 
     this->d->m_frameMutex.lock();
@@ -274,7 +271,11 @@ void AudioStream::convertPacket(const AkPacket &packet)
     // Create new buffer.
     auto oFrame = av_frame_alloc();
     oFrame->format = codecContext->sample_fmt;
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 24, 100)
+    av_channel_layout_copy(&oFrame->ch_layout, &codecContext->ch_layout);
+#else
     oFrame->channel_layout = codecContext->channel_layout;
+#endif
     oFrame->sample_rate = codecContext->sample_rate;
     oFrame->nb_samples = (this->d->m_frame? this->d->m_frame->nb_samples: 0)
                          + iFrame.nb_samples;
@@ -286,6 +287,12 @@ void AudioStream::convertPacket(const AkPacket &packet)
 
         return;
     }
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 24, 100)
+    int channels = iFrame.ch_layout.nb_channels;
+#else
+    int channels = av_get_channel_layout_nb_channels(iFrame.channel_layout);
+#endif
 
     // Copy old samples to new buffer.
     if (this->d->m_frame)
@@ -413,11 +420,20 @@ AVFrame *AudioStream::dequeueFrame()
         // Create output buffer.
         oFrame = av_frame_alloc();
         oFrame->format = codecContext->sample_fmt;
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 24, 100)
+        av_channel_layout_copy(&oFrame->ch_layout, &codecContext->ch_layout);
+#else
         oFrame->channel_layout = codecContext->channel_layout;
+#endif
         oFrame->sample_rate = codecContext->sample_rate;
         oFrame->nb_samples = codecContext->frame_size;
         oFrame->pts = this->d->m_frame->pts;
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 24, 100)
+        int channels = oFrame->ch_layout.nb_channels;
+#else
         int channels = av_get_channel_layout_nb_channels(oFrame->channel_layout);
+#endif
 
         if (av_frame_get_buffer(oFrame, 0) < 0) {
             this->deleteFrame(&oFrame);
@@ -443,7 +459,11 @@ AVFrame *AudioStream::dequeueFrame()
         // Create new buffer.
         auto frame = av_frame_alloc();
         frame->format = codecContext->sample_fmt;
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 24, 100)
+        av_channel_layout_copy(&frame->ch_layout, &codecContext->ch_layout);
+#else
         frame->channel_layout = codecContext->channel_layout;
+#endif
         frame->sample_rate = codecContext->sample_rate;
         frame->nb_samples = this->d->m_frame->nb_samples - codecContext->frame_size;
         frame->pts = this->d->m_frame->pts + codecContext->frame_size;
