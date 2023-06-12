@@ -1,3 +1,9 @@
+webcamoid (9.1.0-1) unstable; urgency=medium
+
+  * New upstream version
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Mon, 12 Jun 2023 11:46:07 +0100
+
 webcamoid (9.0.0-6) unstable; urgency=medium
 
   * Update standards version to 4.6.2, no changes needed.
