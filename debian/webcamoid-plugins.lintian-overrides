@@ -1,3 +1,17 @@
 # 'blhc --all' returns nothing
 # false positive
 webcamoid-plugins: hardening-no-fortify-functions
+# USB device strings
+webcamoid-plugins: spelling-error-in-binary CoUl
+webcamoid-plugins: spelling-error-in-binary Messanger
+webcamoid-plugins: spelling-error-in-binary Nam
+webcamoid-plugins: spelling-error-in-binary Optio
+webcamoid-plugins: spelling-error-in-binary Reciever
+webcamoid-plugins: spelling-error-in-binary Rigt
+webcamoid-plugins: spelling-error-in-binary Rigth
+webcamoid-plugins: spelling-error-in-binary adapater
+webcamoid-plugins: spelling-error-in-binary afe
+webcamoid-plugins: spelling-error-in-binary aquisition
+webcamoid-plugins: spelling-error-in-binary foLL
+webcamoid-plugins: spelling-error-in-binary lIK
+webcamoid-plugins: spelling-error-in-binary transciever

@@ -2,8 +2,9 @@ webcamoid (9.1.0-1) unstable; urgency=medium
 
   * New upstream version
   * Adjust scripts to upstream's installation of translation files
+  * Lintian overrides for spelling hits on USB device ID strings
 
- -- Barak A. Pearlmutter <bap@debian.org>  Mon, 12 Jun 2023 12:09:23 +0100
+ -- Barak A. Pearlmutter <bap@debian.org>  Mon, 12 Jun 2023 12:25:58 +0100
 
 webcamoid (9.0.0-6) unstable; urgency=medium
 
