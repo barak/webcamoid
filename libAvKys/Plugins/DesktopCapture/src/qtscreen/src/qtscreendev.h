@@ -80,11 +80,6 @@ class QtScreenDev: public ScreenDev
         void resetStreams() override;
         bool init() override;
         bool uninit() override;
-
-    private slots:
-        void screenAdded(QScreen *screen);
-        void screenRemoved(QScreen *screen);
-        void srceenResized(int screen);
 };
 
 #endif // QTSCREENDEV_H

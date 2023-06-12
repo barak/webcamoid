@@ -100,7 +100,7 @@ class AudioDevOpenSLPrivate
         static SLuint32 channelMaskFromLayout(AkAudioCaps::ChannelLayout layout);
         static void sampleProcess(SLAndroidSimpleBufferQueueItf bufferQueue,
                                   void *context);
-        static bool hasAudioPermissions();
+        static bool hasAudioCapturePermissions();
         void updateDevices();
 };
 
@@ -182,27 +182,56 @@ bool AudioDevOpenSL::init(const QString &device, const AkAudioCaps &caps)
                 AudioDevOpenSLPrivate::createAudioRecorder(this->d->m_engine,
                                                            caps);
 
-        if (!this->d->m_audioRecorder)
-            goto init_failed;
+        if (!this->d->m_audioRecorder) {
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         SLPlayItf audioRecorder = nullptr;
 
         if ((*this->d->m_audioRecorder)->GetInterface(this->d->m_audioRecorder,
                                                       SL_IID_RECORD,
-                                                      &audioRecorder) != SL_RESULT_SUCCESS)
-            goto init_failed;
+                                                      &audioRecorder) != SL_RESULT_SUCCESS) {
+            (*this->d->m_audioRecorder)->Destroy(this->d->m_audioRecorder);
+            this->d->m_audioRecorder = nullptr;
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         SLAndroidSimpleBufferQueueItf bufferQueue = nullptr;
 
         if ((*this->d->m_audioRecorder)->GetInterface(this->d->m_audioRecorder,
                                                       SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
-                                                      &bufferQueue) != SL_RESULT_SUCCESS)
-            goto init_failed;
+                                                      &bufferQueue) != SL_RESULT_SUCCESS) {
+            (*this->d->m_audioRecorder)->Destroy(this->d->m_audioRecorder);
+            this->d->m_audioRecorder = nullptr;
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         if ((*bufferQueue)->RegisterCallback(bufferQueue,
                                              AudioDevOpenSLPrivate::sampleProcess,
-                                             this->d) != SL_RESULT_SUCCESS)
-            goto init_failed;
+                                             this->d) != SL_RESULT_SUCCESS) {
+            (*this->d->m_audioRecorder)->Destroy(this->d->m_audioRecorder);
+            this->d->m_audioRecorder = nullptr;
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         auto bufferSize = this->d->self->latency()
                           * this->d->m_curCaps.bps()
@@ -213,72 +242,133 @@ bool AudioDevOpenSL::init(const QString &device, const AkAudioCaps &caps)
         AudioDevOpenSLPrivate::sampleProcess(bufferQueue, this->d);
 
         if ((*audioRecorder)->SetPlayState(audioRecorder,
-                                           SL_RECORDSTATE_RECORDING) != SL_RESULT_SUCCESS)
-            goto init_failed;
+                                           SL_RECORDSTATE_RECORDING) != SL_RESULT_SUCCESS) {
+            (*this->d->m_audioRecorder)->Destroy(this->d->m_audioRecorder);
+            this->d->m_audioRecorder = nullptr;
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
     } else {
         this->d->m_outputMix =
                 AudioDevOpenSLPrivate::createOutputMix(this->d->m_engine);
 
-        if (!this->d->m_outputMix)
-            goto init_failed;
+        if (!this->d->m_outputMix) {
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         this->d->m_audioPlayer =
                 AudioDevOpenSLPrivate::createAudioPlayer(this->d->m_engine,
                                                          this->d->m_outputMix,
                                                          caps);
 
-        if (!this->d->m_audioPlayer)
-            goto init_failed;
+        if (!this->d->m_audioPlayer) {
+            if (this->d->m_outputMix) {
+                (*this->d->m_outputMix)->Destroy(this->d->m_outputMix);
+                this->d->m_outputMix = nullptr;
+            }
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         SLPlayItf audioPlayer = nullptr;
 
         if ((*this->d->m_audioPlayer)->GetInterface(this->d->m_audioPlayer,
                                                     SL_IID_PLAY,
-                                                    &audioPlayer) != SL_RESULT_SUCCESS)
-            goto init_failed;
+                                                    &audioPlayer) != SL_RESULT_SUCCESS) {
+            if (this->d->m_audioPlayer) {
+                (*this->d->m_audioPlayer)->Destroy(this->d->m_audioPlayer);
+                this->d->m_audioPlayer = nullptr;
+            }
+
+            if (this->d->m_outputMix) {
+                (*this->d->m_outputMix)->Destroy(this->d->m_outputMix);
+                this->d->m_outputMix = nullptr;
+            }
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         SLAndroidSimpleBufferQueueItf bufferQueue = nullptr;
 
         if ((*this->d->m_audioPlayer)->GetInterface(this->d->m_audioPlayer,
                                                     SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
-                                                    &bufferQueue) != SL_RESULT_SUCCESS)
-            goto init_failed;
+                                                    &bufferQueue) != SL_RESULT_SUCCESS) {
+            if (this->d->m_audioPlayer) {
+                (*this->d->m_audioPlayer)->Destroy(this->d->m_audioPlayer);
+                this->d->m_audioPlayer = nullptr;
+            }
+
+            if (this->d->m_outputMix) {
+                (*this->d->m_outputMix)->Destroy(this->d->m_outputMix);
+                this->d->m_outputMix = nullptr;
+            }
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         if ((*bufferQueue)->RegisterCallback(bufferQueue,
                                              AudioDevOpenSLPrivate::sampleProcess,
-                                             this->d) != SL_RESULT_SUCCESS)
-            goto init_failed;
+                                             this->d) != SL_RESULT_SUCCESS) {
+            if (this->d->m_audioPlayer) {
+                (*this->d->m_audioPlayer)->Destroy(this->d->m_audioPlayer);
+                this->d->m_audioPlayer = nullptr;
+            }
+
+            if (this->d->m_outputMix) {
+                (*this->d->m_outputMix)->Destroy(this->d->m_outputMix);
+                this->d->m_outputMix = nullptr;
+            }
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         if ((*audioPlayer)->SetPlayState(audioPlayer,
-                                         SL_PLAYSTATE_PLAYING) != SL_RESULT_SUCCESS)
-            goto init_failed;
+                                         SL_PLAYSTATE_PLAYING) != SL_RESULT_SUCCESS) {
+            if (this->d->m_audioPlayer) {
+                (*this->d->m_audioPlayer)->Destroy(this->d->m_audioPlayer);
+                this->d->m_audioPlayer = nullptr;
+            }
+
+            if (this->d->m_outputMix) {
+                (*this->d->m_outputMix)->Destroy(this->d->m_outputMix);
+                this->d->m_outputMix = nullptr;
+            }
+
+            (*this->d->m_engine)->Destroy(this->d->m_engine);
+            this->d->m_engine = nullptr;
+            this->d->m_audioBuffers.clear();
+
+            return false;
+        }
 
         AudioDevOpenSLPrivate::sampleProcess(bufferQueue, this->d);
     }
 
     return true;
-
-init_failed:
-    if (this->d->m_audioRecorder) {
-        (*this->d->m_audioRecorder)->Destroy(this->d->m_audioRecorder);
-        this->d->m_audioRecorder = nullptr;
-    }
-
-    if (this->d->m_audioPlayer) {
-        (*this->d->m_audioPlayer)->Destroy(this->d->m_audioPlayer);
-        this->d->m_audioPlayer = nullptr;
-    }
-
-    if (this->d->m_outputMix) {
-        (*this->d->m_outputMix)->Destroy(this->d->m_outputMix);
-        this->d->m_outputMix = nullptr;
-    }
-
-    (*this->d->m_engine)->Destroy(this->d->m_engine);
-    this->d->m_engine = nullptr;
-    this->d->m_audioBuffers.clear();
-
-    return false;
 }
 
 QByteArray AudioDevOpenSL::read()
@@ -699,7 +789,7 @@ void AudioDevOpenSLPrivate::sampleProcess(SLAndroidSimpleBufferQueueItf bufferQu
     }
 }
 
-bool AudioDevOpenSLPrivate::hasAudioPermissions()
+bool AudioDevOpenSLPrivate::hasAudioCapturePermissions()
 {
 #ifdef Q_OS_ANDROID
     static bool done = false;
@@ -709,7 +799,6 @@ bool AudioDevOpenSLPrivate::hasAudioPermissions()
         return result;
 
     QStringList permissions {
-        "android.permission.CAPTURE_AUDIO_OUTPUT",
         "android.permission.RECORD_AUDIO"
     };
     QStringList neededPermissions;
@@ -738,9 +827,6 @@ bool AudioDevOpenSLPrivate::hasAudioPermissions()
 
 void AudioDevOpenSLPrivate::updateDevices()
 {
-    if (!this->hasAudioPermissions())
-        return;
-
     auto engine = AudioDevOpenSLPrivate::createEngine();
 
     if (!engine)
@@ -778,39 +864,41 @@ void AudioDevOpenSLPrivate::updateDevices()
         SL_SAMPLINGRATE_192	   / 1000,
     };
 
-    // Test audio input
-    for (auto &format: sampleFormats)
-        for (auto &layout: layouts)
-            for (auto &rate: sampleRates) {
-                AkAudioCaps caps(format, layout, false, rate);
-                auto audioRecorder =
-                        AudioDevOpenSLPrivate::createAudioRecorder(engine, caps);
+    if (this->hasAudioCapturePermissions()) {
+        // Test audio input
+        for (auto &format: sampleFormats)
+            for (auto &layout: layouts)
+                for (auto &rate: sampleRates) {
+                    AkAudioCaps caps(format, layout, false, rate);
+                    auto audioRecorder =
+                            AudioDevOpenSLPrivate::createAudioRecorder(engine, caps);
 
-                if (audioRecorder) {
-                    if (!this->m_supportedFormats[":openslinput:"].contains(format))
-                        this->m_supportedFormats[":openslinput:"] << format;
+                    if (audioRecorder) {
+                        if (!this->m_supportedFormats[":openslinput:"].contains(format))
+                            this->m_supportedFormats[":openslinput:"] << format;
 
-                    if (!this->m_supportedLayouts[":openslinput:"].contains(layout))
-                        this->m_supportedLayouts[":openslinput:"] << layout;
+                        if (!this->m_supportedLayouts[":openslinput:"].contains(layout))
+                            this->m_supportedLayouts[":openslinput:"] << layout;
 
-                    if (!this->m_supportedSampleRates[":openslinput:"].contains(rate))
-                        this->m_supportedSampleRates[":openslinput:"] << rate;
+                        if (!this->m_supportedSampleRates[":openslinput:"].contains(rate))
+                            this->m_supportedSampleRates[":openslinput:"] << rate;
 
-                    (*audioRecorder)->Destroy(audioRecorder);
+                        (*audioRecorder)->Destroy(audioRecorder);
+                    }
                 }
-            }
 
-    if (this->m_supportedFormats.contains(":openslinput:")
-        && this->m_supportedLayouts.contains(":openslinput:")
-        && this->m_supportedSampleRates.contains(":openslinput:")) {
-        this->m_sources = QStringList {":openslinput:"};
-        this->m_pinDescriptionMap[":openslinput:"] = "OpenSL ES Input";
-        this->m_preferredCaps[":openslinput:"] = {
-            AkAudioCaps::SampleFormat_s16,
-            AkAudioCaps::Layout_mono,
-            false,
-            44100,
-        };
+        if (this->m_supportedFormats.contains(":openslinput:")
+            && this->m_supportedLayouts.contains(":openslinput:")
+            && this->m_supportedSampleRates.contains(":openslinput:")) {
+            this->m_sources = QStringList {":openslinput:"};
+            this->m_pinDescriptionMap[":openslinput:"] = "OpenSL ES Input";
+            this->m_preferredCaps[":openslinput:"] = {
+                AkAudioCaps::SampleFormat_s16,
+                AkAudioCaps::Layout_mono,
+                false,
+                44100,
+            };
+        }
     }
 
     // Test audio output

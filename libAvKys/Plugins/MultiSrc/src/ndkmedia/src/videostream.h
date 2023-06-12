@@ -38,7 +38,8 @@ class VideoStream: public AbstractStream
         ~VideoStream();
 
         Q_INVOKABLE AkCaps caps() const override;
-        Q_INVOKABLE bool decodeData() override;
+        Q_INVOKABLE bool eos() const override;
+        Q_INVOKABLE EnqueueResult decodeData() override;
 
     protected:
         void processData(const AkPacket &packet) override;

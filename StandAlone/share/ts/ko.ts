@@ -4,48 +4,43 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../qml/About.qml" line="58"/>
-        <source>Version %1</source>
-        <translation>버전 %1</translation>
-    </message>
-    <message>
-        <location filename="../qml/About.qml" line="66"/>
+        <location filename="../qml/About.qml" line="61"/>
         <source>Built from</source>
         <extracomment>Built from &quot;short commit hash&quot;</extracomment>
         <translation>&quot; &quot; 기반으로 구축됨</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="72"/>
+        <location filename="../qml/About.qml" line="67"/>
         <source>Built from %1</source>
         <translation>%1부터 구축됨</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="74"/>
+        <location filename="../qml/About.qml" line="69"/>
         <source>Open the commit in your web browser</source>
         <translation>웹 브라우저에서 커밋 열기</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="80"/>
+        <location filename="../qml/About.qml" line="75"/>
         <source>Using Qt %1</source>
         <translation>Qt %1 사용함</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="84"/>
+        <location filename="../qml/About.qml" line="94"/>
         <source>Website</source>
         <translation>웹사이트</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="88"/>
+        <location filename="../qml/About.qml" line="98"/>
         <source>Go to %1 website</source>
         <translation>%1 웹 사이트로 이동하기</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="96"/>
+        <location filename="../qml/About.qml" line="79"/>
         <source>Webcam capture application.</source>
         <translation>웹캠 캡처 응용프로그램.</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="99"/>
+        <location filename="../qml/About.qml" line="84"/>
         <source>A simple webcam application for picture and video capture.</source>
         <translation>사진과 영상을 캡처하기 위한 간단한 웹캠 응용프로그램.</translation>
     </message>
@@ -53,30 +48,30 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../qml/AboutDialog.qml" line="32"/>
+        <location filename="../qml/AboutDialog.qml" line="35"/>
         <source>About %1</source>
         <translation>약 %1</translation>
     </message>
     <message>
-        <location filename="../qml/AboutDialog.qml" line="47"/>
+        <location filename="../qml/AboutDialog.qml" line="78"/>
         <source>About</source>
         <extracomment>Information of the program, like name, description, version, etc..</extracomment>
         <translation>정보</translation>
     </message>
     <message>
-        <location filename="../qml/AboutDialog.qml" line="53"/>
+        <location filename="../qml/AboutDialog.qml" line="84"/>
         <source>Contributors</source>
         <extracomment>List of people contributing to the project: software developers, translators, designers, etc..</extracomment>
         <translation>기여하신 분들</translation>
     </message>
     <message>
-        <location filename="../qml/AboutDialog.qml" line="57"/>
+        <location filename="../qml/AboutDialog.qml" line="88"/>
         <source>License</source>
         <extracomment>Program license.</extracomment>
         <translation>라이선스</translation>
     </message>
     <message>
-        <location filename="../qml/AboutDialog.qml" line="63"/>
+        <location filename="../qml/AboutDialog.qml" line="94"/>
         <source>3rd Party Licenses</source>
         <extracomment>License for 3rd party components used in Webcamoid, like libraries and code snippets.</extracomment>
         <translation>제3자 라이선스</translation>
@@ -207,29 +202,6 @@
     </message>
 </context>
 <context>
-    <name>AudioVideoPanel</name>
-    <message>
-        <location filename="../qml/AudioVideoPanel.qml" line="27"/>
-        <source>Audio</source>
-        <translation>오디오</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioVideoPanel.qml" line="29"/>
-        <source>Video</source>
-        <translation>비디오</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioVideoPanel.qml" line="31"/>
-        <source>Video Source Options</source>
-        <translation>비디오 입력 옵션</translation>
-    </message>
-    <message>
-        <location filename="../qml/AudioVideoPanel.qml" line="32"/>
-        <source>Video Output Options</source>
-        <translation>비디오 출력 옵션</translation>
-    </message>
-</context>
-<context>
     <name>Commons</name>
     <message>
         <location filename="../qml/Commons.qml" line="28"/>
@@ -253,40 +225,40 @@
 <context>
     <name>DownloadDialog</name>
     <message>
-        <location filename="../qml/DownloadDialog.qml" line="32"/>
+        <location filename="../qml/DownloadDialog.qml" line="35"/>
         <source>Downloading %1</source>
         <translation>%1 다운로드 중</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadDialog.qml" line="150"/>
-        <source>From: %1</source>
-        <translation>보낸 사람: %1</translation>
+        <location filename="../qml/DownloadDialog.qml" line="155"/>
+        <source>&lt;b&gt;From:&lt;/b&gt; %1</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/DownloadDialog.qml" line="154"/>
-        <source>To: %1</source>
-        <translation>받는 사람: %1</translation>
+        <location filename="../qml/DownloadDialog.qml" line="160"/>
+        <source>&lt;b&gt;To:&lt;/b&gt; %1</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/DownloadDialog.qml" line="158"/>
-        <source>Size: %1 %2B / %3 %4B</source>
-        <translation>크기: %1 %2B / %3 %4B</translation>
+        <location filename="../qml/DownloadDialog.qml" line="165"/>
+        <source>&lt;b&gt;Size:&lt;/b&gt; %1 %2B / %3 %4B</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/DownloadDialog.qml" line="166"/>
-        <source>Speed: %1 %2B/s</source>
-        <translation>속도: %1 %2B/s</translation>
+        <location filename="../qml/DownloadDialog.qml" line="173"/>
+        <source>&lt;b&gt;Speed:&lt;/b&gt; %1 %2B/s</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/DownloadDialog.qml" line="172"/>
-        <source>Time remaining: %1</source>
-        <translation>남은 시간: %1</translation>
+        <location filename="../qml/DownloadDialog.qml" line="179"/>
+        <source>&lt;b&gt;Time remaining:&lt;/b&gt; %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>DownloadFailedDialog</name>
     <message>
-        <location filename="../qml/DownloadFailedDialog.qml" line="31"/>
+        <location filename="../qml/DownloadFailedDialog.qml" line="34"/>
         <source>Download failed</source>
         <translation>다운로드 실패</translation>
     </message>
@@ -294,12 +266,12 @@
 <context>
     <name>DownloadSucceededDialog</name>
     <message>
-        <location filename="../qml/DownloadSucceededDialog.qml" line="31"/>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="34"/>
         <source>Download ready</source>
         <translation>다운로드 준비</translation>
     </message>
     <message>
-        <location filename="../qml/DownloadSucceededDialog.qml" line="47"/>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="52"/>
         <source>Install the virtual camera?</source>
         <translation>가상 카메라를 설치하시겠습니까?</translation>
     </message>
@@ -362,34 +334,123 @@
 <context>
     <name>ImageCapture</name>
     <message>
-        <location filename="../qml/ImageCapture.qml" line="40"/>
+        <location filename="../qml/ImageCapture.qml" line="44"/>
         <source>Images directory</source>
         <translation>이미지 폴더</translation>
     </message>
     <message>
-        <location filename="../qml/ImageCapture.qml" line="51"/>
+        <location filename="../qml/ImageCapture.qml" line="55"/>
         <source>Search</source>
         <translation>검색</translation>
     </message>
     <message>
-        <location filename="../qml/ImageCapture.qml" line="52"/>
+        <location filename="../qml/ImageCapture.qml" line="56"/>
         <source>Search directory to save images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/ImageCapture.qml" line="61"/>
+        <location filename="../qml/ImageCapture.qml" line="65"/>
         <source>File format</source>
         <translation>파일 포맷</translation>
     </message>
     <message>
-        <location filename="../qml/ImageCapture.qml" line="92"/>
+        <location filename="../qml/ImageCapture.qml" line="96"/>
         <source>Quality</source>
         <translation>품질</translation>
     </message>
     <message>
-        <location filename="../qml/ImageCapture.qml" line="119"/>
+        <location filename="../qml/ImageCapture.qml" line="123"/>
         <source>Select the folder to save your photos</source>
         <translation>사진을 저장할 폴더를 선택</translation>
+    </message>
+</context>
+<context>
+    <name>ImageCaptureDialog</name>
+    <message>
+        <location filename="../qml/ImageCaptureDialog.qml" line="29"/>
+        <source>Image capture settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCaptureDialog.qml" line="53"/>
+        <source>Use flash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCaptureDialog.qml" line="59"/>
+        <source>Use flash when taking a photo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCaptureDialog.qml" line="63"/>
+        <source>Delay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCaptureDialog.qml" line="71"/>
+        <source>Photo timer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCaptureDialog.qml" line="72"/>
+        <source>The time to wait before the photo is taken</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCaptureDialog.qml" line="77"/>
+        <source>Now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCaptureDialog.qml" line="86"/>
+        <source>%1 seconds</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>LocalSettingsMenu</name>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="33"/>
+        <source>Copy to clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="40"/>
+        <source>Image capture settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MainPanel</name>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="27"/>
+        <source>Audio</source>
+        <translation type="unfinished">오디오</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="29"/>
+        <source>Video</source>
+        <translation type="unfinished">비디오</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="31"/>
+        <source>Effects</source>
+        <translation type="unfinished">이펙트</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="33"/>
+        <source>Video Source Options</source>
+        <translation type="unfinished">비디오 입력 옵션</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="35"/>
+        <source>Video Output Options</source>
+        <translation type="unfinished">비디오 출력 옵션</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="36"/>
+        <source>%1 options</source>
+        <translation type="unfinished">%1 설정</translation>
     </message>
 </context>
 <context>
@@ -421,27 +482,27 @@
         <translation>플러그인</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="164"/>
+        <location filename="../qml/PluginConfig.qml" line="179"/>
         <source>Search plugins in subfolders</source>
         <translation>하위폴더에서 플러그인을 검색</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="173"/>
+        <location filename="../qml/PluginConfig.qml" line="188"/>
         <source>Add path</source>
         <translation>경로 추가</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="211"/>
+        <location filename="../qml/PluginConfig.qml" line="226"/>
         <source>Update</source>
         <translation>업데이트</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="212"/>
+        <location filename="../qml/PluginConfig.qml" line="227"/>
         <source>Update plugins list</source>
         <translation>플러그인 목록 업데이트</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="239"/>
+        <location filename="../qml/PluginConfig.qml" line="254"/>
         <source>Add plugins search path</source>
         <translation>플러그인을 검색할 경로 추가</translation>
     </message>
@@ -512,7 +573,7 @@
 <context>
     <name>Recording</name>
     <message>
-        <location filename="../../src/recording.cpp" line="384"/>
+        <location filename="../../src/recording.cpp" line="385"/>
         <source>%1/Video %2.%3</source>
         <translation>%1/Video %2.%3</translation>
     </message>
@@ -523,6 +584,14 @@
         <location filename="../qml/RecordingNotice.qml" line="55"/>
         <source>Recording</source>
         <translation>녹화</translation>
+    </message>
+</context>
+<context>
+    <name>RunCommandDialog</name>
+    <message>
+        <location filename="../qml/RunCommandDialog.qml" line="93"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -556,32 +625,37 @@
 <context>
     <name>SettingsMenu</name>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="40"/>
+        <location filename="../qml/SettingsMenu.qml" line="41"/>
         <source>Video</source>
         <translation>비디오</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="46"/>
+        <location filename="../qml/SettingsMenu.qml" line="47"/>
         <source>Audio</source>
         <translation>오디오</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="52"/>
+        <location filename="../qml/SettingsMenu.qml" line="53"/>
+        <source>Effects</source>
+        <translation type="unfinished">이펙트</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="59"/>
         <source>Preferences</source>
         <translation>환경설정</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="58"/>
+        <location filename="../qml/SettingsMenu.qml" line="65"/>
         <source>Donate</source>
         <translation>기부하다</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="64"/>
+        <location filename="../qml/SettingsMenu.qml" line="71"/>
         <source>About</source>
         <translation>정보</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="71"/>
+        <location filename="../qml/SettingsMenu.qml" line="78"/>
         <source>Play sources</source>
         <translation>입력 재생</translation>
     </message>
@@ -680,7 +754,7 @@
 <context>
     <name>UpdatesDialog</name>
     <message>
-        <location filename="../qml/UpdatesDialog.qml" line="33"/>
+        <location filename="../qml/UpdatesDialog.qml" line="29"/>
         <source>New version available!</source>
         <translation>새 버전이 있습니다!</translation>
     </message>
@@ -737,18 +811,18 @@
         <translation>비디오 코덱 옵션</translation>
     </message>
     <message>
-        <location filename="../qml/VideoCodecOptions.qml" line="170"/>
+        <location filename="../qml/VideoCodecOptions.qml" line="179"/>
         <source>Bitrate</source>
         <translation>비트레이트</translation>
     </message>
     <message>
-        <location filename="../qml/VideoCodecOptions.qml" line="174"/>
+        <location filename="../qml/VideoCodecOptions.qml" line="183"/>
         <source>Bitrate (bits/secs)</source>
         <translation>비트레이트 (비트/초)</translation>
     </message>
     <message>
-        <location filename="../qml/VideoCodecOptions.qml" line="187"/>
-        <location filename="../qml/VideoCodecOptions.qml" line="191"/>
+        <location filename="../qml/VideoCodecOptions.qml" line="196"/>
+        <location filename="../qml/VideoCodecOptions.qml" line="200"/>
         <source>Keyframes stride</source>
         <translation>키 프레임 간격</translation>
     </message>
@@ -774,17 +848,7 @@
         <translation>비디오 이펙트 추가</translation>
     </message>
     <message>
-        <location filename="../qml/VideoEffectsDialog.qml" line="87"/>
-        <source>Search effect</source>
-        <translation>이펙트 검색</translation>
-    </message>
-    <message>
-        <location filename="../qml/VideoEffectsDialog.qml" line="88"/>
-        <source>Search video effect</source>
-        <translation>비디오 이펙트 검색</translation>
-    </message>
-    <message>
-        <location filename="../qml/VideoEffectsDialog.qml" line="204"/>
+        <location filename="../qml/VideoEffectsDialog.qml" line="129"/>
         <source>Chain effect</source>
         <extracomment>Apply the effect over the other effects.</extracomment>
         <translation>이펙트 연결</translation>
@@ -804,19 +868,6 @@
     </message>
 </context>
 <context>
-    <name>VideoEffectsPanel</name>
-    <message>
-        <location filename="../qml/VideoEffectsPanel.qml" line="27"/>
-        <source>Effects</source>
-        <translation>이펙트</translation>
-    </message>
-    <message>
-        <location filename="../qml/VideoEffectsPanel.qml" line="28"/>
-        <source>%1 options</source>
-        <translation>%1 설정</translation>
-    </message>
-</context>
-<context>
     <name>VideoFormatOptions</name>
     <message>
         <location filename="../qml/VideoFormatOptions.qml" line="27"/>
@@ -832,60 +883,60 @@
 <context>
     <name>VideoInputAddEdit</name>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="57"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="60"/>
         <source>Edit Source</source>
         <translation>입력 수정</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="58"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="61"/>
         <source>Add Source</source>
         <translation>입력 추가</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="86"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="89"/>
         <source>File</source>
         <translation>파일</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="89"/>
-        <location filename="../qml/VideoInputAddEdit.qml" line="180"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="92"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="183"/>
         <source>URL</source>
         <translation>URL</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="111"/>
-        <location filename="../qml/VideoInputAddEdit.qml" line="164"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="114"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="167"/>
         <source>Description</source>
         <translation>상세설명</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="117"/>
-        <location filename="../qml/VideoInputAddEdit.qml" line="170"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="120"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="173"/>
         <source>Source title</source>
         <translation>입력 제목</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="127"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="130"/>
         <source>Path</source>
         <translation>경로</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="134"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="137"/>
         <source>File path</source>
         <translation>파일 경로</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="142"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="145"/>
         <source>Search</source>
         <translation>검색</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="143"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="146"/>
         <source>Search file to use as source</source>
         <translation>소스로 사용할 파일 검색</translation>
     </message>
     <message>
-        <location filename="../qml/VideoInputAddEdit.qml" line="226"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="229"/>
         <source>Choose the file to add as source</source>
         <translation>입력으로 추가할 파일을 선택하세요</translation>
     </message>
@@ -911,199 +962,199 @@
         <translation>입력 추가</translation>
     </message>
     <message>
+        <location filename="../qml/VideoInputs.qml" line="76"/>
+        <source>No cameras found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qml/VideoInputs.qml" line="57"/>
         <source>Configure source</source>
         <translation>소스 구성</translation>
-    </message>
-    <message>
-        <location filename="../qml/VideoInputs.qml" line="76"/>
-        <source>No webcams found</source>
-        <translation>웹캠이 없습니다</translation>
     </message>
 </context>
 <context>
     <name>VideoLayer</name>
     <message>
-        <location filename="../../src/videolayer.cpp" line="135"/>
+        <location filename="../../src/videolayer.cpp" line="191"/>
         <source>3GP Video</source>
         <translation>3GP 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="136"/>
+        <location filename="../../src/videolayer.cpp" line="192"/>
         <source>AVI Video</source>
         <translation>AVI 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="137"/>
+        <location filename="../../src/videolayer.cpp" line="193"/>
         <source>Windows Bitmap</source>
         <translation>Windows 비트맵</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="138"/>
+        <location filename="../../src/videolayer.cpp" line="194"/>
         <source>Microsoft Windows Cursor</source>
         <translation>마이크로소프트 윈도우 커서</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="140"/>
+        <location filename="../../src/videolayer.cpp" line="196"/>
         <source>Flash Video</source>
         <extracomment>Adobe FLV Flash video</extracomment>
         <translation>Flash 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="141"/>
+        <location filename="../../src/videolayer.cpp" line="197"/>
         <source>Animated GIF</source>
         <translation>움직이는 GIF</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="142"/>
+        <location filename="../../src/videolayer.cpp" line="198"/>
         <source>Graphic Interchange Format</source>
         <translation>그래픽 교환 형식</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="143"/>
+        <location filename="../../src/videolayer.cpp" line="199"/>
         <source>Apple Icon Image</source>
         <translation>사과 아이콘 이미지</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="144"/>
+        <location filename="../../src/videolayer.cpp" line="200"/>
         <source>Microsoft Windows Icon</source>
         <translation>마이크로소프트 윈도우 아이콘</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="145"/>
+        <location filename="../../src/videolayer.cpp" line="201"/>
         <source>Joint Photographic Experts Group</source>
         <translation>공동 사진 전문가 그룹</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="146"/>
+        <location filename="../../src/videolayer.cpp" line="202"/>
         <source>MKV Video</source>
         <translation>MKV 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="147"/>
+        <location filename="../../src/videolayer.cpp" line="203"/>
         <source>Animated PNG</source>
         <translation>움직이는 PNG</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="148"/>
+        <location filename="../../src/videolayer.cpp" line="204"/>
         <source>Multiple-image Network Graphics</source>
         <translation>다중 이미지 네트워크 그래픽</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="149"/>
+        <location filename="../../src/videolayer.cpp" line="205"/>
         <source>QuickTime Video</source>
         <translation>QuickTime 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="150"/>
+        <location filename="../../src/videolayer.cpp" line="206"/>
         <source>MP4 Video</source>
         <translation>MP4 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="151"/>
+        <location filename="../../src/videolayer.cpp" line="207"/>
         <source>MPEG Video</source>
         <translation>MPEG 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="152"/>
+        <location filename="../../src/videolayer.cpp" line="208"/>
         <source>Ogg Video</source>
         <translation>Ogg 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="153"/>
+        <location filename="../../src/videolayer.cpp" line="209"/>
         <source>Portable Bitmap</source>
         <translation>휴대용 비트맵</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="154"/>
+        <location filename="../../src/videolayer.cpp" line="210"/>
         <source>Portable Graymap</source>
         <translation>휴대용 그레이맵</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="155"/>
+        <location filename="../../src/videolayer.cpp" line="211"/>
         <source>Portable Network Graphics</source>
         <translation>휴대용 네트워크 그래픽</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="156"/>
+        <location filename="../../src/videolayer.cpp" line="212"/>
         <source>Portable Pixmap</source>
         <translation>휴대용 픽스맵</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="158"/>
+        <location filename="../../src/videolayer.cpp" line="214"/>
         <source>RealMedia Video</source>
         <extracomment>Don&apos;t translate &quot;RealMedia&quot;, leave it as is.</extracomment>
         <translation>RealMedia 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="159"/>
+        <location filename="../../src/videolayer.cpp" line="215"/>
         <source>Scalable Vector Graphics</source>
         <translation>확장 가능한 벡터 그래픽</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="160"/>
+        <location filename="../../src/videolayer.cpp" line="216"/>
         <source>Truevision TGA</source>
         <translation>트루비전 TGA</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="161"/>
+        <location filename="../../src/videolayer.cpp" line="217"/>
         <source>Tagged Image File Format</source>
         <translation>태그가 지정된 이미지 파일 형식</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="162"/>
+        <location filename="../../src/videolayer.cpp" line="218"/>
         <source>DVD Video</source>
         <translation>DVD 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="163"/>
+        <location filename="../../src/videolayer.cpp" line="219"/>
         <source>Wireless Bitmap</source>
         <translation>무선 비트맵</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="164"/>
+        <location filename="../../src/videolayer.cpp" line="220"/>
         <source>WebM Video</source>
         <translation>WebM 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="165"/>
+        <location filename="../../src/videolayer.cpp" line="221"/>
         <source>WebP</source>
         <translation>웹피</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="167"/>
+        <location filename="../../src/videolayer.cpp" line="223"/>
         <source>Windows Media Video</source>
         <extracomment>Also known as WMV, is a video file format.</extracomment>
         <translation>윈도우 미디어 비디오</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="168"/>
+        <location filename="../../src/videolayer.cpp" line="224"/>
         <source>X11 Bitmap</source>
         <translation>X11 비트맵</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="169"/>
+        <location filename="../../src/videolayer.cpp" line="225"/>
         <source>X11 Pixmap</source>
         <translation>X11 픽스맵</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="209"/>
+        <location filename="../../src/videolayer.cpp" line="265"/>
         <source>All Image and Video Files</source>
         <translation>모든 이미지 및 비디오 파일</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="244"/>
+        <location filename="../../src/videolayer.cpp" line="300"/>
         <source>All Files</source>
         <translation>모든 파일</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="386"/>
+        <location filename="../../src/videolayer.cpp" line="463"/>
         <source>No Output</source>
         <extracomment>Disable video output, don&apos;t send the video to the output device.</extracomment>
         <translation>출력 없음</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="721"/>
+        <location filename="../../src/videolayer.cpp" line="825"/>
         <source>Virtual Camera</source>
         <translation>가상 카메라</translation>
     </message>
@@ -1216,32 +1267,32 @@
         <translation>가상 카메라 출력 이미지</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputPicture.qml" line="65"/>
+        <location filename="../qml/VideoOutputPicture.qml" line="69"/>
         <source>Virtual camera default output picture</source>
         <translation>가상 카메라 기본 출력 이미지</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputPicture.qml" line="71"/>
+        <location filename="../qml/VideoOutputPicture.qml" line="75"/>
         <source>Search</source>
         <translation>검색</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputPicture.qml" line="72"/>
+        <location filename="../qml/VideoOutputPicture.qml" line="76"/>
         <source>Search image to use as default output picture</source>
         <translation>기본 출력 사진으로 사용할 검색 이미지</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputPicture.qml" line="95"/>
+        <location filename="../qml/VideoOutputPicture.qml" line="99"/>
         <source>Can&apos;t set virtual camera picture</source>
         <translation>가상 카메라 사진을 설정할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputPicture.qml" line="99"/>
+        <location filename="../qml/VideoOutputPicture.qml" line="103"/>
         <source>Error Removing Virtual Cameras</source>
         <translation>가상 카메라 삭제 중 오류</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputPicture.qml" line="111"/>
+        <location filename="../qml/VideoOutputPicture.qml" line="115"/>
         <source>Please choose an image file</source>
         <translation>이미지 파일을 선택하세요</translation>
     </message>
@@ -1249,129 +1300,134 @@
 <context>
     <name>VideoOutputs</name>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="86"/>
+        <location filename="../qml/VideoOutputs.qml" line="89"/>
         <source>The virtual camera is outdated (%1), install the latest version (%2)?</source>
-        <translation>가상 카메라가 오래되었습니다(%1). 최신 버전(%2)을 설치하시겠습니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="95"/>
-        <location filename="../qml/VideoOutputs.qml" line="227"/>
+        <location filename="../qml/VideoOutputs.qml" line="98"/>
+        <location filename="../qml/VideoOutputs.qml" line="234"/>
         <source>Install</source>
-        <translation>설치하다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="100"/>
-        <location filename="../qml/VideoOutputs.qml" line="231"/>
+        <location filename="../qml/VideoOutputs.qml" line="103"/>
+        <location filename="../qml/VideoOutputs.qml" line="238"/>
         <source>Install virtual camera</source>
-        <translation>가상 카메라 설치</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="111"/>
+        <location filename="../qml/VideoOutputs.qml" line="114"/>
         <source>Configure output</source>
-        <translation>출력 구성</translation>
+        <translation type="unfinished">출력 구성</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="121"/>
+        <location filename="../qml/VideoOutputs.qml" line="124"/>
         <source>Add output</source>
-        <translation>출력 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="129"/>
+        <location filename="../qml/VideoOutputs.qml" line="132"/>
         <source>Error Creating Virtual Camera</source>
-        <translation>가상 카메라 생성 중 오류 발생</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="136"/>
+        <location filename="../qml/VideoOutputs.qml" line="139"/>
         <source>Remove all outputs</source>
-        <translation>모든 출력 삭제하기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="143"/>
+        <location filename="../qml/VideoOutputs.qml" line="146"/>
         <source>Error removing virtual cameras</source>
-        <translation>가상 카메라 제거 중 오류 발생</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="148"/>
+        <location filename="../qml/VideoOutputs.qml" line="151"/>
         <source>Error Removing Virtual Cameras</source>
-        <translation>가상 카메라 제거 중 오류</translation>
+        <translation type="unfinished">가상 카메라 삭제 중 오류</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="155"/>
+        <location filename="../qml/VideoOutputs.qml" line="158"/>
         <source>Set output picture</source>
-        <translation>출력 이미지 설정하기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="220"/>
+        <location filename="../qml/VideoOutputs.qml" line="226"/>
         <source>The virtual camera is not installed, do you want to install it?</source>
-        <translation>가상 카메라가 설치되지 않았습니다, 설치하시겠습니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="247"/>
+        <location filename="../qml/VideoOutputs.qml" line="227"/>
+        <source>The virtual camera is not installed. Please, install &lt;b&gt;v4l2loopback&lt;/b&gt;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="255"/>
         <source>The virtual camera is not supported in this platform</source>
-        <translation>가상 카메라는 이 플랫폼에서 지원되지 않습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>VideoRecording</name>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="116"/>
+        <location filename="../qml/VideoRecording.qml" line="120"/>
         <source>Videos directory</source>
         <translation>비디오 폴더</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="127"/>
+        <location filename="../qml/VideoRecording.qml" line="131"/>
         <source>Search</source>
         <translation>검색</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="128"/>
+        <location filename="../qml/VideoRecording.qml" line="132"/>
         <source>Search directory to save videos</source>
         <translation>비디오를 저장할 디렉토리 검색하기</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="137"/>
+        <location filename="../qml/VideoRecording.qml" line="141"/>
         <source>Record audio</source>
         <translation>오디오 녹음</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="149"/>
+        <location filename="../qml/VideoRecording.qml" line="153"/>
         <source>File format</source>
         <translation>파일 포맷</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="180"/>
-        <location filename="../qml/VideoRecording.qml" line="219"/>
-        <location filename="../qml/VideoRecording.qml" line="260"/>
+        <location filename="../qml/VideoRecording.qml" line="184"/>
+        <location filename="../qml/VideoRecording.qml" line="223"/>
+        <location filename="../qml/VideoRecording.qml" line="264"/>
         <source>Configure</source>
         <translation>환경설정</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="181"/>
+        <location filename="../qml/VideoRecording.qml" line="185"/>
         <source>Configure file format</source>
         <translation>파일 형식 구성</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="188"/>
+        <location filename="../qml/VideoRecording.qml" line="192"/>
         <source>Video codec</source>
         <translation>비디오 코덱</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="220"/>
+        <location filename="../qml/VideoRecording.qml" line="224"/>
         <source>Configure video codec</source>
         <translation>비디오 코덱 구성</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="227"/>
+        <location filename="../qml/VideoRecording.qml" line="231"/>
         <source>Audio codec</source>
         <translation>오디오 코덱</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="261"/>
+        <location filename="../qml/VideoRecording.qml" line="265"/>
         <source>Configure audio codec</source>
         <translation>오디오 코덱 구성</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="295"/>
+        <location filename="../qml/VideoRecording.qml" line="299"/>
         <source>Select the folder to save your videos</source>
         <translation>비디오를 저장할 폴더를 선택하세요</translation>
     </message>
@@ -1421,8 +1477,8 @@
     <message>
         <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="209"/>
         <location filename="../../../libAvKys/Plugins/Cartoon/share/qml/main.qml" line="213"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="217"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="221"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="222"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="226"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="167"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="171"/>
         <source>Scan block</source>
@@ -1566,10 +1622,10 @@
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="98"/>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="128"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="559"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="629"/>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="156"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="135"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="564"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="634"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="162"/>
         <source>Search</source>
         <translation>검색</translation>
     </message>
@@ -1757,86 +1813,86 @@
         <translation>걸러낼 색깔을 선택하세요</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="37"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="44"/>
         <source>Color table</source>
         <translation>색상 표</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="55"/>
         <source>Base</source>
         <extracomment>Base color, show the image without modifications</extracomment>
         <translation>베이스</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="59"/>
         <source>Metal</source>
         <translation>메탈</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="57"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="64"/>
         <source>Heat</source>
         <extracomment>https://en.wikipedia.org/wiki/Heat_map</extracomment>
         <translation>히트</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="61"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="68"/>
         <source>Old Photo</source>
         <translation>옛날 사진</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="65"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="72"/>
         <source>Red &amp; Green</source>
         <translation>적록</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="77"/>
         <source>Sepia</source>
         <extracomment>https://en.wikipedia.org/wiki/Sepia_(color)</extracomment>
         <translation>세피아</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="74"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="81"/>
         <source>X-Pro</source>
         <translation>X-프로</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="78"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="85"/>
         <source>X-Ray</source>
         <translation>X-레이</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="82"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="89"/>
         <source>Yellow &amp; Blue</source>
         <translation>황청</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="86"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="514"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="584"/>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="112"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="93"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="519"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="589"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="118"/>
         <source>Custom</source>
         <translation>커스텀</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="107"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="114"/>
         <source>Source palette</source>
         <translation>소스 팔레트</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="110"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="117"/>
         <source>Image file to use as palette</source>
         <translation>팔레트로 사용할 이미지 파일</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="130"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="137"/>
         <source>Search the image file to use as palette</source>
         <translation>팔레트로 사용할 이미지 파일 검색</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="138"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="1022"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="1038"/>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="244"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="145"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="1027"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="1037"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="250"/>
         <source>Please choose an image file</source>
         <translation>이미지 파일을 선택하세요</translation>
     </message>
@@ -1994,171 +2050,171 @@
         <translation>반전</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="111"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="116"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="60"/>
         <source>Haar file</source>
         <extracomment>https://en.wikipedia.org/wiki/Haar-like_feature</extracomment>
         <translation>하르 파일</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="122"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="127"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="71"/>
         <source>Eye</source>
         <translation>눈</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="126"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="131"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="75"/>
         <source>Eye glasses</source>
         <translation>안경</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="130"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="135"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="79"/>
         <source>Frontal face alternative 1</source>
         <translation>전면 대안 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="134"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="139"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="83"/>
         <source>Frontal face alternative 2</source>
         <translation>전면 대안 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="138"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="143"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="87"/>
         <source>Frontal face alternative 3</source>
         <translation>전면 대안 3</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="147"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="91"/>
         <source>Frontal face default</source>
         <translation>전면 기본값</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="151"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="95"/>
         <source>Full body</source>
         <translation>전신</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="155"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="99"/>
         <source>Left Eye 1</source>
         <translation>왼쪽 눈 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="154"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="159"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="103"/>
         <source>Lower body</source>
         <translation>하체</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="163"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="107"/>
         <source>Eye pair big</source>
         <translation>큰 눈 쌍</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="162"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="167"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="111"/>
         <source>Eye pair small</source>
         <translation>작은 눈 쌍</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="166"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="171"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="115"/>
         <source>Left ear</source>
         <translation>왼쪽 귀</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="175"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="119"/>
         <source>Left eye 2</source>
         <translation>왼쪽 눈 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="179"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="123"/>
         <source>Mouth</source>
         <translation>입</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="178"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="183"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="127"/>
         <source>Nose</source>
         <translation>코</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="187"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="131"/>
         <source>Right ear</source>
         <translation>오른쪽 귀</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="186"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="191"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="135"/>
         <source>Right Eye 1</source>
         <translation>오른쪽 눈 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="190"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="195"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="139"/>
         <source>Upper body 1</source>
         <translation>상체 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="194"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="199"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="143"/>
         <source>Profile face</source>
         <translation>프로필 얼굴</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="198"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="203"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="147"/>
         <source>Right eye 2</source>
         <translation>오른쪽 눈 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="202"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="207"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="151"/>
         <source>Smile</source>
         <translation>웃다</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="206"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="211"/>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="155"/>
         <source>Upper body</source>
         <translation>상체</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="235"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="240"/>
         <source>Marker type</source>
         <translation>마커 타입</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="246"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="251"/>
         <source>Rectangle</source>
         <translation>사각형</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="250"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="255"/>
         <source>Ellipse</source>
         <translation>타원</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="254"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="259"/>
         <source>Image</source>
         <translation>이미지</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="258"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="263"/>
         <source>Pixelate</source>
         <translation>픽셀화</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="262"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="267"/>
         <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="158"/>
         <location filename="../../../libAvKys/Plugins/Fire/share/qml/main.qml" line="162"/>
         <location filename="../../../libAvKys/Plugins/Radioactive/share/qml/main.qml" line="112"/>
@@ -2166,348 +2222,348 @@
         <translation>블러</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="266"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="271"/>
         <source>Blur Outer</source>
         <translation>외부 블러</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="270"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="275"/>
         <source>Background Image</source>
         <translation>배경 이미지</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="281"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="286"/>
         <source>Marker style</source>
         <translation>마커 스타일</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="292"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="297"/>
         <source>Solid</source>
         <translation>실선</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="296"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="301"/>
         <source>Dash</source>
         <translation>파선</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="300"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="305"/>
         <source>Dot</source>
         <translation>점선</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="304"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="309"/>
         <source>Dash dot</source>
         <translation>1점 쇄선</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="308"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="313"/>
         <source>Dash dot dot</source>
         <translation>2점 쇄선</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="319"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="324"/>
         <source>Marker color</source>
         <translation>마커 색상</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="338"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="342"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="343"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="347"/>
         <source>Marker width</source>
         <translation>마커 너비</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="356"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="361"/>
         <source>Masks</source>
         <translation>마스크</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="366"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="371"/>
         <source>Angel</source>
         <translation>천사</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="370"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="375"/>
         <source>Bear</source>
         <translation>곰</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="374"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="379"/>
         <source>Beaver</source>
         <translation>비버</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="378"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="383"/>
         <source>Cat</source>
         <translation>고양이</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="382"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="387"/>
         <source>Chicken</source>
         <translation>닭</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="386"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="391"/>
         <source>Cow</source>
         <translation>소</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="390"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="395"/>
         <source>Devil</source>
         <translation>악마</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="394"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="399"/>
         <source>Dog</source>
         <translation>개</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="398"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="403"/>
         <source>Dalmatian dog</source>
         <translation>달마시안 개</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="402"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="407"/>
         <source>Happy dog</source>
         <translation>행복한 개</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="406"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="411"/>
         <source>Dragon</source>
         <translation>드래곤</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="410"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="415"/>
         <source>Elephant 1</source>
         <translation>코끼리 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="414"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="419"/>
         <source>Elephant 2</source>
         <translation>코끼리 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="418"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="423"/>
         <source>Elk</source>
         <translation>엘크</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="422"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="427"/>
         <source>Frog</source>
         <translation>개구리</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="426"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="431"/>
         <source>Ghost</source>
         <translation>유령</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="430"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="435"/>
         <source>Giraffe</source>
         <translation>기린</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="434"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="439"/>
         <source>Gnu</source>
         <translation>누 영양</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="438"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="443"/>
         <source>Goat</source>
         <translation>염소</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="442"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="447"/>
         <source>Hippo</source>
         <translation>하마</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="446"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="451"/>
         <source>Horse</source>
         <translation>말</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="450"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="455"/>
         <source>Gray horse</source>
         <translation>회색 말</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="454"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="459"/>
         <source>Koala</source>
         <translation>코알라</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="458"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="463"/>
         <source>Monkey</source>
         <translation>원숭이</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="462"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="467"/>
         <source>Gray mouse</source>
         <translation>회색 쥐</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="466"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="471"/>
         <source>White mouse</source>
         <translation>흰 쥐</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="470"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="475"/>
         <source>Panda</source>
         <translation>판다곰</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="474"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="479"/>
         <source>Penguin</source>
         <translation>펭귄</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="478"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="483"/>
         <source>Pumpkin 1</source>
         <translation>호박 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="482"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="487"/>
         <source>Pumpkin 2</source>
         <translation>호박 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="486"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="491"/>
         <source>Raccoon</source>
         <translation>라쿤</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="490"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="495"/>
         <source>Rhino</source>
         <translation>코뿔소</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="494"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="499"/>
         <source>Sheep</source>
         <translation>양</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="498"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="503"/>
         <source>Skull 1</source>
         <translation>해골 1</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="502"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="507"/>
         <source>Skull 2</source>
         <translation>해골 2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="506"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="511"/>
         <source>Triceratops</source>
         <translation>트리케라톱스</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="510"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="515"/>
         <source>Zebra</source>
         <translation>얼룩말</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="524"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="529"/>
         <source>Marker picture</source>
         <translation>마커 그림</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="538"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="543"/>
         <source>Replace face with this picture</source>
         <translation>얼굴을 이 사진으로 바꾸기</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="561"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="566"/>
         <source>Search the image to put into the detected rectangle</source>
         <translation>감지된 사각형에 넣을 이미지를 검색한다</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="570"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="575"/>
         <source>Background</source>
         <translation>배경</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="682"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="740"/>
+        <source>Horizontal Offset</source>
+        <translation type="unfinished">가로 간격띄우기</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="769"/>
+        <source>Vertical Offset</source>
+        <translation type="unfinished">세로 간격띄우기</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="973"/>
+        <source>Horizontal Radius %</source>
+        <translation type="unfinished">가로 반지름 %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="1000"/>
+        <source>Vertical Radius %</source>
+        <translation type="unfinished">세로 반지름 %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="585"/>
+        <source>Black Square</source>
+        <translation type="unfinished">검은 사각형</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="599"/>
+        <source>Background picture</source>
+        <translation type="unfinished">배경 사진</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="613"/>
+        <source>Replace background with this picture</source>
+        <translation type="unfinished">배경을 이 사진으로 바꾸기</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="636"/>
+        <source>Search the image to use as background</source>
+        <translation type="unfinished">배경으로 사용할 이미지 검색한다</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="645"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="649"/>
+        <source>Pixel grid size</source>
+        <translation type="unfinished">픽셀 그리드 크기</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="663"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="667"/>
+        <source>Blur radius</source>
+        <translation type="unfinished">블러 반지름</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="680"/>
+        <source>Face Area Settings</source>
+        <translation type="unfinished">얼굴 영역 설정</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="687"/>
         <source>Advanced face area settings for 
 background blur or image below.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="735"/>
-        <source>Horizontal Offset</source>
-        <translation type="unfinished">가로 간격띄우기</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="764"/>
-        <source>Vertical Offset</source>
-        <translation type="unfinished">세로 간격띄우기</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="968"/>
-        <source>Horizontal Radius %</source>
-        <translation type="unfinished">가로 반지름 %</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="995"/>
-        <source>Vertical Radius %</source>
-        <translation type="unfinished">세로 반지름 %</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="580"/>
-        <source>Black Square</source>
-        <translation type="unfinished">검은 사각형</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="594"/>
-        <source>Background picture</source>
-        <translation type="unfinished">배경 사진</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="608"/>
-        <source>Replace background with this picture</source>
-        <translation type="unfinished">배경을 이 사진으로 바꾸기</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="631"/>
-        <source>Search the image to use as background</source>
-        <translation type="unfinished">배경으로 사용할 이미지 검색한다</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="640"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="644"/>
-        <source>Pixel grid size</source>
-        <translation type="unfinished">픽셀 그리드 크기</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="658"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="662"/>
-        <source>Blur radius</source>
-        <translation type="unfinished">블러 반지름</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="675"/>
-        <source>Face Area Settings</source>
-        <translation type="unfinished">얼굴 영역 설정</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="794"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="909"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="799"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="914"/>
         <source>Width Adjust %</source>
         <translation>폭 조정 %</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="823"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="938"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="828"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="943"/>
         <source>Height Adjust %</source>
         <translation>높이 조정 %</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="853"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="858"/>
         <source>Round Area</source>
         <translation>원형 영역</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="327"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="332"/>
         <source>Select marker color</source>
         <translation>마커 색상 선택</translation>
     </message>
@@ -2572,99 +2628,99 @@ background blur or image below.</source>
         <translation>보폭</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="61"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="67"/>
         <source>Pattern</source>
         <translation>패턴</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="78"/>
         <source>90° Halftone 6x6</source>
         <translation>90% 명암 중간부 6x6</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="76"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="82"/>
         <source>Cluster 3</source>
         <translation>클러스터 3</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="80"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="86"/>
         <source>Cluster 4</source>
         <translation>클러스터 4</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="84"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="90"/>
         <source>Cluster 8</source>
         <translation>클러스터 8</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="88"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="94"/>
         <source>Lines 4x4</source>
         <translation>4x4 라인</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="92"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="98"/>
         <source>Magic 2x2</source>
         <translation>매직 2x2</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="96"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="102"/>
         <source>Magic 4x4</source>
         <translation>매직 4x4</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="100"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="106"/>
         <source>Ordered 4x4</source>
         <translation>4x4 순서의</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="104"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="110"/>
         <source>Ordered 6x6</source>
         <translation>6x6 순서의</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="108"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="114"/>
         <source>Ordered 8x8</source>
         <translation>8x8 순서의</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="134"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="140"/>
         <source>Bitmap pattern</source>
         <translation>비트맵 패턴</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="137"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="143"/>
         <source>Image to use as pattern</source>
         <translation>패턴으로 사용할 이미지</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="164"/>
         <source>Search the image to use as pattern</source>
         <translation>패턴으로 사용할 이미지 검색</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="167"/>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="171"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="177"/>
         <source>Pattern size</source>
         <translation>패턴 크기</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="184"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="190"/>
         <source>Lightning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="209"/>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="213"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="215"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="219"/>
         <source>Slope</source>
         <translation>기울기</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="226"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="232"/>
         <source>Interception</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="230"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="236"/>
         <source>Intercept</source>
         <translation>절편</translation>
     </message>
@@ -2994,9 +3050,65 @@ background blur or image below.</source>
         <translation>초당 프레임</translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="61"/>
+        <source>Edit</source>
+        <translation type="unfinished">수정</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="63"/>
+        <source>Enable edition mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="70"/>
+        <source>Pixels/%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="71"/>
+        <source>Select cropping unit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="175"/>
+        <source>Top</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="214"/>
+        <source>Bottom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="97"/>
+        <source>Left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="136"/>
+        <source>Right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="253"/>
+        <source>Fill color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="263"/>
+        <source>Choose the filling color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="271"/>
         <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="382"/>
         <source>Reset</source>
         <translation>리셋</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="273"/>
+        <source>Reset parameters</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="385"/>
@@ -3010,8 +3122,8 @@ background blur or image below.</source>
         <translation>측면</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="692"/>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="866"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="697"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="871"/>
         <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="112"/>
         <source>Scale</source>
         <translation>규모</translation>
@@ -3037,152 +3149,117 @@ background blur or image below.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="189"/>
-        <source>Use flash</source>
-        <translation>플래시 사용</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="212"/>
-        <source>Now</source>
-        <translation>지금</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="219"/>
-        <source>%1 seconds</source>
-        <translation>%1 초</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="336"/>
-        <location filename="../qml/main.qml" line="339"/>
+        <location filename="../qml/main.qml" line="295"/>
+        <location filename="../qml/main.qml" line="298"/>
         <source>Take a photo</source>
         <translation>사진 찍기</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="57"/>
+        <location filename="../qml/main.qml" line="60"/>
         <source>%1/Picture %2.%3</source>
         <translation>%1/사진 %2.%3</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="43"/>
+        <location filename="../qml/main.qml" line="46"/>
         <source>Daily Build</source>
         <translation>데일리 빌드</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="182"/>
-        <source>Video effects</source>
-        <translation>비디오 효과</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="183"/>
-        <source>Open video effects panel</source>
+        <location filename="../qml/main.qml" line="186"/>
+        <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="193"/>
-        <source>Use flash when taking a photo</source>
-        <translation>사진을 찍을 때 플래시 사용</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="206"/>
-        <source>Photo timer</source>
-        <translation>포토 타이머</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="207"/>
-        <source>The time to wait before the photo is taken</source>
-        <translation>사진을 찍기 전에 기다리는 시간</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="252"/>
-        <source>Snapshot to Clipboard</source>
+        <location filename="../qml/main.qml" line="196"/>
+        <source>Open main menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="253"/>
-        <source>Captures a snapshot and copies it into the clipboard</source>
+        <location filename="../qml/main.qml" line="214"/>
+        <source>Image capture options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="255"/>
-        <source>Capture Snapshot to Clipboard</source>
+        <location filename="../qml/main.qml" line="224"/>
+        <source>Open image capture options menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="269"/>
-        <source>Sources and outputs settings</source>
-        <translation>소스 및 출력 설정</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="270"/>
-        <source>Open sources and outputs settings menu</source>
-        <translation>오픈 소스 및 출력 설정 메뉴</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="310"/>
+        <location filename="../qml/main.qml" line="263"/>
         <source>Open last photo</source>
         <translation>마지막 사진 열기</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="321"/>
+        <location filename="../qml/main.qml" line="274"/>
         <source>Open last photo taken</source>
         <translation>마지막으로 찍은 사진 열기</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="340"/>
+        <location filename="../qml/main.qml" line="299"/>
         <source>Image capture mode</source>
         <translation>이미지 캡처 모드</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="343"/>
+        <location filename="../qml/main.qml" line="302"/>
         <source>Make a capture and save it to an image file</source>
         <translation>캡처하여 이미지 파일에 저장</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="344"/>
+        <location filename="../qml/main.qml" line="303"/>
         <source>Put %1 in image capture mode</source>
         <translation>%1을 이미지 캡처 모드로 설정</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="394"/>
-        <location filename="../qml/main.qml" line="400"/>
+        <location filename="../qml/main.qml" line="350"/>
+        <location filename="../qml/main.qml" line="356"/>
         <source>Record video</source>
         <translation>비디오 녹화</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="395"/>
-        <location filename="../qml/main.qml" line="401"/>
+        <location filename="../qml/main.qml" line="351"/>
+        <location filename="../qml/main.qml" line="357"/>
         <source>Stop video recording</source>
         <translation>비디오 녹화 중지</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="398"/>
+        <location filename="../qml/main.qml" line="354"/>
         <source>Video capture mode</source>
         <translation>비디오 캡처 모드</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="404"/>
+        <location filename="../qml/main.qml" line="360"/>
         <source>Put %1 in video recording mode</source>
         <translation>%1을 비디오 녹화 모드로 설정</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="406"/>
+        <location filename="../qml/main.qml" line="362"/>
         <source>Start recording to a video file</source>
         <translation>비디오 파일에 녹화 시작</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="407"/>
+        <location filename="../qml/main.qml" line="363"/>
         <source>Stop current video recording</source>
         <translation>현재 비디오 녹화 중지</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="424"/>
+        <location filename="../qml/main.qml" line="380"/>
         <source>Open last video</source>
         <translation>마지막 비디오 열기</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="436"/>
+        <location filename="../qml/main.qml" line="392"/>
         <source>Open last recorded video</source>
         <translation>마지막으로 녹화한 비디오 열기</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="592"/>
+        <source>Installing virtual camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="593"/>
+        <source>Running commands</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="425"/>
@@ -3386,6 +3463,7 @@ duration (seconds)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="80"/>
         <location filename="../../../libAvKys/Plugins/Rotate/share/qml/main.qml" line="65"/>
         <source>Keep resolution</source>
         <translation type="unfinished"></translation>

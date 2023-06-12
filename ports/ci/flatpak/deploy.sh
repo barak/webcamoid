@@ -21,13 +21,36 @@
 appId=io.github.webcamoid.Webcamoid
 export PACKAGES_DIR=${PWD}/webcamoid-packages/linux
 
-if [ "${DAILY_BUILD}" = 1 ]; then
-    version=daily-$(basename ${GITHUB_REF})-$(git rev-list --count HEAD)
+if [ "${GITHUB_SHA}" != "" ]; then
+    branch=${GITHUB_REF##*/}
 else
-    version=$(flatpak run "${appId}" -v | awk '{print $2}')
+    branch=${CIRRUS_BASE_BRANCH}
 fi
 
-package=webcamoid-installer-linux-${version}-x86_64.flatpak
+if [ "${DAILY_BUILD}" = 1 ]; then
+    version=daily-${branch}
+else
+    verMaj=$(grep VER_MAJ libAvKys/cmake/ProjectCommons.cmake | awk '{print $2}' | tr -d ')' | head -n 1)
+    verMin=$(grep VER_MIN libAvKys/cmake/ProjectCommons.cmake | awk '{print $2}' | tr -d ')' | head -n 1)
+    verPat=$(grep VER_PAT libAvKys/cmake/ProjectCommons.cmake | awk '{print $2}' | tr -d ')' | head -n 1)
+    version=${verMaj}.${verMin}.${verPat}
+fi
+
+architecture="${DOCKERIMG%%/*}"
+
+case "$architecture" in
+    arm64v8)
+        packageArch=arm64
+        ;;
+    arm32v7)
+        packageArch=arm32
+        ;;
+    *)
+        packageArch=x64
+        ;;
+esac
+
+package=webcamoid-installer-linux-${version}-${packageArch}.flatpak
 packagePath=${PACKAGES_DIR}/${package}
 
 echo "Running packaging"

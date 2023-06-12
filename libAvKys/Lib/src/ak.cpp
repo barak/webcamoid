@@ -34,6 +34,7 @@
 #include "akaudiopacket.h"
 #include "akcaps.h"
 #include "akcolorcomponent.h"
+#include "akcolorconvert.h"
 #include "akcolorplane.h"
 #include "akcompressedvideocaps.h"
 #include "akcompressedvideopacket.h"
@@ -99,6 +100,7 @@ void Ak::registerTypes()
     AkAudioPacket::registerTypes();
     AkCaps::registerTypes();
     AkColorComponent::registerTypes();
+    AkColorConvert::registerTypes();
     AkColorPlane::registerTypes();
     AkColorizedImage::registerTypes();
     AkCompressedVideoCaps::registerTypes();
@@ -127,6 +129,21 @@ qint64 Ak::id()
     static qint64 id = 0;
 
     return id++;
+}
+
+QString Ak::platform()
+{
+#ifdef Q_OS_WIN32
+    return {"windows"};
+#elif defined(Q_OS_OSX)
+    return {"macos"};
+#elif defined(Q_OS_ANDROID)
+    return {"android"};
+#elif defined(Q_OS_POSIX)
+    return {"posix"};
+#else
+    return {"unknown"};
+#endif
 }
 
 void Ak::setQmlEngine(QQmlEngine *engine)

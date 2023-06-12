@@ -28,6 +28,11 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QtConcurrent>
+
+#ifdef Q_OS_ANDROID
+#include <QtAndroid>
+#endif
+
 #include <akaudiocaps.h>
 #include <akcaps.h>
 #include <akpacket.h>
@@ -44,6 +49,16 @@
 #include "updates.h"
 
 #define DUMMY_OUTPUT_DEVICE ":dummyout:"
+
+#ifdef Q_OS_WIN32
+    #define DEFAULT_VCAM_DRIVER "VideoSink/VirtualCamera/Impl/AkVirtualCameraDShow"
+#elif defined(Q_OS_OSX)
+    #define DEFAULT_VCAM_DRIVER "VideoSink/VirtualCamera/Impl/AkVirtualCameraCMIO"
+#elif defined(Q_OS_LINUX)
+    #define DEFAULT_VCAM_DRIVER "VideoSink/VirtualCamera/Impl/AkVCam"
+#else
+    #define DEFAULT_VCAM_DRIVER ""
+#endif
 
 using ObjectPtr = QSharedPointer<QObject>;
 
@@ -71,8 +86,11 @@ class VideoLayerPrivate
         QString m_latestVersion;
         bool m_playOnStart {true};
         bool m_outputsAsInputs {false};
+        bool m_currentVCamInstalled;
 
         explicit VideoLayerPrivate(VideoLayer *self);
+        bool isFlatpak() const;
+        static bool canAccessStorage();
         void connectSignals();
         AkElementPtr sourceElement(const QString &stream) const;
         QString sourceId(const QString &stream) const;
@@ -99,6 +117,7 @@ VideoLayer::VideoLayer(QQmlApplicationEngine *engine, QObject *parent):
     QObject(parent)
 {
     this->d = new VideoLayerPrivate(this);
+    this->d->canAccessStorage();
     this->setQmlEngine(engine);
     this->d->connectSignals();
     this->d->loadProperties();
@@ -113,14 +132,51 @@ VideoLayer::VideoLayer(QQmlApplicationEngine *engine, QObject *parent):
             && links["VideoSink/VirtualCamera/Impl/*"] != this->d->m_vcamDriver) {
             this->d->m_vcamDriver = links["VideoSink/VirtualCamera/Impl/*"];
             emit this->vcamDriverChanged(this->d->m_vcamDriver);
-            QString version;
 
-            if (this->d->m_cameraOutput)
-                version = this->d->m_cameraOutput->property("driverVersion").toString();
+            if (this->d->m_cameraOutput) {
+                auto version = this->d->m_cameraOutput->property("driverVersion").toString();
+                emit this->currentVCamVersionChanged(version);
+                auto installed =
+                    this->d->m_cameraOutput->property("driverInstalled").toBool();
 
-            emit this->currentVCamVersionChanged(version);
+                if (this->d->m_currentVCamInstalled != installed) {
+                    this->d->m_currentVCamInstalled = installed;
+                    emit this->currentVCamInstalledChanged(installed);
+                }
+            }
         }
     });
+
+    if (this->d->m_cameraOutput) {
+        this->d->m_currentVCamInstalled =
+            this->d->m_cameraOutput->property("driverInstalled").toBool();
+
+        if (!this->d->m_currentVCamInstalled) {
+            QString pluginId;
+            auto plugins = akPluginManager->listPlugins("VideoSink/VirtualCamera/Impl/*",
+                                                        {"VirtualCameraImpl"},
+                                                        AkPluginManager::FilterEnabled);
+            for (auto &plugin: plugins) {
+                auto pluginInstance = akPluginManager->create<QObject>(plugin);
+
+                if (pluginInstance && pluginInstance->property("isInstalled").toBool()) {
+                    if (pluginId.isEmpty())
+                        pluginId = plugin;
+
+                    if (plugin == DEFAULT_VCAM_DRIVER) {
+                        pluginId = plugin;
+
+                        break;
+                    }
+                }
+            }
+
+            if (pluginId.isEmpty())
+                pluginId = DEFAULT_VCAM_DRIVER;
+
+            akPluginManager->link("VideoSink/VirtualCamera/Impl/*", pluginId);
+        }
+    }
 }
 
 VideoLayer::~VideoLayer()
@@ -328,6 +384,27 @@ AkVideoCapsList VideoLayer::supportedOutputVideoCaps(const QString &device) cons
 AkElement::ElementState VideoLayer::state() const
 {
     return this->d->m_state;
+}
+
+VideoLayer::FlashModeList VideoLayer::supportedFlashModes(const QString &videoInput) const
+{
+    if (!this->d->m_cameraCapture)
+        return {};
+
+    FlashModeList modes;
+    QMetaObject::invokeMethod(this->d->m_cameraCapture.data(),
+                              "supportedFlashModes",
+                              Q_RETURN_ARG(FlashModeList, modes),
+                              Q_ARG(QString, videoInput));
+    return modes;
+}
+
+VideoLayer::FlashMode VideoLayer::flashMode() const
+{
+    if (!this->d->m_cameraCapture)
+        return FlashMode_Off;
+
+    return this->d->m_cameraCapture->property("flashMode").value<FlashMode>();
 }
 
 bool VideoLayer::playOnStart() const
@@ -635,13 +712,30 @@ bool VideoLayer::isVCamSupported() const
 
 VideoLayer::VCamStatus VideoLayer::vcamInstallStatus() const
 {
-    auto akvcam = akPluginManager->create<QObject>("VideoSink/VirtualCamera/Impl/AkVCam");
+    bool akvcamInstalled = false;
+    bool otherInstalled = false;
+    auto plugins = akPluginManager->listPlugins("VideoSink/VirtualCamera/Impl/*",
+                                                {"VirtualCameraImpl"},
+                                                AkPluginManager::FilterEnabled);
 
-    if (akvcam && akvcam->property("isInstalled").toBool())
+    for (auto &plugin: plugins) {
+        auto pluginInstance = akPluginManager->create<QObject>(plugin);
+
+        if (pluginInstance && pluginInstance->property("isInstalled").toBool()) {
+            if (plugin == DEFAULT_VCAM_DRIVER) {
+                akvcamInstalled = true;
+
+                break;
+            }
+
+            otherInstalled = true;
+        }
+    }
+
+    if (akvcamInstalled)
         return VCamInstalled;
 
-    if (this->d->m_cameraOutput
-        && this->d->m_cameraOutput->property("driverInstalled").toBool())
+    if (otherInstalled)
         return VCamInstalledOther;
 
     return VCamNotInstalled;
@@ -658,6 +752,11 @@ QString VideoLayer::currentVCamVersion() const
         return this->d->m_cameraOutput->property("driverVersion").toString();
 
     return {};
+}
+
+bool VideoLayer::isCurrentVCamInstalled() const
+{
+    return this->d->m_currentVCamInstalled;
 }
 
 QString VideoLayer::vcamUpdateUrl() const
@@ -680,6 +779,11 @@ QString VideoLayer::vcamDownloadUrl() const
 #else
     return {};
 #endif
+}
+
+QString VideoLayer::defaultVCamDriver() const
+{
+    return {DEFAULT_VCAM_DRIVER};
 }
 
 bool VideoLayer::applyPicture()
@@ -711,7 +815,7 @@ bool VideoLayer::downloadVCam()
         return false;
 
     auto locations =
-            QStandardPaths::standardLocations(QStandardPaths::TempLocation);
+        QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
 
     if (locations.isEmpty())
         return false;
@@ -757,7 +861,7 @@ bool VideoLayer::executeVCamInstaller(const QString &installer)
         execInfo.lpFile = installer.toStdString().c_str();
         execInfo.lpParameters = "";
         execInfo.lpDirectory = "";
-        execInfo.nShow = SW_HIDE;
+        execInfo.nShow = SW_SHOWNORMAL;
         execInfo.hInstApp = nullptr;
         ShellExecuteExA(&execInfo);
 
@@ -783,11 +887,61 @@ bool VideoLayer::executeVCamInstaller(const QString &installer)
         errorString = proc.errorString();
 #else
         QProcess proc;
-        proc.start(installer, QStringList {});
+
+    #ifdef Q_PROCESSOR_X86
+        if (this->d->isFlatpak())
+            proc.start("flatpak-spawn", QStringList {"--host", installer});
+        else
+            proc.start(installer, QStringList {});
+    #else
+        auto readLine = [this, &proc] () {
+            while (proc.canReadLine())
+                emit this->vcamCliInstallLineReady(proc.readLine());
+        };
+
+        QObject::connect(&proc,
+                         &QProcess::started,
+                         this,
+                         &VideoLayer::vcamCliInstallStarted);
+        QObject::connect(&proc,
+                         &QProcess::readyReadStandardOutput,
+                         this,
+                         readLine,
+                         Qt::DirectConnection);
+        QObject::connect(&proc,
+                         &QProcess::readyReadStandardError,
+                         this,
+                         readLine,
+                         Qt::DirectConnection);
+
+        if (this->d->isFlatpak())
+            proc.start("flatpak-spawn",
+                       QStringList {"--host",
+                                    "pkexec",
+                                    "/bin/sh",
+                                    "-c",
+                                    "yes | " + installer});
+        else
+            proc.start("pkexec",
+                       QStringList {"/bin/sh",
+                                    "-c",
+                                    "yes | " + installer});
+    #endif
+
         proc.waitForFinished(-1);
         exitCode = proc.exitCode();
         errorString = proc.errorString();
+
+    #ifndef Q_PROCESSOR_X86
+        emit this->vcamCliInstallFinished();
+    #endif
 #endif
+
+        if (exitCode != 0)
+            qDebug() << "Failed to run virtual camera installer:"
+                     << exitCode
+                     << ":"
+                     << errorString;
 
         emit this->vcamInstallFinished(exitCode, errorString);
     });
@@ -978,6 +1132,12 @@ void VideoLayer::setState(AkElement::ElementState state)
     }
 }
 
+void VideoLayer::setFlashMode(FlashMode mode)
+{
+    if (this->d->m_cameraCapture)
+        this->d->m_cameraCapture->setProperty("flashMode", mode);
+}
+
 void VideoLayer::setPlayOnStart(bool playOnStart)
 {
     if (this->d->m_playOnStart == playOnStart)
@@ -1025,6 +1185,11 @@ void VideoLayer::resetState()
     this->setState(AkElement::ElementStateNull);
 }
 
+void VideoLayer::resetFlashMode()
+{
+    this->setFlashMode(FlashMode_Off);
+}
+
 void VideoLayer::resetPlayOnStart()
 {
     this->setPlayOnStart(true);
@@ -1061,6 +1226,8 @@ void VideoLayer::setQmlEngine(QQmlApplicationEngine *engine)
         qRegisterMetaType<InputType>("VideoInputType");
         qRegisterMetaType<OutputType>("VideoOutputType");
         qRegisterMetaType<VCamStatus>("VCamStatus");
+        qRegisterMetaType<FlashMode>("FlashMode");
+        qRegisterMetaType<FlashModeList>("FlashModeList");
         qmlRegisterType<VideoLayer>("Webcamoid", 1, 0, "VideoLayer");
     }
 }
@@ -1206,6 +1373,49 @@ VideoLayerPrivate::VideoLayerPrivate(VideoLayer *self):
 {
 }
 
+bool VideoLayerPrivate::isFlatpak() const
+{
+    static const bool isFlatpak = QFile::exists("/.flatpak-info");
+
+    return isFlatpak;
+}
+
+bool VideoLayerPrivate::canAccessStorage()
+{
+#ifdef Q_OS_ANDROID
+    static bool done = false;
+    static bool result = false;
+
+    if (done)
+        return result;
+
+    QStringList permissions {
+        "android.permission.READ_EXTERNAL_STORAGE"
+    };
+    QStringList neededPermissions;
+
+    for (auto &permission: permissions)
+        if (QtAndroid::checkPermission(permission) == QtAndroid::PermissionResult::Denied)
+            neededPermissions << permission;
+
+    if (!neededPermissions.isEmpty()) {
+        auto results = QtAndroid::requestPermissionsSync(neededPermissions);
+
+        for (auto it = results.constBegin(); it != results.constEnd(); it++)
+            if (it.value() == QtAndroid::PermissionResult::Denied) {
+                done = true;
+
+                return false;
+            }
+    }
+
+    done = true;
+    result = true;
+#endif
+
+    return true;
+}
+
 void VideoLayerPrivate::connectSignals()
 {
     if (this->m_cameraCapture) {
@@ -1226,6 +1436,10 @@ void VideoLayerPrivate::connectSignals()
                          SIGNAL(streamsChanged(QList<int>)),
                          self,
                          SLOT(updateCaps()));
+        QObject::connect(this->m_cameraCapture.data(),
+                         SIGNAL(flashModeChanged(FlashMode)),
+                         self,
+                         SIGNAL(flashModeChanged(FlashMode)));
     }
 
     if (this->m_desktopCapture) {
@@ -1566,11 +1780,17 @@ QString VideoLayerPrivate::vcamDownloadUrl() const
     return QString("https://github.com/webcamoid/akvirtualcamera/releases/download/%1/akvirtualcamera-windows-%1.exe")
            .arg(this->m_latestVersion);
 #elif defined(Q_OS_OSX)
-    return QString("https://github.com/webcamoid/akvirtualcamera/releases/download/%1/akvirtualcamera-mac-%1.pkg")
-           .arg(this->m_latestVersion);
+    return QString("https://github.com/webcamoid/akvirtualcamera/releases/download/%1/akvirtualcamera-mac-%1-%2.pkg")
+           .arg(this->m_latestVersion)
+           .arg(TARGET_ARCH);
 #elif defined(Q_OS_LINUX)
-    return QString("https://github.com/webcamoid/akvcam/releases/download/%1/akvcam-linux-%1.run")
-           .arg(this->m_latestVersion);
+    #ifdef Q_PROCESSOR_X86
+        return QString("https://github.com/webcamoid/akvcam/releases/download/%1/akvcam-installer-gui-linux-%1.run")
+               .arg(this->m_latestVersion);
+    #else
+        return QString("https://github.com/webcamoid/akvcam/releases/download/%1/akvcam-installer-cli-linux-%1.run")
+               .arg(this->m_latestVersion);
+    #endif
 #else
     return {};
 #endif

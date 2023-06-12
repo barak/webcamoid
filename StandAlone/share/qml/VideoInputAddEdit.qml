@@ -30,6 +30,9 @@ Dialog {
     height: AkUnit.create(320 * AkTheme.controlScale, "dp").pixels
     modal: true
 
+    readonly property string filePrefix: Ak.platform() == "windows"?
+                                             "file:///":
+                                             "file://"
     property bool editMode: false
 
     signal edited()
@@ -38,7 +41,7 @@ Dialog {
 
     function isFile(url)
     {
-        if (RegExp("^file://", "gi").test(url))
+        if (RegExp("^" + addEdit.filePrefix, "gi").test(url))
             return true
 
         return !RegExp("^[a-z][a-z0-9+-.]*://", "gi").test(url)
@@ -232,7 +235,7 @@ Dialog {
             filePath.text = mediaTools.urlToLocalFile(fileDialog.file)
             urlPath.text = ""
             fileDescription.text =
-                    addEdit.defaultDescription(fileDialog.file.toString())
+                    addEdit.defaultDescription(filePath.text)
             urlDescription.text = fileDescription.text
         }
     }

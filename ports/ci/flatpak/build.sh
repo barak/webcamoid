@@ -21,6 +21,22 @@
 appId=io.github.webcamoid.Webcamoid
 manifestFile=${appId}.yml
 
+if [ "${GITHUB_SHA}" != "" ]; then
+    branch=${GITHUB_REF##*/}
+    commitSha=${GITHUB_SHA}
+else
+    branch=${CIRRUS_BASE_BRANCH}
+    commitSha=${CIRRUS_BASE_SHA}
+fi
+
+if [ "${branch}" = "" ]; then
+    branch=$(git rev-parse --abbrev-ref HEAD)
+fi
+
+if [ "${commitSha}" = "" ]; then
+    commitSha=$(git rev-parse "origin/${branch}")
+fi
+
 cat << EOF > "${manifestFile}"
 app-id: ${appId}
 runtime: org.kde.Platform
@@ -39,6 +55,7 @@ finish-args:
   - --filesystem=xdg-pictures
   - --filesystem=xdg-videos
   - --device=all
+  - --talk-name=org.freedesktop.Flatpak
 modules:
   - name: webcamoid
     buildsystem: cmake-ninja
@@ -49,8 +66,16 @@ modules:
     sources:
       - type: git
         url: https://github.com/webcamoid/webcamoid.git
-        branch: ${GITHUB_REF##*/}
-        commit: ${GITHUB_SHA}
+        branch: ${branch}
+        commit: ${commitSha}
 EOF
 
-flatpak-builder --user --install webcamoid-build --force-clean "${manifestFile}"
+if [ "${ARM_BUILD}" = 1 ]; then
+    EXTRA_PARAMS="--disable-rofiles-fuse"
+fi
+
+flatpak-builder \
+  --user \
+  ${EXTRA_PARAMS} \
+  --install webcamoid-build \
+  --force-clean "${manifestFile}"

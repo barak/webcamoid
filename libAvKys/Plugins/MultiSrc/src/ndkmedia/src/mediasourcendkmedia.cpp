@@ -34,11 +34,20 @@
 #include "mediasourcendkmedia.h"
 #include "audiostream.h"
 #include "clock.h"
+#include "ndkerrormsg.h"
 #include "videostream.h"
+
+#if __ANDROID_API__ < 29
+#define AMEDIAFORMAT_KEY_FRAME_COUNT "frame-count"
+#endif
 
 class Stream
 {
     public:
+        AkCaps caps;
+        QString language;
+        bool defaultStream;
+
         Stream()
         {
         }
@@ -51,10 +60,6 @@ class Stream
             defaultStream(defaultStream)
         {
         }
-
-        AkCaps caps;
-        QString language;
-        bool defaultStream;
 };
 
 using MediaExtractorPtr = QSharedPointer<AMediaExtractor>;
@@ -63,12 +68,13 @@ class MediaSourceNDKMediaPrivate
 {
     public:
         MediaSourceNDKMedia *self;
+        QFile m_mediaFile;
         QString m_media;
         QList<int> m_streams;
         qint64 m_maxPacketQueueSize {15 * 1024 * 1024};
         MediaExtractorPtr m_mediaExtractor;
         QThreadPool m_threadPool;
-        QMutex m_dataMutex;
+        QMutex m_extractMutex;
         QVector<Stream> m_streamInfo;
         QMap<int, AbstractStreamPtr> m_streamsMap;
         Clock m_globalClock;
@@ -82,9 +88,9 @@ class MediaSourceNDKMediaPrivate
         bool m_showLog {false};
 
         explicit MediaSourceNDKMediaPrivate(MediaSourceNDKMedia *self);
+        qint64 packetQueueSize() const;
         AbstractStreamPtr createStream(int index);
         void readPackets();
-        void readPacket();
         static AkCaps capsFromMediaFormat(AMediaFormat *mediaFormat);
         void updateStreams();
 };
@@ -94,8 +100,8 @@ MediaSourceNDKMedia::MediaSourceNDKMedia(QObject *parent):
 {
     this->d = new MediaSourceNDKMediaPrivate(this);
 
-    if (this->d->m_threadPool.maxThreadCount() < 2)
-        this->d->m_threadPool.setMaxThreadCount(2);
+    if (this->d->m_threadPool.maxThreadCount() < 4)
+        this->d->m_threadPool.setMaxThreadCount(4);
 }
 
 MediaSourceNDKMedia::~MediaSourceNDKMedia()
@@ -203,6 +209,10 @@ qint64 MediaSourceNDKMedia::durationMSecs()
 
         for (size_t i = 0; i < numtracks; i++) {
             auto format = AMediaExtractor_getTrackFormat(extractor, i);
+
+            if (!format)
+                continue;
+
             int64_t streamDuration = 0;
             AMediaFormat_getInt64(format, AMEDIAFORMAT_KEY_DURATION, &streamDuration);
             duration = qMax(duration, streamDuration);
@@ -260,7 +270,7 @@ void MediaSourceNDKMedia::seek(qint64 mSecs,
 
     pts = qBound<qint64>(0, pts, this->durationMSecs()) * 1000;
 
-    this->d->m_dataMutex.lock();
+    this->d->m_extractMutex.lock();
 
     for (auto &stream: this->d->m_streamsMap)
         stream->flush();
@@ -269,7 +279,7 @@ void MediaSourceNDKMedia::seek(qint64 mSecs,
                            pts,
                            AMEDIAEXTRACTOR_SEEK_CLOSEST_SYNC);
     this->d->m_globalClock.setClock(qreal(pts) / 1e6);
-    this->d->m_dataMutex.unlock();
+    this->d->m_extractMutex.unlock();
 }
 
 void MediaSourceNDKMedia::setMedia(const QString &media)
@@ -280,6 +290,7 @@ void MediaSourceNDKMedia::setMedia(const QString &media)
     auto state = this->d->m_state;
     this->setState(AkElement::ElementStateNull);
     this->d->m_media = media;
+    this->d->updateStreams();
 
     if (!this->d->m_media.isEmpty())
         this->setState(state);
@@ -333,6 +344,9 @@ void MediaSourceNDKMedia::setSync(bool sync)
 
     this->d->m_sync = sync;
     emit this->syncChanged(sync);
+
+    for (auto &stream: this->d->m_streamsMap)
+        stream->setSync(sync);
 }
 
 void MediaSourceNDKMedia::resetMedia()
@@ -375,14 +389,53 @@ bool MediaSourceNDKMedia::setState(AkElement::ElementState state)
     case AkElement::ElementStateNull: {
         if (state == AkElement::ElementStatePaused
             || state == AkElement::ElementStatePlaying) {
+        auto mediaExtractor = AMediaExtractor_new();
+
+            if (!mediaExtractor) {
+                qDebug() << "Can't create MediaExtractor";
+
+                return false;
+            }
+
             this->d->m_mediaExtractor =
-                    MediaExtractorPtr(AMediaExtractor_new(),
+                    MediaExtractorPtr(mediaExtractor,
                                       [] (AMediaExtractor *mediaExtractor) {
                                         AMediaExtractor_delete(mediaExtractor);
                                       });
 
-            if (AMediaExtractor_setDataSource(this->d->m_mediaExtractor.data(),
-                                              this->d->m_media.toStdString().c_str()) != AMEDIA_OK) {
+            media_status_t status = AMEDIA_ERROR_UNKNOWN;
+
+            if (QFileInfo(this->d->m_media).isFile()
+                && QFileInfo::exists(this->d->m_media)) {
+                this->d->m_mediaFile.setFileName(this->d->m_media);
+
+                if (!this->d->m_mediaFile.open(QIODevice::ReadOnly)) {
+                    this->d->m_mediaExtractor.clear();
+                    qDebug() << "Failed to open"
+                             << this->d->m_mediaFile.fileName()
+                             << ":"
+                             << this->d->m_mediaFile.errorString();
+
+                    return false;
+                }
+
+                status = AMediaExtractor_setDataSourceFd(this->d->m_mediaExtractor.data(),
+                                                         this->d->m_mediaFile.handle(),
+                                                         0,
+                                                         this->d->m_mediaFile.size());
+            } else {
+                status = AMediaExtractor_setDataSource(this->d->m_mediaExtractor.data(),
+                                                       this->d->m_media.toStdString().c_str());
+            }
+
+            if (status != AMEDIA_OK) {
+                this->d->m_mediaExtractor.clear();
+                this->d->m_mediaFile.close();
+                qDebug() << "Failed to set data source to"
+                         << this->d->m_media
+                         << ":"
+                         << mediaStatusToStr(status, "Unknown");
+
                 return false;
             }
 
@@ -412,7 +465,7 @@ bool MediaSourceNDKMedia::setState(AkElement::ElementState state)
                                  this,
                                  SLOT(log()));
                 QObject::connect(stream.data(),
-                                 SIGNAL(eof()),
+                                 SIGNAL(eosReached()),
                                  this,
                                  SLOT(doLoop()));
 
@@ -448,6 +501,7 @@ bool MediaSourceNDKMedia::setState(AkElement::ElementState state)
 
             this->d->m_streamsMap.clear();
             this->d->m_mediaExtractor.clear();
+            this->d->m_mediaFile.close();
             this->d->m_state = state;
             emit this->stateChanged(state);
 
@@ -482,6 +536,7 @@ bool MediaSourceNDKMedia::setState(AkElement::ElementState state)
 
             this->d->m_streamsMap.clear();
             this->d->m_mediaExtractor.clear();
+            this->d->m_mediaFile.close();
             this->d->m_state = state;
             emit this->stateChanged(state);
 
@@ -541,24 +596,31 @@ void MediaSourceNDKMedia::log()
 
     QString diffType;
     qreal diff;
+    qint64 audioQueueSize = 0;
+    qint64 videoQueueSize = 0;
 
     if (audioStream && videoStream) {
         diffType = "A-V";
         diff = audioStream->clockDiff() - videoStream->clockDiff();
+        audioQueueSize = audioStream->queueSize();
+        videoQueueSize = videoStream->queueSize();
     } else if (audioStream) {
         diffType = "M-A";
         diff = -audioStream->clockDiff();
+        audioQueueSize = audioStream->queueSize();
     } else if (videoStream) {
         diffType = "M-V";
         diff = -videoStream->clockDiff();
+        videoQueueSize = videoStream->queueSize();
     } else
         return;
 
-    QString logFmt("%1 %2: %3");
+    QString logFmt("%1 %2: %3 aq=%4KB vq=%5KB");
     QString log = logFmt.arg(this->d->m_globalClock.clock(), 7, 'f', 2)
                         .arg(diffType)
-                        .arg(diff, 7, 'f', 3);
-
+                        .arg(diff, 7, 'f', 3)
+                        .arg(audioQueueSize / 1024, 5)
+                        .arg(videoQueueSize / 1024, 5);
     qDebug() << log.toStdString().c_str();
 }
 
@@ -568,9 +630,23 @@ MediaSourceNDKMediaPrivate::MediaSourceNDKMediaPrivate(MediaSourceNDKMedia *self
 
 }
 
+qint64 MediaSourceNDKMediaPrivate::packetQueueSize() const
+{
+    qint64 size = 0;
+
+    for (auto &stream: this->m_streamsMap)
+        size += stream->queueSize();
+
+    return size;
+}
+
 AbstractStreamPtr MediaSourceNDKMediaPrivate::createStream(int index)
 {
     auto mediaExtractor = this->m_mediaExtractor.data();
+
+    if (!mediaExtractor)
+        return {};
+
     auto type = AbstractStream::type(mediaExtractor, uint(index));
     AbstractStreamPtr stream;
     auto id = Ak::id();
@@ -595,12 +671,6 @@ AbstractStreamPtr MediaSourceNDKMediaPrivate::createStream(int index)
         break;
 
     default:
-        stream = AbstractStreamPtr(new AbstractStream(mediaExtractor,
-                                                      uint(index),
-                                                      id,
-                                                      &this->m_globalClock,
-                                                      this->m_sync));
-
         break;
     }
 
@@ -616,40 +686,46 @@ void MediaSourceNDKMediaPrivate::readPackets()
             continue;
         }
 
-        this->readPacket();
+        if (!this->m_eos) {
+            auto streamIndex =
+                    AMediaExtractor_getSampleTrackIndex(this->m_mediaExtractor.data());
 
-        for (auto &stream: this->m_streamsMap)
-            stream->decodeData();
-    }
-}
+            if (streamIndex < 0) {
+                for (auto &stream: this->m_streamsMap) {
+                    stream->packetEnqueue(true);
 
-void MediaSourceNDKMediaPrivate::readPacket()
-{
-    this->m_dataMutex.lock();
+                    while (this->m_run) {
+                        auto result = stream->decodeData();
 
-    if (!this->m_eos) {
-        auto streamIndex =
-                AMediaExtractor_getSampleTrackIndex(this->m_mediaExtractor.data());
+                        if (result != AbstractStream::EnqueueOk)
+                            break;
+                    }
+                }
+            } else if (this->m_streamsMap.contains(streamIndex)) {
+                auto stream = this->m_streamsMap[streamIndex];
+                stream->packetEnqueue();
 
-        if (streamIndex < 0) {
-            for (auto &stream: this->m_streamsMap)
-                stream->packetEnqueue(true);
-        } else {
-            if (this->m_streamsMap.contains(streamIndex)
-                && (this->m_streams.isEmpty()
-                    || this->m_streams.contains(streamIndex))) {
-                this->m_streamsMap[streamIndex]->packetEnqueue();
+                while (this->m_run) {
+                    auto result = stream->decodeData();
+
+                    if (result != AbstractStream::EnqueueOk)
+                        break;
+                }
             }
+
+            AMediaExtractor_advance(this->m_mediaExtractor.data());
+
+            for (auto &stream: this->m_streamsMap)
+                this->m_eos |= stream->eos();
         }
-
-        this->m_eos = !AMediaExtractor_advance(this->m_mediaExtractor.data());
     }
-
-    this->m_dataMutex.unlock();
 }
 
 AkCaps MediaSourceNDKMediaPrivate::capsFromMediaFormat(AMediaFormat *mediaFormat)
 {
+    if (!mediaFormat)
+        return {};
+
     AkCaps caps;
     const char *mime = nullptr;
     AMediaFormat_getString(mediaFormat, AMEDIAFORMAT_KEY_MIME, &mime);
@@ -687,14 +763,32 @@ AkCaps MediaSourceNDKMediaPrivate::capsFromMediaFormat(AMediaFormat *mediaFormat
         AMediaFormat_getInt32(mediaFormat, AMEDIAFORMAT_KEY_WIDTH, &width);
         int32_t height = 0;
         AMediaFormat_getInt32(mediaFormat, AMEDIAFORMAT_KEY_HEIGHT, &height);
-        int32_t frameRate;
-        AMediaFormat_getInt32(mediaFormat,
+        float frameRate = 0.0f;
+        AMediaFormat_getFloat(mediaFormat,
                               AMEDIAFORMAT_KEY_FRAME_RATE,
                               &frameRate);
+
+        if (frameRate < 1.0f) {
+            int64_t duration = 0;
+            AMediaFormat_getInt64(mediaFormat,
+                                  AMEDIAFORMAT_KEY_DURATION,
+                                  &duration);
+            int64_t frameCount = 0;
+            AMediaFormat_getInt64(mediaFormat,
+                                  AMEDIAFORMAT_KEY_FRAME_COUNT,
+                                  &frameCount);
+            frameRate = duration > 0.0f?
+                            1.0e6f * frameCount / duration:
+                            0.0f;
+        }
+
+        if (frameRate < 1.0f)
+            frameRate = DEFAULT_FRAMERATE;
+
         caps = AkVideoCaps(AkVideoCaps::Format_rgb24,
                            width,
                            height,
-                           AkFrac(frameRate, 1));
+                           AkFrac(qRound64(1000 * frameRate), 1000));
     }
 
     return caps;
@@ -709,29 +803,69 @@ void MediaSourceNDKMediaPrivate::updateStreams()
 
     auto extractor = AMediaExtractor_new();
 
-    if (AMediaExtractor_setDataSource(extractor,
-                                      this->m_media.toStdString().c_str()) == AMEDIA_OK) {
-        for (size_t i = 0; i < AMediaExtractor_getTrackCount(extractor); i++) {
-            auto format = AMediaExtractor_getTrackFormat(extractor, i);
-            auto caps = MediaSourceNDKMediaPrivate::capsFromMediaFormat(format);
+    if (!extractor)
+        return;
 
-            if (caps) {
-                int32_t isDefault = false;
-                AMediaFormat_getInt32(format,
-                                      AMEDIAFORMAT_KEY_IS_DEFAULT,
-                                      &isDefault);
-                const char *language = nullptr;
-                AMediaFormat_getString(format,
-                                       AMEDIAFORMAT_KEY_LANGUAGE,
-                                       &language);
-                this->m_streamInfo << Stream(caps,
-                                             language?
-                                                 QString(language): QString(),
-                                             isDefault);
-            }
+    QFile mediaFile;
+    media_status_t status = AMEDIA_ERROR_UNKNOWN;
 
-            AMediaFormat_delete(format);
+    if (QFileInfo(this->m_media).isFile()
+        && QFileInfo::exists(this->m_media)) {
+        mediaFile.setFileName(this->m_media);
+
+        if (!mediaFile.open(QIODevice::ReadOnly)) {
+            AMediaExtractor_delete(extractor);
+            qDebug() << "Failed to open"
+                     << mediaFile.fileName()
+                     << ":"
+                     << mediaFile.errorString();
+
+            return;
         }
+
+        status = AMediaExtractor_setDataSourceFd(extractor,
+                                                 mediaFile.handle(),
+                                                 0,
+                                                 mediaFile.size());
+    } else {
+        status = AMediaExtractor_setDataSource(extractor,
+                                               this->m_media.toStdString().c_str());
+    }
+
+    if (status != AMEDIA_OK) {
+        AMediaExtractor_delete(extractor);
+        qDebug() << "Failed to set data source to"
+                 << this->m_media
+                 << ":"
+                 << mediaStatusToStr(status, "Unknown");
+
+        return;
+    }
+
+    for (size_t i = 0; i < AMediaExtractor_getTrackCount(extractor); i++) {
+        auto format = AMediaExtractor_getTrackFormat(extractor, i);
+
+        if (!format)
+            continue;
+
+        auto caps = MediaSourceNDKMediaPrivate::capsFromMediaFormat(format);
+
+        if (caps) {
+            int32_t isDefault = false;
+            AMediaFormat_getInt32(format,
+                                  AMEDIAFORMAT_KEY_IS_DEFAULT,
+                                  &isDefault);
+            const char *language = nullptr;
+            AMediaFormat_getString(format,
+                                   AMEDIAFORMAT_KEY_LANGUAGE,
+                                   &language);
+            this->m_streamInfo << Stream(caps,
+                                         language?
+                                             QString(language): QString(),
+                                         isDefault);
+        }
+
+        AMediaFormat_delete(format);
     }
 
     AMediaExtractor_delete(extractor);

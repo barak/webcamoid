@@ -100,8 +100,10 @@ dnf -y install \
     lib64jack-devel \
     lib64kmod-devel \
     lib64pipewire-devel \
+    lib64portaudio-devel \
     lib64pulseaudio-devel \
     lib64qt5concurrent-devel \
+    lib64qt5multimedia-devel \
     lib64qt5opengl-devel \
     lib64qt5quick-devel \
     lib64qt5quickcontrols2-devel \

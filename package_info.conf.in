@@ -1,6 +1,7 @@
 [Package]
 name = webcamoid
 targetPlatform = @TARGET_PLATFORM@
+debug = @PACKAGE_IS_DEBUG@
 sourcesDir = @CMAKE_SOURCE_DIR@
 mainExecutable = @MAIN_EXECUTABLE@
 programArgs = @PROGRAM_ARGS@
@@ -11,6 +12,9 @@ version = @VERSION@
 outputFormats = @OUTPUT_FORMATS@
 modules = Qt5, GStreamer, PipeWire, Vlc
 extraLibs = @EXTRA_LIBS@
+
+[Git]
+hideCommitCount = true
 
 [PipeWire]
 modulesDir = @PIPEWIRE_MODULES_DIR@

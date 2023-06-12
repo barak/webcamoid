@@ -19,6 +19,7 @@
 
 #include <QMap>
 #include <QThread>
+#include <QtDebug>
 #include <akfrac.h>
 #include <akcaps.h>
 #include <akpacket.h>
@@ -139,7 +140,11 @@ inline const ImageFormatToPixelFormatMap &imageFormatToPixelFormat()
 }
 
 #if __ANDROID_API__ < 28
-const char *AMEDIAFORMAT_KEY_SLICE_HEIGHT = "slice-height";
+#define AMEDIAFORMAT_KEY_SLICE_HEIGHT "slice-height"
+#endif
+
+#if __ANDROID_API__ < 29
+#define AMEDIAFORMAT_KEY_FRAME_COUNT "frame-count"
 #endif
 
 class VideoStreamPrivate
@@ -147,6 +152,7 @@ class VideoStreamPrivate
     public:
         VideoStream *self;
         qreal m_lastPts {0.0};
+        bool m_eos {false};
 
         explicit VideoStreamPrivate(VideoStream *self);
         AkPacket readPacket(size_t bufferIndex,
@@ -189,48 +195,88 @@ AkCaps VideoStream::caps() const
     AMediaFormat_getInt32(this->mediaFormat(),
                           AMEDIAFORMAT_KEY_HEIGHT,
                           &height);
-    int32_t frameRate;
-    AMediaFormat_getInt32(this->mediaFormat(),
+    float frameRate = 0.0f;
+    AMediaFormat_getFloat(this->mediaFormat(),
                           AMEDIAFORMAT_KEY_FRAME_RATE,
                           &frameRate);
+
+    if (frameRate < 1.0f) {
+        int64_t duration = 0;
+        AMediaFormat_getInt64(this->mediaFormat(),
+                              AMEDIAFORMAT_KEY_DURATION,
+                              &duration);
+        int64_t frameCount = 0;
+        AMediaFormat_getInt64(this->mediaFormat(),
+                              AMEDIAFORMAT_KEY_FRAME_COUNT,
+                              &frameCount);
+        frameRate = duration > 0.0f?
+                        1.0e6f * frameCount / duration:
+                        0.0f;
+    }
+
+    if (frameRate < 1.0)
+        frameRate = DEFAULT_FRAMERATE;
 
     return AkVideoCaps(imageFormatToPixelFormat().value(colorFormat),
                        width,
                        height,
-                       {frameRate, 1});
+                       {qRound64(1000 * frameRate), 1000});
 }
 
-bool VideoStream::decodeData()
+bool VideoStream::eos() const
+{
+    return this->d->m_eos;
+}
+
+AbstractStream::EnqueueResult VideoStream::decodeData()
 {
     if (!this->isValid())
-        return false;
+        return EnqueueFailed;
 
     AMediaCodecBufferInfo info;
     memset(&info, 0, sizeof(AMediaCodecBufferInfo));
     ssize_t timeOut = 5000;
     auto bufferIndex =
             AMediaCodec_dequeueOutputBuffer(this->codec(), &info, timeOut);
+    AkPacket packet;
 
-    if (bufferIndex == AMEDIACODEC_INFO_TRY_AGAIN_LATER)
-        return true;
-    else if (bufferIndex >= 0) {
-        auto packet = this->d->readPacket(size_t(bufferIndex), info);
-
-        if (packet)
-            this->dataEnqueue(packet);
-
+    if (bufferIndex == AMEDIACODEC_INFO_TRY_AGAIN_LATER) {
+        return EnqueueAgain;
+    } else if (bufferIndex >= 0) {
+        packet = this->d->readPacket(size_t(bufferIndex), info);
         AMediaCodec_releaseOutputBuffer(this->codec(),
                                         size_t(bufferIndex),
                                         info.size != 0);
+
+        if (this->m_buffersQueued > 0) {
+            this->m_bufferQueueSize = this->m_bufferQueueSize *
+                                      (this->m_buffersQueued - 1)
+                                      / this->m_buffersQueued;
+            this->m_buffersQueued--;
+        }
     }
+
+    EnqueueResult result = EnqueueFailed;
 
     if (info.flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM) {
-        this->dataEnqueue({});
+        while (this->running()) {
+            result = this->dataEnqueue({});
 
-        return false;
+            if (result != EnqueueAgain)
+                break;
+        }
+
+        this->d->m_eos = true;
+    } else if (packet) {
+        while (this->running()) {
+            result = this->dataEnqueue(packet);
+
+            if (result != EnqueueAgain)
+                break;
+        }
     }
 
-    return true;
+    return result;
 }
 
 void VideoStream::processData(const AkPacket &packet)
@@ -304,10 +350,28 @@ AkPacket VideoStreamPrivate::readPacket(size_t bufferIndex,
     AMediaFormat_getInt32(format,
                           AMEDIAFORMAT_KEY_HEIGHT,
                           &height);
-    int32_t frameRate = 0;
-    AMediaFormat_getInt32(format,
+    float frameRate = 0.0f;
+    AMediaFormat_getFloat(format,
                           AMEDIAFORMAT_KEY_FRAME_RATE,
                           &frameRate);
+
+    if (frameRate < 1.0f) {
+        int64_t duration = 0;
+        AMediaFormat_getInt64(format,
+                              AMEDIAFORMAT_KEY_DURATION,
+                              &duration);
+        int64_t frameCount = 0;
+        AMediaFormat_getInt64(format,
+                              AMEDIAFORMAT_KEY_FRAME_COUNT,
+                              &frameCount);
+        frameRate = duration > 0.0f?
+                        1.0e6f * frameCount / duration:
+                        0.0f;
+    }
+
+    if (frameRate < 1.0)
+        frameRate = DEFAULT_FRAMERATE;
+
     int32_t stride = 0;
     AMediaFormat_getInt32(format,
                           AMEDIAFORMAT_KEY_STRIDE,
@@ -329,7 +393,7 @@ AkPacket VideoStreamPrivate::readPacket(size_t bufferIndex,
     AkVideoPacket packet({imageFormatToPixelFormat().value(colorFormat),
                           width,
                           height,
-                          {frameRate, 1}});
+                          {qRound64(1000 * frameRate), 1000}});
     auto iData = data + info.offset;
 
     for (int plane = 0; plane < packet.planes(); ++plane) {

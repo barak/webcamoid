@@ -123,6 +123,7 @@ apt-get -y install \
     libpulse-dev \
     libqt5opengl5-dev \
     libqt5svg5-dev \
+    libsdl2-dev \
     libswresample-dev \
     libswscale-dev \
     libusb-dev \
@@ -134,6 +135,7 @@ apt-get -y install \
     make \
     patchelf \
     pkg-config \
+    portaudio19-dev \
     qml-module-qt-labs-folderlistmodel \
     qml-module-qt-labs-platform \
     qml-module-qt-labs-settings \
@@ -145,6 +147,7 @@ apt-get -y install \
     qml-module-qtquick-templates2 \
     qt5-qmake \
     qtdeclarative5-dev \
+    qtmultimedia5-dev \
     qtquickcontrols2-5-dev \
     qttools5-dev-tools \
     qtwayland5 \

@@ -21,7 +21,6 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.0 as LABS
 import Ak 1.0
 import AkControls 1.0 as AK
 import Webcamoid 1.0
@@ -36,6 +35,10 @@ ApplicationWindow {
     visible: true
     width: mediaTools.windowWidth
     height: mediaTools.windowHeight
+
+    readonly property string filePrefix: Ak.platform() == "windows"?
+                                             "file:///":
+                                             "file://"
 
     function version()
     {
@@ -62,12 +65,13 @@ ApplicationWindow {
     }
 
     function snapshotToClipboard()
-	{
-        var success = false
-		snapToClipboard.focus = false
+    {
         recording.takePhoto()
-		success = recording.copyToClipboard()
-        console.debug("Capture snapshot to Clipboard ", success ? "successful" : "failed")
+
+        if (recording.copyToClipboard())
+            console.debug("Capture snapshot to Clipboard successful")
+        else
+            console.debug("Capture snapshot to Clipboard failed")
     }
 
     function pathToUrl(path)
@@ -75,7 +79,7 @@ ApplicationWindow {
         if (path.length < 1)
             return ""
 
-        return "file://" + path
+        return wdgMainWidget.filePrefix + path
     }
 
     function adjustControlScale()
@@ -101,7 +105,6 @@ ApplicationWindow {
     Component.onCompleted: {
         x = (Screen.width - mediaTools.windowWidth) / 2
         y = (Screen.height - mediaTools.windowHeight) / 2
-        chkFlash.updateVisibility()
     }
 
     Connections {
@@ -117,9 +120,20 @@ ApplicationWindow {
     Connections {
         target: videoLayer
 
-        function onVideoInputChanged()
+        function onVcamCliInstallStarted()
         {
-            chkFlash.updateVisibility()
+            runCommandDialog.start()
+            runCommandDialog.open()
+        }
+
+        function onVcamCliInstallLineReady(line)
+        {
+            runCommandDialog.writeLine(line)
+        }
+
+        function onVcamCliInstallFinished()
+        {
+            runCommandDialog.stop()
         }
     }
 
@@ -166,108 +180,20 @@ ApplicationWindow {
 
         property real k: 0
     }
-    ColumnLayout {
+    Button {
         id: leftControls
-        width: AkUnit.create(childrenRect.width * AkTheme.controlScale, "dp").pixels
+        icon.source: "image://icons/menu"
+        text: qsTr("Main menu")
+        display: AbstractButton.IconOnly
+        flat: true
         anchors.top: parent.top
         anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
         anchors.left: parent.left
         anchors.leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        state: cameraControls.state
-
-        Button {
-            icon.source: "image://icons/video-effects"
-            display: AbstractButton.IconOnly
-            flat: true
-            Accessible.name: qsTr("Video effects")
-            Accessible.description: qsTr("Open video effects panel")
-
-            onClicked: videoEffectsPanel.open()
-        }
-        Switch {
-            id: chkFlash
-            text: qsTr("Use flash")
-            checked: true
-            visible: false
-            Accessible.name: text
-            Accessible.description: qsTr("Use flash when taking a photo")
-
-            function updateVisibility()
-            {
-                visible =
-                        videoLayer.deviceType(videoLayer.videoInput) == VideoLayer.InputCamera
-            }
-        }
-        ComboBox {
-            id: cbxTimeShot
-            textRole: "text"
-            Layout.fillWidth: true
-            visible: chkFlash.visible
-            Accessible.name: qsTr("Photo timer")
-            Accessible.description: qsTr("The time to wait before the photo is taken")
-            model: ListModel {
-                id: lstTimeOptions
-
-                ListElement {
-                    text: qsTr("Now")
-                    time: 0
-                }
-            }
-
-            Component.onCompleted: {
-                for (var i = 5; i < 35; i += 5)
-                    lstTimeOptions.append({text: qsTr("%1 seconds").arg(i),
-                                           time: i})
-            }
-        }
-
-        states: [
-            State {
-                name: "Video"
-
-                PropertyChanges {
-                    target: chkFlash
-                    visible: false
-                }
-            }
-        ]
-
-        transitions: Transition {
-            PropertyAnimation {
-                target: chkFlash
-                properties: "visible"
-                duration: cameraControls.animationTime
-            }
-        }
-    }
-
-    Button {
-        id: snapToClipboard
-        icon.source: "image://icons/paperclip"
-        display: AbstractButton.IconOnly
-        flat: true
-        anchors.top: parent.top
-        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        anchors.horizontalCenter: parent.horizontalCenter
-        Accessible.name: qsTr("Snapshot to Clipboard")
-        Accessible.description: qsTr("Captures a snapshot and copies it into the clipboard")
         ToolTip.visible: hovered
-        ToolTip.text: qsTr("Capture Snapshot to Clipboard")
-
-        onClicked: snapshotToClipboard()
-    }
-
-    Button {
-        id: rightControls
-        icon.source: "image://icons/settings"
-        display: AbstractButton.IconOnly
-        flat: true
-        anchors.top: parent.top
-        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        anchors.right: parent.right
-        anchors.rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        Accessible.name: qsTr("Sources and outputs settings")
-        Accessible.description: qsTr("Open sources and outputs settings menu")
+        ToolTip.text: text
+        Accessible.name: text
+        Accessible.description: qsTr("Open main menu")
 
         onClicked: settings.popup()
     }
@@ -275,11 +201,38 @@ ApplicationWindow {
         id: settings
         width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
 
-        onOpenAudioSettings: audioVideoPanel.openAudioSettings()
-        onOpenVideoSettings: audioVideoPanel.openVideoSettings()
+        onOpenAudioSettings: mainPanel.openAudioSettings()
+        onOpenVideoSettings: mainPanel.openVideoSettings()
+        onOpenVideoEffectsPanel: mainPanel.openVideoEffects()
         onOpenSettings: settingsDialog.open()
         onOpenDonationsDialog: Qt.openUrlExternally(mediaTools.projectDonationsUrl)
         onOpenAboutDialog: aboutDialog.open()
+    }
+    Button {
+        id: rightControls
+        icon.source: "image://icons/settings"
+        text: qsTr("Image capture options")
+        display: AbstractButton.IconOnly
+        flat: true
+        anchors.top: parent.top
+        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        anchors.right: parent.right
+        anchors.rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        ToolTip.visible: hovered
+        ToolTip.text: text
+        Accessible.name: text
+        Accessible.description: qsTr("Open image capture options menu")
+        enabled: videoLayer.state == AkElement.ElementStatePlaying
+        visible: cameraControls.state == ""
+
+        onClicked: localSettings.popup()
+    }
+    LocalSettingsMenu {
+        id: localSettings
+        width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
+
+        onCopyToClipboard: snapshotToClipboard()
+        onOpenImageCaptureSettings: imageCaptureDialog.open()
     }
     RecordingNotice {
         anchors.top: parent.top
@@ -321,8 +274,14 @@ ApplicationWindow {
                 Accessible.description: qsTr("Open last photo taken")
 
                 onClicked: {
-                    if (photoPreview.status == AkColorizedImage.Ready)
-                        Qt.openUrlExternally(photoPreview.icon.source)
+                    if (photoPreview.status == AkColorizedImage.Ready) {
+                        let url = "" + photoPreview.icon.source
+
+                        if (!url.startsWith(wdgMainWidget.filePrefix))
+                            url = wdgMainWidget.filePrefix + url
+
+                        Qt.openUrlExternally(url)
+                    }
                 }
             }
             RoundButton {
@@ -351,15 +310,16 @@ ApplicationWindow {
                     if (cameraControls.state == "Video") {
                         cameraControls.state = ""
                     } else {
-                        if (!chkFlash.visible) {
+                        if (!imageCaptureDialog.useFlash
+                            || videoLayer.deviceType(videoLayer.videoInput) != VideoLayer.InputCamera) {
                             savePhoto()
 
                             return
                         }
 
-                        if (cbxTimeShot.currentIndex == 0) {
-                            if (chkFlash.checked)
-                                flash.show()
+                        if (imageCaptureDialog.delay == 0) {
+                            if (imageCaptureDialog.useFlash)
+                                flash.shot()
                             else
                                 savePhoto()
 
@@ -369,11 +329,7 @@ ApplicationWindow {
                         if (updateProgress.running) {
                             updateProgress.stop()
                             pgbPhotoShot.value = 0
-                            cbxTimeShot.enabled = true
-                            chkFlash.enabled = true
                         } else {
-                            cbxTimeShot.enabled = false
-                            chkFlash.enabled = false
                             pgbPhotoShot.start = new Date().getTime()
                             updateProgress.start()
                         }
@@ -436,8 +392,14 @@ ApplicationWindow {
                 Accessible.description: qsTr("Open last recorded video")
 
                 onClicked: {
-                    if (videoPreview.status == Image.Ready)
-                        Qt.openUrlExternally("file://" + recording.lastVideo)
+                    if (videoPreview.status == Image.Ready) {
+                        let url = recording.lastVideo
+
+                        if (!url.startsWith(wdgMainWidget.filePrefix))
+                            url = wdgMainWidget.filePrefix + url
+
+                        Qt.openUrlExternally(url)
+                    }
                 }
             }
 
@@ -506,36 +468,30 @@ ApplicationWindow {
                 if (value >= 1) {
                     updateProgress.stop()
                     value = 0
-                    cbxTimeShot.enabled = true
-                    chkFlash.enabled = true
 
-                    if (chkFlash.checked)
-                        flash.show()
+                    if (imageCaptureDialog.useFlash)
+                        flash.shot()
                     else
                         savePhoto()
                 }
             }
         }
     }
-    VideoEffectsPanel {
-        id: videoEffectsPanel
-
-        onOpenVideoEffectsDialog: videoEffectsDialog.open()
-    }
-    AudioVideoPanel {
-        id: audioVideoPanel
+    MainPanel {
+        id: mainPanel
 
         onOpenErrorDialog: videoOutputError.openError(title, message)
+        onOpenVideoEffectsDialog: videoEffectsDialog.open()
     }
 
     SequentialAnimation {
         id: photoPreviewSaveAnimation
 
         PropertyAnimation {
-                   target: photoPreviewThumbnail
-                   property: "k"
-                   to: 0
-                   duration: 0
+            target: photoPreviewThumbnail
+            property: "k"
+            to: 0
+            duration: 0
         }
         PropertyAnimation {
             target: photoPreview
@@ -614,14 +570,32 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
-            var timeout = 1000 * lstTimeOptions.get(cbxTimeShot.currentIndex).time
-            pgbPhotoShot.value = (new Date().getTime() - pgbPhotoShot.start) / timeout
+            pgbPhotoShot.value = (new Date().getTime() - pgbPhotoShot.start)
+                                 / imageCaptureDialog.delay
         }
     }
     Flash {
         id: flash
 
+        onShotStarted: {
+            if (isHardwareFlash)
+                videoLayer.flashMode = VideoLayer.FlashMode_Torch
+        }
         onTriggered: savePhoto()
+        onShotFinished: {
+            if (isHardwareFlash)
+                videoLayer.flashMode = VideoLayer.FlashMode_Off
+        }
+    }
+    RunCommandDialog {
+        id: runCommandDialog
+        title: qsTr("Installing virtual camera")
+        message: qsTr("Running commands")
+        anchors.centerIn: Overlay.overlay
+    }
+    ImageCaptureDialog {
+        id: imageCaptureDialog
+        anchors.centerIn: Overlay.overlay
     }
     VideoEffectsDialog {
         id: videoEffectsDialog
@@ -635,23 +609,14 @@ ApplicationWindow {
     }
     VideoOutputError {
         id: videoOutputError
-
         anchors.centerIn: Overlay.overlay
     }
     UpdatesDialog {
         id: updatesDialog
-
         anchors.centerIn: Overlay.overlay
     }
     AboutDialog {
         id: aboutDialog
-
         anchors.centerIn: Overlay.overlay
-    }
-    LABS.Settings {
-        category: "GeneralConfigs"
-
-        property alias useFlash: chkFlash.checked
-        property alias photoTimeout: cbxTimeShot.currentIndex
     }
 }
