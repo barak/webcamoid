@@ -24,7 +24,7 @@ License: CC0-1.0
 Comment: All files in THIS FOLDER incorporates work from
          https://openclipart.org/
 
-Files: webcamoid.metainfo.xml
+Files: io.github.webcamoid.Webcamoid.metainfo.xml
 Copyright: 2020 Joel Barrios <darkshram@gmail.com>
 License: CC0-1.0
 Comment: license from metadata license in metadata; year and author from git log
@@ -35,6 +35,7 @@ License: BSD-3-clause
 
 Files: debian/*
 Copyright: 2015-2019 Herbert Parentes Fortes Neto <hpfn@debian.org>
+           2022-2023 Barak A. Pearlmutter <bap@debian.org>
 License: GPL-3+
 
 License: GPL-3+
