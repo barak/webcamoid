@@ -1,4 +1,4 @@
 StandAlone/share/themes/WebcamoidTheme/icons usr/share/webcamoid/
 /usr/share/icons
 StandAlone/share/qml usr/share/webcamoid/
-StandAlone/share/ts/*.qm usr/share/webcamoid/locale
+/usr/share/webcamoid/translations/*.qm
