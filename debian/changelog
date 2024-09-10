@@ -1,3 +1,10 @@
+webcamoid (9.1.1-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload
+  * Cherry-pick patch to fix build with ffmpeg 7 (Closes: #1072457)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 10 Sep 2024 14:48:52 -0400
+
 webcamoid (9.1.1-1) unstable; urgency=medium
 
   * New upstream version
