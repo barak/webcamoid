@@ -1,3 +1,15 @@
+webcamoid (9.2.3-1) UNRELEASED; urgency=medium
+
+  * New upstream version
+  * Switch to Qt6
+  * Cannot reproduce MultiSink_ffmpeg plugin crash (closes: #1053808)
+  * Cannot reproduce
+  * Redundant report of ffmpeg 7 issue, see 1072457 below (closes: #1080481)
+  * Calls to pkexec should now work (closes: #1006881)
+  * Select/add filter us errors scrollbox should be displayed (closes: #954839)
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Thu, 07 Nov 2024 17:08:06 +0000
+
 webcamoid (9.1.1-1.1) unstable; urgency=medium
 
   * Non-maintainer upload

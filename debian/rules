@@ -7,10 +7,16 @@ include /usr/share/dpkg/pkg-info.mk
 
 export DEB_BUILD_MAINT_OPTIONS := hardening=+all
 export DEB_LDFLAGS_MAINT_APPEND := -fPIE -pie
-export QT_SELECT=5
 
 %:
 	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	 -DCMAKE_BUILD_TYPE=Release \
+	 -DQT_QMAKE_EXECUTABLE=/usr/lib/qt6/bin/qmake \
+	 -DLRELEASE_TOOL=/usr/lib/qt6/bin/lrelease \
+	 -DLUPDATE_TOOL=/usr/lib/qt6/bin/lupdate
 
 execute_after_dh_install:
 	@echo "Superfluous license file."
