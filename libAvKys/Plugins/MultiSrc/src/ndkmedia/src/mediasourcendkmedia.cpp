@@ -268,7 +268,7 @@ void MediaSourceNDKMedia::seek(qint64 mSecs,
         break;
     }
 
-    pts = qBound<qint64>(0, pts, this->durationMSecs()) * 1000;
+    pts = qBound(0, qint64(pts), this->durationMSecs()) * 1000;
 
     this->d->m_extractMutex.lock();
 
@@ -479,8 +479,8 @@ bool MediaSourceNDKMedia::setState(AkElement::ElementState state)
             this->d->m_eos = false;
             auto result =
                     QtConcurrent::run(&this->d->m_threadPool,
-                                      this->d,
-                                      &MediaSourceNDKMediaPrivate::readPackets);
+                                      &MediaSourceNDKMediaPrivate::readPackets,
+                                      this->d);
             Q_UNUSED(result)
             this->d->m_state = state;
             emit this->stateChanged(state);

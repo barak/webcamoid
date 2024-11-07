@@ -17,13 +17,13 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import Ak
 
 AbstractButton {
     id: control
-    font.bold: true
+    font: AkTheme.fontSettings.button
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,

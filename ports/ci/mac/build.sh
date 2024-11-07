@@ -18,6 +18,14 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
+if [ ! -z "${GITHUB_SHA}" ]; then
+    export GIT_COMMIT_HASH="${GITHUB_SHA}"
+elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
+    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
+fi
+
 COMPILER_C=clang
 COMPILER_CXX=clang++
 
@@ -29,10 +37,10 @@ if [ "${UPLOAD}" == 1 ]; then
     EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOJACK=ON -DNOLIBUVC=ON -DNOPULSEAUDIO=ON"
 fi
 
-export PATH="${HOMEBREW_PATH}/opt/qt@5/bin:$PATH"
-export LDFLAGS="$LDFLAGS -L${HOMEBREW_PATH}/opt/qt@5/lib"
-export CPPFLAGS="$CPPFLAGS -I${HOMEBREW_PATH}/opt/qt@5/include"
-export PKG_CONFIG_PATH="${HOMEBREW_PATH}/opt/qt@5/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PATH="${HOMEBREW_PATH}/opt/qt@6/bin:$PATH"
+export LDFLAGS="$LDFLAGS -L${HOMEBREW_PATH}/opt/qt@6/lib"
+export CPPFLAGS="$CPPFLAGS -I${HOMEBREW_PATH}/opt/qt@6/include"
+export PKG_CONFIG_PATH="${HOMEBREW_PATH}/opt/qt@6/lib/pkgconfig:$PKG_CONFIG_PATH"
 export MACOSX_DEPLOYMENT_TARGET="10.14"
 INSTALL_PREFIX=${PWD}/webcamoid-data
 
@@ -45,6 +53,7 @@ cmake \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
     -DCMAKE_C_COMPILER="${COMPILER_C}" \
     -DCMAKE_CXX_COMPILER="${COMPILER_CXX}" \
+    -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
     -DDAILY_BUILD="${DAILY_BUILD}"
 cmake --build build --parallel "${NJOBS}"

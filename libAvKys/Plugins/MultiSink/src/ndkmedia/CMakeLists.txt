@@ -54,9 +54,22 @@ set(SOURCES
     pspec.json)
 
 if (NOT NONDKMEDIA AND MEDIANDK)
-    add_library(MultiSink_ndkmedia SHARED ${SOURCES})
+    qt_add_plugin(MultiSink_ndkmedia
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(MultiSink_ndkmedia PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(MultiSink_ndkmedia SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(MultiSink_ndkmedia EXCLUDE_FROM_ALL ${SOURCES})
+endif ()
+
+set_target_properties(MultiSink_ndkmedia PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(MultiSink_ndkmedia PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(MultiSink_ndkmedia avkys)
@@ -72,4 +85,10 @@ target_link_libraries(MultiSink_ndkmedia
 
 if (NOT NONDKMEDIA AND MEDIANDK)
     target_link_libraries(MultiSink_ndkmedia ${MEDIANDK})
+endif ()
+
+if (NOT NONDKMEDIA AND MEDIANDK)
+    install(TARGETS MultiSink_ndkmedia
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

@@ -36,6 +36,14 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
+find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
+             Multimedia)
+find_package(Qt${QT_VERSION_MAJOR} 6.5 COMPONENTS
+             Multimedia)
+
+if (Qt${QT_VERSION_MAJOR}Multimedia_FOUND)
+    list(APPEND QT_COMPONENTS Multimedia)
+endif ()
 
 set(SOURCES
     ../screendev.cpp
@@ -46,18 +54,23 @@ set(SOURCES
     src/qtscreendev.h
     pspec.json)
 
-if (ANDROID)
-    add_library(DesktopCapture_qtscreen SHARED EXCLUDE_FROM_ALL ${SOURCES})
+if (Qt${QT_VERSION_MAJOR}Multimedia_FOUND AND NOT NOQTSCREENCAPTURE AND NOT NOSCREENCAPTURE)
+    qt_add_plugin(DesktopCapture_qtscreen
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(DesktopCapture_qtscreen PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(DesktopCapture_qtscreen SHARED ${SOURCES})
+    add_library(DesktopCapture_qtscreen EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(DesktopCapture_qtscreen PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(DesktopCapture_qtscreen PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(DesktopCapture_qtscreen PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(DesktopCapture_qtscreen avkys)
@@ -68,8 +81,8 @@ target_compile_definitions(DesktopCapture_qtscreen PRIVATE AVKYS_PLUGIN_DESKTOPC
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(DesktopCapture_qtscreen avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS DesktopCapture_qtscreen RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS DesktopCapture_qtscreen DESTINATION ${PLUGINSDIR})
+if (Qt${QT_VERSION_MAJOR}Multimedia_FOUND AND NOT NOQTSCREENCAPTURE AND NOT NOSCREENCAPTURE)
+    install(TARGETS DesktopCapture_qtscreen
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

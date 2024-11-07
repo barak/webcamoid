@@ -36,19 +36,23 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Equalize SHARED
-            src/equalize.h
-            src/equalizeelement.h
-            src/equalize.cpp
-            src/equalizeelement.cpp
-            pspec.json)
+qt_add_plugin(Equalize
+              SHARED
+              CLASS_NAME Equalize)
+target_sources(Equalize PRIVATE
+               src/equalize.h
+               src/equalizeelement.h
+               src/equalize.cpp
+               src/equalizeelement.cpp
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Equalize PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Equalize PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Equalize PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Equalize avkys)
@@ -58,8 +62,6 @@ target_compile_definitions(Equalize PRIVATE AVKYS_PLUGIN_EQUALIZE)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Equalize avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Equalize RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Equalize DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Equalize
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

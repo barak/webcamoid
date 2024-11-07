@@ -18,6 +18,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 #qtIinstallerVerbose=--verbose
 
 if [ ! -z "${USE_WGET}" ]; then
@@ -32,13 +34,21 @@ brew install \
     ccache \
     cmake \
     ffmpeg \
-    gstreamer \
     jack \
     libuvc \
+    libx11 \
+    libxext \
+    libxfixes \
     p7zip \
     pkg-config \
     portaudio \
     pulseaudio \
     python \
-    qt@5 \
-    vlc
+    qt@6 \
+    vlc \
+    vulkan-headers
+
+if [ "${UPLOAD}" != 1 ]; then
+    brew install \
+        gstreamer
+fi

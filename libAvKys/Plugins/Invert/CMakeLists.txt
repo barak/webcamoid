@@ -36,19 +36,23 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Invert SHARED
-            src/invert.h
-            src/invertelement.h
-            src/invert.cpp
-            src/invertelement.cpp
-            pspec.json)
+qt_add_plugin(Invert
+              SHARED
+              CLASS_NAME Invert)
+target_sources(Invert PRIVATE
+               src/invert.h
+               src/invertelement.h
+               src/invert.cpp
+               src/invertelement.cpp
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Invert PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Invert PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Invert PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Invert avkys)
@@ -58,8 +62,6 @@ target_compile_definitions(Invert PRIVATE AVKYS_PLUGIN_INVERT)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Invert avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Invert RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Invert DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Invert
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

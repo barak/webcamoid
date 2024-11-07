@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Ripple SHARED
-            src/ripple.h
-            src/rippleelement.h
-            src/ripple.cpp
-            src/rippleelement.cpp
-            Ripple.qrc
-            pspec.json)
+qt_add_plugin(Ripple
+              SHARED
+              CLASS_NAME Ripple)
+target_sources(Ripple PRIVATE
+               src/ripple.h
+               src/rippleelement.h
+               src/ripple.cpp
+               src/rippleelement.cpp
+               Ripple.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Ripple PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Ripple PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Ripple PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Ripple avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Ripple PRIVATE AVKYS_PLUGIN_RIPPLE)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Ripple avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Ripple RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Ripple DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Ripple
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

@@ -37,9 +37,13 @@
 #include <QtGlobal>
 
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
+#include <QJniObject>
+
+#define PERMISSION_GRANTED  0
+#define PERMISSION_DENIED  -1
 #endif
 
+#include <ak.h>
 #include <akaudiocaps.h>
 #include <akcaps.h>
 #include <akfrac.h>
@@ -100,11 +104,13 @@ class RecordingPrivate
         AkElement::ElementState m_state {AkElement::ElementStateNull};
         int m_imageSaveQuality {-1};
         bool m_recordAudio {DEFAULT_RECORD_AUDIO};
+        bool m_printRP {true};
         AkVideoConverter m_videoConverter {{AkVideoCaps::Format_argbpack, 0, 0, {}}};
 
         explicit RecordingPrivate(Recording *self);
         static bool canAccessStorage();
         void linksChanged(const AkPluginLinks &links);
+        void printRecordingParameters();
         void updateProperties();
         void updatePreviews();
         void updateAvailableVideoFormats(bool save=false);
@@ -166,9 +172,12 @@ Recording::Recording(QQmlApplicationEngine *engine, QObject *parent):
                          SLOT(mediaLoaded(QString)));
     }
 
+    this->d->m_printRP = false;
     this->d->updateProperties();
     this->d->updateAvailableVideoFormats();
     this->d->updatePreviews();
+    this->d->m_printRP = true;
+    this->d->printRecordingParameters();
 }
 
 Recording::~Recording()
@@ -357,6 +366,7 @@ void Recording::setAudioCaps(const AkAudioCaps &audioCaps)
 
     this->d->m_audioCaps = audioCaps;
     emit this->audioCapsChanged(audioCaps);
+    this->d->printRecordingParameters();
     this->d->updateStreams(true);
 }
 
@@ -367,6 +377,7 @@ void Recording::setVideoCaps(const AkVideoCaps &videoCaps)
 
     this->d->m_videoCaps = videoCaps;
     emit this->videoCapsChanged(videoCaps);
+    this->d->printRecordingParameters();
     this->d->updateStreams(true);
 }
 
@@ -424,6 +435,7 @@ void Recording::setVideoFormat(const QString &videoFormat)
     this->d->m_videoFormat = videoFormat;
     emit this->videoFormatChanged(videoFormat);
     this->d->saveVideoFormat(videoFormat);
+    this->d->printRecordingParameters();
     this->d->updateAvailableVideoFormatExtensions(true);
     this->d->updateAvailableVideoFormatOptions(true);
     this->d->updateAvailableVideoCodecs(true);
@@ -484,6 +496,7 @@ void Recording::setVideoCodecParams(const QVariantMap &videoCodecParams)
 
     this->d->m_videoCodecParams = videoCodecParams;
     emit this->videoCodecParamsChanged(this->d->m_videoCodecParams);
+    this->d->printRecordingParameters();
     this->d->saveVideoCodecParams(videoCodecParams);
     this->d->updateStreams(true);
 }
@@ -495,6 +508,7 @@ void Recording::setAudioCodecParams(const QVariantMap &audioCodecParams)
 
     this->d->m_audioCodecParams = audioCodecParams;
     emit this->audioCodecParamsChanged(this->d->m_audioCodecParams);
+    this->d->printRecordingParameters();
     this->d->saveAudioCodecParams(audioCodecParams);
     this->d->updateStreams(true);
 }
@@ -858,8 +872,8 @@ void Recording::thumbnailUpdated(const AkPacket &packet)
     this->d->m_thumbnailMutex.unlock();
     auto result =
             QtConcurrent::run(&this->d->m_threadPool,
-                              this->d,
-                              &RecordingPrivate::thumbnailReady);
+                              &RecordingPrivate::thumbnailReady,
+                              this->d);
     Q_UNUSED(result)
 }
 
@@ -951,24 +965,80 @@ bool RecordingPrivate::canAccessStorage()
     if (done)
         return result;
 
+    QJniObject context =
+        qApp->nativeInterface<QNativeInterface::QAndroidApplication>()->context();
+
+    if (!context.isValid()) {
+        done = false;
+
+        return result;
+    }
+
     QStringList permissions {
         "android.permission.WRITE_EXTERNAL_STORAGE"
     };
     QStringList neededPermissions;
 
-    for (auto &permission: permissions)
-        if (QtAndroid::checkPermission(permission) == QtAndroid::PermissionResult::Denied)
+    for (auto &permission: permissions) {
+        auto permissionStr = QJniObject::fromString(permission);
+        auto result =
+            context.callMethod<jint>("checkSelfPermission",
+                                     "(Ljava/lang/String;)I",
+                                     permissionStr.object());
+
+        if (result != PERMISSION_GRANTED)
             neededPermissions << permission;
+    }
 
     if (!neededPermissions.isEmpty()) {
-        auto results = QtAndroid::requestPermissionsSync(neededPermissions);
+        QJniEnvironment jniEnv;
+        jobjectArray permissionsArray =
+            jniEnv->NewObjectArray(permissions.size(),
+                                   jniEnv->FindClass("java/lang/String"),
+                                   nullptr);
+        int i = 0;
 
-        for (auto it = results.constBegin(); it != results.constEnd(); it++)
-            if (it.value() == QtAndroid::PermissionResult::Denied) {
-                done = true;
+        for (auto &permission: permissions) {
+            auto permissionObject = QJniObject::fromString(permission);
+            jniEnv->SetObjectArrayElement(permissionsArray,
+                                          i,
+                                          permissionObject.object());
+            i++;
+        }
 
-                return false;
+        context.callMethod<void>("requestPermissions",
+                                 "([Ljava/lang/String;I)V",
+                                 permissionsArray,
+                                 jint(Ak::id()));
+        QElapsedTimer timer;
+        timer.start();
+        static const int timeout = 5000;
+
+        while (timer.elapsed() < timeout) {
+            bool permissionsGranted = true;
+
+            for (auto &permission: permissions) {
+                auto permissionStr = QJniObject::fromString(permission);
+                auto result =
+                    context.callMethod<jint>("checkSelfPermission",
+                                             "(Ljava/lang/String;)I",
+                                             permissionStr.object());
+
+                if (result != PERMISSION_GRANTED) {
+                    permissionsGranted = false;
+
+                    break;
+                }
             }
+
+            if (permissionsGranted)
+                break;
+
+            auto eventDispatcher = QThread::currentThread()->eventDispatcher();
+
+            if (eventDispatcher)
+                eventDispatcher->processEvents(QEventLoop::AllEvents);
+        }
     }
 
     done = true;
@@ -986,6 +1056,51 @@ void RecordingPrivate::linksChanged(const AkPluginLinks &links)
 
     this->updateAvailableVideoFormats();
     this->m_mediaWriterImpl = links["MultimediaSink/MultiSink/Impl/*"];
+}
+
+void RecordingPrivate::printRecordingParameters()
+{
+    if (!this->m_printRP)
+        return;
+
+    int audioBitrate = 0;
+
+    if (this->m_record) {
+        QVariantMap defaultParams;
+        QMetaObject::invokeMethod(this->m_record.data(),
+                                  "defaultCodecParams",
+                                  Q_RETURN_ARG(QVariantMap, defaultParams),
+                                  Q_ARG(QString, this->m_audioCodec));
+        audioBitrate = this->m_audioCodecParams.value("bitrate", defaultParams.value("defaultBitRate")).toInt();
+    }
+
+    int videoBitrate = 0;
+
+    if (this->m_record) {
+        QVariantMap defaultParams;
+        QMetaObject::invokeMethod(this->m_record.data(),
+                                  "defaultCodecParams",
+                                  Q_RETURN_ARG(QVariantMap, defaultParams),
+                                  Q_ARG(QString, this->m_videoCodec));
+        videoBitrate = this->m_videoCodecParams.value("bitrate", defaultParams.value("defaultBitRate")).toInt();
+    }
+
+    qInfo() << "Recording parameters:";
+    qInfo() << "    Format:" << this->m_videoFormat;
+    qInfo() << "    Audio:";
+    qInfo() << "        sample format:" << this->m_audioCaps.format();
+    qInfo() << "        channels:" << this->m_audioCaps.channels();
+    qInfo() << "        layout:" << this->m_audioCaps.layout();
+    qInfo() << "        sample rate:" << this->m_audioCaps.rate();
+    qInfo() << "        codec:" << this->m_audioCodec;
+    qInfo() << "        bitrate:" << audioBitrate;
+    qInfo() << "    Video:";
+    qInfo() << "        pixel format:" << this->m_videoCaps.format();
+    qInfo() << "        width:" << this->m_videoCaps.width();
+    qInfo() << "        height:" << this->m_videoCaps.height();
+    qInfo() << "        frame rate:" << this->m_videoCaps.fps().toString();
+    qInfo() << "        codec:" << this->m_videoCodec;
+    qInfo() << "        bitrate:" << videoBitrate;
 }
 
 void RecordingPrivate::updateProperties()
@@ -1013,6 +1128,14 @@ void RecordingPrivate::updateProperties()
     this->m_imageSaveQuality = config.value("imageSaveQuality", -1).toInt();
     this->m_recordAudio =
             config.value("recordAudio", DEFAULT_RECORD_AUDIO).toBool();
+    auto outputWidth = qMax(config.value("outputWidth", 1280).toInt(), 1);
+    auto outputHeight = qMax(config.value("outputHeight", 720).toInt(), 1);
+    auto outputFPS = qMax(config.value("outputFPS", 30).toInt(), 1);
+
+    this->m_videoCaps = {AkVideoCaps::Format_yuyv422,
+                         outputWidth,
+                         outputHeight,
+                         {outputFPS, 1}};
 
     config.endGroup();
 }
@@ -1069,18 +1192,12 @@ void RecordingPrivate::updatePreviews()
                                   Q_RETURN_ARG(QStringList, extensions),
                                   Q_ARG(QString, format));
 
-#ifdef Q_OS_ANDROID
-        if (!videoCodecs.isEmpty() && !extensions.isEmpty())
-            for (auto extension: extensions)
-                nameFilters += "*." + extension;
-#else
         if ((format == "gif" || !audioCodecs.isEmpty())
             && !videoCodecs.isEmpty()
             && !extensions.isEmpty()) {
             for (auto &extension: extensions)
                 nameFilters += "*." + extension;
         }
-#endif
     }
 
     dir = QDir(this->m_videoDirectory);
@@ -1126,15 +1243,11 @@ void RecordingPrivate::updateAvailableVideoFormats(bool save)
                                   Q_RETURN_ARG(QStringList, extensions),
                                   Q_ARG(QString, format));
 
-#ifdef Q_OS_ANDROID
-        if (!videoCodecs.isEmpty() && !extensions.isEmpty())
-            videoFormats << format;
-#else
         if ((format == "gif" || !audioCodecs.isEmpty())
             && !videoCodecs.isEmpty()
-            && !extensions.isEmpty())
+            && !extensions.isEmpty()) {
             videoFormats << format;
-#endif
+        }
     }
 
     if (this->m_availableVideoFormats != videoFormats) {
@@ -1295,6 +1408,7 @@ void RecordingPrivate::updateVideoFormat(bool save)
         this->m_record->setProperty("outputFormat", videoFormat);
         this->m_videoFormat = videoFormat;
         emit self->videoFormatChanged(videoFormat);
+        this->printRecordingParameters();
 
         if (save)
             this->saveVideoFormat(videoFormat);
@@ -1465,6 +1579,7 @@ void RecordingPrivate::updateVideoCodecParams(bool save)
     if (this->m_videoCodecParams != streamParams) {
         this->m_videoCodecParams = streamParams;
         emit self->videoCodecParamsChanged(streamParams);
+        this->printRecordingParameters();
 
         if (save)
             this->saveVideoCodecParams(streamParams);
@@ -1506,6 +1621,7 @@ void RecordingPrivate::updateAudioCodecParams(bool save)
     if (this->m_audioCodecParams != streamParams) {
         this->m_audioCodecParams = streamParams;
         emit self->audioCodecParamsChanged(this->m_audioCodecParams);
+        this->printRecordingParameters();
 
         if (save)
             this->saveAudioCodecParams(streamParams);

@@ -30,10 +30,6 @@ set(CMAKE_AUTORCC ON)
 set(QT_COMPONENTS
     Core)
 
-if (ANDROID)
-    list(APPEND QT_COMPONENTS AndroidExtras)
-endif ()
-
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
@@ -52,9 +48,22 @@ set(SOURCES
     pspec.json)
 
 if (NOT NONDKAUDIO AND AAUDIO)
-    add_library(AudioDevice_ndkaudio SHARED ${SOURCES})
+    qt_add_plugin(AudioDevice_ndkaudio
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(AudioDevice_ndkaudio PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(AudioDevice_ndkaudio SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(AudioDevice_ndkaudio EXCLUDE_FROM_ALL ${SOURCES})
+endif ()
+
+set_target_properties(AudioDevice_ndkaudio PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(AudioDevice_ndkaudio PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(AudioDevice_ndkaudio avkys)
@@ -65,9 +74,17 @@ target_include_directories(AudioDevice_ndkaudio
 target_compile_definitions(AudioDevice_ndkaudio PRIVATE AVKYS_PLUGIN_AUDIODEVICE_NDKAUDIO)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(AudioDevice_ndkaudio
+                      PUBLIC
                       ${QT_LIBS}
                       avkys)
 
 if (NOT NONDKAUDIO AND AAUDIO)
-    target_link_libraries(AudioDevice_ndkaudio ${AAUDIO})
+    target_link_libraries(AudioDevice_ndkaudio
+                          PRIVATE
+                          Qt${QT_VERSION_MAJOR}::CorePrivate
+                          ${AAUDIO})
+
+    install(TARGETS AudioDevice_ndkaudio
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

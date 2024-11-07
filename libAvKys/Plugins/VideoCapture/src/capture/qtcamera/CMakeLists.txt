@@ -52,22 +52,25 @@ set(SOURCES
     src/captureqt.h
     src/plugin.cpp
     src/plugin.h
-    src/videosurface.cpp
-    src/videosurface.h
     pspec.json)
 
 if (NOT NOQTCAMERA AND Qt${QT_VERSION_MAJOR}Multimedia_FOUND)
-    add_library(VideoCapture_qtcamera SHARED ${SOURCES})
+    qt_add_plugin(VideoCapture_qtcamera
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VideoCapture_qtcamera PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VideoCapture_qtcamera SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VideoCapture_qtcamera EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(VideoCapture_qtcamera PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(VideoCapture_qtcamera PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(VideoCapture_qtcamera PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(VideoCapture_qtcamera avkys)
@@ -80,9 +83,7 @@ list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_
 target_link_libraries(VideoCapture_qtcamera avkys ${QT_LIBS})
 
 if (NOT NOQTCAMERA AND Qt${QT_VERSION_MAJOR}Multimedia_FOUND)
-    if (WIN32)
-        install(TARGETS VideoCapture_qtcamera RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS VideoCapture_qtcamera DESTINATION ${PLUGINSDIR})
-    endif ()
+    install(TARGETS VideoCapture_qtcamera
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

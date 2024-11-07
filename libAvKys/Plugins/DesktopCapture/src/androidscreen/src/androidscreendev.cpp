@@ -19,16 +19,15 @@
 
 #include <QApplication>
 #include <QFuture>
+#include <QJniObject>
 #include <QMutex>
 #include <QScreen>
 #include <QThreadPool>
 #include <QTime>
 #include <QTimer>
 #include <QtConcurrent>
-#include <QtAndroid>
-#include <QAndroidJniEnvironment>
-#include <QAndroidJniObject>
-#include <QAndroidActivityResultReceiver>
+#include <QtDebug>
+#include <QtCore/private/qandroidextras_p.h>
 #include <ak.h>
 #include <akfrac.h>
 #include <akpacket.h>
@@ -42,7 +41,7 @@
 #define JLCLASS(jclass) "L" JNAMESPACE "/" jclass ";"
 
 #define MEDIA_PROJECTION_SERVICE "media_projection"
-#define SCREEN_CAPTURE_REQUEST_CODE 0
+#define SCREEN_CAPTURE_REQUEST_CODE AK_MAKE_FOURCC('S', 'C', 'R', 'N')
 #define RESULT_OK -1
 #define BUFFER_SIZE 4
 
@@ -92,39 +91,60 @@ enum ImageFormat
     DEPTH_JPEG        = MAKE_FOURCC('c', 'i', 'e', 'i'),
 };
 
-using AndroidFmtToAkFmtMap = QMap<__u32, AkVideoCaps::PixelFormat>;
-
-inline AndroidFmtToAkFmtMap initAndroidFmtToAkFmt()
+struct AndroidScreenFormat
 {
-    AndroidFmtToAkFmtMap androidFmtToAkFmt {
-        {RGBA_8888        , AkVideoCaps::Format_rgba       },
-        {RGBX_8888        , AkVideoCaps::Format_rgb0       },
-        {RGB_888          , AkVideoCaps::Format_rgb24      },
-        {RGB_565          , AkVideoCaps::Format_rgb565     },
-        {RGBA_5551        , AkVideoCaps::Format_rgba5551   },
-        {RGBA_4444        , AkVideoCaps::Format_rgba4444   },
-        {A_8              , AkVideoCaps::Format_gray8      },
-        {L_8              , AkVideoCaps::Format_gray8      },
-        {LA_88            , AkVideoCaps::Format_graya8     },
-        {RGB_332          , AkVideoCaps::Format_rgb332     },
-        {NV16             , AkVideoCaps::Format_nv16       },
-        {NV21             , AkVideoCaps::Format_nv21       },
-        {YUY2             , AkVideoCaps::Format_yuyv422    },
-        {YUV_420_888      , AkVideoCaps::Format_yuv420p    },
-        {YUV_422_888      , AkVideoCaps::Format_yuv422p    },
-        {FLEX_RGB_888     , AkVideoCaps::Format_rgb24p     },
-        {FLEX_RGBA_8888   , AkVideoCaps::Format_rgbap      },
-        {RGBA_1010102     , AkVideoCaps::Format_rgba1010102},
-        {Y8               , AkVideoCaps::Format_gray8      },
-        {YV12             , AkVideoCaps::Format_yvu420p    },
-    };
+    __u32 fmt;
+    AkVideoCaps::PixelFormat ak;
 
-    return androidFmtToAkFmt;
+    inline static const AndroidScreenFormat *byFmt(__u32 fmt);
+    inline static const AndroidScreenFormat *byAk(AkVideoCaps::PixelFormat ak);
+};
+
+static const AndroidScreenFormat androidScreenFormatTable[] {
+    {RGBA_8888        , AkVideoCaps::Format_rgba       },
+    {RGBX_8888        , AkVideoCaps::Format_rgbx       },
+    {RGB_888          , AkVideoCaps::Format_rgb24      },
+    {RGB_565          , AkVideoCaps::Format_rgb565     },
+    {RGBA_5551        , AkVideoCaps::Format_rgba5551   },
+    {RGBA_4444        , AkVideoCaps::Format_rgba4444   },
+    {A_8              , AkVideoCaps::Format_y8         },
+    {L_8              , AkVideoCaps::Format_y8         },
+    {LA_88            , AkVideoCaps::Format_ya88       },
+    {RGB_332          , AkVideoCaps::Format_rgb332     },
+    {NV16             , AkVideoCaps::Format_nv16       },
+    {NV21             , AkVideoCaps::Format_nv21       },
+    {YUY2             , AkVideoCaps::Format_yuyv422    },
+    {YUV_420_888      , AkVideoCaps::Format_yuv420p    },
+    {YUV_422_888      , AkVideoCaps::Format_yuv422p    },
+    {FLEX_RGB_888     , AkVideoCaps::Format_rgb24p     },
+    {FLEX_RGBA_8888   , AkVideoCaps::Format_rgbap      },
+    {RGBA_1010102     , AkVideoCaps::Format_rgba1010102},
+    {Y8               , AkVideoCaps::Format_y8         },
+    {YV12             , AkVideoCaps::Format_yvu420p    },
+    {UNKNOWN          , AkVideoCaps::Format_none       },
+};
+
+const AndroidScreenFormat *AndroidScreenFormat::byFmt(__u32 fmt)
+{
+    auto format = androidScreenFormatTable;
+
+    for (; format->ak != AkVideoCaps::Format_none; format++)
+        if (format->fmt == fmt)
+            return format;
+
+    return format;
 }
 
-Q_GLOBAL_STATIC_WITH_ARGS(AndroidFmtToAkFmtMap,
-                          androidFmtToAkFmt,
-                          (initAndroidFmtToAkFmt()))
+const AndroidScreenFormat *AndroidScreenFormat::byAk(AkVideoCaps::PixelFormat ak)
+{
+    auto format = androidScreenFormatTable;
+
+    for (; format->ak != AkVideoCaps::Format_none; format++)
+        if (format->ak == ak)
+            return format;
+
+    return format;
+}
 
 class AndroidScreenDevPrivate: public QAndroidActivityResultReceiver
 {
@@ -140,13 +160,13 @@ class AndroidScreenDevPrivate: public QAndroidActivityResultReceiver
         QWaitCondition m_packetReady;
         QMutex m_mutex;
         AkPacket m_curPacket;
-        QAndroidJniEnvironment m_jenv;
-        QAndroidJniObject m_activity;
-        QAndroidJniObject m_service;
-        QAndroidJniObject m_mediaProjection;
-        QAndroidJniObject m_virtualDisplay;
-        QAndroidJniObject m_imageReader;
-        QAndroidJniObject m_callbacks;
+        QJniEnvironment m_jenv;
+        QJniObject m_activity;
+        QJniObject m_service;
+        QJniObject m_mediaProjection;
+        QJniObject m_virtualDisplay;
+        QJniObject m_imageReader;
+        QJniObject m_callbacks;
         int m_curScreenNumber {-1};
         bool m_threadedRead {true};
         bool m_canCapture {false};
@@ -156,7 +176,7 @@ class AndroidScreenDevPrivate: public QAndroidActivityResultReceiver
         void sendPacket(const AkPacket &packet);
         void handleActivityResult(int requestCode,
                                   int resultCode,
-                                  const QAndroidJniObject &intent);
+                                  const QJniObject &intent) override;
         static void imageAvailable(JNIEnv *env,
                                    jobject obj,
                                    jlong userPtr,
@@ -169,7 +189,8 @@ AndroidScreenDev::AndroidScreenDev():
     ScreenDev()
 {
     this->d = new AndroidScreenDevPrivate(this);
-    this->d->m_activity = QtAndroid::androidActivity();
+    this->d->m_activity =
+        qApp->nativeInterface<QNativeInterface::QAndroidApplication>()->context();
     this->d->m_timer.setInterval(qRound(1.e3 *
                                         this->d->m_fps.invert().value()));
 
@@ -194,12 +215,13 @@ AkFrac AndroidScreenDev::fps() const
 
 QStringList AndroidScreenDev::medias()
 {
-    QStringList screens;
+    QStringList medias;
+    auto screens = QGuiApplication::screens();
 
-    for (int i = 0; i < QGuiApplication::screens().size(); i++)
-        screens << QString("screen://%1").arg(i);
+    for (int i = 0; i < screens.size(); i++)
+        medias << QString("screen://%1").arg(i);
 
-    return screens;
+    return medias;
 }
 
 QString AndroidScreenDev::media() const
@@ -249,7 +271,7 @@ AkVideoCaps AndroidScreenDev::caps(int stream)
     if (curScreen < 0 || curScreen >= screens.size())
         return {};
 
-    auto screen = screens[curScreen];
+    auto screen = screens.value(curScreen);
 
     if (!screen)
         return {};
@@ -258,6 +280,26 @@ AkVideoCaps AndroidScreenDev::caps(int stream)
                        screen->size().width(),
                        screen->size().height(),
                        this->d->m_fps);
+}
+
+bool AndroidScreenDev::canCaptureCursor() const
+{
+    return false;
+}
+
+bool AndroidScreenDev::canChangeCursorSize() const
+{
+    return false;
+}
+
+bool AndroidScreenDev::showCursor() const
+{
+    return false;
+}
+
+int AndroidScreenDev::cursorSize() const
+{
+    return 0;
 }
 
 void AndroidScreenDev::setFps(const AkFrac &fps)
@@ -296,6 +338,16 @@ void AndroidScreenDev::setMedia(const QString &media)
     }
 }
 
+void AndroidScreenDev::setShowCursor(bool showCursor)
+{
+    Q_UNUSED(showCursor)
+}
+
+void AndroidScreenDev::setCursorSize(int cursorSize)
+{
+    Q_UNUSED(cursorSize)
+}
+
 void AndroidScreenDev::resetMedia()
 {
     int screen = QGuiApplication::screens().indexOf(QGuiApplication::primaryScreen());
@@ -319,42 +371,67 @@ void AndroidScreenDev::resetStreams()
 
 }
 
+void AndroidScreenDev::resetShowCursor()
+{
+
+}
+
+void AndroidScreenDev::resetCursorSize()
+{
+
+}
+
 bool AndroidScreenDev::init()
 {
     this->uninit();
 
     this->d->m_canCapture = false;
-    auto serviceName = QAndroidJniObject::fromString(MEDIA_PROJECTION_SERVICE);
-    this->d->m_service =
-            this->d->m_activity.callObjectMethod("getSystemService",
-                                                 "(Ljava/lang/String;)Ljava/lang/Object;",
-                                                 serviceName.object());
+    auto serviceName = QJniObject::fromString(MEDIA_PROJECTION_SERVICE);
+    qInfo() << "Obtaining '" MEDIA_PROJECTION_SERVICE "' system service";
 
-    if (!this->d->m_service.isValid())
+    if (this->d->m_activity.isValid())
+        this->d->m_service =
+                this->d->m_activity.callObjectMethod("getSystemService",
+                                                     "(Ljava/lang/String;)Ljava/lang/Object;",
+                                                     serviceName.object());
+
+    if (!this->d->m_service.isValid()) {
+        qWarning() << "Failed to obtain '" MEDIA_PROJECTION_SERVICE "' system service";
+
         return false;
+    }
 
+    qInfo() << "Creating the capture intent";
     auto intent =
             this->d->m_service.callObjectMethod("createScreenCaptureIntent",
                                                 "()Landroid/content/Intent;");
 
-    if (!intent.isValid())
-        return false;
+    if (!intent.isValid()) {
+        qWarning() << "Failed creating the capture intent";
 
-    QtAndroid::startActivity(intent,
-                             SCREEN_CAPTURE_REQUEST_CODE,
-                             this->d);
+        return false;
+    }
+
+    qInfo() << "Starting the intent";
+    QtAndroidPrivate::startActivity(intent,
+                                    SCREEN_CAPTURE_REQUEST_CODE,
+                                    this->d);
 
     this->d->m_mutex.lock();
     this->d->m_captureSetupReady.wait(&this->d->m_mutex);
     this->d->m_mutex.unlock();
 
-    if (!this->d->m_canCapture)
+    if (!this->d->m_canCapture) {
+        qWarning() << "Failed starting the screen capture";
+
         return false;
+    }
 
     this->d->m_id = Ak::id();
     this->d->m_timer.setInterval(qRound(1.e3 *
                                         this->d->m_fps.invert().value()));
     this->d->m_timer.start();
+    qInfo() << "Screen capture in progress";
 
     return true;
 }
@@ -362,20 +439,22 @@ bool AndroidScreenDev::init()
 bool AndroidScreenDev::uninit()
 {
     this->d->m_timer.stop();
-    this->d->m_threadStatus.waitForFinished();
+
+    if (!this->d->m_threadStatus.isRunning())
+        this->d->m_threadStatus.waitForFinished();
 
     if (this->d->m_mediaProjection.isValid()) {
-        this->d->m_mediaProjection.callMethod<void>("stop");
+        this->d->m_mediaProjection.callMethod<void>("stop", "()V");
         this->d->m_mediaProjection = {};
     }
 
     if (this->d->m_virtualDisplay.isValid()) {
-        this->d->m_virtualDisplay.callMethod<void>("release");
+        this->d->m_virtualDisplay.callMethod<void>("release", "()V");
         this->d->m_virtualDisplay = {};
     }
 
     if (this->d->m_imageReader.isValid()) {
-        this->d->m_imageReader.callMethod<void>("close");
+        this->d->m_imageReader.callMethod<void>("close", "()V");
         this->d->m_imageReader = {};
     }
 
@@ -391,9 +470,9 @@ AndroidScreenDevPrivate::AndroidScreenDevPrivate(AndroidScreenDev *self):
     this->registerNatives();
     jlong userPtr = intptr_t(this);
     this->m_callbacks =
-            QAndroidJniObject(JCLASS(AkAndroidScreenCallbacks),
-                              "(J)V",
-                              userPtr);
+            QJniObject(JCLASS(AkAndroidScreenCallbacks),
+                       "(J)V",
+                       userPtr);
 }
 
 void AndroidScreenDevPrivate::registerNatives()
@@ -403,10 +482,10 @@ void AndroidScreenDevPrivate::registerNatives()
     if (ready)
         return;
 
-    QAndroidJniEnvironment jenv;
+    QJniEnvironment jenv;
 
     if (auto jclass = jenv.findClass(JCLASS(AkAndroidScreenCallbacks))) {
-        QVector<JNINativeMethod> methods {
+        static const QVector<JNINativeMethod> methods {
             {"imageAvailable", "(JLandroid/media/Image;)V", reinterpret_cast<void *>(AndroidScreenDevPrivate::imageAvailable)},
             {"captureStopped", "(J)V"                     , reinterpret_cast<void *>(AndroidScreenDevPrivate::captureStopped)},
         };
@@ -424,18 +503,22 @@ void AndroidScreenDevPrivate::sendPacket(const AkPacket &packet)
 
 void AndroidScreenDevPrivate::handleActivityResult(int requestCode,
                                                    int resultCode,
-                                                   const QAndroidJniObject &intent)
+                                                   const QJniObject &intent)
 {
     if (requestCode != SCREEN_CAPTURE_REQUEST_CODE)
         return;
 
     if (resultCode != RESULT_OK) {
+        qWarning() << "Screen capture intent failed";
+
         this->m_mutex.lock();
         this->m_captureSetupReady.wakeAll();
         this->m_mutex.unlock();
 
         return;
     }
+
+    qInfo() << "Obtaining MediaProjection";
 
     this->m_mediaProjection =
             this->m_service.callObjectMethod("getMediaProjection",
@@ -444,12 +527,16 @@ void AndroidScreenDevPrivate::handleActivityResult(int requestCode,
                                              intent.object());
 
     if (!this->m_mediaProjection.isValid()) {
+        qWarning() << "Failed to obtain MediaProjection";
+
         this->m_mutex.lock();
         this->m_captureSetupReady.wakeAll();
         this->m_mutex.unlock();
 
         return;
     }
+
+    qInfo() << "Obtaining MediaProjectionCallback";
 
     auto mediaProjectionCallback =
             this->m_callbacks.callObjectMethod("mediaProjectionCallback",
@@ -457,74 +544,107 @@ void AndroidScreenDevPrivate::handleActivityResult(int requestCode,
                                                JLCLASS("AkAndroidScreenCallbacks$MediaProjectionCallback"));
 
     if (!mediaProjectionCallback.isValid()) {
+        qWarning() << "Failed to obtain MediaProjectionCallback";
+
         this->m_mutex.lock();
         this->m_captureSetupReady.wakeAll();
         this->m_mutex.unlock();
 
         return;
     }
+
+    qInfo() << "Registering the callback";
 
     this->m_mediaProjection.callMethod<void>("registerCallback",
                                              "(Landroid/media/projection/MediaProjection$Callback;"
                                              "Landroid/os/Handler;)V",
                                              mediaProjectionCallback.object(),
                                              nullptr);
-    auto resources =
-            this->m_activity.callObjectMethod("getResources",
-                                              "()Landroid/content/res/Resources;");
 
-    if (!resources.isValid()) {
+    if (!this->m_activity.isValid()) {
+        qWarning() << "Failed to register callback";
+
         this->m_mutex.lock();
         this->m_captureSetupReady.wakeAll();
         this->m_mutex.unlock();
 
         return;
     }
+
+    qInfo() << "Obtaining the resources";
+
+    auto resources =
+            this->m_activity.callObjectMethod("getResources",
+                                              "()Landroid/content/res/Resources;");
+
+    if (!resources.isValid()) {
+        qWarning() << "Failed obtaining the resources";
+
+        this->m_mutex.lock();
+        this->m_captureSetupReady.wakeAll();
+        this->m_mutex.unlock();
+
+        return;
+    }
+
+    qInfo() << "Obtaining the display metrics";
 
     auto metrics =
             resources.callObjectMethod("getDisplayMetrics",
                                        "()Landroid/util/DisplayMetrics;");
 
     if (!metrics.isValid()) {
+        qWarning() << "Failed obtaining the display metrics";
+
         this->m_mutex.lock();
         this->m_captureSetupReady.wakeAll();
         this->m_mutex.unlock();
 
         return;
     }
+
+    qInfo() << "Creating a image reader";
 
     auto width = metrics.getField<jint>("widthPixels");
     auto height = metrics.getField<jint>("heightPixels");
     auto density = metrics.getField<jint>("densityDpi");
 
     this->m_imageReader =
-            QAndroidJniObject::callStaticObjectMethod("android/media/ImageReader",
-                                                      "newInstance",
-                                                      "(IIII)Landroid/media/ImageReader;",
-                                                      width,
-                                                      height,
-                                                      ImageFormat::RGBA_8888,
-                                                      BUFFER_SIZE);
+            QJniObject::callStaticObjectMethod("android/media/ImageReader",
+                                               "newInstance",
+                                               "(IIII)Landroid/media/ImageReader;",
+                                               width,
+                                               height,
+                                               ImageFormat::RGBA_8888,
+                                               BUFFER_SIZE);
 
     if (!this->m_imageReader.isValid()) {
+        qWarning() << "Failed creating a image reader";
+
         this->m_mutex.lock();
         this->m_captureSetupReady.wakeAll();
         this->m_mutex.unlock();
 
         return;
     }
+
+    qInfo() << "Obtaining the image reader surface";
 
     auto surface =
             this->m_imageReader.callObjectMethod("getSurface",
                                                  "()Landroid/view/Surface;");
 
     if (!surface.isValid()) {
+        qWarning() << "Failed obtaining the image reader surface";
+
         this->m_mutex.lock();
         this->m_captureSetupReady.wakeAll();
         this->m_mutex.unlock();
 
         return;
     }
+
+    qInfo() << "Setting the image listener";
 
     this->m_imageReader.callMethod<void>("setOnImageAvailableListener",
                                          "(Landroid/media/ImageReader$OnImageAvailableListener;"
@@ -532,7 +652,9 @@ void AndroidScreenDevPrivate::handleActivityResult(int requestCode,
                                          this->m_callbacks.object(),
                                          nullptr);
 
-    auto displayName = QAndroidJniObject::fromString("VirtualDisplay");
+    qInfo() << "Creating the virtual display";
+
+    auto displayName = QJniObject::fromString("VirtualDisplay");
     this->m_virtualDisplay =
             this->m_mediaProjection.callObjectMethod("createVirtualDisplay",
                                                      "(Ljava/lang/String;"
@@ -551,6 +673,8 @@ void AndroidScreenDevPrivate::handleActivityResult(int requestCode,
                                                      nullptr);
 
     if (!this->m_virtualDisplay.isValid()) {
+        qWarning() << "Failed creating the virtual display";
+
         this->m_mutex.lock();
         this->m_captureSetupReady.wakeAll();
         this->m_mutex.unlock();
@@ -572,10 +696,12 @@ void AndroidScreenDevPrivate::imageAvailable(JNIEnv *env,
 {
     Q_UNUSED(obj)
 
+    auto self = reinterpret_cast<AndroidScreenDevPrivate *>(intptr_t(userPtr));
+
     if (!image)
         return;
 
-    QAndroidJniObject src = image;
+    QJniObject src = image;
     auto planesArray = src.callObjectMethod("getPlanes",
                                             "()[Landroid/media/Image$Plane;");
 
@@ -587,39 +713,43 @@ void AndroidScreenDevPrivate::imageAvailable(JNIEnv *env,
     if (planes < 1)
         return;
 
-    auto format = src.callMethod<jint>("getFormat");
-    auto fmt = androidFmtToAkFmt->value(format, AkVideoCaps::Format_none);
+    auto format = src.callMethod<jint>("getFormat", "()I");
+    auto fmt = AndroidScreenFormat::byFmt(format)->ak;
 
     if (fmt == AkVideoCaps::Format_none)
         return;
 
-    auto width = src.callMethod<jint>("getWidth");
+    auto width = src.callMethod<jint>("getWidth", "()I");
 
     if (width < 1)
         return;
 
-    auto height = src.callMethod<jint>("getHeight");
+    auto height = src.callMethod<jint>("getHeight", "()I");
 
     if (height < 1)
         return;
 
-    auto self = reinterpret_cast<AndroidScreenDevPrivate *>(intptr_t(userPtr));
-
     AkVideoPacket packet({fmt, width, height, self->m_fps}, true);
 
     for(jsize i = 0; i < planes; i++) {
-        QAndroidJniObject plane =
+        QJniObject plane =
                 env->GetObjectArrayElement(jobjectArray(planesArray.object()),
                                            i);
 
         if (!plane.isValid())
             continue;
 
-        auto iLineSize = plane.callMethod<jint>("getRowStride");
+        auto iLineSize = plane.callMethod<jint>("getRowStride", "()I");
 
         if (iLineSize < 1)
             continue;
 
+        auto pixelStride =  plane.callMethod<jint>("getPixelStride", "()I");
+
+        if (iLineSize < 1)
+            continue;
+
+        auto pixelSize = packet.pixelSize(i);
         auto lineSize = qMin<size_t>(iLineSize, packet.lineSize(i));
         auto byteBuffer = plane.callObjectMethod("getBuffer",
                                                  "()Ljava/nio/ByteBuffer;");
@@ -627,22 +757,51 @@ void AndroidScreenDevPrivate::imageAvailable(JNIEnv *env,
         if (!byteBuffer.isValid())
             continue;
 
-        auto planeData = reinterpret_cast<quint8 *>(env->GetDirectBufferAddress(byteBuffer.object()));
+        auto planeData =
+                reinterpret_cast<quint8 *>(env->GetDirectBufferAddress(byteBuffer.object()));
 
         if (!planeData)
             continue;
 
+        auto widthDiv = packet.widthDiv(i);
         auto heightDiv = packet.heightDiv(i);
 
-        for (int y = 0; y < packet.caps().height(); ++y) {
-            int ys = y >> heightDiv;
-            auto srcLine = planeData + ys * iLineSize;
-            auto dstLine = packet.line(i, y);
-            memcpy(dstLine, srcLine, lineSize);
-        }
+        if (pixelStride == pixelSize)
+            for (int y = 0; y < packet.caps().height(); ++y) {
+                int ys = y >> heightDiv;
+                auto srcLine = planeData + ys * iLineSize;
+                auto dstLine = packet.line(i, y);
+                memcpy(dstLine, srcLine, lineSize);
+            }
+        else if (pixelSize == 1)
+            for (int y = 0; y < packet.caps().height(); ++y) {
+                int ys = y >> heightDiv;
+                auto srcLine = planeData + ys * iLineSize;
+                auto dstLine = packet.line(i, y);
+
+                for (int x = 0; x < packet.caps().width(); ++x) {
+                    int xs = x >> widthDiv;
+                    dstLine[xs] = srcLine[xs * pixelStride];
+                }
+            }
+        else
+            for (int y = 0; y < packet.caps().height(); ++y) {
+                int ys = y >> heightDiv;
+                auto srcLine = planeData + ys * iLineSize;
+                auto dstLine = packet.line(i, y);
+
+                for (int x = 0; x < packet.caps().width(); ++x) {
+                    int xs = x >> widthDiv;
+                    auto iPixel = srcLine + xs * pixelStride;
+                    auto oPixel = dstLine + xs * pixelSize;
+
+                    for (int i = 0; i < pixelSize; ++i)
+                        oPixel[i] = iPixel[i];
+                }
+            }
     }
 
-    jlong timestampNs = src.callMethod<jlong>("getTimestamp");
+    jlong timestampNs = src.callMethod<jlong>("getTimestamp", "()J");
 
     auto pts = qint64(timestampNs * self->m_fps.value() / 1e9);
     packet.setPts(pts);
@@ -689,8 +848,8 @@ void AndroidScreenDevPrivate::readFrame()
     if (!this->m_threadStatus.isRunning()) {
         this->m_threadStatus =
                 QtConcurrent::run(&this->m_threadPool,
-                                  this,
                                   &AndroidScreenDevPrivate::sendPacket,
+                                  this,
                                   packet);
     }
 }

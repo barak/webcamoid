@@ -31,6 +31,7 @@ RoundButton 1.0 RoundButton.qml
 ScrollBar 1.0 ScrollBar.qml
 ScrollIndicator 1.0 ScrollIndicator.qml
 ScrollView 1.0 ScrollView.qml
+SelectionRectangle 1.0 SelectionRectangle.qml
 Slider 1.0 Slider.qml
 SpinBox 1.0 SpinBox.qml
 SplitView 1.0 SplitView.qml

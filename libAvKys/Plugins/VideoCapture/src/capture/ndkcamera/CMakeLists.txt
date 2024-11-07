@@ -31,10 +31,6 @@ set(QT_COMPONENTS
     Concurrent
     Core)
 
-if (ANDROID)
-    list(APPEND QT_COMPONENTS AndroidExtras)
-endif ()
-
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
@@ -55,9 +51,22 @@ set(SOURCES
     pspec.json)
 
 if (NOT NONDKCAMERA AND ANDROIDLIB AND CAMERA2NDK AND MEDIANDK)
-    add_library(VideoCapture_ndkcamera SHARED ${SOURCES})
+    qt_add_plugin(VideoCapture_ndkcamera
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VideoCapture_ndkcamera PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VideoCapture_ndkcamera SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VideoCapture_ndkcamera EXCLUDE_FROM_ALL ${SOURCES})
+endif ()
+
+set_target_properties(VideoCapture_ndkcamera PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(VideoCapture_ndkcamera PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(VideoCapture_ndkcamera avkys)
@@ -68,12 +77,19 @@ target_include_directories(VideoCapture_ndkcamera
 target_compile_definitions(VideoCapture_ndkcamera PRIVATE AVKYS_PLUGIN_VIDEOCAPTURE_NDKCAMERA)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(VideoCapture_ndkcamera
+                      PUBLIC
                       ${QT_LIBS}
                       avkys)
 
 if (NOT NONDKCAMERA AND ANDROIDLIB AND CAMERA2NDK AND MEDIANDK)
     target_link_libraries(VideoCapture_ndkcamera
+                          PRIVATE
+                          Qt${QT_VERSION_MAJOR}::CorePrivate
                           ${ANDROIDLIB}
                           ${CAMERA2NDK}
                           ${MEDIANDK})
+
+    install(TARGETS VideoCapture_ndkcamera
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

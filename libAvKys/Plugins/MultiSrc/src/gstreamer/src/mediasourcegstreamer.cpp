@@ -318,7 +318,7 @@ void MediaSourceGStreamer::seek(qint64 mSecs,
         break;
     }
 
-    pts = qBound<qint64>(0, pts, this->durationMSecs()) * 1000000;
+    pts = qBound(0, qint64(pts), this->durationMSecs()) * 1000000;
     gst_element_seek_simple(this->d->m_pipeline,
                             GST_FORMAT_TIME,
                             GstSeekFlags(GST_SEEK_FLAG_FLUSH

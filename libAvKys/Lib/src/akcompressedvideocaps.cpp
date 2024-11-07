@@ -299,7 +299,6 @@ void AkCompressedVideoCaps::resetFps()
 void AkCompressedVideoCaps::registerTypes()
 {
     qRegisterMetaType<AkCompressedVideoCaps>("AkCompressedVideoCaps");
-    qRegisterMetaTypeStreamOperators<AkCompressedVideoCaps>("AkCompressedVideoCaps");
     qmlRegisterSingletonType<AkCompressedVideoCaps>("Ak", 1, 0, "AkCompressedVideoCaps",
                                           [] (QQmlEngine *qmlEngine,
                                               QJSEngine *jsEngine) -> QObject * {

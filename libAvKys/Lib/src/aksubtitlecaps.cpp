@@ -225,9 +225,7 @@ void AkSubtitleCaps::resetRect()
 void AkSubtitleCaps::registerTypes()
 {
     qRegisterMetaType<AkSubtitleCaps>("AkSubtitleCaps");
-    qRegisterMetaTypeStreamOperators<AkSubtitleCaps>("AkSubtitleCaps");
     qRegisterMetaType<SubtitleFormat>("SubtitleFormat");
-    QMetaType::registerDebugStreamOperator<SubtitleFormat>();
     qmlRegisterSingletonType<AkSubtitleCaps>("Ak", 1, 0, "AkSubtitleCaps",
                                           [] (QQmlEngine *qmlEngine,
                                               QJSEngine *jsEngine) -> QObject * {

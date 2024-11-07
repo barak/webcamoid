@@ -31,12 +31,6 @@ set(QT_COMPONENTS
     Concurrent
     Widgets)
 
-if (ANDROID)
-    list(APPEND QT_COMPONENTS AndroidExtras)
-    include(UseJava)
-    find_package(Java ${ANDROID_JAVA_VERSION})
-endif ()
-
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
@@ -49,17 +43,30 @@ set(SOURCES
     ../../screendev.h
     androidscreendev.cpp
     androidscreendev.h
+    plugin.h
     plugin.cpp
     pspec.json)
 
-if (ANDROID AND Java_FOUND)
-    add_library(DesktopCapture_androidscreensrc SHARED ${SOURCES})
+if (ANDROID AND NOT NOSCREENCAPTURE)
+    qt_add_plugin(DesktopCapture_androidscreensrc
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(DesktopCapture_androidscreensrc PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(DesktopCapture_androidscreensrc SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(DesktopCapture_androidscreensrc EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(DesktopCapture_androidscreensrc PROPERTIES
-                      OUTPUT_NAME DesktopCapture_androidscreen)
+                      OUTPUT_NAME DesktopCapture_androidscreen
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(DesktopCapture_androidscreensrc PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(DesktopCapture_androidscreensrc avkys)
 target_include_directories(DesktopCapture_androidscreensrc
                            PRIVATE
@@ -68,5 +75,18 @@ target_include_directories(DesktopCapture_androidscreensrc
 target_compile_definitions(DesktopCapture_androidscreensrc PRIVATE AVKYS_PLUGIN_DESKTOPCAPTURE_ANDROIDSCREEN)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(DesktopCapture_androidscreensrc
+                      PUBLIC
                       ${QT_LIBS}
                       avkys)
+
+if (ANDROID)
+    target_link_libraries(DesktopCapture_androidscreensrc
+                          PRIVATE
+                          Qt${QT_VERSION_MAJOR}::CorePrivate)
+
+    if (NOT NOSCREENCAPTURE)
+        install(TARGETS DesktopCapture_androidscreensrc
+                LIBRARY DESTINATION ${AKPLUGINSDIR}
+                RUNTIME DESTINATION ${AKPLUGINSDIR})
+    endif ()
+endif ()

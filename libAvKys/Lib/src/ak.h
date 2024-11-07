@@ -40,6 +40,12 @@ class AKCOMMONS_EXPORT Ak: public QObject
         Q_INVOKABLE static qint64 id();
         Q_INVOKABLE static QString platform();
         Q_INVOKABLE static void setQmlEngine(QQmlEngine *engine);
+        Q_INVOKABLE static bool isFlatpak();
+        Q_INVOKABLE static bool hasFlatpakVCam();
+
+#ifdef Q_OS_ANDROID
+        Q_INVOKABLE static void registerJniLogFunc(const QString &className);
+#endif
 };
 
 Q_DECLARE_METATYPE(Ak)

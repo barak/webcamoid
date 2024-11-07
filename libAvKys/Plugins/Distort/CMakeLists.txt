@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Distort SHARED
-            src/distort.h
-            src/distortelement.h
-            src/distort.cpp
-            src/distortelement.cpp
-            Distort.qrc
-            pspec.json)
+qt_add_plugin(Distort
+              SHARED
+              CLASS_NAME Distort)
+target_sources(Distort PRIVATE
+               src/distort.h
+               src/distortelement.h
+               src/distort.cpp
+               src/distortelement.cpp
+               Distort.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Distort PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Distort PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Distort PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Distort avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Distort PRIVATE AVKYS_PLUGIN_DISTORT)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Distort avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Distort RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Distort DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Distort
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

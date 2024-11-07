@@ -18,14 +18,8 @@ jobs:
        include:
          - target_arch: x86_64
            compiler: gcc
-           upload: 1
-         - target_arch: x86_64
-           compiler: clang
            upload: 0
-         - target_arch: i686
-           compiler: gcc
-           upload: 1
-         - target_arch: i686
+         - target_arch: x86_64
            compiler: clang
            upload: 0
     env:
@@ -52,7 +46,7 @@ jobs:
           mingw-w64-${{ matrix.target_arch }}-cmake
           mingw-w64-${{ matrix.target_arch }}-ffmpeg
           mingw-w64-${{ matrix.target_arch }}-pkgconf
-          mingw-w64-${{ matrix.target_arch }}-qt5
+          mingw-w64-${{ matrix.target_arch }}-qt6
           mingw-w64-${{ matrix.target_arch }}-vlc
     - uses: msys2/setup-msys2@v2
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -76,7 +70,7 @@ jobs:
           mingw-w64-${{ matrix.target_arch }}-gst-plugins-good
           mingw-w64-${{ matrix.target_arch }}-pkgconf
           mingw-w64-${{ matrix.target_arch }}-portaudio
-          mingw-w64-${{ matrix.target_arch }}-qt5
+          mingw-w64-${{ matrix.target_arch }}-qt6
           mingw-w64-${{ matrix.target_arch }}-vlc
     - name: Release Build
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -98,16 +92,18 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.upload }}
       with:
+        repository: webcamoid/WebcamoidPrivate
         files: |
           webcamoid-packages/windows-gcc-x86_64/*
           webcamoid-packages/windows-gcc-i686/*
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
     - name: Daily Build Upload
       uses: softprops/action-gh-release@v1
       if: ${{ !startsWith(github.ref, 'refs/tags/') && matrix.upload && github.ref == 'refs/heads/master' }}
       with:
-        body: "${{ github.event.head_commit.message }} (commit: ${{ github.sha }})<hr>**Note**: Ignore the commit information of the tag, the files in the release keep updating with every new build, these packages were built from ${{ github.sha }} commit."
+        repository: webcamoid/WebcamoidPrivate
+        body: "${{ github.event.head_commit.message }} (commit: [${{ github.sha }}](https://github.com/webcamoid/webcamoid/commit/${{ github.sha }}))<hr>**Note**: Ignore the commit information of the tag, the files in the release keep updating with every new build, these packages were built from [${{ github.sha }}](https://github.com/webcamoid/webcamoid/commit/${{ github.sha }}) commit."
         prerelease: true
         files: |
           webcamoid-packages/windows-gcc-x86_64/*
@@ -115,4 +111,4 @@ jobs:
         name: Daily Build
         tag_name: daily-build
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}

@@ -17,9 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 ColumnLayout {
     id: configs
@@ -45,8 +45,8 @@ ColumnLayout {
             id: hh
             text: ChangeHSL.kernel[0]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 0, Row 0")
@@ -57,8 +57,8 @@ ColumnLayout {
             id: hs
             text: ChangeHSL.kernel[1]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 1, Row 0")
@@ -69,8 +69,8 @@ ColumnLayout {
             id: hl
             text: ChangeHSL.kernel[2]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 2, Row 0")
@@ -81,8 +81,8 @@ ColumnLayout {
             id: h0
             text: ChangeHSL.kernel[3]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 3, Row 0")
@@ -95,8 +95,8 @@ ColumnLayout {
             id: sh
             text: ChangeHSL.kernel[4]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 0, Row 1")
@@ -107,8 +107,8 @@ ColumnLayout {
             id: ss
             text: ChangeHSL.kernel[5]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 1, Row 1")
@@ -119,8 +119,8 @@ ColumnLayout {
             id: sl
             text: ChangeHSL.kernel[6]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 2, Row 1")
@@ -131,8 +131,8 @@ ColumnLayout {
             id: s0
             text: ChangeHSL.kernel[7]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 3, Row 1")
@@ -145,8 +145,8 @@ ColumnLayout {
             id: lh
             text: ChangeHSL.kernel[8]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 0, Row 2")
@@ -157,8 +157,8 @@ ColumnLayout {
             id: ls
             text: ChangeHSL.kernel[9]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 1, Row 2")
@@ -169,8 +169,8 @@ ColumnLayout {
             id: ll
             text: ChangeHSL.kernel[10]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 2, Row 2")
@@ -181,8 +181,8 @@ ColumnLayout {
             id: l0
             text: ChangeHSL.kernel[11]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 3, Row 2")

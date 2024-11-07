@@ -36,19 +36,23 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(GrayScale SHARED
-            src/grayscale.h
-            src/grayscaleelement.h
-            src/grayscale.cpp
-            src/grayscaleelement.cpp
-            pspec.json)
+qt_add_plugin(GrayScale
+              SHARED
+              CLASS_NAME GrayScale)
+target_sources(GrayScale PRIVATE
+               src/grayscale.h
+               src/grayscaleelement.h
+               src/grayscale.cpp
+               src/grayscaleelement.cpp
+               pspec.json)
 
-if (WIN32)
+set_target_properties(GrayScale PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(GrayScale PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(GrayScale PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(GrayScale avkys)
@@ -58,8 +62,6 @@ target_compile_definitions(GrayScale PRIVATE AVKYS_PLUGIN_GRAYSCALE)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(GrayScale avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS GrayScale RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS GrayScale DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS GrayScale
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

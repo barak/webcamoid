@@ -18,6 +18,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 #qtIinstallerVerbose=--verbose
 
 if [ ! -z "${USE_WGET}" ]; then
@@ -80,16 +82,34 @@ if [ -e ".local/${appimage}" ]; then
     cd ..
 fi
 
-dnf install -y --skip-broken "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-${FEDORAVER}.noarch.rpm"
-dnf install -y --skip-broken "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${FEDORAVER}.noarch.rpm"
+# dnf install -y "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-${FEDORAVER}.noarch.rpm"
+# dnf install -y "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${FEDORAVER}.noarch.rpm"
+
+# cat << EOF > /etc/yum.repos.d/fedora-cisco-openh264.repo
+# [fedora-cisco-openh264]
+# name=Fedora \$releasever openh264 (From Cisco) - \$basearch
+# metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-cisco-openh264-\$releasever&arch=\$basearch
+# type=rpm
+# enabled=1
+# metadata_expire=14d
+# repo_gpgcheck=0
+# gpgcheck=1
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-\$releasever-\$basearch
+# skip_if_unavailable=True
+# EOF
+dnf config-manager --add-repo https://terra.fyralabs.com/terra.repo
+
 dnf -y upgrade-minimal --exclude=systemd,systemd-libs
-dnf -y --skip-broken install \
+dnf -y install \
     SDL2-devel \
     alsa-lib-devel \
     ccache \
     clang \
     cmake \
-    ffmpeg-devel \
+    libavdevice-free-devel \
+    libavfilter-free-devel \
+    libXext-devel \
+    libXfixes-devel \
     file \
     gcc-c++ \
     git \
@@ -98,19 +118,22 @@ dnf -y --skip-broken install \
     gstreamer1-plugins-good \
     jack-audio-connection-kit-devel \
     kmod-devel \
+    libusb1-devel \
+    libuvc-devel \
     libv4l-devel \
     make \
     patchelf \
     pipewire-devel \
     portaudio-devel \
     pulseaudio-libs-devel \
-    qt5-linguist \
-    qt5-qtdeclarative-devel \
-    qt5-qtmultimedia-devel \
-    qt5-qtquickcontrols2-devel \
-    qt5-qtsvg-devel \
-    qt5-qttools-devel \
-    qt5-qtwayland \
+    qt6-linguist \
+    qt6-qtbase-devel \
+    qt6-qtdeclarative-devel \
+    qt6-qtmultimedia-devel \
+    qt6-qtquickcontrols2-devel \
+    qt6-qtsvg-devel \
+    qt6-qttools-devel \
+    qt6-qtwayland \
     vlc-core \
     vlc-devel \
     which \

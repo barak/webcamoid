@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(AnalogTV SHARED
-            src/analogtv.h
-            src/analogtvelement.h
-            src/analogtv.cpp
-            src/analogtvelement.cpp
-            AnalogTV.qrc
-            pspec.json)
+qt_add_plugin(AnalogTV
+              SHARED
+              CLASS_NAME AnalogTV)
+target_sources(AnalogTV PRIVATE
+               src/analogtv.h
+               src/analogtvelement.h
+               src/analogtv.cpp
+               src/analogtvelement.cpp
+               AnalogTV.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(AnalogTV PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(AnalogTV PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(AnalogTV PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(AnalogTV avkys)
@@ -60,8 +64,6 @@ list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_
 target_link_libraries(AnalogTV avkys ${QT_LIBS})
 set(QML_IMPORT_PATH ../../Lib/share/qml)
 
-if (WIN32)
-    install(TARGETS AnalogTV RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS AnalogTV DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS AnalogTV
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

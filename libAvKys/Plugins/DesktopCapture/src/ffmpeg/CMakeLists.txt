@@ -55,20 +55,23 @@ set(MODULES
 
 pkg_check_modules(FFMPEG ${MODULES})
 
-link_directories(${FFMPEG_LIBRARY_DIRS})
-
-if (NOT NOFFMPEGSCREENCAP AND FFMPEG_FOUND AND NOT ANDROID)
-    add_library(DesktopCapture_ffmpeg SHARED ${SOURCES})
+if (FFMPEG_FOUND AND NOT ANDROID AND NOT NOFFMPEGSCREENCAP AND NOT NOSCREENCAPTURE)
+    qt_add_plugin(DesktopCapture_ffmpeg
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(DesktopCapture_ffmpeg PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(DesktopCapture_ffmpeg SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(DesktopCapture_ffmpeg EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(DesktopCapture_ffmpeg PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(DesktopCapture_ffmpeg PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(DesktopCapture_ffmpeg PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(DesktopCapture_ffmpeg avkys)
@@ -80,15 +83,16 @@ target_include_directories(DesktopCapture_ffmpeg
                            ../../../../Lib/src)
 target_compile_definitions(DesktopCapture_ffmpeg PRIVATE AVKYS_PLUGIN_DESKTOPCAPTURE_FFMPEG)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
+target_link_directories(DesktopCapture_ffmpeg
+                        PUBLIC
+                        ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(DesktopCapture_ffmpeg
                       ${QT_LIBS}
                       ${FFMPEG_LIBRARIES}
                       avkys)
 
-if (NOT NOFFMPEGSCREENCAP AND FFMPEG_FOUND)
-    if (WIN32)
-        install(TARGETS DesktopCapture_ffmpeg RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS DesktopCapture_ffmpeg DESTINATION ${PLUGINSDIR})
-    endif ()
+if (FFMPEG_FOUND AND NOT ANDROID AND NOT NOFFMPEGSCREENCAP AND NOT NOSCREENCAPTURE)
+    install(TARGETS DesktopCapture_ffmpeg
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

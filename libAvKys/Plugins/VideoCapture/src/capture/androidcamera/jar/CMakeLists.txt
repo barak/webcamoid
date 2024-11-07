@@ -36,7 +36,8 @@ if (ANDROID)
                 INCLUDE_JARS
                 ${ANDROID_JAR_DIRECTORY}/android.jar
                 OUTPUT_NAME AkVideoCapture_androidcamera
-                OUTPUT_DIR ${CMAKE_BINARY_DIR}/android-build/libs)
+                OUTPUT_DIR ${CMAKE_BINARY_DIR}/${BUILDDIR}/${JARDIR})
+        install_jar(VideoCapture_androidcamerajar DESTINATION ${JARDIR})
     endif ()
 endif ()
 

@@ -17,16 +17,20 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.0 as LABS
-import Ak 1.0
-import Webcamoid 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtCore
+import Qt.labs.settings 1.0
+import Ak
+import Webcamoid
+
 
 StackLayout {
     id: videoOutputsLayout
-    currentIndex: !videoLayer.isVCamSupported?
+    currentIndex: Ak.isFlatpak() && !Ak.hasFlatpakVCam()?
+                      3:
+                  !videoLayer.isVCamSupported?
                       2:
                   (videoLayer.vcamInstallStatus == VideoLayer.VCamNotInstalled)
                   || !videoLayer.isCurrentVCamInstalled?
@@ -166,10 +170,13 @@ StackLayout {
                 OptionList {
                     id: devicesList
                     Layout.fillWidth: true
+                    Layout.minimumHeight: minHeight
 
                     property bool updating: false
+                    property int minHeight: 0
 
                     function update() {
+                        devicesList.minHeight = 0
                         let devices = videoLayer.outputs
 
                         for (let i = count - 1; i >= 0; i--)
@@ -199,6 +206,7 @@ StackLayout {
                             obj.text = videoLayer.description(devices[i])
                             obj.device = devices[i]
                             obj.highlighted = i == index
+                            devicesList.minHeight += obj.height
 
                             obj.Keys.onSpacePressed.connect(function () {
                                 if (videoLayer.videoOutput[0] != ":dummyout:")
@@ -260,8 +268,30 @@ StackLayout {
             }
         }
     }
+    Page {
+        ColumnLayout {
+            width: parent.width
 
-    LABS.Settings {
+            Label {
+                text: qsTr("This Flatpak version does not have support for the virtual camera.")
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+                Layout.leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+                Layout.rightMargin: AkUnit.create(8 * AkTheme.controlScale, "dp").pixels
+            }
+            Button {
+                text: qsTr("Download the full version")
+                highlighted: true
+                Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+                Layout.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+                Accessible.description: qsTr("Download the full Flatpak version with the virtual camera support")
+
+                onClicked: Qt.openUrlExternally(mediaTools.projectUrl)
+            }
+        }
+    }
+
+    Settings {
         category: "Updates"
 
         property alias showDialog: videoOutputsLayout.showDialog

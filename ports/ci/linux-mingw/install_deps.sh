@@ -18,6 +18,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 if [ ! -z "${USE_WGET}" ]; then
     export DOWNLOAD_CMD="wget -nv -c"
 else
@@ -26,14 +28,23 @@ fi
 
 # Configure mirrors
 
-cat << EOF >> /etc/pacman.conf
+sed -n '/^\[core\]/q;p' /etc/pacman.conf > /etc/pacman_temp.conf
+mv -vf /etc/pacman_temp.conf /etc/pacman.conf
 
-[multilib]
-Include = /etc/pacman.d/mirrorlist
+cat << EOF >> /etc/pacman.conf
 
 [ownstuff]
 Server = https://ftp.f3l.de/~martchus/\$repo/os/\$arch
 Server = http://martchus.no-ip.biz/repo/arch/\$repo/os/\$arch
+
+[core]
+Include = /etc/pacman.d/mirrorlist
+
+[extra]
+Include = /etc/pacman.d/mirrorlist
+
+[multilib]
+Include = /etc/pacman.d/mirrorlist
 EOF
 sed -i 's/Required DatabaseOptional/Never/g' /etc/pacman.conf
 
@@ -55,36 +66,38 @@ pacman --noconfirm --needed -S \
     cmake \
     file \
     git \
-    gst-plugins-base-libs \
-    lib32-gst-plugins-base-libs \
     lib32-mpg123 \
     make \
     mpg123 \
+    nsis \
     pkgconf \
     python \
+    qt6-declarative \
+    qt6-tools \
     sed \
+    unzip \
+    vulkan-headers \
     wine \
     xorg-server-xvfb \
     mingw-w64-cmake \
     mingw-w64-ffmpeg \
     mingw-w64-gcc \
-    mingw-w64-gst-plugins-base \
-    mingw-w64-gstreamer \
     mingw-w64-portaudio \
     mingw-w64-pkg-config \
-    mingw-w64-qt5-multimedia \
-    mingw-w64-qt5-quickcontrols2 \
-    mingw-w64-qt5-svg \
-    mingw-w64-qt5-tools \
-    mingw-w64-sdl2
+    mingw-w64-qt6-declarative \
+    mingw-w64-qt6-imageformats \
+    mingw-w64-qt6-multimedia \
+    mingw-w64-qt6-svg \
+    mingw-w64-qt6-tools \
+    mingw-w64-sdl2 \
+    mingw-w64-vulkan-headers
 
 # Install NSIS
 
-nsis=nsis-${NSIS_VERSION}-setup.exe
-${DOWNLOAD_CMD} "https://sourceforge.net/projects/nsis/files/NSIS%20${NSIS_VERSION:0:1}/${NSIS_VERSION}/${nsis}"
+NSIS_VERSION=3.10
+nsis=nsis-${NSIS_VERSION}.zip
+${DOWNLOAD_CMD} "https://downloads.sourceforge.net/nsis/NSIS%20${NSIS_VERSION:0:1}/${NSIS_VERSION}/${nsis}"
 
 if [ -e "${nsis}" ]; then
-    export WINEPREFIX=/opt/.wine
-
-    wine ./"${nsis}" /S
+    unzip -q "${PWD}/${nsis}"
 fi

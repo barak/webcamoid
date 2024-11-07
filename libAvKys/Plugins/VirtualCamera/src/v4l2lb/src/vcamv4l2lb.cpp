@@ -25,10 +25,10 @@
 #include <QFileSystemWatcher>
 #include <QMutex>
 #include <QProcessEnvironment>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QTemporaryFile>
-#include <QTextCodec>
 #include <QThread>
 #include <fcntl.h>
 #include <limits>
@@ -41,6 +41,13 @@
 #include <libkmod.h>
 #endif
 
+#ifdef Q_OS_FREEBSD
+#include <sys/types.h>
+#include <sys/user.h>
+#include <libutil.h>
+#endif
+
+#include <ak.h>
 #include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
@@ -142,7 +149,6 @@ class VCamV4L2LoopBackPrivate
 
         inline int xioctl(int fd, ulong request, void *arg) const;
         inline int planesCount(const v4l2_format &format) const;
-        bool isFlatpak() const;
         bool sudo(const QString &script);
         QStringList availableRootMethods() const;
         QString whereBin(const QString &binary) const;
@@ -229,9 +235,13 @@ bool VCamV4L2LoopBack::isInstalled() const
     static bool result = false;
 
     if (!haveResult) {
+#ifdef Q_OS_BSD4
+        auto modinfoBin = this->d->whereBin("webcamd");
+        result = !modinfoBin.isEmpty();
+#else
         static const char moduleName[] = "v4l2loopback";
 
-        if (this->d->isFlatpak()) {
+        if (Ak::isFlatpak()) {
             QProcess modinfo;
             modinfo.start("flatpak-spawn",
                           QStringList {"--host",
@@ -263,6 +273,7 @@ bool VCamV4L2LoopBack::isInstalled() const
                 }
             }
         }
+#endif
 
         haveResult = true;
     }
@@ -276,9 +287,12 @@ QString VCamV4L2LoopBack::installedVersion() const
     static QString version;
 
     if (!haveVersion) {
+#ifdef Q_OS_BSD4
+        version = QSysInfo::kernelVersion();
+#else
         static const char moduleName[] = "v4l2loopback";
 
-        if (this->d->isFlatpak()) {
+        if (Ak::isFlatpak()) {
             QProcess modinfo;
             modinfo.start("flatpak-spawn",
                           QStringList {"--host",
@@ -338,6 +352,7 @@ QString VCamV4L2LoopBack::installedVersion() const
             }
 #endif
         }
+#endif
 
         haveVersion = true;
     }
@@ -366,7 +381,7 @@ QList<AkVideoCaps::PixelFormat> VCamV4L2LoopBack::supportedOutputPixelFormats() 
         AkVideoCaps::Format_rgb24,
         AkVideoCaps::Format_rgb565le,
         AkVideoCaps::Format_rgb555le,
-        AkVideoCaps::Format_0bgr,
+        AkVideoCaps::Format_xbgr,
         AkVideoCaps::Format_bgr24,
         AkVideoCaps::Format_uyvy422,
         AkVideoCaps::Format_yuyv422,
@@ -441,7 +456,7 @@ QList<quint64> VCamV4L2LoopBack::clientsPids() const
     auto devices = this->d->devicesInfo();
     QList<quint64> clientsPids;
 
-    if (this->d->isFlatpak()) {
+    if (Ak::isFlatpak()) {
         QProcess find;
         find.start("flatpak-spawn",
                    QStringList {"--host",
@@ -505,6 +520,28 @@ QList<quint64> VCamV4L2LoopBack::clientsPids() const
                 continue;
 
             QStringList videoDevices;
+
+#ifdef Q_OS_FREEBSD
+            int nfiles = 0;
+            auto files = kinfo_getfile(pid, &nfiles);
+
+            for (int i = 0; i < nfiles; i++) {
+                auto &kFileInfo = files[i];
+
+                if (kFileInfo.kf_fd < 0
+                    || kFileInfo.kf_type == KF_TYPE_FIFO
+                    || kFileInfo.kf_type == KF_TYPE_VNODE) {
+                    QFileInfo fdInfo(kFileInfo.kf_path);
+                    QString target = fdInfo.isSymLink()?
+                                         fdInfo.symLinkTarget():
+                                         fdInfo.absoluteFilePath();
+                    static const QRegularExpression re("^/dev/video[0-9]+$");
+
+                    if (re.match(target).hasMatch())
+                        videoDevices << target;
+                }
+            }
+#else
             QDir fdDir(QString("/proc/%1/fd").arg(pid));
             auto fds = fdDir.entryList(QStringList() << "[0-9]*",
                                        QDir::Files
@@ -514,11 +551,15 @@ QList<quint64> VCamV4L2LoopBack::clientsPids() const
 
             for (auto &fd: fds) {
                 QFileInfo fdInfo(fdDir.absoluteFilePath(fd));
-                QString target = fdInfo.isSymLink()? fdInfo.symLinkTarget(): "";
+                QString target = fdInfo.isSymLink()?
+                                     fdInfo.symLinkTarget():
+                                     fdInfo.absoluteFilePath();
+                static const QRegularExpression re("^/dev/video[0-9]+$");
 
-                if (QRegExp("/dev/video[0-9]+").exactMatch(target))
+                if (re.match(target).hasMatch())
                     videoDevices << target;
             }
+#endif
 
             for (auto &device: devices)
                 if (videoDevices.contains(device.path)) {
@@ -536,7 +577,10 @@ QList<quint64> VCamV4L2LoopBack::clientsPids() const
 
 QString VCamV4L2LoopBack::clientExe(quint64 pid) const
 {
-    if (this->d->isFlatpak()) {
+#ifdef Q_OS_FREEBSD
+    return QFileInfo(QString("/proc/%1/file").arg(pid)).symLinkTarget();
+#else
+    if (Ak::isFlatpak()) {
         QProcess realpath;
         realpath.start("flatpak-spawn",
                        QStringList {"--host",
@@ -551,6 +595,7 @@ QString VCamV4L2LoopBack::clientExe(quint64 pid) const
     }
 
     return QFileInfo(QString("/proc/%1/exe").arg(pid)).symLinkTarget();
+#endif
 }
 
 QString VCamV4L2LoopBack::rootMethod() const
@@ -561,6 +606,15 @@ QString VCamV4L2LoopBack::rootMethod() const
 QStringList VCamV4L2LoopBack::availableRootMethods() const
 {
     return this->d->availableRootMethods();
+}
+
+bool VCamV4L2LoopBack::canEditVCamDescription() const
+{
+#ifdef Q_OS_BSD4
+    return false;
+#else
+    return true;
+#endif
 }
 
 QString VCamV4L2LoopBack::deviceCreate(const QString &description,
@@ -574,17 +628,30 @@ QString VCamV4L2LoopBack::deviceCreate(const QString &description,
         return {};
     }
 
-    auto deviceNR = this->d->requestDeviceNR(2);
+#ifdef Q_OS_LINUX
+    static const int nDevices = 1;
+    auto deviceNR = this->d->requestDeviceNR(nDevices);
 
-    if (deviceNR.count() < 2) {
+    if (deviceNR.count() < nDevices) {
         this->d->m_error = "No available devices to create a virtual camera";
 
         return {};
     }
+#endif
 
+    auto devices = this->d->devicesInfo();
+
+#ifdef Q_OS_FREEBSD
+    QSet<QString> oldDevices;
+
+    std::for_each(devices.begin(),
+                  devices.end(),
+                  [&oldDevices] (const DeviceInfo &device) {
+        oldDevices << device.path;
+    });
+#else
     // Fill device info.
     auto deviceId = QString("/dev/video%1").arg(deviceNR.front());
-    auto devices = this->d->devicesInfo();
     devices << DeviceInfo {deviceNR.front(),
                            deviceId,
                            this->d->cleanDescription(description),
@@ -609,11 +676,19 @@ QString VCamV4L2LoopBack::deviceCreate(const QString &description,
 
         cardLabel += device.description;
     }
+#endif
 
     // Write the script file.
 
     QString script;
     QTextStream ts(&script);
+
+#ifdef Q_OS_FREEBSD
+    ts << "killall webcamd" << Qt::endl;
+    ts << "/usr/local/sbin/webcamd -B -c v4l2loopback -m v4l2loopback.devices="
+       << (devices.size() + 1)
+       << Qt::endl;
+#else
     ts << "rmmod v4l2loopback 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules-load.d/*.conf 2>/dev/null" << Qt::endl;
@@ -625,10 +700,31 @@ QString VCamV4L2LoopBack::deviceCreate(const QString &description,
        << cardLabel
        << "\"' > /etc/modprobe.d/v4l2loopback.conf" << Qt::endl;
     ts << "modprobe v4l2loopback video_nr=" << videoNR << " card_label=\"" << cardLabel << "\"" << Qt::endl;
+#endif
 
     // Execute the script
     if (!this->d->sudo(script))
         return {};
+
+#ifdef Q_OS_FREEBSD
+    QThread::msleep(3000);
+    devices = this->d->devicesInfo();
+    QSet<QString> curDevices;
+
+    std::for_each(devices.begin(),
+                  devices.end(),
+                  [&curDevices] (const DeviceInfo &device) {
+                      curDevices << device.path;
+                  });
+    auto newDevices = curDevices.subtract(oldDevices);
+    QString deviceId;
+
+    for (auto &device: newDevices) {
+        deviceId = device;
+
+        break;
+    }
+#endif
 
     if (!this->d->waitForDevice(deviceId)) {
         this->d->m_error = "Time exceeded while waiting for the device";
@@ -709,6 +805,15 @@ bool VCamV4L2LoopBack::deviceEdit(const QString &deviceId,
 
     auto devices = this->d->devicesInfo();
 
+#ifdef Q_OS_FREEBSD
+    QSet<QString> oldDevices;
+
+    std::for_each(devices.begin(),
+                  devices.end(),
+                  [&oldDevices] (const DeviceInfo &device) {
+                      oldDevices << device.path;
+                  });
+#else
     for (auto &device: devices)
         if (device.path == deviceId) {
             device.description = this->d->cleanDescription(description);
@@ -731,11 +836,19 @@ bool VCamV4L2LoopBack::deviceEdit(const QString &deviceId,
 
         cardLabel += device.description;
     }
+#endif
 
     // Write the script file.
 
     QString script;
     QTextStream ts(&script);
+
+#ifdef Q_OS_FREEBSD
+    ts << "killall webcamd" << Qt::endl;
+    ts << "/usr/local/sbin/webcamd -B -c v4l2loopback -m v4l2loopback.devices="
+       << devices.size()
+       << Qt::endl;
+#else
     ts << "rmmod v4l2loopback 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules-load.d/*.conf 2>/dev/null" << Qt::endl;
@@ -747,6 +860,7 @@ bool VCamV4L2LoopBack::deviceEdit(const QString &deviceId,
        << cardLabel
        << "\"' > /etc/modprobe.d/v4l2loopback.conf" << Qt::endl;
     ts << "modprobe v4l2loopback video_nr=" << videoNR << " card_label=\"" << cardLabel << "\"" << Qt::endl;
+#endif
 
     // Execute the script
     if (!this->d->sudo(script))
@@ -819,6 +933,11 @@ bool VCamV4L2LoopBack::deviceEdit(const QString &deviceId,
 bool VCamV4L2LoopBack::changeDescription(const QString &deviceId,
                                          const QString &description)
 {
+#ifdef Q_OS_FREEBSD
+    this->d->m_error = "Device name can't be changed in FreeBSD";
+
+    return false;
+#else
     this->d->m_error = "";
 
     if (!this->clientsPids().isEmpty()) {
@@ -850,6 +969,7 @@ bool VCamV4L2LoopBack::changeDescription(const QString &deviceId,
 
     QString script;
     QTextStream ts(&script);
+
     ts << "rmmod v4l2loopback 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules-load.d/*.conf 2>/dev/null" << Qt::endl;
@@ -869,6 +989,7 @@ bool VCamV4L2LoopBack::changeDescription(const QString &deviceId,
     this->d->updateDevices();
 
     return result;
+#endif
 }
 
 bool VCamV4L2LoopBack::deviceDestroy(const QString &deviceId)
@@ -881,8 +1002,10 @@ bool VCamV4L2LoopBack::deviceDestroy(const QString &deviceId)
         return false;
     }
 
-    // Delete the devices
     auto devices = this->d->devicesInfo();
+
+#ifdef Q_OS_LINUX
+    // Delete the devices
     auto it = std::find_if(devices.begin(),
                            devices.end(),
                            [&deviceId] (const DeviceInfo &device) {
@@ -919,11 +1042,24 @@ bool VCamV4L2LoopBack::deviceDestroy(const QString &deviceId)
 
         cardLabel += device.description;
     }
+#endif
 
     // Write the script file.
 
     QString script;
     QTextStream ts(&script);
+
+#ifdef Q_OS_FREEBSD
+    int nDevices = qMax(devices.size() - 1, 0);
+    ts << "killall webcamd" << Qt::endl;
+
+    if (nDevices > 0)
+        ts << "/usr/local/sbin/webcamd -B -c v4l2loopback -m v4l2loopback.devices="
+           << nDevices
+           << Qt::endl;
+    else
+        ts << "/usr/local/sbin/webcamd -B" << Qt::endl;
+#else
     ts << "rmmod v4l2loopback 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules-load.d/*.conf 2>/dev/null" << Qt::endl;
@@ -941,15 +1077,20 @@ bool VCamV4L2LoopBack::deviceDestroy(const QString &deviceId)
            << "\"' > /etc/modprobe.d/v4l2loopback.conf" << Qt::endl;
         ts << "modprobe v4l2loopback video_nr=" << videoNR << " card_label=\"" << cardLabel << "\"" << Qt::endl;
     }
+#endif
 
     if (!this->d->sudo(script))
         return false;
 
+#ifdef Q_OS_FREEBSD
+    QThread::msleep(3000);
+#else
     if (!this->d->waitForDevices(devicesList)) {
         this->d->m_error = "Time exceeded while waiting for the device";
 
         return false;
     }
+#endif
 
     this->d->updateDevices();
 
@@ -970,12 +1111,18 @@ bool VCamV4L2LoopBack::destroyAllDevices()
 
     QString script;
     QTextStream ts(&script);
+
+#ifdef Q_OS_FREEBSD
+    ts << "killall webcamd" << Qt::endl;
+    ts << "/usr/local/sbin/webcamd -B" << Qt::endl;
+#else
     ts << "rmmod v4l2loopback 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modules-load.d/*.conf 2>/dev/null" << Qt::endl;
     ts << "sed -i '/v4l2loopback/d' /etc/modprobe.d/*.conf 2>/dev/null" << Qt::endl;
     ts << "rm -f /etc/modules-load.d/v4l2loopback.conf" << Qt::endl;
     ts << "rm -f /etc/modprobe.d/v4l2loopback.conf" << Qt::endl;
+#endif
 
     if (!this->d->sudo(script))
         return false;
@@ -1145,6 +1292,16 @@ void VCamV4L2LoopBack::setDevice(const QString &device)
             close(fd);
 
             for (auto &control: this->d->deviceControls()) {
+                if ((control.name == "Horizontal Flip" || control.name == "Vertical Flip")
+                    && !this->d->m_flipFilter) {
+                    continue;
+                }
+
+                if ((control.name == "Swap Red and Blue")
+                    && !this->d->m_swapRBFilter) {
+                    continue;
+                }
+
                 int value = control.default_value;
 
                 if (this->d->m_deviceControlValues.contains(this->d->m_device)
@@ -1231,11 +1388,15 @@ bool VCamV4L2LoopBack::write(const AkVideoPacket &packet)
     }
 
     auto values = this->d->m_deviceControlValues[this->d->m_device];
-    this->d->m_flipFilter->setProperty("horizontalFlip", values.value("Horizontal Flip", false));
-    this->d->m_flipFilter->setProperty("verticalFlip", values.value("Vertical Flip", false));
-    auto packet_ = this->d->m_flipFilter->iStream(packet);
+    auto packet_ = packet;
 
-    if (values.value("Swap Read and Blue", false))
+    if (this->d->m_flipFilter) {
+        this->d->m_flipFilter->setProperty("horizontalFlip", values.value("Horizontal Flip", false));
+        this->d->m_flipFilter->setProperty("verticalFlip", values.value("Vertical Flip", false));
+        packet_ = this->d->m_flipFilter->iStream(packet_);
+    }
+
+    if (this->d->m_swapRBFilter && values.value("Swap Red and Blue", false))
         packet_ = this->d->m_swapRBFilter->iStream(packet_);
 
     this->d->m_videoConverter.setScalingMode(AkVideoConverter::ScalingMode(values.value("Scaling Mode", 0)));
@@ -1327,13 +1488,6 @@ int VCamV4L2LoopBackPrivate::planesCount(const v4l2_format &format) const
                 format.fmt.pix_mp.num_planes;
 }
 
-bool VCamV4L2LoopBackPrivate::isFlatpak() const
-{
-    static const bool isFlatpak = QFile::exists("/.flatpak-info");
-
-    return isFlatpak;
-}
-
 bool VCamV4L2LoopBackPrivate::sudo(const QString &script)
 {
     if (this->m_rootMethod.isEmpty()) {
@@ -1346,7 +1500,7 @@ bool VCamV4L2LoopBackPrivate::sudo(const QString &script)
 
     QProcess su;
 
-    if (this->isFlatpak()) {
+    if (Ak::isFlatpak()) {
         su.start("flatpak-spawn", QStringList {"--host", this->m_rootMethod, "sh"});
     } else {
         auto sudoBin = this->whereBin(this->m_rootMethod);
@@ -1416,7 +1570,7 @@ QStringList VCamV4L2LoopBackPrivate::availableRootMethods() const
 
         methods.clear();
 
-        if (this->isFlatpak()) {
+        if (Ak::isFlatpak()) {
             for (auto &su: sus) {
                 QProcess suProc;
                 suProc.start("flatpak-spawn",
@@ -1444,9 +1598,10 @@ QString VCamV4L2LoopBackPrivate::whereBin(const QString &binary) const
 {
     // Limit search paths to trusted directories only.
     static const QStringList paths {
-        "/usr/bin",       // GNU/Linux
-        "/bin",           // NetBSD
-        "/usr/local/bin", // FreeBSD
+        "/usr/bin",        // GNU/Linux
+        "/bin",            // NetBSD
+        "/usr/local/bin",  // FreeBSD
+        "/usr/local/sbin", // FreeBSD
 
         // Additionally, search it in a developer provided extra directory.
 
@@ -1689,13 +1844,13 @@ inline const V4L2AkFormatMap &VCamV4L2LoopBackPrivate::v4l2AkFormatMap() const
         {0                  , AkVideoCaps::Format_none    , ""     },
 
         // RGB formats
-        {V4L2_PIX_FMT_RGB32 , AkVideoCaps::Format_0rgb    , "RGB32"},
+        {V4L2_PIX_FMT_RGB32 , AkVideoCaps::Format_xrgb    , "RGB32"},
         {V4L2_PIX_FMT_RGB24 , AkVideoCaps::Format_rgb24   , "RGB24"},
         {V4L2_PIX_FMT_RGB565, AkVideoCaps::Format_rgb565le, "RGB16"},
         {V4L2_PIX_FMT_RGB555, AkVideoCaps::Format_rgb555le, "RGB15"},
 
         // BGR formats
-        {V4L2_PIX_FMT_BGR32 , AkVideoCaps::Format_0bgr    , "BGR32"},
+        {V4L2_PIX_FMT_BGR32 , AkVideoCaps::Format_xbgr    , "BGR32"},
         {V4L2_PIX_FMT_BGR24 , AkVideoCaps::Format_bgr24   , "BGR24"},
 
         // Luminance+Chrominance formats
@@ -1769,7 +1924,7 @@ const DeviceControls &VCamV4L2LoopBackPrivate::deviceControls() const
         {"Aspect Ratio Mode" , "menu"   , 0, 0, 1, 0, {"Ignore",
                                                        "Keep",
                                                        "Expanding"}},
-        {"Swap Read and Blue", "boolean", 0, 1, 1, 0, {}           },
+        {"Swap Red and Blue" , "boolean", 0, 1, 1, 0, {}           },
     };
 
     return deviceControls;
@@ -2165,7 +2320,7 @@ void VCamV4L2LoopBackPrivate::initDefaultFormats()
     static const QVector<AkVideoCaps::PixelFormat> pixelFormats {
         AkVideoCaps::Format_yuyv422,
         AkVideoCaps::Format_uyvy422,
-        AkVideoCaps::Format_0rgb,
+        AkVideoCaps::Format_xrgb,
         AkVideoCaps::Format_rgb24,
     };
     static const QVector<QPair<int , int>> resolutions {

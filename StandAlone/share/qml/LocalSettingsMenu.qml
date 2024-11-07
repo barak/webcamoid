@@ -17,17 +17,20 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import Ak 1.0
-import Webcamoid 1.0
+import QtQuick
+import QtQuick.Controls
+import Ak
+import Webcamoid
 
 Menu {
     id: settingsMenu
     margins: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
 
+    property bool videoSettings: false
+
     signal copyToClipboard()
-    signal openImageCaptureSettings()
+    signal openCaptureSettings()
+    signal openRecordingSettings()
 
     MenuItem {
         text: qsTr("Copy to clipboard")
@@ -36,10 +39,19 @@ Menu {
         onClicked: settingsMenu.copyToClipboard()
     }
     MenuItem {
-        text: qsTr("Image capture settings")
+        text: videoSettings?
+                  qsTr("Video capture settings"):
+                  qsTr("Image capture settings")
         icon.source: "image://icons/settings"
-        visible: videoLayer.deviceType(videoLayer.videoInput) == VideoLayer.InputCamera
+        enabled: videoLayer.deviceType(videoLayer.videoInput) == VideoLayer.InputCamera
 
-        onClicked: settingsMenu.openImageCaptureSettings()
+        onClicked: settingsMenu.openCaptureSettings()
+    }
+    MenuItem {
+        text: qsTr("Video recording settings")
+        icon.source: "image://icons/video"
+        enabled: videoSettings
+
+        onClicked: settingsMenu.openRecordingSettings()
     }
 }

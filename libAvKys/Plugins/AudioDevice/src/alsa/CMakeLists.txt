@@ -47,20 +47,24 @@ set(SOURCES
     pspec.json)
 
 pkg_check_modules(ALSA alsa)
-link_directories(${ALSA_LIBRARY_DIRS})
 
-if (NOT NOALSA AND ALSA_FOUND)
-    add_library(AudioDevice_alsa SHARED ${SOURCES})
+if (NOT NOALSA AND ALSA_FOUND AND NOT ANDROID)
+    qt_add_plugin(AudioDevice_alsa
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(AudioDevice_alsa PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(AudioDevice_alsa SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(AudioDevice_alsa EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(AudioDevice_alsa PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(AudioDevice_alsa PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(AudioDevice_alsa PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(AudioDevice_alsa avkys)
@@ -72,15 +76,16 @@ target_include_directories(AudioDevice_alsa
                            ../../../../Lib/src)
 target_compile_definitions(AudioDevice_alsa PRIVATE AVKYS_PLUGIN_AUDIODEVICE_ALSA)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
+target_link_directories(AudioDevice_alsa
+                        PUBLIC
+                        ${ALSA_LIBRARY_DIRS})
 target_link_libraries(AudioDevice_alsa
                       ${QT_LIBS}
                       ${ALSA_LIBRARIES}
                       avkys)
 
-if (NOT NOALSA AND ALSA_FOUND)
-    if (WIN32)
-        install(TARGETS AudioDevice_alsa RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS AudioDevice_alsa DESTINATION ${PLUGINSDIR})
-    endif ()
+if (NOT NOALSA AND ALSA_FOUND AND NOT ANDROID)
+    install(TARGETS AudioDevice_alsa
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

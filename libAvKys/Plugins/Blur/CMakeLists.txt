@@ -36,21 +36,25 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Blur SHARED
-            src/blur.h
-            src/blurelement.h
-            src/pixel.h
-            src/blur.cpp
-            src/blurelement.cpp
-            Blur.qrc
-            pspec.json)
+qt_add_plugin(Blur
+              SHARED
+              CLASS_NAME Blur)
+target_sources(Blur PRIVATE
+               src/blur.h
+               src/blurelement.h
+               src/pixel.h
+               src/blur.cpp
+               src/blurelement.cpp
+               Blur.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Blur PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Blur PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Blur PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Blur avkys)
@@ -60,8 +64,6 @@ target_compile_definitions(Blur PRIVATE AVKYS_PLUGIN_BLUR)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Blur avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Blur RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Blur DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Blur
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

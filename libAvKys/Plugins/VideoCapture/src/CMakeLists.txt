@@ -37,27 +37,29 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(VideoCaptureSrc SHARED
-            capture.cpp
-            capture.h
-            convertvideo.cpp
-            convertvideo.h
-            videocapture.cpp
-            videocapture.h
-            videocaptureelement.cpp
-            videocaptureelement.h
-            ../VideoCapture.qrc
-            ../pspec.json)
+qt_add_plugin(VideoCaptureSrc
+              SHARED
+              CLASS_NAME VideoCapture)
+target_sources(VideoCaptureSrc PRIVATE
+               capture.cpp
+               capture.h
+               convertvideo.cpp
+               convertvideo.h
+               videocapture.cpp
+               videocapture.h
+               videocaptureelement.cpp
+               videocaptureelement.h
+               VideoCapture.qrc
+               pspec.json)
 
 set_target_properties(VideoCaptureSrc PROPERTIES
-                      OUTPUT_NAME VideoCapture)
+                      OUTPUT_NAME VideoCapture
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
 
-if (WIN32)
+if (IPO_IS_SUPPORTED)
     set_target_properties(VideoCaptureSrc PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(VideoCaptureSrc PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(VideoCaptureSrc avkys)
@@ -71,9 +73,6 @@ if (WIN32)
     target_link_libraries(VideoCaptureSrc ole32)
 endif ()
 
-
-if (WIN32)
-    install(TARGETS VideoCaptureSrc RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS VideoCaptureSrc DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS VideoCaptureSrc
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

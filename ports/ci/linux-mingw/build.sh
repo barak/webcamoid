@@ -18,6 +18,14 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
+if [ ! -z "${GITHUB_SHA}" ]; then
+    export GIT_COMMIT_HASH="${GITHUB_SHA}"
+elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
+    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
+fi
+
 if [ "${COMPILER}" = clang ]; then
     COMPILER_C=clang
     COMPILER_CXX=clang++
@@ -30,29 +38,45 @@ COMPILER_C=${TARGET_ARCH}-w64-mingw32-${COMPILER_C}
 COMPILER_CXX=${TARGET_ARCH}-w64-mingw32-${COMPILER_CXX}
 
 if [ -z "${DISABLE_CCACHE}" ]; then
-    EXTRA_PARAMS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OBJCXX_COMPILER_LAUNCHER=ccache"
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OBJCXX_COMPILER_LAUNCHER=ccache"
 fi
+
+if [ "${UPLOAD}" == 1 ]; then
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON"
+fi
+
+# Some anti-virus software seems to be detecting libVLC load as it were
+# malware:
+#
+# https://hijacklibs.net/entries/3rd_party/vlc/libvlc.html
+#
+# so disable it in all cases, even though its a legitimate usage in the case of
+# Webcamoid
+
+EXTRA_PARAMS="${EXTRA_PARAMS} -DNOVLC=ON"
 
 export PKG_CONFIG=${TARGET_ARCH}-w64-mingw32-pkg-config
 MINGW_PREFIX=/usr/${TARGET_ARCH}-w64-mingw32
-QMAKE_CMD=${MINGW_PREFIX}/lib/qt/bin/qmake
-LRELEASE_TOOL=${MINGW_PREFIX}/lib/qt/bin/lrelease
-LUPDATE_TOOL=${MINGW_PREFIX}/lib/qt/bin/lupdate
+QT_QMAKE_EXECUTABLE=${MINGW_PREFIX}/lib/qt6/bin/qmake
+LRELEASE_TOOL=/usr/lib/qt6/bin/lrelease
+LUPDATE_TOOL=/usr/lib/qt6/bin/lupdate
 
 INSTALL_PREFIX=${PWD}/webcamoid-data-${COMPILER}-${TARGET_ARCH}
 buildDir=build-${COMPILER}-${TARGET_ARCH}
 mkdir "${buildDir}"
-"${TARGET_ARCH}-w64-mingw32-cmake" \
+
+"${MINGW_PREFIX}/lib/qt6/bin/qt-cmake" \
     -LA \
     -S . \
     -B "${buildDir}" \
-    -DQT_QMAKE_EXECUTABLE="${QMAKE_CMD}" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
     -DCMAKE_C_COMPILER="${COMPILER_C}" \
     -DCMAKE_CXX_COMPILER="${COMPILER_CXX}" \
+    -DQT_QMAKE_EXECUTABLE="${QT_QMAKE_EXECUTABLE}" \
     -DLRELEASE_TOOL="${LRELEASE_TOOL}" \
     -DLUPDATE_TOOL="${LUPDATE_TOOL}" \
+    -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
     -DDAILY_BUILD="${DAILY_BUILD}"
 make -C "${buildDir}" -j"${NJOBS}"

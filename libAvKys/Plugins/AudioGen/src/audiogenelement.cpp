@@ -224,8 +224,8 @@ bool AudioGenElement::setState(AkElement::ElementState state)
             this->d->m_readFramesLoop = true;
             this->d->m_readFramesLoopResult =
                     QtConcurrent::run(&this->d->m_threadPool,
-                                      this->d,
-                                      &AudioGenElementPrivate::readFramesLoop);
+                                      &AudioGenElementPrivate::readFramesLoop,
+                                      this->d);
 
             return AkElement::setState(state);
         }
@@ -236,8 +236,8 @@ bool AudioGenElement::setState(AkElement::ElementState state)
             this->d->m_readFramesLoop = true;
             this->d->m_readFramesLoopResult =
                     QtConcurrent::run(&this->d->m_threadPool,
-                                      this->d,
-                                      &AudioGenElementPrivate::readFramesLoop);
+                                      &AudioGenElementPrivate::readFramesLoop,
+                                      this->d);
 
             return AkElement::setState(state);
         }

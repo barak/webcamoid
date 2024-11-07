@@ -67,17 +67,37 @@ set(SOURCES
     src/capturev4l2.h
     src/plugin.cpp
     src/plugin.h
+    src/ioctldefs.h
     pspec.json)
 
-if (NOT NOV4L2 AND HAVE_V4L2 AND NOT ANDROID)
-    add_library(VideoCapture_v4l2sys SHARED ${SOURCES})
-else ()
-    add_library(VideoCapture_v4l2sys SHARED EXCLUDE_FROM_ALL ${SOURCES})
+pkg_check_modules(LIBUSB libusb-1.0)
+
+if (NOT NOLIBUSB AND LIBUSB_FOUND)
+    list(APPEND SOURCES
+         src/guid.h
+         src/uvcextendedcontrols.h
+         src/guid.cpp
+         src/uvcextendedcontrols.cpp
+         v4l2.qrc)
 endif ()
 
-if (NOT ANDROID)
+if (NOT NOV4L2 AND HAVE_V4L2 AND NOT ANDROID)
+    qt_add_plugin(VideoCapture_v4l2sys
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VideoCapture_v4l2sys PRIVATE
+                   ${SOURCES})
+else ()
+    add_library(VideoCapture_v4l2sys EXCLUDE_FROM_ALL ${SOURCES})
+endif ()
+
+set_target_properties(VideoCapture_v4l2sys PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(VideoCapture_v4l2sys PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(VideoCapture_v4l2sys avkys)
@@ -89,6 +109,23 @@ target_compile_definitions(VideoCapture_v4l2sys PRIVATE AVKYS_PLUGIN_VIDEOCAPTUR
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(VideoCapture_v4l2sys ${QT_LIBS} avkys)
 
+if (NOT NOLIBUSB AND LIBUSB_FOUND)
+    target_link_directories(VideoCapture_v4l2sys
+                            PUBLIC
+                            ${LIBUSB_LIBRARY_DIRS})
+    target_include_directories(VideoCapture_v4l2sys
+                               PUBLIC
+                               ${LIBUSB_INCLUDE_DIRS})
+    target_link_libraries(VideoCapture_v4l2sys
+                          ${LIBUSB_LIBRARIES})
+    add_definitions(-DHAVE_LIBUSB)
+endif ()
+
+add_definitions(-DBINDIR="${BINDIR}"
+                -DDATAROOTDIR="${DATAROOTDIR}")
+
 if (NOT NOV4L2 AND HAVE_V4L2 AND NOT ANDROID)
-    install(TARGETS VideoCapture_v4l2sys DESTINATION ${PLUGINSDIR})
+    install(TARGETS VideoCapture_v4l2sys
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

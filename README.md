@@ -6,7 +6,7 @@
 
 ## Features ##
 
-* Cross-platform (GNU/Linux, Mac, Windows)
+* Cross-platform (GNU/Linux, Mac, Windows, Android, FreeBSD)
 * Take pictures and record videos with the webcam.
 * Manages multiple webcams.
 * Written in C++ and Qt.
@@ -17,7 +17,7 @@
 * Use custom network and local files as capture devices.
 * Capture from desktop.
 * Many recording formats.
-* Virtual webcam support for feeding other programs.
+* Virtual webcam support for feeding other programs (GNU/Linux, Mac, Windows)
 
 ## Build and Install ##
 
@@ -25,9 +25,14 @@ Visit the [wiki](https://github.com/webcamoid/webcamoid/wiki) for a comprehensiv
 
 ## Downloads ##
 
-[![Download](https://img.shields.io/badge/Download-Releases-3f2a7e.svg)](https://github.com/webcamoid/webcamoid/releases)
-[![Daily Build](https://img.shields.io/badge/Download-Daily%20Build-3f2a7e.svg)](https://github.com/webcamoid/webcamoid/releases/tag/daily-build)
-[![Total Downloads](https://img.shields.io/github/downloads/webcamoid/webcamoid/total.svg?label=Total%20Downloads&color=3f2a7e)](https://tooomm.github.io/github-release-stats/?username=webcamoid&repository=webcamoid)
+Download the pre-compiled packages for GNU/Linux, Windows, and Android.
+If you are a Mac user, consider [making a donation](http://webcamoid.github.io/donations) for buying the needed development hardware and also supporting your platform.
+
+[![Release buidls](http://webcamoid.github.io/theme/images/DownloadButtons/BinaryPackagesButton.png)](https://payhip.com/Webcamoid)
+
+Become a [Webcamoid sponsor](https://github.com/sponsors/hipersayanX) and get early access to the latest features.
+
+[![Daily Build](http://webcamoid.github.io/theme/images/DownloadButtons/DailyBuildButton.png)](https://github.com/sponsors/hipersayanX)
 
 ## Donations ##
 
@@ -46,7 +51,6 @@ If you are interested in donating to the project you can look at all available m
 [![Flatpak](https://github.com/webcamoid/webcamoid/actions/workflows/flatpak.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/flatpak.yml)
 [![Mac](https://github.com/webcamoid/webcamoid/actions/workflows/mac.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/mac.yml)
 [![Windows MSYS](https://github.com/webcamoid/webcamoid/actions/workflows/windows-msys.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/windows-msys.yml)
-[![Build status](https://ci.appveyor.com/api/projects/status/1ecp839l0nnnya9l?svg=true)](https://ci.appveyor.com/project/hipersayanX/webcamoid)
 [![Build status](https://api.cirrus-ci.com/github/webcamoid/webcamoid.svg)](https://cirrus-ci.com/github/webcamoid/webcamoid)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/08a585dc07a14b8bad2bbb39d6628fdd)](https://www.codacy.com/gh/webcamoid/webcamoid/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webcamoid/webcamoid&amp;utm_campaign=Badge_Grade)
 [![Translation status](https://hosted.weblate.org/widgets/webcamoid/-/svg-badge.svg)](https://hosted.weblate.org/engage/webcamoid/?utm_source=widget)

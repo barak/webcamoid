@@ -27,7 +27,6 @@ QObject *Hypnotic::create(const QString &key, const QString &specification)
     Q_UNUSED(key)
     Q_UNUSED(specification)
     qRegisterMetaType<HypnoticElement::OpticMode>("HypnoticOpticMode");
-    qRegisterMetaTypeStreamOperators<HypnoticElement::OpticMode>("HypnoticOpticMode");
     qmlRegisterType<HypnoticElement>("HypnoticElement", 1, 0, "HypnoticElement");
 
     return new HypnoticElement();

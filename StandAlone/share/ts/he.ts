@@ -4,43 +4,43 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../qml/About.qml" line="61"/>
+        <location filename="../qml/About.qml" line="60"/>
         <source>Built from</source>
         <extracomment>Built from &quot;short commit hash&quot;</extracomment>
         <translation>נבנה מתוך</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="67"/>
+        <location filename="../qml/About.qml" line="66"/>
         <source>Built from %1</source>
         <translation>נבנה מתוך %1</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="69"/>
+        <location filename="../qml/About.qml" line="68"/>
         <source>Open the commit in your web browser</source>
         <translation>פתיחת ההגשה בדפדפן</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="75"/>
+        <location filename="../qml/About.qml" line="74"/>
         <source>Using Qt %1</source>
         <translation>על גבי Qt %1</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="94"/>
+        <location filename="../qml/About.qml" line="93"/>
         <source>Website</source>
         <translation>אתר</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="98"/>
+        <location filename="../qml/About.qml" line="97"/>
         <source>Go to %1 website</source>
         <translation>מעבר לאתר של %1</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="79"/>
+        <location filename="../qml/About.qml" line="78"/>
         <source>Webcam capture application.</source>
         <translation>יישומון לכידה ממצלמה.</translation>
     </message>
     <message>
-        <location filename="../qml/About.qml" line="84"/>
+        <location filename="../qml/About.qml" line="83"/>
         <source>A simple webcam application for picture and video capture.</source>
         <translation>יישומון פשוט לצילום והסרטה מהמצלמה.</translation>
     </message>
@@ -202,6 +202,54 @@
     </message>
 </context>
 <context>
+    <name>CaptureSettingsDialog</name>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="31"/>
+        <source>Video capture settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="32"/>
+        <source>Image capture settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="57"/>
+        <source>Use flash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="63"/>
+        <source>Use flash when taking a photo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="67"/>
+        <source>Delay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="77"/>
+        <source>Photo timer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="78"/>
+        <source>The time to wait before the photo is taken</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="83"/>
+        <source>Now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="92"/>
+        <source>%1 seconds</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Commons</name>
     <message>
         <location filename="../qml/Commons.qml" line="28"/>
@@ -220,6 +268,49 @@
         <location filename="../qml/Contributors.qml" line="36"/>
         <source>Thanks to all these cool people that helped contributing to Webcamoid all these years.</source>
         <translation>תודות לכל האנשים הנהדרים שסייעו בתרומתם ל־Webcamoid במהלך כל השנים האלה.</translation>
+    </message>
+</context>
+<context>
+    <name>DebugLog</name>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="58"/>
+        <source>Logs directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="69"/>
+        <source>Search</source>
+        <translation type="unfinished">חיפוש</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="70"/>
+        <source>Search directory to save logs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="82"/>
+        <source>Clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="83"/>
+        <source>Clear the debug log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="90"/>
+        <source>Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="91"/>
+        <source>Save the debug log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="117"/>
+        <source>Select the folder to save the logs</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -279,22 +370,22 @@
 <context>
     <name>GeneralConfig</name>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="94"/>
+        <location filename="../qml/GeneralConfig.qml" line="93"/>
         <source>Video capture</source>
         <translation>לכידת וידאו</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="151"/>
+        <location filename="../qml/GeneralConfig.qml" line="150"/>
         <source>Video convert</source>
         <translation>המרת וידאו</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="208"/>
+        <location filename="../qml/GeneralConfig.qml" line="207"/>
         <source>Virtual camera driver</source>
         <translation>מנהל התקן וירטואלי למצלמה</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="170"/>
+        <location filename="../qml/GeneralConfig.qml" line="169"/>
         <source>Video playback</source>
         <translation>נגינת וידאו</translation>
     </message>
@@ -310,22 +401,22 @@
         <translation>סביבות עבודה וספריות</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="113"/>
+        <location filename="../qml/GeneralConfig.qml" line="112"/>
         <source>Screen capture</source>
         <translation>לכידת המסך</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="132"/>
+        <location filename="../qml/GeneralConfig.qml" line="131"/>
         <source>Audio capture/playback</source>
         <translation>לכידת/נגינת שמע</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="189"/>
+        <location filename="../qml/GeneralConfig.qml" line="188"/>
         <source>Video record</source>
         <translation>הקלטת וידאו</translation>
     </message>
     <message>
-        <location filename="../qml/GeneralConfig.qml" line="230"/>
+        <location filename="../qml/GeneralConfig.qml" line="232"/>
         <source>Root method</source>
         <extracomment>The preferred method for executing commands with elevated privileges in the system.</extracomment>
         <translation>שיטת שורש</translation>
@@ -365,58 +456,38 @@
     </message>
 </context>
 <context>
-    <name>ImageCaptureDialog</name>
-    <message>
-        <location filename="../qml/ImageCaptureDialog.qml" line="29"/>
-        <source>Image capture settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/ImageCaptureDialog.qml" line="53"/>
-        <source>Use flash</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/ImageCaptureDialog.qml" line="59"/>
-        <source>Use flash when taking a photo</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/ImageCaptureDialog.qml" line="63"/>
-        <source>Delay</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/ImageCaptureDialog.qml" line="71"/>
-        <source>Photo timer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/ImageCaptureDialog.qml" line="72"/>
-        <source>The time to wait before the photo is taken</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/ImageCaptureDialog.qml" line="77"/>
-        <source>Now</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/ImageCaptureDialog.qml" line="86"/>
-        <source>%1 seconds</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>LocalSettingsMenu</name>
     <message>
-        <location filename="../qml/LocalSettingsMenu.qml" line="33"/>
+        <location filename="../qml/LocalSettingsMenu.qml" line="36"/>
         <source>Copy to clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/LocalSettingsMenu.qml" line="40"/>
+        <location filename="../qml/LocalSettingsMenu.qml" line="43"/>
+        <source>Video capture settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="44"/>
         <source>Image capture settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="51"/>
+        <source>Video recording settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>LogSavedDialog</name>
+    <message>
+        <location filename="../qml/LogSavedDialog.qml" line="32"/>
+        <source>Done</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/LogSavedDialog.qml" line="42"/>
+        <source>Log file saved</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -454,9 +525,17 @@
     </message>
 </context>
 <context>
+    <name>MediaTools</name>
+    <message>
+        <location filename="../../src/mediatools.cpp" line="807"/>
+        <source>%1/log %2.txt</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>OptionsPanel</name>
     <message>
-        <location filename="../qml/OptionsPanel.qml" line="199"/>
+        <location filename="../qml/OptionsPanel.qml" line="198"/>
         <source>Close %1 panel</source>
         <translation>סגירת הלוח %1</translation>
     </message>
@@ -464,7 +543,7 @@
 <context>
     <name>PipewireScreenDev</name>
     <message>
-        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/pipewire/src/pipewirescreendev.cpp" line="216"/>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/pipewire/src/pipewirescreendev.cpp" line="218"/>
         <source>PipeWire Screen</source>
         <translation>מסך PipeWire</translation>
     </message>
@@ -482,27 +561,27 @@
         <translation>תוספים</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="179"/>
+        <location filename="../qml/PluginConfig.qml" line="185"/>
         <source>Search plugins in subfolders</source>
         <translation>חיפוש תוספים בתת־תיקיות</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="188"/>
+        <location filename="../qml/PluginConfig.qml" line="194"/>
         <source>Add path</source>
         <translation>הוספת נתיב</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="226"/>
+        <location filename="../qml/PluginConfig.qml" line="235"/>
         <source>Update</source>
         <translation>עדכון</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="227"/>
+        <location filename="../qml/PluginConfig.qml" line="236"/>
         <source>Update plugins list</source>
         <translation>עדכון רשימת התוספים</translation>
     </message>
     <message>
-        <location filename="../qml/PluginConfig.qml" line="254"/>
+        <location filename="../qml/PluginConfig.qml" line="266"/>
         <source>Add plugins search path</source>
         <translation>הוספת נתיב חיפוש תוספים</translation>
     </message>
@@ -518,62 +597,215 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../src/clioptions.cpp" line="45"/>
+        <location filename="../../src/clioptions.cpp" line="44"/>
         <source>Webcam capture application.</source>
         <translation>יישומון לכידה ממצלמה.</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="48"/>
+        <location filename="../../src/clioptions.cpp" line="47"/>
         <source>Load settings from PATH. If PATH is empty, load configs from application directory.</source>
         <translation>טעינת הגדרות מ־PATH. אם ה־PATH ריק, יש לטעון הגדרות מתיקיית היישומון.</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="50"/>
+        <location filename="../../src/clioptions.cpp" line="49"/>
         <source>PATH</source>
         <translation>PATH</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="62"/>
-        <location filename="../../src/clioptions.cpp" line="71"/>
+        <location filename="../../src/clioptions.cpp" line="61"/>
+        <location filename="../../src/clioptions.cpp" line="70"/>
         <source>PATH1;PATH2;PATH3;...</source>
         <translation>PATH1;PATH2;PATH3;...</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="76"/>
-        <source>Send debug output to a file</source>
-        <translation>שליחת פלט ניפוי שגיאות לקובץ</translation>
-    </message>
-    <message>
-        <location filename="../../src/clioptions.cpp" line="77"/>
-        <source>FILE</source>
-        <translation>קובץ</translation>
-    </message>
-    <message>
-        <location filename="../../src/clioptions.cpp" line="81"/>
+        <location filename="../../src/clioptions.cpp" line="74"/>
         <source>Open a new instance of %1.</source>
         <translation>פתיחת עותק חדש של %1.</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="55"/>
+        <location filename="../../src/clioptions.cpp" line="54"/>
         <source>Search in the specified plugins paths recursively.</source>
         <translation>חיפוש בנתיבי התוספים האלו באופן רקורסיבי.</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="60"/>
+        <location filename="../../src/clioptions.cpp" line="59"/>
         <source>Semi-colon separated list of paths to search for plugins.</source>
         <translation>רשימה מופרדת בנקודה פסיק לחיפוש אחר תוספים.</translation>
     </message>
     <message>
-        <location filename="../../src/clioptions.cpp" line="69"/>
+        <location filename="../../src/clioptions.cpp" line="68"/>
         <source>Semi-colon separated list of paths to avoid loading.</source>
         <extracomment>Blacklist of plugins that could have conflicts when loading in Webcamoid.</extracomment>
         <translation>רשימה מופרדת בפסיקים של נתיבים אותם אין לטעון.</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1350"/>
+        <source>3GP Video</source>
+        <translation type="unfinished">וידאו 3GP</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1351"/>
+        <source>AVI Video</source>
+        <translation type="unfinished">וידאו AVI</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1352"/>
+        <source>Windows Bitmap</source>
+        <translation type="unfinished">מפת סיביות של Windows</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1353"/>
+        <source>Microsoft Windows Cursor</source>
+        <translation type="unfinished">סמן של Microsoft Windows</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1355"/>
+        <source>Flash Video</source>
+        <extracomment>Adobe FLV Flash video</extracomment>
+        <translation type="unfinished">וידאו Flash</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1356"/>
+        <source>Animated GIF</source>
+        <translation type="unfinished">GIF מונפש</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1357"/>
+        <source>Graphic Interchange Format</source>
+        <translation type="unfinished">תצורת גרפיקה להחלפה</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1358"/>
+        <source>Apple Icon Image</source>
+        <translation type="unfinished">תמונת סמל של Apple</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1359"/>
+        <source>Microsoft Windows Icon</source>
+        <translation type="unfinished">סמל של Microsoft Windows</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1360"/>
+        <source>Joint Photographic Experts Group</source>
+        <translation type="unfinished">קבוצת מומחי הצילום המאוחדת</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1361"/>
+        <source>MKV Video</source>
+        <translation type="unfinished">וידאו MKV</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1362"/>
+        <source>Animated PNG</source>
+        <translation type="unfinished">PNG מונפש</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1363"/>
+        <source>Multiple-image Network Graphics</source>
+        <translation type="unfinished">גרפיקת רשת מרובת תמונות</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1364"/>
+        <source>QuickTime Video</source>
+        <translation type="unfinished">וידאו QuickTime</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1365"/>
+        <source>MP4 Video</source>
+        <translation type="unfinished">וידאו MP4</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1366"/>
+        <source>MPEG Video</source>
+        <translation type="unfinished">וידאו MPEG</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1367"/>
+        <source>Ogg Video</source>
+        <translation type="unfinished">וידאו Ogg</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1368"/>
+        <source>Portable Bitmap</source>
+        <translation type="unfinished">מפת סיביות ניידת</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1369"/>
+        <source>Portable Graymap</source>
+        <translation type="unfinished">מפת אפורים ניידת</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1370"/>
+        <source>Portable Network Graphics</source>
+        <translation type="unfinished">גרפיקת רשת ניידת</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1371"/>
+        <source>Portable Pixmap</source>
+        <translation type="unfinished">מפת פיקסלים ניידת</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1373"/>
+        <source>RealMedia Video</source>
+        <extracomment>Don&apos;t translate &quot;RealMedia&quot;, leave it as is.</extracomment>
+        <translation type="unfinished">וידאו RealMedia</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1374"/>
+        <source>Scalable Vector Graphics</source>
+        <translation type="unfinished">גרפיקת וקטורים נמתחת</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1375"/>
+        <source>Truevision TGA</source>
+        <translation type="unfinished">TGA מבית Truevision</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1376"/>
+        <source>Tagged Image File Format</source>
+        <translation type="unfinished">תצורת קובץ תמונה מתויגת</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1377"/>
+        <source>DVD Video</source>
+        <translation type="unfinished">וידאו DVD</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1378"/>
+        <source>Wireless Bitmap</source>
+        <translation type="unfinished">מפת סיביות אלחוטית</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1379"/>
+        <source>WebM Video</source>
+        <translation type="unfinished">וידאו WebM</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1380"/>
+        <source>WebP</source>
+        <translation type="unfinished">WebP‎</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1382"/>
+        <source>Windows Media Video</source>
+        <extracomment>Also known as WMV, is a video file format.</extracomment>
+        <translation type="unfinished">וידאו Windows Media</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1383"/>
+        <source>X11 Bitmap</source>
+        <translation type="unfinished">מפת סיביות X11</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="1384"/>
+        <source>X11 Pixmap</source>
+        <translation type="unfinished">מפת פיקסלים X11</translation>
     </message>
 </context>
 <context>
     <name>Recording</name>
     <message>
-        <location filename="../../src/recording.cpp" line="385"/>
+        <location filename="../../src/recording.cpp" line="396"/>
         <source>%1/Video %2.%3</source>
         <translation>%1/סרטון %2.%3</translation>
     </message>
@@ -589,7 +821,7 @@
 <context>
     <name>RunCommandDialog</name>
     <message>
-        <location filename="../qml/RunCommandDialog.qml" line="93"/>
+        <location filename="../qml/RunCommandDialog.qml" line="92"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -597,67 +829,72 @@
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="73"/>
+        <location filename="../qml/SettingsDialog.qml" line="78"/>
         <source>Image Capture</source>
         <translation>לכידת תמונה</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="76"/>
+        <location filename="../qml/SettingsDialog.qml" line="81"/>
         <source>Video Recording</source>
         <translation>הקלטת וידאו</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="79"/>
+        <location filename="../qml/SettingsDialog.qml" line="84"/>
         <source>General Options</source>
         <translation>אפשרויות כלליות</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="82"/>
+        <location filename="../qml/SettingsDialog.qml" line="87"/>
         <source>Plugins</source>
         <translation>תוספים</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="85"/>
+        <location filename="../qml/SettingsDialog.qml" line="90"/>
         <source>Updates</source>
         <translation>עדכונים</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsDialog.qml" line="93"/>
+        <source>Debug Log</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>SettingsMenu</name>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="41"/>
+        <location filename="../qml/SettingsMenu.qml" line="60"/>
         <source>Video</source>
-        <translation>וידאו</translation>
+        <translation type="unfinished">וידאו</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="47"/>
+        <location filename="../qml/SettingsMenu.qml" line="66"/>
         <source>Audio</source>
-        <translation>שמע</translation>
+        <translation type="unfinished">שמע</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="53"/>
+        <location filename="../qml/SettingsMenu.qml" line="72"/>
         <source>Effects</source>
         <translation type="unfinished">אפקטים</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsMenu.qml" line="59"/>
-        <source>Preferences</source>
-        <translation>העדפות</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsMenu.qml" line="65"/>
-        <source>Donate</source>
-        <translation>תרומה</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsMenu.qml" line="71"/>
-        <source>About</source>
-        <translation>על אודות</translation>
-    </message>
-    <message>
         <location filename="../qml/SettingsMenu.qml" line="78"/>
+        <source>Preferences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="84"/>
+        <source>Donate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="90"/>
+        <source>About</source>
+        <translation type="unfinished">על אודות</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="97"/>
         <source>Play sources</source>
-        <translation>מקורות נגינה</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -681,72 +918,72 @@
 <context>
     <name>UpdatesConfig</name>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="84"/>
+        <location filename="../qml/UpdatesConfig.qml" line="85"/>
         <source>Notify about new versions</source>
         <translation>הצגת הודעה על גרסאות חדשות</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="96"/>
+        <location filename="../qml/UpdatesConfig.qml" line="97"/>
         <source>Show updates dialog</source>
         <translation>הצגת תיבת דו־שיח עדכונים</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="106"/>
+        <location filename="../qml/UpdatesConfig.qml" line="107"/>
         <source>Check new versions</source>
         <translation>בדיקה לאיתור גרסאות חדשות</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="115"/>
+        <location filename="../qml/UpdatesConfig.qml" line="116"/>
         <source>Daily</source>
         <translation>יומית</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="119"/>
+        <location filename="../qml/UpdatesConfig.qml" line="120"/>
         <source>Every two days</source>
         <translation>כל יומיים</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="123"/>
+        <location filename="../qml/UpdatesConfig.qml" line="124"/>
         <source>Weekly</source>
         <translation>שבועית</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="127"/>
+        <location filename="../qml/UpdatesConfig.qml" line="128"/>
         <source>Every two weeks</source>
         <translation>כל שבועיים</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="131"/>
+        <location filename="../qml/UpdatesConfig.qml" line="132"/>
         <source>Monthly</source>
         <translation>חודשית</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="135"/>
+        <location filename="../qml/UpdatesConfig.qml" line="136"/>
         <source>Never</source>
         <translation>אף פעם</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="148"/>
+        <location filename="../qml/UpdatesConfig.qml" line="149"/>
         <source>Last updated</source>
         <translation>עדכון אחרון</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="169"/>
+        <location filename="../qml/UpdatesConfig.qml" line="170"/>
         <source>Your version of %1 is outdated. Latest version is &lt;b&gt;%2&lt;/b&gt;.</source>
         <translation>הגרסה של ה־%1 שלך מיושנת. הגרסה העדכנית ביותר היא &lt;b&gt;%2&lt;/b&gt;.</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="175"/>
+        <location filename="../qml/UpdatesConfig.qml" line="176"/>
         <source>Upgrade Now!</source>
         <translation>לשדרג כעת!</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="190"/>
+        <location filename="../qml/UpdatesConfig.qml" line="191"/>
         <source>Thanks for using a &lt;b&gt;development version&lt;/b&gt;!&lt;br /&gt;It will be very helpful if you can report any bug and suggestions you have.</source>
         <translation>תודה לך על השימוש ב&lt;b&gt;גרסת הפיתוח&lt;/b&gt;!&lt;br /&gt;נודה לך מאוד אם יתאפשר לך לדווח על תקלות או להציע הצעות שיש לך.</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesConfig.qml" line="195"/>
+        <location filename="../qml/UpdatesConfig.qml" line="196"/>
         <source>Report a Bug</source>
         <translation>דיווח על תקלה</translation>
     </message>
@@ -754,17 +991,17 @@
 <context>
     <name>UpdatesDialog</name>
     <message>
-        <location filename="../qml/UpdatesDialog.qml" line="29"/>
+        <location filename="../qml/UpdatesDialog.qml" line="30"/>
         <source>New version available!</source>
         <translation>גרסה חדשה זמינה!</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesDialog.qml" line="72"/>
+        <location filename="../qml/UpdatesDialog.qml" line="73"/>
         <source>Download %1 %2 NOW!</source>
         <translation>להוריד את %1 %2 עכשיו!</translation>
     </message>
     <message>
-        <location filename="../qml/UpdatesDialog.qml" line="79"/>
+        <location filename="../qml/UpdatesDialog.qml" line="80"/>
         <source>Show this dialog next time</source>
         <translation>להציג את תיבת הדו־שיח הזו בפעם הבאה</translation>
     </message>
@@ -822,9 +1059,13 @@
     </message>
     <message>
         <location filename="../qml/VideoCodecOptions.qml" line="196"/>
+        <source>Keyframes stride (ms)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qml/VideoCodecOptions.qml" line="200"/>
-        <source>Keyframes stride</source>
-        <translation>פסע שקופיות מפתח</translation>
+        <source>1000</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -975,186 +1216,23 @@
 <context>
     <name>VideoLayer</name>
     <message>
-        <location filename="../../src/videolayer.cpp" line="191"/>
-        <source>3GP Video</source>
-        <translation>וידאו 3GP</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="192"/>
-        <source>AVI Video</source>
-        <translation>וידאו AVI</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="193"/>
-        <source>Windows Bitmap</source>
-        <translation>מפת סיביות של Windows</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="194"/>
-        <source>Microsoft Windows Cursor</source>
-        <translation>סמן של Microsoft Windows</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="196"/>
-        <source>Flash Video</source>
-        <extracomment>Adobe FLV Flash video</extracomment>
-        <translation>וידאו Flash</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="197"/>
-        <source>Animated GIF</source>
-        <translation>GIF מונפש</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="198"/>
-        <source>Graphic Interchange Format</source>
-        <translation>תצורת גרפיקה להחלפה</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="199"/>
-        <source>Apple Icon Image</source>
-        <translation>תמונת סמל של Apple</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="200"/>
-        <source>Microsoft Windows Icon</source>
-        <translation>סמל של Microsoft Windows</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="201"/>
-        <source>Joint Photographic Experts Group</source>
-        <translation>קבוצת מומחי הצילום המאוחדת</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="202"/>
-        <source>MKV Video</source>
-        <translation>וידאו MKV</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="203"/>
-        <source>Animated PNG</source>
-        <translation>PNG מונפש</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="204"/>
-        <source>Multiple-image Network Graphics</source>
-        <translation>גרפיקת רשת מרובת תמונות</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="205"/>
-        <source>QuickTime Video</source>
-        <translation>וידאו QuickTime</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="206"/>
-        <source>MP4 Video</source>
-        <translation>וידאו MP4</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="207"/>
-        <source>MPEG Video</source>
-        <translation>וידאו MPEG</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="208"/>
-        <source>Ogg Video</source>
-        <translation>וידאו Ogg</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="209"/>
-        <source>Portable Bitmap</source>
-        <translation>מפת סיביות ניידת</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="210"/>
-        <source>Portable Graymap</source>
-        <translation>מפת אפורים ניידת</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="211"/>
-        <source>Portable Network Graphics</source>
-        <translation>גרפיקת רשת ניידת</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="212"/>
-        <source>Portable Pixmap</source>
-        <translation>מפת פיקסלים ניידת</translation>
-    </message>
-    <message>
         <location filename="../../src/videolayer.cpp" line="214"/>
-        <source>RealMedia Video</source>
-        <extracomment>Don&apos;t translate &quot;RealMedia&quot;, leave it as is.</extracomment>
-        <translation>וידאו RealMedia</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="215"/>
-        <source>Scalable Vector Graphics</source>
-        <translation>גרפיקת וקטורים נמתחת</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="216"/>
-        <source>Truevision TGA</source>
-        <translation>TGA מבית Truevision</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="217"/>
-        <source>Tagged Image File Format</source>
-        <translation>תצורת קובץ תמונה מתויגת</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="218"/>
-        <source>DVD Video</source>
-        <translation>וידאו DVD</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="219"/>
-        <source>Wireless Bitmap</source>
-        <translation>מפת סיביות אלחוטית</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="220"/>
-        <source>WebM Video</source>
-        <translation>וידאו WebM</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="221"/>
-        <source>WebP</source>
-        <translation>WebP‎</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="223"/>
-        <source>Windows Media Video</source>
-        <extracomment>Also known as WMV, is a video file format.</extracomment>
-        <translation>וידאו Windows Media</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="224"/>
-        <source>X11 Bitmap</source>
-        <translation>מפת סיביות X11</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="225"/>
-        <source>X11 Pixmap</source>
-        <translation>מפת פיקסלים X11</translation>
-    </message>
-    <message>
-        <location filename="../../src/videolayer.cpp" line="265"/>
         <source>All Image and Video Files</source>
         <translation>כל קובצי התמונה והווידאו</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="300"/>
+        <location filename="../../src/videolayer.cpp" line="251"/>
         <source>All Files</source>
-        <translation>כל הקבצים</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="463"/>
+        <location filename="../../src/videolayer.cpp" line="422"/>
         <source>No Output</source>
         <extracomment>Disable video output, don&apos;t send the video to the output device.</extracomment>
         <translation>ללא פלט</translation>
     </message>
     <message>
-        <location filename="../../src/videolayer.cpp" line="825"/>
+        <location filename="../../src/videolayer.cpp" line="793"/>
         <source>Virtual Camera</source>
         <translation>מצלמה וירטואלית</translation>
     </message>
@@ -1175,58 +1253,58 @@
 <context>
     <name>VideoOutputAddEdit</name>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="179"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="181"/>
         <source>Edit Virtual Camera</source>
         <translation>עריכת מצלמה וירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="180"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="182"/>
         <source>Add Virtual Camera</source>
         <translation>הוספת מצלמה וירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="207"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="209"/>
         <source>Virtual camera name</source>
         <translation>שם מצלמה וירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="216"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="228"/>
         <source>Add format</source>
         <translation>הוספת תצורה</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="226"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="238"/>
         <source>Clear formats</source>
         <translation>מחיקת תצורות</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="258"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="275"/>
         <source>Can&apos;t edit the virtual camera</source>
         <translation>לא ניתן לערוך את המצלמה הווירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="259"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="276"/>
         <source>Can&apos;t add the virtual camera</source>
         <translation>לא ניתן להוסיף את המצלמה הווירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="268"/>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="295"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="285"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="312"/>
         <source>Error editing the virtual camera</source>
         <translation>שגיאה בעריכת המצלמה הווירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="269"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="286"/>
         <source>Error adding the virtual camera</source>
         <translation>שגיאה בהוספת המצלמה הווירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="307"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="324"/>
         <source>Error creating the virtual camera</source>
         <translation>שגיאה ביצירת המצלמה הווירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputAddEdit.qml" line="270"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="287"/>
         <source>Camera description and formats can&apos;t be empty.</source>
         <translation>תיאור המצלמה והתצורות לא יכולים להישאר ריקים.</translation>
     </message>
@@ -1300,134 +1378,174 @@
 <context>
     <name>VideoOutputs</name>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="89"/>
+        <location filename="../qml/VideoOutputs.qml" line="93"/>
         <source>The virtual camera is outdated (%1), install the latest version (%2)?</source>
         <translation>המצלמה הווירטואלית אינה עדכנית (%1), להתקין את הגרסה העדכנית ביותר (%2)?</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="98"/>
-        <location filename="../qml/VideoOutputs.qml" line="234"/>
+        <location filename="../qml/VideoOutputs.qml" line="102"/>
+        <location filename="../qml/VideoOutputs.qml" line="242"/>
         <source>Install</source>
         <translation>התקנה</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="103"/>
-        <location filename="../qml/VideoOutputs.qml" line="238"/>
+        <location filename="../qml/VideoOutputs.qml" line="107"/>
+        <location filename="../qml/VideoOutputs.qml" line="246"/>
         <source>Install virtual camera</source>
         <translation>התקנת מצלמה וירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="114"/>
+        <location filename="../qml/VideoOutputs.qml" line="118"/>
         <source>Configure output</source>
         <translation>הגדרת פלט</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="124"/>
+        <location filename="../qml/VideoOutputs.qml" line="128"/>
         <source>Add output</source>
         <translation>הוספת פלט</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="132"/>
+        <location filename="../qml/VideoOutputs.qml" line="136"/>
         <source>Error Creating Virtual Camera</source>
         <translation>שגיאה ביצירת מצלמה וירטואלית</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="139"/>
+        <location filename="../qml/VideoOutputs.qml" line="143"/>
         <source>Remove all outputs</source>
         <translation>הסרת כל הפלטים</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="146"/>
+        <location filename="../qml/VideoOutputs.qml" line="150"/>
         <source>Error removing virtual cameras</source>
         <translation>שגיאה בהסרת המצלמות הווירטואליות</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="151"/>
+        <location filename="../qml/VideoOutputs.qml" line="155"/>
         <source>Error Removing Virtual Cameras</source>
         <translation>שגיאה בהסרת מצלמות וירטואליות</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="158"/>
+        <location filename="../qml/VideoOutputs.qml" line="162"/>
         <source>Set output picture</source>
         <translation>הגדרת תמונת פלט</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="226"/>
+        <location filename="../qml/VideoOutputs.qml" line="234"/>
         <source>The virtual camera is not installed, do you want to install it?</source>
         <translation>המצלמה הווירטואלית לא מותקנת, להתקין אותה?</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="227"/>
+        <location filename="../qml/VideoOutputs.qml" line="235"/>
         <source>The virtual camera is not installed. Please, install &lt;b&gt;v4l2loopback&lt;/b&gt;.</source>
         <translation>המצלמה הווירטואלית לא מותקנת. נא להתקין את &lt;b&gt;v4l2loopback&lt;/b&gt;.</translation>
     </message>
     <message>
-        <location filename="../qml/VideoOutputs.qml" line="255"/>
+        <location filename="../qml/VideoOutputs.qml" line="263"/>
         <source>The virtual camera is not supported in this platform</source>
         <translation>אין תמיכה במצלמה הווירטואלית במערכת הזאת</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="276"/>
+        <source>This Flatpak version does not have support for the virtual camera.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="283"/>
+        <source>Download the full version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="287"/>
+        <source>Download the full Flatpak version with the virtual camera support</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>VideoRecording</name>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="120"/>
+        <location filename="../qml/VideoRecording.qml" line="121"/>
         <source>Videos directory</source>
         <translation>תיקיית סרטונים</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="131"/>
+        <location filename="../qml/VideoRecording.qml" line="132"/>
         <source>Search</source>
         <translation>חיפוש</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="132"/>
+        <location filename="../qml/VideoRecording.qml" line="133"/>
         <source>Search directory to save videos</source>
         <translation>חיפוש בתיקייה כדי לשמור סרטונים</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="141"/>
+        <location filename="../qml/VideoRecording.qml" line="142"/>
         <source>Record audio</source>
         <translation>הקלטת שמע</translation>
     </message>
     <message>
         <location filename="../qml/VideoRecording.qml" line="153"/>
+        <source>Video quality</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="161"/>
+        <source>Output width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="181"/>
+        <source>Output height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="201"/>
+        <source>Output Frame rate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="220"/>
+        <source>File format and codecs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="228"/>
         <source>File format</source>
         <translation>מבנה קובץ</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="184"/>
-        <location filename="../qml/VideoRecording.qml" line="223"/>
-        <location filename="../qml/VideoRecording.qml" line="264"/>
+        <location filename="../qml/VideoRecording.qml" line="259"/>
+        <location filename="../qml/VideoRecording.qml" line="298"/>
+        <location filename="../qml/VideoRecording.qml" line="339"/>
         <source>Configure</source>
         <translation>הגדרה</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="185"/>
+        <location filename="../qml/VideoRecording.qml" line="260"/>
         <source>Configure file format</source>
         <translation>הגדרת סוג קובץ</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="192"/>
+        <location filename="../qml/VideoRecording.qml" line="267"/>
         <source>Video codec</source>
         <translation>מפענח וידאו</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="224"/>
+        <location filename="../qml/VideoRecording.qml" line="299"/>
         <source>Configure video codec</source>
         <translation>הגדרת מפענח וידאו</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="231"/>
+        <location filename="../qml/VideoRecording.qml" line="306"/>
         <source>Audio codec</source>
         <translation>מפענח שמע</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="265"/>
+        <location filename="../qml/VideoRecording.qml" line="340"/>
         <source>Configure audio codec</source>
         <translation>הגדרת מפענח שמע</translation>
     </message>
     <message>
-        <location filename="../qml/VideoRecording.qml" line="299"/>
+        <location filename="../qml/VideoRecording.qml" line="374"/>
         <source>Select the folder to save your videos</source>
         <translation>נא לבחור את התיקייה לשמירת הסרטונים שלך</translation>
     </message>
@@ -1622,6 +1740,7 @@
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="98"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="235"/>
         <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="135"/>
         <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="564"/>
         <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="634"/>
@@ -1753,6 +1872,7 @@
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="229"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="192"/>
         <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="236"/>
         <source>Background color</source>
         <translation>צבע רקע</translation>
@@ -1776,6 +1896,7 @@
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Charify/share/qml/main.qml" line="237"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="204"/>
         <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="244"/>
         <source>Choose the background color</source>
         <translation>נא לבחור את צבע הרקע</translation>
@@ -1789,6 +1910,8 @@
     <message>
         <location filename="../../../libAvKys/Plugins/Cinema/share/qml/main.qml" line="81"/>
         <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="42"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="75"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="178"/>
         <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="47"/>
         <location filename="../../../libAvKys/Plugins/Vignette/share/qml/main.qml" line="53"/>
         <source>Color</source>
@@ -1874,21 +1997,35 @@
         <translation>התאמה אישית</translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="163"/>
+        <source>Background type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="174"/>
+        <source>No background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="227"/>
         <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="114"/>
         <source>Source palette</source>
         <translation>ערכת צבעים במקור</translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="230"/>
         <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="117"/>
         <source>Image file to use as palette</source>
         <translation>קובץ תמונה לשימוש כערכת צבעים</translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="237"/>
         <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="137"/>
         <source>Search the image file to use as palette</source>
         <translation>חיפוש קובץ התמונה שישמש כערכת צבעים</translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="245"/>
         <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="145"/>
         <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="1027"/>
         <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="1037"/>
@@ -1978,10 +2115,15 @@
         <translation>סיגמא</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/DesktopCapture/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="48"/>
         <location filename="../../../libAvKys/Plugins/ImageSrc/share/qml/main.qml" line="66"/>
         <source>Frame rate</source>
         <translation>קצב שקופיות</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="102"/>
+        <source>Cursor size</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="30"/>
@@ -2204,6 +2346,7 @@
         <translation>אליפסה</translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="182"/>
         <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="259"/>
         <source>Image</source>
         <translation>תמונה</translation>
@@ -2483,6 +2626,12 @@
         <translation>רקע</translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="687"/>
+        <source>Advanced face area settings for 
+background blur or image below.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="740"/>
         <source>Horizontal Offset</source>
         <translation>היסט אופקי</translation>
@@ -2538,13 +2687,6 @@
         <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="680"/>
         <source>Face Area Settings</source>
         <translation>הגדרות אזור פנים</translation>
-    </message>
-    <message>
-        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="687"/>
-        <source>Advanced face area settings for 
-background blur or image below.</source>
-        <translation>הגדרות אזור פנים מתקדמות 
-לטשטוש פנים או לתמונה מתחת.</translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="799"/>
@@ -2841,6 +2983,7 @@ background blur or image below.</source>
         <translation>שינוי גודל חלק</translation>
     </message>
     <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="83"/>
         <location filename="../../../libAvKys/Plugins/Matrix/share/qml/main.qml" line="334"/>
         <source>Show cursor</source>
         <translation>הצגת סמן</translation>
@@ -2851,22 +2994,22 @@ background blur or image below.</source>
         <translation>הצגת גשם</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="123"/>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="123"/>
         <source>Video track</source>
         <translation>רצועת וידאו</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="139"/>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="139"/>
         <source>Audio track</source>
         <translation>רצועת שמע</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="155"/>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="155"/>
         <source>Subtitles track</source>
         <translation>רצועת כתוביות</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/MultiSrc/share/qml/main.qml" line="171"/>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="171"/>
         <source>Synchronise</source>
         <translation>סנכרון</translation>
     </message>
@@ -3036,17 +3179,17 @@ background blur or image below.</source>
         <translation>חום</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="318"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="318"/>
         <source>Video format</source>
         <translation>תסדיר וידאו</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="338"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="338"/>
         <source>Resolution</source>
         <translation>רזולוציה</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="358"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="358"/>
         <source>FPS</source>
         <translation>שקופיות לשנייה</translation>
     </message>
@@ -3102,7 +3245,7 @@ background blur or image below.</source>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="271"/>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="382"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="382"/>
         <source>Reset</source>
         <translation>איפוס</translation>
     </message>
@@ -3112,7 +3255,7 @@ background blur or image below.</source>
         <translation>איפוס משתנים</translation>
     </message>
     <message>
-        <location filename="../../../libAvKys/Plugins/VideoCapture/share/qml/main.qml" line="385"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="385"/>
         <source>Reset to default values</source>
         <translation>איפוס לערכי ברירת המחדל</translation>
     </message>
@@ -3148,119 +3291,6 @@ background blur or image below.</source>
         <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="82"/>
         <source>Duration (in seconds)</source>
         <translation>משך (בשניות)</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="295"/>
-        <location filename="../qml/main.qml" line="298"/>
-        <source>Take a photo</source>
-        <translation>צילום תמונה</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="60"/>
-        <source>%1/Picture %2.%3</source>
-        <translation>%1/תמונה %2.%3</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="46"/>
-        <source>Daily Build</source>
-        <translation>מהדורה יומית</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="186"/>
-        <source>Main menu</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="196"/>
-        <source>Open main menu</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="214"/>
-        <source>Image capture options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="224"/>
-        <source>Open image capture options menu</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="263"/>
-        <source>Open last photo</source>
-        <translation>פתיחת התמונה האחרונה</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="274"/>
-        <source>Open last photo taken</source>
-        <translation>פתיחת התמונה האחרונה שצולמה</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="299"/>
-        <source>Image capture mode</source>
-        <translation>מצב לכידת תמונה</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="302"/>
-        <source>Make a capture and save it to an image file</source>
-        <translation>לכידת תמונה ושמירתה לקובץ תמונה</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="303"/>
-        <source>Put %1 in image capture mode</source>
-        <translation>הגדרת %1 למצב לכידת תמונה</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="350"/>
-        <location filename="../qml/main.qml" line="356"/>
-        <source>Record video</source>
-        <translation>הקלטת וידאו</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="351"/>
-        <location filename="../qml/main.qml" line="357"/>
-        <source>Stop video recording</source>
-        <translation>עצירת הקלטת וידאו</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="354"/>
-        <source>Video capture mode</source>
-        <translation>מצב לכידת וידאו</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="360"/>
-        <source>Put %1 in video recording mode</source>
-        <translation>הגדרת %1 למצב לכידת וידאו</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="362"/>
-        <source>Start recording to a video file</source>
-        <translation>התחלת הקלטה לקובץ וידאו</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="363"/>
-        <source>Stop current video recording</source>
-        <translation>עצירת הקלטת הווידאו הנוכחית</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="380"/>
-        <source>Open last video</source>
-        <translation>פתיחת הווידאו האחרון</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="392"/>
-        <source>Open last recorded video</source>
-        <translation>פתיחת הווידאו האחרון שהוקלט</translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="592"/>
-        <source>Installing virtual camera</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/main.qml" line="593"/>
-        <source>Running commands</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../../libAvKys/Plugins/FaceTrack/share/qml/main.qml" line="425"/>
@@ -3558,6 +3588,139 @@ duration (seconds)</source>
         <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="272"/>
         <source>Phase (Y)</source>
         <translation>שלב (Y)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="85"/>
+        <source>Choose the color to filter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="95"/>
+        <source>Color Difference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="120"/>
+        <source>Smoothness</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="145"/>
+        <source>Normalize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="46"/>
+        <source>Daily Build</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="60"/>
+        <source>%1/Picture %2.%3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="201"/>
+        <source>Main menu</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="212"/>
+        <source>Open main menu</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="233"/>
+        <source>Capture options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="244"/>
+        <source>Open capture options menu</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="286"/>
+        <source>Open last photo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="297"/>
+        <source>Open last photo taken</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="318"/>
+        <location filename="../qml/main.qml" line="321"/>
+        <source>Take a photo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="322"/>
+        <source>Image capture mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="325"/>
+        <source>Make a capture and save it to an image file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="326"/>
+        <source>Put %1 in image capture mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="375"/>
+        <location filename="../qml/main.qml" line="381"/>
+        <source>Record video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="376"/>
+        <location filename="../qml/main.qml" line="382"/>
+        <source>Stop video recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="379"/>
+        <source>Video capture mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="385"/>
+        <source>Put %1 in video recording mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="387"/>
+        <source>Start recording to a video file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="388"/>
+        <source>Stop current video recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="414"/>
+        <source>Open last video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="426"/>
+        <source>Open last recorded video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="648"/>
+        <source>Installing virtual camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="649"/>
+        <source>Running commands</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

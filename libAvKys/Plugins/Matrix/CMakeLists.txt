@@ -37,24 +37,28 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Matrix SHARED
-            src/character.cpp
-            src/character.h
-            src/matrix.cpp
-            src/matrix.h
-            src/matrixelement.cpp
-            src/matrixelement.h
-            src/raindrop.cpp
-            src/raindrop.h
-            Matrix.qrc
-            pspec.json)
+qt_add_plugin(Matrix
+              SHARED
+              CLASS_NAME Matrix)
+target_sources(Matrix PRIVATE
+               src/character.cpp
+               src/character.h
+               src/matrix.cpp
+               src/matrix.h
+               src/matrixelement.cpp
+               src/matrixelement.h
+               src/raindrop.cpp
+               src/raindrop.h
+               Matrix.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Matrix PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Matrix PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Matrix PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Matrix avkys)
@@ -64,8 +68,6 @@ target_compile_definitions(Matrix PRIVATE AVKYS_PLUGIN_MATRIX)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Matrix avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Matrix RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Matrix DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Matrix
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

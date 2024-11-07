@@ -91,14 +91,25 @@ using ImageFormatToPixelFormatMap = QMap<int32_t, AkVideoCaps::PixelFormat>;
 inline const ImageFormatToPixelFormatMap &imageFormatToPixelFormat()
 {
     static const ImageFormatToPixelFormatMap imgFmtToPixFmt {
+        {COLOR_Format16bitRGB565   , AkVideoCaps::Format_rgb565le},
+        {COLOR_Format24bitBGR888   , AkVideoCaps::Format_bgr24   },
+        {COLOR_FormatL8            , AkVideoCaps::Format_y8      },
+        {COLOR_FormatL16           , AkVideoCaps::Format_y16le   },
+        {COLOR_Format32bitABGR8888 , AkVideoCaps::Format_abgr    },
+        {COLOR_FormatYUV420Flexible, AkVideoCaps::Format_yuv420p },
+        {COLOR_FormatYUV422Flexible, AkVideoCaps::Format_yuv422p },
+        {COLOR_FormatYUV444Flexible, AkVideoCaps::Format_yuv444p },
+        {COLOR_FormatRGBFlexible   , AkVideoCaps::Format_rgb24p  },
+        {COLOR_FormatRGBAFlexible  , AkVideoCaps::Format_rgbap   },
+
+        // Deprecated
+
         {COLOR_Format8bitRGB332            , AkVideoCaps::Format_rgb332    },
         {COLOR_Format12bitRGB444           , AkVideoCaps::Format_rgb444le  },
         {COLOR_Format16bitARGB4444         , AkVideoCaps::Format_argb4444le},
         {COLOR_Format16bitARGB1555         , AkVideoCaps::Format_argb1555le},
-        {COLOR_Format16bitRGB565           , AkVideoCaps::Format_rgb565le  },
         {COLOR_Format16bitBGR565           , AkVideoCaps::Format_bgr565le  },
         {COLOR_Format24bitRGB888           , AkVideoCaps::Format_rgb24     },
-        {COLOR_Format24bitBGR888           , AkVideoCaps::Format_bgr24     },
         {COLOR_Format32bitBGRA8888         , AkVideoCaps::Format_bgra      },
         {COLOR_Format32bitARGB8888         , AkVideoCaps::Format_argb      },
         {COLOR_FormatYUV411Planar          , AkVideoCaps::Format_yuv411p   },
@@ -114,17 +125,9 @@ inline const ImageFormatToPixelFormatMap &imageFormatToPixelFormat()
         {COLOR_FormatCbYCrY                , AkVideoCaps::Format_uyvy422   },
         {COLOR_FormatCrYCbY                , AkVideoCaps::Format_vyuy422   },
         {COLOR_FormatYUV444Interleaved     , AkVideoCaps::Format_yuv444    },
-        {COLOR_FormatL8                    , AkVideoCaps::Format_gray8     },
-        {COLOR_FormatL16                   , AkVideoCaps::Format_gray16le  },
-        {COLOR_FormatL32                   , AkVideoCaps::Format_gray32le  },
+        {COLOR_FormatL32                   , AkVideoCaps::Format_y32le     },
         {COLOR_FormatYUV420PackedSemiPlanar, AkVideoCaps::Format_yuv420p   },
         {COLOR_FormatYUV422PackedSemiPlanar, AkVideoCaps::Format_yuv422p   },
-        {COLOR_Format32bitABGR8888         , AkVideoCaps::Format_abgr      },
-        {COLOR_FormatYUV420Flexible        , AkVideoCaps::Format_yuv420p   },
-        {COLOR_FormatYUV422Flexible        , AkVideoCaps::Format_yuv422p   },
-        {COLOR_FormatYUV444Flexible        , AkVideoCaps::Format_yuv444p   },
-        {COLOR_FormatRGBFlexible           , AkVideoCaps::Format_rgb24p    },
-        {COLOR_FormatRGBAFlexible          , AkVideoCaps::Format_rgbap     },
     };
 
     return imgFmtToPixFmt;
@@ -144,7 +147,9 @@ const QVector<QSize> &h263SupportedSize()
 }
 
 #if __ANDROID_API__ < 28
-const char *AMEDIAFORMAT_KEY_SLICE_HEIGHT = "slice-height";
+#define FORMAT_KEY_SLICE_HEIGHT "slice-height"
+#else
+#define FORMAT_KEY_SLICE_HEIGHT AMEDIAFORMAT_KEY_SLICE_HEIGHT
 #endif
 
 class VideoStreamPrivate
@@ -154,80 +159,77 @@ class VideoStreamPrivate
         AkVideoPacket m_frame;
         QMutex m_frameMutex;
         QWaitCondition m_frameReady;
-        AkVideoCaps m_caps;
         AkVideoConverter m_videoConverter;
 
         explicit VideoStreamPrivate(VideoStream *self);
         static AkVideoCaps nearestH263Caps(const AkVideoCaps &caps);
+        AkVideoCaps codecInputCaps() const;
 };
 
-VideoStream::VideoStream(AMediaMuxer *mediaMuxerformatContext,
-                         uint index,
+VideoStream::VideoStream(uint index,
                          int streamIndex,
                          const QVariantMap &configs,
                          const QMap<QString, QVariantMap> &codecOptions,
                          MediaWriterNDKMedia *mediaWriter,
                          QObject *parent):
-    AbstractStream(mediaMuxerformatContext,
-                   index, streamIndex,
+    AbstractStream(index,
+                   streamIndex,
                    configs,
                    codecOptions,
                    mediaWriter,
                    parent)
 {
     this->d = new VideoStreamPrivate(this);
-    this->d->m_caps = configs["caps"].value<AkCaps>();
+    AkVideoCaps videoCaps = configs["caps"].value<AkCaps>();
     auto codecName = configs["codec"].toString();
     auto defaultCodecParams = mediaWriter->defaultCodecParams(codecName);
-    auto pixelFormat = this->d->m_caps.format();
+    auto pixelFormat = videoCaps.format();
     auto supportedPixelFormats =
             defaultCodecParams["supportedPixelFormats"].toList();
 
     if (!supportedPixelFormats.contains(int(pixelFormat))) {
         auto defaultPixelFormat =
                 AkVideoCaps::PixelFormat(defaultCodecParams["defaultPixelFormat"].toInt());
-        this->d->m_caps.setFormat(defaultPixelFormat);
+        videoCaps.setFormat(defaultPixelFormat);
     }
 
     if (codecName == "video/3gpp")
-        this->d->m_caps = VideoStreamPrivate::nearestH263Caps(this->d->m_caps);
+        videoCaps = VideoStreamPrivate::nearestH263Caps(videoCaps);
 
-    int32_t interval =
-            qRound(configs["gop"].toInt() / this->d->m_caps.fps().value());
+    int32_t interval = qRound(configs["gop"].toInt() / 1000.0);
 
     if (interval < 1)
         interval = 1;
 
-    AMediaFormat_setInt32(this->mediaFormat(),
+    auto mediaFormat = this->mediaFormat();
+    AMediaFormat_setInt32(mediaFormat,
                           AMEDIAFORMAT_KEY_COLOR_FORMAT,
-                          VideoStream::colorFormatFromPixelFormat(this->d->m_caps.format()));
-    AMediaFormat_setInt32(this->mediaFormat(),
+                          VideoStream::colorFormatFromPixelFormat(videoCaps.format()));
+    AMediaFormat_setInt32(mediaFormat,
                           AMEDIAFORMAT_KEY_WIDTH,
-                          this->d->m_caps.width());
-    AMediaFormat_setInt32(this->mediaFormat(),
+                          videoCaps.width());
+    AMediaFormat_setInt32(mediaFormat,
                           AMEDIAFORMAT_KEY_HEIGHT,
-                          this->d->m_caps.height());
-    AMediaFormat_setFloat(this->mediaFormat(),
+                          videoCaps.height());
+    AMediaFormat_setFloat(mediaFormat,
                           AMEDIAFORMAT_KEY_FRAME_RATE,
-                          float(this->d->m_caps.fps().value()));
-    auto specs = AkVideoCaps::formatSpecs(this->d->m_caps.format());
+                          float(videoCaps.fps().value()));
+    auto specs = AkVideoCaps::formatSpecs(videoCaps.format());
     auto &plane = specs.plane(0);
-    size_t stride = this->d->m_caps.width() & 0x1?
-                        plane.bitsSize() * (this->d->m_caps.width() + 1) / 8:
-                        plane.bitsSize() * this->d->m_caps.width() / 8;
-    AMediaFormat_setInt32(this->mediaFormat(),
+    size_t stride = videoCaps.width() & 0x1?
+                        plane.bitsSize() * (videoCaps.width() + 1) / 8:
+                        plane.bitsSize() * videoCaps.width() / 8;
+    AMediaFormat_setInt32(mediaFormat,
                           AMEDIAFORMAT_KEY_STRIDE,
                           stride);
-#if __ANDROID_API__ >= 28
-    AMediaFormat_setInt32(this->mediaFormat(),
-                          AMEDIAFORMAT_KEY_SLICE_HEIGHT,
-                          this->d->m_caps.height());
-#endif
-    AMediaFormat_setInt32(this->mediaFormat(),
+    AMediaFormat_setInt32(mediaFormat,
+                          FORMAT_KEY_SLICE_HEIGHT,
+                          videoCaps.height());
+    AMediaFormat_setInt32(mediaFormat,
                           AMEDIAFORMAT_KEY_I_FRAME_INTERVAL,
                           interval);
-    this->d->m_videoConverter.setOutputCaps(this->d->m_caps);
-}
+    this->d->m_videoConverter.setAspectRatioMode(AkVideoConverter::AspectRatioMode_Fit);
+ }
 
 VideoStream::~VideoStream()
 {
@@ -247,6 +249,7 @@ void VideoStream::convertPacket(const AkPacket &packet)
 
     this->d->m_frameMutex.lock();
 
+    this->d->m_videoConverter.setOutputCaps(this->d->codecInputCaps());
     this->d->m_videoConverter.begin();
     this->d->m_frame = this->d->m_videoConverter.convert(packet);
     this->d->m_videoConverter.end();
@@ -268,7 +271,7 @@ void VideoStream::encode(const AkPacket &packet,
                           &stride);
     int32_t sliceHeight = 0;
     AMediaFormat_getInt32(this->mediaFormat(),
-                          AMEDIAFORMAT_KEY_SLICE_HEIGHT,
+                          FORMAT_KEY_SLICE_HEIGHT,
                           &sliceHeight);
 
     if (sliceHeight < videoPacket.caps().height())
@@ -336,7 +339,7 @@ AkVideoCaps VideoStreamPrivate::nearestH263Caps(const AkVideoCaps &caps)
             nearestSize = size;
             q = k;
 
-            if (k == 0.)
+            if (qFuzzyCompare(k, 0.0))
                 break;
         }
     }
@@ -346,6 +349,32 @@ AkVideoCaps VideoStreamPrivate::nearestH263Caps(const AkVideoCaps &caps)
     nearestCaps.setHeight(nearestSize.height());
 
     return nearestCaps;
+}
+
+AkVideoCaps VideoStreamPrivate::codecInputCaps() const
+{
+    auto mediaFormat = self->mediaFormat();
+    int32_t colorFormat = 0;
+    AMediaFormat_getInt32(mediaFormat,
+                          AMEDIAFORMAT_KEY_COLOR_FORMAT,
+                          &colorFormat);
+    int32_t width = 0;
+    AMediaFormat_getInt32(mediaFormat,
+                          AMEDIAFORMAT_KEY_WIDTH,
+                          &width);
+    int32_t height = 0;
+    AMediaFormat_getInt32(mediaFormat,
+                          AMEDIAFORMAT_KEY_HEIGHT,
+                          &height);
+    float frameRate = 0.0f;
+    AMediaFormat_getFloat(mediaFormat,
+                          AMEDIAFORMAT_KEY_FRAME_RATE,
+                          &frameRate);
+
+    return AkVideoCaps(imageFormatToPixelFormat().value(colorFormat),
+                       width,
+                       height,
+                       {qRound64(1000 * frameRate), 1000});
 }
 
 #include "moc_videostream.cpp"

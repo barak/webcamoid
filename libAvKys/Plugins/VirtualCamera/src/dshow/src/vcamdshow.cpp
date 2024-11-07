@@ -29,13 +29,13 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTemporaryDir>
-#include <QTextCodec>
 #include <QVariant>
 #include <QWaitCondition>
 #include <QXmlStreamReader>
-#include <windows.h>
 #include <akfrac.h>
 #include <akvideoconverter.h>
+#include <windows.h>
+#include <shlobj.h>
 
 #include "vcamdshow.h"
 
@@ -358,14 +358,6 @@ QString VCamDShow::deviceCreate(const QString &description,
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
 
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
-
     // Write 'config.ini'.
     int i = 0;
     int j = 0;
@@ -493,14 +485,6 @@ bool VCamDShow::deviceEdit(const QString &deviceId,
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
 
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
-
     // Write 'config.ini'.
     int i = 0;
     int j = 0;
@@ -612,14 +596,6 @@ bool VCamDShow::changeDescription(const QString &deviceId,
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
 
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
-
     // Write 'config.ini'.
     int i = 0;
     int j = 0;
@@ -728,14 +704,6 @@ bool VCamDShow::deviceDestroy(const QString &deviceId)
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
 
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
-
     // Write 'config.ini'.
     int i = 0;
     int j = 0;
@@ -833,14 +801,6 @@ bool VCamDShow::destroyAllDevices()
 
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
-
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
 
     // Copy default frame to file system.
     QImage defaultImage;
@@ -1063,14 +1023,6 @@ bool VCamDShow::applyPicture()
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
 
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
-
     // Write 'config.ini'.
     int i = 0;
     int j = 0;
@@ -1281,13 +1233,13 @@ const DShowAkFormatMap &VCamDShowPrivate::dshowAkFormatMap() const
 {
     static const DShowAkFormatMap formatMap {
         // RGB formats
-        {AkVideoCaps::Format_0rgb    , "RGB32"},
+        {AkVideoCaps::Format_xrgb    , "RGB32"},
         {AkVideoCaps::Format_rgb24   , "RGB24"},
         {AkVideoCaps::Format_rgb565le, "RGB16"},
         {AkVideoCaps::Format_rgb555le, "RGB15"},
 
         // RGB formats
-        {AkVideoCaps::Format_0bgr    , "BGR32"},
+        {AkVideoCaps::Format_xbgr    , "BGR32"},
         {AkVideoCaps::Format_bgr24   , "BGR24"},
         {AkVideoCaps::Format_bgr565le, "BGR16"},
         {AkVideoCaps::Format_bgr555le, "BGR15"},
@@ -1555,57 +1507,74 @@ QString VCamDShowPrivate::readPicturePath() const
 
 QString VCamDShowPrivate::servicePath(const QString &serviceName) const
 {
-    QString path;
     auto manager = OpenSCManager(nullptr, nullptr, GENERIC_READ);
 
-    if (manager) {
-        auto service = OpenServiceA(manager,
-                                    serviceName.toStdString().c_str(),
-                                    SERVICE_QUERY_CONFIG);
+    if (!manager) {
+        qCritical() << "Failed to connect with the service control manager";
 
-        if (service) {
-            DWORD bytesNeeded = 0;
-            QueryServiceConfig(service, nullptr, 0, &bytesNeeded);
-            auto bufSize = bytesNeeded;
-            auto serviceConfig =
-                    reinterpret_cast<LPQUERY_SERVICE_CONFIG>(LocalAlloc(LMEM_FIXED,
-                                                                        bufSize));
-            if (serviceConfig) {
-                if (QueryServiceConfig(service,
-                                       serviceConfig,
-                                       bufSize,
-                                       &bytesNeeded)) {
-                    path = QString::fromStdWString(serviceConfig->lpBinaryPathName);
-                }
-
-                LocalFree(serviceConfig);
-            }
-
-            CloseServiceHandle(service);
-        }
-
-        CloseServiceHandle(manager);
+        return {};
     }
+
+    QString path;
+    auto service = OpenServiceA(manager,
+                                serviceName.toStdString().c_str(),
+                                SERVICE_QUERY_CONFIG);
+
+    if (!service) {
+        qCritical() << "Failed to open" << serviceName << "service";
+        CloseServiceHandle(manager);
+
+        return {};
+    }
+
+    DWORD bytesNeeded = 0;
+    auto ok = QueryServiceConfig(service, nullptr, 0, &bytesNeeded);
+
+    if (!ok || bytesNeeded < 1) {
+        qCritical() << "Failed to query the buffer size for" << serviceName << "service configuration";
+        CloseServiceHandle(service);
+        CloseServiceHandle(manager);
+
+        return {};
+    }
+
+    auto bufSize = bytesNeeded;
+    auto serviceConfig =
+            reinterpret_cast<LPQUERY_SERVICE_CONFIG>(LocalAlloc(LMEM_FIXED,
+                                                                bufSize));
+
+    if (!serviceConfig) {
+        qCritical() << "Failed to allocate the buffer for the query";
+        CloseServiceHandle(service);
+        CloseServiceHandle(manager);
+
+        return {};
+    }
+
+    ok = QueryServiceConfig(service,
+                            serviceConfig,
+                            bufSize,
+                            &bytesNeeded);
+
+    if (!ok) {
+        qCritical() << "Can't query the configurations for" << serviceName << "service";
+        LocalFree(serviceConfig);
+        CloseServiceHandle(service);
+        CloseServiceHandle(manager);
+
+        return {};
+    }
+
+    path = QString::fromStdWString(serviceConfig->lpBinaryPathName);
+    LocalFree(serviceConfig);
+    CloseServiceHandle(service);
+    CloseServiceHandle(manager);
 
     return path;
 }
 
 QString VCamDShowPrivate::manager(const QString &arch) const
 {
-    auto assistant = this->servicePath("AkVCamAssistant");
-
-    if (assistant.isEmpty())
-        return {};
-
-    auto pluginDir = QFileInfo(assistant).absoluteDir();
-    pluginDir.cdUp();
-
-    if (!arch.isEmpty()) {
-        auto manager = pluginDir.absoluteFilePath(arch + "\\AkVCamManager.exe");
-
-        return QFileInfo::exists(manager)? manager: QString();
-    }
-
     QStringList archs;
 
     if (QSysInfo::buildCpuArchitecture() == "x86_64") {
@@ -1617,7 +1586,47 @@ QString VCamDShowPrivate::manager(const QString &arch) const
             archs << "x64";
     }
 
-    QString driverPath;
+    auto assistant = this->servicePath("AkVCamAssistant");
+
+    if (assistant.isEmpty()) {
+        /* Maybe the assistant is not running, try searching the manager in
+         * the standard install path
+         */
+
+        TCHAR programFiles[MAX_PATH];
+
+        if (FAILED(SHGetFolderPath(NULL,
+                                   CSIDL_PROGRAM_FILES,
+                                   NULL,
+                                   0,
+                                   programFiles))) {
+            return {};
+        };
+
+        if (!arch.isEmpty()) {
+            auto manager = QString("%1\\AkVirtualCamera\\%2\\AkVCamManager.exe").arg(programFiles, arch);
+
+            return QFileInfo::exists(manager)? manager: QString();
+        }
+
+        for (auto &arch: archs) {
+            auto manager = QString("%1\\AkVirtualCamera\\%2\\AkVCamManager.exe").arg(programFiles, arch);
+
+            if (QFileInfo::exists(manager))
+                return manager;
+        }
+
+        return {};
+    }
+
+    auto pluginDir = QFileInfo(assistant).absoluteDir();
+    pluginDir.cdUp();
+
+    if (!arch.isEmpty()) {
+        auto manager = pluginDir.absoluteFilePath(arch + "\\AkVCamManager.exe");
+
+        return QFileInfo::exists(manager)? manager: QString();
+    }
 
     for (auto &arch: archs) {
         auto manager = pluginDir.absoluteFilePath(arch + "\\AkVCamManager.exe");

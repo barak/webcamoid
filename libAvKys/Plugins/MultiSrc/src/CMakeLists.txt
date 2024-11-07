@@ -35,24 +35,27 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(MultiSrcSrc SHARED
-            mediasource.cpp
-            mediasource.h
-            multisrc.cpp
-            multisrc.h
-            multisrcelement.cpp
-            multisrcelement.h
-            ../MultiSrc.qrc
-            ../pspec.json)
-set_target_properties(MultiSrcSrc PROPERTIES
-                      OUTPUT_NAME MultiSrc)
+qt_add_plugin(MultiSrcSrc
+              SHARED
+              CLASS_NAME MultiSrc)
+target_sources(MultiSrcSrc PRIVATE
+               mediasource.cpp
+               mediasource.h
+               multisrc.cpp
+               multisrc.h
+               multisrcelement.cpp
+               multisrcelement.h
+               MultiSrc.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(MultiSrcSrc PROPERTIES
+                      OUTPUT_NAME MultiSrc
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(MultiSrcSrc PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(MultiSrcSrc PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(MultiSrcSrc avkys)
@@ -62,8 +65,6 @@ target_compile_definitions(MultiSrcSrc PRIVATE AVKYS_PLUGIN_MULTISRC)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(MultiSrcSrc avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS MultiSrcSrc RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS MultiSrcSrc DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS MultiSrcSrc
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

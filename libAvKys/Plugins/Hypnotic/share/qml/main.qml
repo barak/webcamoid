@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import HypnoticElement 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import HypnoticElement
 
 GridLayout {
     columns: 3
@@ -90,8 +90,8 @@ GridLayout {
         text: Hypnotic.speedInc
         placeholderText: qsTr("Speed increment")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /-?\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /-?\d+/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true

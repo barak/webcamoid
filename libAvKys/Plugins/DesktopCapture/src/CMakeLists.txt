@@ -35,24 +35,27 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(DesktopCaptureSrc SHARED
-            desktopcapture.cpp
-            desktopcapture.h
-            desktopcaptureelement.cpp
-            desktopcaptureelement.h
-            screendev.cpp
-            screendev.h
-            ../DesktopCapture.qrc
-            ../pspec.json)
-set_target_properties(DesktopCaptureSrc PROPERTIES
-                      OUTPUT_NAME DesktopCapture)
+qt_add_plugin(DesktopCaptureSrc
+              SHARED
+              CLASS_NAME DesktopCapture)
+target_sources(DesktopCaptureSrc PRIVATE
+               desktopcapture.cpp
+               desktopcapture.h
+               desktopcaptureelement.cpp
+               desktopcaptureelement.h
+               screendev.cpp
+               screendev.h
+               DesktopCapture.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(DesktopCaptureSrc PROPERTIES
+                      OUTPUT_NAME DesktopCapture
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(DesktopCaptureSrc PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(DesktopCaptureSrc PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(DesktopCaptureSrc avkys)
@@ -62,8 +65,6 @@ target_compile_definitions(DesktopCaptureSrc PRIVATE AVKYS_PLUGIN_DESKTOPCAPTURE
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(DesktopCaptureSrc avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS DesktopCaptureSrc RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS DesktopCaptureSrc DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS DesktopCaptureSrc
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

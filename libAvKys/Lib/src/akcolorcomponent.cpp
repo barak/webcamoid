@@ -193,9 +193,7 @@ void AkColorComponent::registerTypes()
 {
     qRegisterMetaType<AkColorComponent>("AkColorComponent");
     qRegisterMetaType<AkColorComponentList>("AkColorComponentList");
-    qRegisterMetaTypeStreamOperators<AkColorComponent>("AkColorComponent");
     qRegisterMetaType<ComponentType>("AkColorComponentType");
-    QMetaType::registerDebugStreamOperator<ComponentType>();
     qmlRegisterSingletonType<AkColorComponent>("Ak", 1, 0, "AkColorComponent",
                                           [] (QQmlEngine *qmlEngine,
                                               QJSEngine *jsEngine) -> QObject * {

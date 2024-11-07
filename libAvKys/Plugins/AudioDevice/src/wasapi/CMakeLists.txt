@@ -46,13 +46,24 @@ set(SOURCES
     pspec.json)
 
 if (NOT NOWASAPI AND WIN32)
-    add_library(AudioDevice_wasapi SHARED ${SOURCES})
+    qt_add_plugin(AudioDevice_wasapi
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(AudioDevice_wasapi PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(AudioDevice_wasapi SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(AudioDevice_wasapi EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(AudioDevice_wasapi PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(AudioDevice_wasapi PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(AudioDevice_wasapi avkys)
 target_include_directories(AudioDevice_wasapi
                            PRIVATE
@@ -67,5 +78,7 @@ target_link_libraries(AudioDevice_wasapi
                       winmm)
 
 if (NOT NOWASAPI AND WIN32)
-    install(TARGETS AudioDevice_wasapi RUNTIME DESTINATION ${PLUGINSDIR})
+    install(TARGETS AudioDevice_wasapi
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

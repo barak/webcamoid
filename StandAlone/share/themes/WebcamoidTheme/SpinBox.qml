@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Templates 2.15 as T
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Templates as T
+import Ak
 
 T.SpinBox {
     id: control
@@ -79,7 +79,7 @@ T.SpinBox {
             id: upIndicatorText
             text: "+"
             font.bold: true
-            font.pixelSize: control.font.pixelSize * 2
+            font.pixelSize: 2 * control.font.pixelSize
             color: control.activeText
             anchors.fill: parent
             fontSizeMode: Text.Fit
@@ -100,7 +100,7 @@ T.SpinBox {
             id: downIndicatorText
             text: "-"
             font.bold: true
-            font.pixelSize: control.font.pixelSize * 2
+            font.pixelSize: 2 * control.font.pixelSize
             color: control.activeText
             anchors.fill: parent
             fontSizeMode: Text.Fit

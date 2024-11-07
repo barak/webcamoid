@@ -46,9 +46,10 @@ class CaptureAndroidCamera: public Capture
         Q_INVOKABLE QVariantList cameraControls() const override;
         Q_INVOKABLE bool setCameraControls(const QVariantMap &cameraControls) override;
         Q_INVOKABLE bool resetCameraControls() override;
-        Q_INVOKABLE FlashModeList supportedFlashModes(const QString &webcam) const override;
-        Q_INVOKABLE FlashMode flashMode() const override;
         Q_INVOKABLE AkPacket readFrame() override;
+        Q_INVOKABLE bool isTorchSupported() const override;
+        Q_INVOKABLE TorchMode torchMode() const override;
+        Q_INVOKABLE PermissionStatus permissionStatus() const override;
 
     private:
         CaptureAndroidCameraPrivate *d;
@@ -60,14 +61,13 @@ class CaptureAndroidCamera: public Capture
         void setStreams(const QList<int> &streams) override;
         void setIoMethod(const QString &ioMethod) override;
         void setNBuffers(int nBuffers) override;
-        void setFlashMode(FlashMode mode) override;
+        void setTorchMode(TorchMode mode) override;
         void resetDevice() override;
         void resetStreams() override;
         void resetIoMethod() override;
         void resetNBuffers() override;
-        void resetFlashMode() override;
+        void resetTorchMode() override;
         void reset() override;
-        void takePictures(int count, int delayMsecs=0) override;
 };
 
 #endif // CAPTUREANDROIDCAMERA_H

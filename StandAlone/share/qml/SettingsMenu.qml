@@ -17,9 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import Ak
+import Webcamoid
 
 Menu {
     id: settingsMenu
@@ -33,8 +34,26 @@ Menu {
     signal openAboutDialog()
 
     Component.onCompleted: {
-        if (videoLayer.playOnStart)
-            videoLayer.state = AkElement.ElementStatePlaying;
+        if (videoLayer.playOnStart) {
+            if (videoLayer.cameraPermissionStatus == VideoLayer.PermissionStatus_Granted
+                || videoLayer.deviceType(videoLayer.videoInput) != VideoLayer.InputCamera) {
+                videoLayer.state = AkElement.ElementStatePlaying;
+            }
+        }
+    }
+
+    Connections {
+        target: videoLayer
+
+        function onCameraPermissionStatusChanged(status)
+        {
+            if (videoLayer.playOnStart) {
+                if (status == VideoLayer.PermissionStatus_Granted
+                    || videoLayer.deviceType(videoLayer.videoInput) != VideoLayer.InputCamera) {
+                    videoLayer.state = AkElement.ElementStatePlaying;
+                }
+            }
+        }
     }
 
     MenuItem {

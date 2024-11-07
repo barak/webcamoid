@@ -35,23 +35,25 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(AudioDeviceSrc SHARED
-            audiodev.cpp
-            audiodev.h
-            audiodevice.cpp
-            audiodevice.h
-            audiodeviceelement.cpp
-            audiodeviceelement.h
-            ../pspec.json)
+qt_add_plugin(AudioDeviceSrc
+              SHARED
+              CLASS_NAME AudioDevice)
+target_sources(AudioDeviceSrc PRIVATE
+               audiodev.cpp
+               audiodev.h
+               audiodevice.cpp
+               audiodevice.h
+               audiodeviceelement.cpp
+               audiodeviceelement.h
+               pspec.json)
 set_target_properties(AudioDeviceSrc PROPERTIES
-                      OUTPUT_NAME AudioDevice)
+                      OUTPUT_NAME AudioDevice
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
 
-if (WIN32)
+if (IPO_IS_SUPPORTED)
     set_target_properties(AudioDeviceSrc PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(AudioDeviceSrc PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(AudioDeviceSrc avkys)
@@ -61,8 +63,6 @@ target_compile_definitions(AudioDeviceSrc PRIVATE AVKYS_PLUGIN_AUDIODEVICE)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(AudioDeviceSrc avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS AudioDeviceSrc RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS AudioDeviceSrc DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS AudioDeviceSrc
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Ak
 
 RowLayout {
     id: iconLabel
@@ -33,7 +33,7 @@ RowLayout {
     property alias iconHeight: icon.height
     property alias iconColor: icon.color
     property int display: AbstractButton.TextBesideIcon
-    property alias spacing: mainLayout.columnSpacing
+    //property alias spacing: mainLayout.columnSpacing
     property bool mirrored: false
     property alias text: label.text
     property alias font: label.font

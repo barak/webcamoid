@@ -17,9 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 GridLayout {
     id: configs
@@ -73,8 +73,8 @@ GridLayout {
     TextField {
         text: Denoise.factor
         placeholderText: qsTr("Factor")
-        validator: RegExpValidator {
-            regExp: /-?\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /-?\d+/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
@@ -96,8 +96,8 @@ GridLayout {
         text: Denoise.mu
         placeholderText: txtMu.text
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /-?\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /-?\d+/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true

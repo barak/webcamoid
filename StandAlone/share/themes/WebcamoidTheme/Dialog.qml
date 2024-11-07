@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Templates 2.15 as T
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Templates as T
+import Ak
 
 T.Dialog {
     id: control
@@ -73,8 +73,7 @@ T.Dialog {
             anchors.left: parent.left
             anchors.leftMargin: control.leftPadding
             elide: Label.ElideRight
-            font.bold: true
-            font.pointSize: 16
+            font: AkTheme.fontSettings.h6
             enabled: control.enabled
         }
 

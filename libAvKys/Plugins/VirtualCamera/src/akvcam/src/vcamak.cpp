@@ -27,10 +27,10 @@
 #include <QImage>
 #include <QMutex>
 #include <QProcessEnvironment>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QTemporaryFile>
-#include <QTextCodec>
 #include <QThread>
 #include <fcntl.h>
 #include <limits>
@@ -43,6 +43,7 @@
 #include <libkmod.h>
 #endif
 
+#include <ak.h>
 #include <akcaps.h>
 #include <akelement.h>
 #include <akfrac.h>
@@ -132,7 +133,6 @@ class VCamAkPrivate
 
         inline int planesCount(const v4l2_format &format) const;
         inline int xioctl(int fd, ulong request, void *arg) const;
-        bool isFlatpak() const;
         bool sudo(const QString &script);
         QStringList availableRootMethods() const;
         QString whereBin(const QString &binary) const;
@@ -228,7 +228,7 @@ bool VCamAk::isInstalled() const
     if (!haveResult) {
         static const char moduleName[] = "akvcam";
 
-        if (this->d->isFlatpak()) {
+        if (Ak::isFlatpak()) {
             QProcess modinfo;
             modinfo.start("flatpak-spawn",
                           QStringList {"--host",
@@ -275,7 +275,7 @@ QString VCamAk::installedVersion() const
     if (!haveVersion) {
         static const char moduleName[] = "akvcam";
 
-        if (this->d->isFlatpak()) {
+        if (Ak::isFlatpak()) {
             QProcess modinfo;
             modinfo.start("flatpak-spawn",
                           QStringList {"--host",
@@ -363,7 +363,7 @@ QList<AkVideoCaps::PixelFormat> VCamAk::supportedOutputPixelFormats() const
         AkVideoCaps::Format_rgb24,
         AkVideoCaps::Format_rgb565le,
         AkVideoCaps::Format_rgb555le,
-        AkVideoCaps::Format_0bgr,
+        AkVideoCaps::Format_xbgr,
         AkVideoCaps::Format_bgr24,
         AkVideoCaps::Format_uyvy422,
         AkVideoCaps::Format_yuyv422,
@@ -447,7 +447,7 @@ QList<quint64> VCamAk::clientsPids() const
     auto devices = this->d->devicesInfo();
     QList<quint64> clientsPids;
 
-    if (this->d->isFlatpak()) {
+    if (Ak::isFlatpak()) {
         QProcess find;
         find.start("flatpak-spawn",
                    QStringList {"--host",
@@ -520,9 +520,12 @@ QList<quint64> VCamAk::clientsPids() const
 
             for (auto &fd: fds) {
                 QFileInfo fdInfo(fdDir.absoluteFilePath(fd));
-                QString target = fdInfo.isSymLink()? fdInfo.symLinkTarget(): "";
+                QString target = fdInfo.isSymLink()?
+                                     fdInfo.symLinkTarget():
+                                     fdInfo.absoluteFilePath();
+                static const QRegularExpression re("^/dev/video[0-9]+$");
 
-                if (QRegExp("/dev/video[0-9]+").exactMatch(target))
+                if (re.match(target).hasMatch())
                     videoDevices << target;
             }
 
@@ -542,7 +545,7 @@ QList<quint64> VCamAk::clientsPids() const
 
 QString VCamAk::clientExe(quint64 pid) const
 {
-    if (this->d->isFlatpak()) {
+    if (Ak::isFlatpak()) {
         QProcess realpath;
         realpath.start("flatpak-spawn",
                        QStringList {"--host",
@@ -585,9 +588,10 @@ QString VCamAk::deviceCreate(const QString &description,
         return {};
     }
 
-    auto deviceNR = this->d->requestDeviceNR(2);
+    static const int nDevices = 2;
+    auto deviceNR = this->d->requestDeviceNR(nDevices);
 
-    if (deviceNR.count() < 2) {
+    if (deviceNR.count() < nDevices) {
         this->d->m_error = "No available devices to create a virtual camera";
 
         return {};
@@ -678,14 +682,6 @@ QString VCamAk::deviceCreate(const QString &description,
 
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
-
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
 
     // Write 'config.ini'.
     int i = 0;
@@ -936,14 +932,6 @@ bool VCamAk::deviceEdit(const QString &deviceId,
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
 
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
-
     // Write 'config.ini'.
     int i = 0;
     int j = 0;
@@ -1173,12 +1161,6 @@ bool VCamAk::changeDescription(const QString &deviceId,
 
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
 
     int i = 0;
     int j = 0;
@@ -1454,12 +1436,6 @@ bool VCamAk::deviceDestroy(const QString &deviceId)
     // Write config.ini.
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
 
     int i = 0;
     int j = 0;
@@ -1924,12 +1900,6 @@ bool VCamAk::applyPicture()
 
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
 
     int i = 0;
     int j = 0;
@@ -2173,13 +2143,6 @@ int VCamAkPrivate::planesCount(const v4l2_format &format) const
                 format.fmt.pix_mp.num_planes;
 }
 
-bool VCamAkPrivate::isFlatpak() const
-{
-    static const bool isFlatpak = QFile::exists("/.flatpak-info");
-
-    return isFlatpak;
-}
-
 bool VCamAkPrivate::sudo(const QString &script)
 {
     if (this->m_rootMethod.isEmpty()) {
@@ -2192,7 +2155,7 @@ bool VCamAkPrivate::sudo(const QString &script)
 
     QProcess su;
 
-    if (this->isFlatpak()) {
+    if (Ak::isFlatpak()) {
         su.start("flatpak-spawn", QStringList {"--host", this->m_rootMethod, "sh"});
     } else {
         auto sudoBin = this->whereBin(this->m_rootMethod);
@@ -2262,7 +2225,7 @@ QStringList VCamAkPrivate::availableRootMethods() const
 
         methods.clear();
 
-        if (this->isFlatpak()) {
+        if (Ak::isFlatpak()) {
             for (auto &su: sus) {
                 QProcess suProc;
                 suProc.start("flatpak-spawn",
@@ -2290,9 +2253,10 @@ QString VCamAkPrivate::whereBin(const QString &binary) const
 {
     // Limit search paths to trusted directories only.
     static const QStringList paths {
-        "/usr/bin",       // GNU/Linux
-        "/bin",           // NetBSD
-        "/usr/local/bin", // FreeBSD
+        "/usr/bin",        // GNU/Linux
+        "/bin",            // NetBSD
+        "/usr/local/bin",  // FreeBSD
+        "/usr/local/sbin", // FreeBSD
 
         // Additionally, search it in a developer provided extra directory.
 
@@ -2636,13 +2600,13 @@ const V4L2AkFormatMap &VCamAkPrivate::v4l2AkFormatMap() const
         {0                  , AkVideoCaps::Format_none    , ""},
 
         // RGB formats
-        {V4L2_PIX_FMT_RGB32 , AkVideoCaps::Format_0rgb    , "RGB32"},
+        {V4L2_PIX_FMT_RGB32 , AkVideoCaps::Format_xrgb    , "RGB32"},
         {V4L2_PIX_FMT_RGB24 , AkVideoCaps::Format_rgb24   , "RGB24"},
         {V4L2_PIX_FMT_RGB565, AkVideoCaps::Format_rgb565le, "RGB16"},
         {V4L2_PIX_FMT_RGB555, AkVideoCaps::Format_rgb555le, "RGB15"},
 
         // BGR formats
-        {V4L2_PIX_FMT_BGR32 , AkVideoCaps::Format_0bgr    , "BGR32"},
+        {V4L2_PIX_FMT_BGR32 , AkVideoCaps::Format_xbgr    , "BGR32"},
         {V4L2_PIX_FMT_BGR24 , AkVideoCaps::Format_bgr24   , "BGR24"},
 
         // YUV formats

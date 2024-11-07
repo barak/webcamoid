@@ -31,12 +31,6 @@ set(QT_COMPONENTS
     Concurrent
     Widgets)
 
-if (ANDROID)
-    list(APPEND QT_COMPONENTS AndroidExtras)
-    include(UseJava)
-    find_package(Java ${ANDROID_JAVA_VERSION})
-endif ()
-
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
@@ -53,14 +47,26 @@ set(SOURCES
     plugin.h
     pspec.json)
 
-if (ANDROID AND Java_FOUND)
-    add_library(VideoCapture_androidcamerasrc SHARED ${SOURCES})
+if (ANDROID)
+    qt_add_plugin(VideoCapture_androidcamerasrc
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VideoCapture_androidcamerasrc PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VideoCapture_androidcamerasrc SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VideoCapture_androidcamerasrc EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(VideoCapture_androidcamerasrc PROPERTIES
-                      OUTPUT_NAME VideoCapture_androidcamera)
+                      OUTPUT_NAME VideoCapture_androidcamera
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(VideoCapture_androidcamerasrc PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(VideoCapture_androidcamerasrc avkys)
 target_include_directories(VideoCapture_androidcamerasrc
                            PRIVATE
@@ -69,5 +75,12 @@ target_include_directories(VideoCapture_androidcamerasrc
 target_compile_definitions(VideoCapture_androidcamerasrc PRIVATE AVKYS_PLUGIN_VIDEOCAPTURE_ANDROIDCAMERA)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(VideoCapture_androidcamerasrc
+                      PUBLIC
                       ${QT_LIBS}
                       avkys)
+
+if (ANDROID)
+    install(TARGETS VideoCapture_androidcamerasrc
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
+endif ()

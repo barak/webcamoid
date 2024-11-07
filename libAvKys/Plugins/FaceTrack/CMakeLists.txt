@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(FaceTrack SHARED
-            src/facetrack.h
-            src/facetrackelement.h
-            src/facetrack.cpp
-            src/facetrackelement.cpp
-            FaceTrack.qrc
-            pspec.json)
+qt_add_plugin(FaceTrack
+              SHARED
+              CLASS_NAME FaceTrack)
+target_sources(FaceTrack PRIVATE
+               src/facetrack.h
+               src/facetrackelement.h
+               src/facetrack.cpp
+               src/facetrackelement.cpp
+               FaceTrack.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(FaceTrack PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(FaceTrack PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(FaceTrack PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(FaceTrack avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(FaceTrack PRIVATE AVKYS_PLUGIN_FACETRACK)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(FaceTrack avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS FaceTrack RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS FaceTrack DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS FaceTrack
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

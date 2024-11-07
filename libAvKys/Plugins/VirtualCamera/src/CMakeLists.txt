@@ -36,24 +36,27 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(VirtualCameraSrc SHARED
-            vcam.cpp
-            vcam.h
-            virtualcamera.cpp
-            virtualcamera.h
-            virtualcameraelement.cpp
-            virtualcameraelement.h
-            ../VirtualCamera.qrc
-            ../pspec.json)
-set_target_properties(VirtualCameraSrc PROPERTIES
-                      OUTPUT_NAME VirtualCamera)
+qt_add_plugin(VirtualCameraSrc
+              SHARED
+              CLASS_NAME VirtualCamera)
+target_sources(VirtualCameraSrc PRIVATE
+               vcam.cpp
+               vcam.h
+               virtualcamera.cpp
+               virtualcamera.h
+               virtualcameraelement.cpp
+               virtualcameraelement.h
+               VirtualCamera.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(VirtualCameraSrc PROPERTIES
+                      OUTPUT_NAME VirtualCamera
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(VirtualCameraSrc PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(VirtualCameraSrc PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(VirtualCameraSrc avkys)
@@ -63,8 +66,6 @@ target_compile_definitions(VirtualCameraSrc PRIVATE AVKYS_PLUGIN_VIRTUALCAMERA)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(VirtualCameraSrc avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS VirtualCameraSrc RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS VirtualCameraSrc DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS VirtualCameraSrc
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

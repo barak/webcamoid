@@ -35,19 +35,23 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(AudioGen SHARED
-            src/audiogen.h
-            src/audiogenelement.h
-            src/audiogen.cpp
-            src/audiogenelement.cpp
-            pspec.json)
+qt_add_plugin(AudioGen
+              SHARED
+              CLASS_NAME AudioGen)
+target_sources(AudioGen PRIVATE
+               src/audiogen.h
+               src/audiogenelement.h
+               src/audiogen.cpp
+               src/audiogenelement.cpp
+               pspec.json)
 
-if (WIN32)
+set_target_properties(AudioGen PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(AudioGen PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(AudioGen PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(AudioGen avkys)
@@ -57,8 +61,6 @@ target_compile_definitions(AudioGen PRIVATE AVKYS_PLUGIN_AUDIOGEN)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(AudioGen avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS AudioGen RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS AudioGen DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS AudioGen
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

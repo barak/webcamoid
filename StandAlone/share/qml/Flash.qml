@@ -17,9 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.5
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import Ak
 
 ApplicationWindow {
     id: wndFlash
@@ -29,7 +30,7 @@ ApplicationWindow {
     visibility: visible? Window.FullScreen: Window.Hidden
 
     property int timeout: 1500
-    property bool isHardwareFlash: false
+    property bool isHardwareFlash: videoLayer.isTorchSupported
 
     signal shotStarted()
     signal triggered()
@@ -39,7 +40,7 @@ ApplicationWindow {
     {
         wndFlash.shotStarted()
 
-        if (!isHardwareFlash)
+        if (!isHardwareFlash && Ak.platform() != "android")
             wndFlash.show()
 
         timerShot.start()

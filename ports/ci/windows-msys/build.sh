@@ -18,8 +18,12 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
-if [ "${UPLOAD}" == 1 ]; then
-    EXTRA_PARAMS="-DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON"
+set -e
+
+if [ ! -z "${GITHUB_SHA}" ]; then
+    export GIT_COMMIT_HASH="${GITHUB_SHA}"
+elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
+    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
 
 if [ "${COMPILER}" = clang ]; then
@@ -34,10 +38,30 @@ if [ -z "${DISABLE_CCACHE}" ]; then
     EXTRA_PARAMS="${EXTRA_PARAMS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OBJCXX_COMPILER_LAUNCHER=ccache"
 fi
 
+if [ "${UPLOAD}" == 1 ]; then
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON"
+fi
+
+# Some anti-virus software seems to be detecting libVLC load as it were
+# malware:
+#
+# https://hijacklibs.net/entries/3rd_party/vlc/libvlc.html
+#
+# so disable it in all cases, even though its a legitimate usage in the case of
+# Webcamoid
+
+EXTRA_PARAMS="${EXTRA_PARAMS} -DNOVLC=ON"
+
 if [ "${TARGET_ARCH}" = i686 ]; then
     export PATH=/mingw32/bin:$PATH
+    export QT_QMAKE_EXECUTABLE=/mingw32/bin/qmake-qt6
+    export LRELEASE_TOOL=/mingw32/bin/lrelease-qt6
+    export LUPDATE_TOOL=/mingw32/bin/lupdate-qt6
 else
     export PATH=/mingw64/bin:$PATH
+    export QT_QMAKE_EXECUTABLE=/mingw64/bin/qmake-qt6
+    export LRELEASE_TOOL=/mingw64/bin/lrelease-qt6
+    export LUPDATE_TOOL=/mingw64/bin/lupdate-qt6
 fi
 
 INSTALL_PREFIX=${PWD}/webcamoid-data-${COMPILER}-${TARGET_ARCH}
@@ -52,6 +76,10 @@ cmake \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
     -DCMAKE_C_COMPILER="${COMPILER_C}" \
     -DCMAKE_CXX_COMPILER="${COMPILER_CXX}" \
+    -DQT_QMAKE_EXECUTABLE="${QT_QMAKE_EXECUTABLE}" \
+    -DLRELEASE_TOOL="${LRELEASE_TOOL}" \
+    -DLUPDATE_TOOL="${LUPDATE_TOOL}" \
+    -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
     -DDAILY_BUILD="${DAILY_BUILD}"
 cmake --build "${buildDir}" --parallel "${NJOBS}"

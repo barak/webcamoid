@@ -22,7 +22,6 @@
 #include <QDirIterator>
 #include <QFontDatabase>
 #include <QMutex>
-#include <QQuickStyle>
 #include <QTranslator>
 
 #include "clioptions.h"
@@ -33,38 +32,40 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName(COMMONS_APPNAME);
     QApplication::setApplicationVersion(COMMONS_VERSION);
     QApplication::setOrganizationName(COMMONS_APPNAME);
-    QApplication::setOrganizationDomain(QString("%1.com").arg(COMMONS_APPNAME));
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+    QApplication::setOrganizationDomain(ORGANIZATION_DOMAIN);
     qInstallMessageHandler(MediaTools::messageHandler);
 
     QApplication app(argc, argv);
     CliOptions cliOptions;
 
-    if (cliOptions.isSet(cliOptions.logFileOpt())) {
-        auto logFile = cliOptions.value(cliOptions.logFileOpt());
-        qDebug() << "Sending log to" << logFile;
-
-        if (!logFile.isEmpty())
-            MediaTools::setLogFile(logFile);
-    }
-
     // Install translations.
 
     QTranslator translator;
 
+#ifdef Q_OS_ANDROID
+    auto dataRootDir = QDir(DATAROOTDIR).absolutePath();
+    auto translationsDir = QDir(TRANSLATIONSDIR).absolutePath();
+    auto relTranslationsDir = QDir(dataRootDir).relativeFilePath(translationsDir);
+
+    if (translator.load(QLocale::system().name(),
+                        QString("assets:/%1").arg(relTranslationsDir)))
+        QCoreApplication::installTranslator(&translator);
+#else
     auto binDir = QDir(BINDIR).absolutePath();
     auto translationsDir = QDir(TRANSLATIONSDIR).absolutePath();
     auto relTranslationsDir = QDir(binDir).relativeFilePath(translationsDir);
     QDir appDir = QCoreApplication::applicationDirPath();
 
-    if (appDir.cd(relTranslationsDir))
-        if (translator.load(QLocale::system().name(), appDir.absolutePath()))
-            QCoreApplication::installTranslator(&translator);
+    if (appDir.cd(relTranslationsDir)) {
+        auto path = appDir.absolutePath();
+        path.replace("/", QDir::separator());
 
-    // Set theme.
-    QQuickStyle::addStylePath(":/Webcamoid/share/themes");
-    QQuickStyle::setStyle("WebcamoidTheme");
+        if (QFileInfo::exists(path)
+            && translator.load(QLocale::system().name(), path)) {
+            QCoreApplication::installTranslator(&translator);
+        }
+    }
+#endif
 
     // Set fonts
     QDirIterator fontsDirIterator(":/Webcamoid/share/themes/WebcamoidTheme/fonts",
@@ -83,20 +84,31 @@ int main(int argc, char *argv[])
 
     if (quickBackend.isEmpty())
         qputenv("QT_QUICK_BACKEND", "software");
-#elif defined(Q_OS_BSD4)
-    // NOTE: Text is not rendered with QQC2 in FreeBSD, use native rendering.
+#elif defined(Q_OS_ANDROID)
+    qputenv("ANDROID_OPENSSL_SUFFIX", ANDROID_OPENSSL_SUFFIX);
+
+    // Enable for plugins debug
+
+    #if defined(QT_DEBUG) || defined(ENABLE_ANDROID_DEBUGGING)
+        qputenv("QT_DEBUG_PLUGINS", "1");
+        qputenv("QT_LOGGING_RULES", "*.debug=true");
+    #endif
+#elif defined(Q_OS_UNIX)
+    // NOTE: Text is not rendered with QQC2, use native rendering.
     auto distanceField = qgetenv("QML_DISABLE_DISTANCEFIELD");
 
     if (distanceField.isEmpty())
         qputenv("QML_DISABLE_DISTANCEFIELD", "1");
 #endif
 
+    qDebug() << "Starting " COMMONS_APPNAME;
     MediaTools mediaTools;
 
     if (!mediaTools.init(cliOptions))
-        return 0;
+        return -1;
 
+    mediaTools.printLog();
     mediaTools.show();
 
-    return QApplication::exec();
+    return app.exec();
 }

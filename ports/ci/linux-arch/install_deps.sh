@@ -18,6 +18,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 if [ ! -z "${USE_WGET}" ]; then
     export DOWNLOAD_CMD="wget -nv -c"
 else
@@ -105,16 +107,19 @@ pacman --noconfirm --needed -S \
     gst-plugins-good \
     jack \
     libpulse \
+    libusb \
+    libxext \
+    libxfixes \
     make \
     patchelf \
     pipewire \
     pkgconf \
     python \
-    qt5-multimedia \
-    qt5-quickcontrols2 \
-    qt5-svg \
-    qt5-tools \
-    qt5-wayland \
+    qt6-multimedia \
+    qt6-declarative \
+    qt6-svg \
+    qt6-tools \
+    qt6-wayland \
     sed \
     v4l-utils \
     vlc \

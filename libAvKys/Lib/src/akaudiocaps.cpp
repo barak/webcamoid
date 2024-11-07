@@ -673,16 +673,11 @@ void AkAudioCaps::resetRate()
 void AkAudioCaps::registerTypes()
 {
     qRegisterMetaType<AkAudioCaps>("AkAudioCaps");
-    qRegisterMetaTypeStreamOperators<AkAudioCaps>("AkAudioCaps");
     qRegisterMetaType<SampleFormat>("SampleFormat");
-    QMetaType::registerDebugStreamOperator<SampleFormat>();
     qRegisterMetaType<SampleFormatList>("SampleFormatList");
     qRegisterMetaType<SampleType>("SampleType");
-    QMetaType::registerDebugStreamOperator<SampleType>();
     qRegisterMetaType<Position>("Position");
-    QMetaType::registerDebugStreamOperator<Position>();
     qRegisterMetaType<ChannelLayout>("ChannelLayout");
-    QMetaType::registerDebugStreamOperator<ChannelLayout>();
     qRegisterMetaType<ChannelLayoutList>("ChannelLayoutList");
     qmlRegisterSingletonType<AkAudioCaps>("Ak", 1, 0, "AkAudioCaps",
                                           [] (QQmlEngine *qmlEngine,

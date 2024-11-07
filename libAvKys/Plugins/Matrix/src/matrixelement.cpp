@@ -64,9 +64,8 @@ inline StyleStrategyToStr initStyleStrategyToStr()
         {QFont::PreferQuality      , "PreferQuality"      },
         {QFont::PreferAntialias    , "PreferAntialias"    },
         {QFont::NoAntialias        , "NoAntialias"        },
-        {QFont::OpenGLCompatible   , "OpenGLCompatible"   },
-        {QFont::ForceIntegerMetrics, "ForceIntegerMetrics"},
         {QFont::NoSubpixelAntialias, "NoSubpixelAntialias"},
+        {QFont::PreferNoShaping    , "PreferNoShaping "   },
         {QFont::NoFontMerging      , "NoFontMerging"      }
     };
 
@@ -246,7 +245,7 @@ AkPacket MatrixElement::iVideoStream(const AkVideoPacket &packet)
     if (this->d->m_charTable.isEmpty()) {
         this->d->m_mutex.unlock();
 
-        AkVideoPacket dst({AkVideoCaps::Format_0rgbpack,
+        AkVideoPacket dst({AkVideoCaps::Format_xrgbpack,
                            textWidth * fontSize.width(),
                            textHeight * fontSize.height(),
                            packet.caps().fps()});
@@ -264,7 +263,7 @@ AkPacket MatrixElement::iVideoStream(const AkVideoPacket &packet)
                                                  AkVideoConverter::ScalingMode_Fast);
 
     this->d->m_videoConverter.begin();
-    this->d->m_videoConverter.setOutputCaps({AkVideoCaps::Format_gray8,
+    this->d->m_videoConverter.setOutputCaps({AkVideoCaps::Format_y8,
                                              textWidth,
                                              textHeight,
                                              {}});
@@ -289,7 +288,7 @@ AkPacket MatrixElement::iVideoStream(const AkVideoPacket &packet)
 
     this->d->m_mutex.unlock();
 
-    AkVideoPacket dst({AkVideoCaps::Format_0rgbpack,
+    AkVideoPacket dst({AkVideoCaps::Format_xrgbpack,
                        outWidth,
                        outHeight,
                        src.caps().fps()});
@@ -728,7 +727,7 @@ AkVideoPacket MatrixElementPrivate::renderdrop(const RainDrop &drop,
                                                const Character *characters,
                                                bool showCursor)
 {
-    AkVideoPacket dropSprite({AkVideoCaps::Format_gray8,
+    AkVideoPacket dropSprite({AkVideoCaps::Format_y8,
                               fontSize.width(),
                               fontSize.height() * drop.length(),
                               {}});

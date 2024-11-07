@@ -53,23 +53,31 @@ class Capture: public QObject
                WRITE setNBuffers
                RESET resetNBuffers
                NOTIFY nBuffersChanged)
-    Q_PROPERTY(FlashMode flashMode
-               READ flashMode
-               WRITE setFlashMode
-               RESET resetFlashMode
-               NOTIFY flashModeChanged)
+    Q_PROPERTY(bool isTorchSupported
+               READ isTorchSupported
+               NOTIFY isTorchSupportedChanged)
+    Q_PROPERTY(TorchMode torchMode
+               READ torchMode
+               WRITE setTorchMode
+               RESET resetTorchMode
+               NOTIFY torchModeChanged)
+    Q_PROPERTY(PermissionStatus permissionStatus
+               READ permissionStatus
+               NOTIFY permissionStatusChanged)
 
     public:
-        enum FlashMode
+        enum TorchMode
         {
-            FlashMode_Off,
-            FlashMode_On,
-            FlashMode_Auto,
-            FlashMode_Torch,
-            FlashMode_RedEye,
-            FlashMode_External,
+            Torch_Off,
+            Torch_On,
         };
-        using FlashModeList = QList<FlashMode>;
+
+        enum PermissionStatus
+        {
+            PermissionStatus_Undetermined,
+            PermissionStatus_Granted,
+            PermissionStatus_Denied,
+        };
 
         Capture(QObject *parent=nullptr);
         ~Capture();
@@ -89,8 +97,9 @@ class Capture: public QObject
         Q_INVOKABLE virtual QVariantList cameraControls() const;
         Q_INVOKABLE virtual bool setCameraControls(const QVariantMap &cameraControls);
         Q_INVOKABLE virtual bool resetCameraControls();
-        Q_INVOKABLE virtual FlashModeList supportedFlashModes(const QString &webcam) const;
-        Q_INVOKABLE virtual FlashMode flashMode() const;
+        Q_INVOKABLE virtual bool isTorchSupported() const;
+        Q_INVOKABLE virtual TorchMode torchMode() const;
+        Q_INVOKABLE virtual PermissionStatus permissionStatus() const;
         Q_INVOKABLE virtual AkPacket readFrame();
 
     private:
@@ -106,7 +115,9 @@ class Capture: public QObject
         void imageControlsChanged(const QVariantMap &imageControls);
         void cameraControlsChanged(const QVariantMap &cameraControls);
         void pictureTaken(int index, const AkPacket &picture);
-        void flashModeChanged(FlashMode mode);
+        void isTorchSupportedChanged(bool torchSupported);
+        void torchModeChanged(TorchMode mode);
+        void permissionStatusChanged(PermissionStatus status);
 
     public slots:
         virtual bool init();
@@ -115,12 +126,12 @@ class Capture: public QObject
         virtual void setStreams(const QList<int> &streams);
         virtual void setIoMethod(const QString &ioMethod);
         virtual void setNBuffers(int nBuffers);
-        virtual void setFlashMode(FlashMode mode);
+        virtual void setTorchMode(TorchMode mode);
         virtual void resetDevice();
         virtual void resetStreams();
         virtual void resetIoMethod();
         virtual void resetNBuffers();
-        virtual void resetFlashMode();
+        virtual void resetTorchMode();
         virtual void reset();
         virtual void takePictures(int count, int delayMsecs=0);
 };

@@ -97,24 +97,27 @@ if (APPLE AND NOT LIBVLC_FOUND)
     endif ()
 endif ()
 
-include_directories(${VLCAPP_INCLUDE_DIRS})
-link_directories(${LIBVLC_LIBRARY_DIRS} ${VLCAPP_LIBRARY_DIRS})
 add_definitions(-DBINDIR="${BINDIR}"
                 -DVLC_INSTALL_PATH="${VLC_INSTALL_PATH}"
                 -DVLC_PLUGINS_PATH="${VLC_PLUGINS_PATH}")
 
 if (NOT NOVLC AND (LIBVLC_FOUND OR VLCAPP_FOUND))
-    add_library(MultiSrc_vlc SHARED ${SOURCES})
+    qt_add_plugin(MultiSrc_vlc
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(MultiSrc_vlc PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(MultiSrc_vlc SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(MultiSrc_vlc EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(MultiSrc_vlc PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(MultiSrc_vlc PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(MultiSrc_vlc PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(MultiSrc_vlc avkys)
@@ -127,6 +130,10 @@ target_include_directories(MultiSrc_vlc
                            ../../../../Lib/src)
 target_compile_definitions(MultiSrc_vlc PRIVATE AVKYS_PLUGIN_MULTISRC_LIBVLC)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
+target_link_directories(MultiSrc_vlc
+                        PUBLIC
+                        ${LIBVLC_LIBRARY_DIRS}
+                        ${VLCAPP_LIBRARY_DIRS})
 target_link_libraries(MultiSrc_vlc
                       ${QT_LIBS}
                       ${LIBVLC_LIBRARIES}
@@ -134,9 +141,7 @@ target_link_libraries(MultiSrc_vlc
                       avkys)
 
 if (NOT NOVLC AND (LIBVLC_FOUND OR VLCAPP_FOUND))
-    if (WIN32)
-        install(TARGETS MultiSrc_vlc RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS MultiSrc_vlc DESTINATION ${PLUGINSDIR})
-    endif ()
+    install(TARGETS MultiSrc_vlc
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

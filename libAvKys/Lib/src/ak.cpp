@@ -52,6 +52,7 @@
 #include "akvideomixer.h"
 #include "akvideopacket.h"
 #include "qml/akcolorizedimage.h"
+#include "qml/akfontsettings.h"
 #include "qml/akutils.h"
 #include "qml/akpalette.h"
 #include "qml/akpalettegroup.h"
@@ -65,6 +66,13 @@ class AkPrivate
         AkPrivate();
 #ifdef Q_OS_WIN32
         virtual ~AkPrivate();
+#endif
+
+#ifdef Q_OS_ANDROID
+        static void jniLog(JNIEnv *env,
+                           jobject obj,
+                           jobject type,
+                           jobject msg);
 #endif
 };
 
@@ -106,6 +114,7 @@ void Ak::registerTypes()
     AkCompressedVideoCaps::registerTypes();
     AkCompressedVideoPacket::registerTypes();
     AkElement::registerTypes();
+    AkFontSettings::registerTypes();
     AkFrac::registerTypes();
     AkPacket::registerTypes();
     AkPalette::registerTypes();
@@ -157,6 +166,44 @@ void Ak::setQmlEngine(QQmlEngine *engine)
     akGlobalStuff->m_globalEngine = engine;
 }
 
+bool Ak::isFlatpak()
+{
+    static const bool isFlatpak = QFile::exists("/.flatpak-info");
+
+    return isFlatpak;
+}
+
+bool Ak::hasFlatpakVCam()
+{
+#ifdef WITH_FLATPAK_VCAM
+    return true;
+#else
+    return false;
+#endif
+}
+
+#ifdef Q_OS_ANDROID
+void Ak::registerJniLogFunc(const QString &className)
+{
+    static bool jniLogFuncReady = false;
+
+    if (jniLogFuncReady)
+        return;
+
+    QJniEnvironment jenv;
+
+    if (auto jclass = jenv.findClass(className.toStdString().c_str())) {
+        static const QVector<JNINativeMethod> methods {
+            {"akLog", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(AkPrivate::jniLog)},
+        };
+
+        jenv->RegisterNatives(jclass, methods.data(), methods.size());
+    }
+
+    jniLogFuncReady = true;
+}
+#endif
+
 AkPrivate::AkPrivate()
 {
     this->m_globalEngine = nullptr;
@@ -172,6 +219,29 @@ AkPrivate::~AkPrivate()
 {
     // Close COM library.
     CoUninitialize();
+}
+#endif
+
+#ifdef Q_OS_ANDROID
+void AkPrivate::jniLog(JNIEnv *env,
+                       jobject obj,
+                       jobject type,
+                       jobject msg)
+{
+    Q_UNUSED(env)
+    Q_UNUSED(obj)
+
+    auto msgType = QJniObject(type).toString();
+    auto msgStr = QJniObject(msg).toString();
+
+    if (msgType == "debug")
+        qDebug() << msgStr.toStdString().c_str();
+    else if (msgType == "warning")
+        qWarning() << msgStr.toStdString().c_str();
+    else if (msgType == "critical" || msgType == "fatal")
+        qCritical() << msgStr.toStdString().c_str();
+    else if (msgType == "info")
+        qInfo() << msgStr.toStdString().c_str();
 }
 #endif
 

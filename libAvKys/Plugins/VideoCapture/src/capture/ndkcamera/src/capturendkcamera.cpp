@@ -18,14 +18,17 @@
  */
 
 #include <QApplication>
+#include <QCoreApplication>
 #include <QDateTime>
+#include <QJniObject>
+#include <QMutex>
 #include <QReadWriteLock>
-#include <QScreen>
+#include <QRegularExpression>
 #include <QThread>
 #include <QVariant>
 #include <QVector>
 #include <QWaitCondition>
-#include <QtAndroid>
+#include <QtConcurrent>
 #include <ak.h>
 #include <akcaps.h>
 #include <akcompressedvideocaps.h>
@@ -36,6 +39,10 @@
 #include <akvideopacket.h>
 #include <camera/NdkCameraManager.h>
 #include <media/NdkImageReader.h>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#include <QPermissions>
+#endif
 
 #include "capturendkcamera.h"
 
@@ -50,11 +57,11 @@ inline const RawFmtToAkMap initRawFmtToAkMap()
 {
     const RawFmtToAkMap rawFmtToAkMap {
         {AIMAGE_FORMAT_RGBA_8888  , AkVideoCaps::Format_rgba   },
-        {AIMAGE_FORMAT_RGBX_8888  , AkVideoCaps::Format_rgb0   },
+        {AIMAGE_FORMAT_RGBX_8888  , AkVideoCaps::Format_rgbx   },
         {AIMAGE_FORMAT_RGB_888    , AkVideoCaps::Format_rgb24  },
         {AIMAGE_FORMAT_RGB_565    , AkVideoCaps::Format_rgb565 },
         {AIMAGE_FORMAT_YUV_420_888, AkVideoCaps::Format_yuv420p},
-        {AIMAGE_FORMAT_Y8         , AkVideoCaps::Format_gray8  },
+        {AIMAGE_FORMAT_Y8         , AkVideoCaps::Format_y8     },
     };
 
     return rawFmtToAkMap;
@@ -263,7 +270,7 @@ inline const MenuOptions &initTonemapOptions()
     return options;
 }
 
-struct Control
+struct DeviceControl
 {
     ControlType type;
     acamera_metadata_tag tag;
@@ -273,7 +280,7 @@ struct Control
     MenuOptions menuOptions;
 };
 
-using ControlVector = QVector<Control>;
+using ControlVector = QVector<DeviceControl>;
 
 inline const ControlVector &initImageControls()
 {
@@ -317,42 +324,6 @@ Q_GLOBAL_STATIC_WITH_ARGS(ControlVector,
                           globalCameraControls,
                           (initCameraControls()))
 
-using AeFlashModeMap = QMap<acamera_metadata_enum_android_control_ae_mode_t, Capture::FlashMode>;
-
-inline const AeFlashModeMap &initAeFlashModeMap()
-{
-    static const AeFlashModeMap aeFlashModeMap {
-        {ACAMERA_CONTROL_AE_MODE_OFF                 , Capture::FlashMode_Off     },
-        {ACAMERA_CONTROL_AE_MODE_ON                  , Capture::FlashMode_On      },
-        {ACAMERA_CONTROL_AE_MODE_ON_AUTO_FLASH       , Capture::FlashMode_Auto    },
-        {ACAMERA_CONTROL_AE_MODE_ON_ALWAYS_FLASH     , Capture::FlashMode_Torch   },
-        {ACAMERA_CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE, Capture::FlashMode_RedEye  },
-        {ACAMERA_CONTROL_AE_MODE_ON_EXTERNAL_FLASH   , Capture::FlashMode_External},
-    };
-
-    return aeFlashModeMap;
-}
-
-Q_GLOBAL_STATIC_WITH_ARGS(AeFlashModeMap, aeFlashModeMap, (initAeFlashModeMap()))
-
-using FlashModeMap = QMap<Capture::FlashMode, acamera_metadata_enum_acamera_flash_mode>;
-
-inline const FlashModeMap &initFlashModeMap()
-{
-    static const FlashModeMap flashModeMap {
-        {Capture::FlashMode_Off     , ACAMERA_FLASH_MODE_OFF   },
-        {Capture::FlashMode_On      , ACAMERA_FLASH_MODE_SINGLE},
-        {Capture::FlashMode_Auto    , ACAMERA_FLASH_MODE_SINGLE},
-        {Capture::FlashMode_RedEye  , ACAMERA_FLASH_MODE_SINGLE},
-        {Capture::FlashMode_External, ACAMERA_FLASH_MODE_SINGLE},
-        {Capture::FlashMode_Torch   , ACAMERA_FLASH_MODE_TORCH },
-    };
-
-    return flashModeMap;
-}
-
-Q_GLOBAL_STATIC_WITH_ARGS(FlashModeMap, flashModeMap, (initFlashModeMap()))
-
 using CameraManagerPtr = QSharedPointer<ACameraManager>;
 
 class CaptureNdkCameraPrivate
@@ -364,7 +335,7 @@ class CaptureNdkCameraPrivate
         QStringList m_devices;
         QMap<QString, QString> m_descriptions;
         QMap<QString, CaptureVideoCaps> m_devicesCaps;
-        QMap<QString, Capture::FlashModeList> m_supportedFlashModes;
+        QMap<QString, bool> m_isTorchSupported;
         QReadWriteLock m_controlsMutex;
         QVariantList m_globalImageControls;
         QVariantList m_globalCameraControls;
@@ -377,6 +348,7 @@ class CaptureNdkCameraPrivate
         AkCaps m_caps;
         QString m_curDeviceId;
         qint64 m_id {-1};
+        QJniObject m_context;
         CameraManagerPtr m_manager;
         ACameraDevice *m_camera {nullptr};
         AImageReader *m_imageReader {nullptr};
@@ -386,8 +358,15 @@ class CaptureNdkCameraPrivate
         ACameraOutputTarget *m_outputTarget {nullptr};
         ACaptureRequest *m_captureRequest {nullptr};
         ACameraCaptureSession *m_captureSession {nullptr};
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        QCameraPermission m_cameraPermission;
+        bool m_permissionResultReady {false};
+#endif
+
         AkElementPtr m_rotate {akPluginManager->create<AkElement>("VideoFilter/Rotate")};
         int m_nBuffers {4};
+        Capture::TorchMode m_torchMode {Capture::Torch_Off};
 
         explicit CaptureNdkCameraPrivate(CaptureNdkCamera *self);
         bool nearestFpsRangue(const QString &cameraId,
@@ -434,8 +413,9 @@ class CaptureNdkCameraPrivate
         QVariantMap controlStatus(const QVariantList &controls) const;
         QVariantMap mapDiff(const QVariantMap &map1,
                             const QVariantMap &map2) const;
-        static bool canUseCamera();
-        bool isFlashSupported() const;
+        bool isTorchSupported(const ACameraMetadata *metaData);
+        void setTorchMode(Capture::TorchMode mode);
+        QString cameraFacing(const ACameraMetadata *metaData) const;
         void updateDevices();
 };
 
@@ -451,23 +431,48 @@ CaptureNdkCamera::CaptureNdkCamera(QObject *parent):
     ACameraManager_registerAvailabilityCallback(this->d->m_manager.data(),
                                                 &availabilityCb);
 
-    auto rotateFunc = [this] () {
-        if (!this->d->m_curDeviceId.isEmpty()) {
-            auto angle = -this->d->cameraRotation(this->d->m_curDeviceId);
-            this->d->m_rotate->setProperty("angle", angle);
-        }
-    };
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    auto permissionStatus = qApp->checkPermission(this->d->m_cameraPermission);
 
-    for (auto &screen: QApplication::screens()) {
-        QObject::connect(screen,
-                         &QScreen::geometryChanged,
-                         this,
-                         rotateFunc);
-        QObject::connect(screen,
-                         &QScreen::primaryOrientationChanged,
-                         this,
-                         rotateFunc);
+    if (permissionStatus != Qt::PermissionStatus::Granted) {
+        this->d->m_permissionResultReady = false;
+        qApp->requestPermission(this->d->m_cameraPermission,
+                                this,
+                                [this, permissionStatus] (const QPermission &permission) {
+                                    if (permissionStatus != permission.status()) {
+                                        PermissionStatus curStatus = PermissionStatus_Granted;
+
+                                        switch (permission.status()) {
+                                        case Qt::PermissionStatus::Undetermined:
+                                            curStatus = PermissionStatus_Undetermined;
+                                            break;
+
+                                        case Qt::PermissionStatus::Granted:
+                                            curStatus = PermissionStatus_Granted;
+                                            break;
+
+                                        case Qt::PermissionStatus::Denied:
+                                            curStatus = PermissionStatus_Denied;
+                                            break;
+
+                                        default:
+                                            break;
+                                        }
+
+                                        emit this->permissionStatusChanged(curStatus);
+                                    }
+
+                                    this->d->m_permissionResultReady = true;
+                                });
+
+        while (!this->d->m_permissionResultReady) {
+            auto eventDispatcher = QThread::currentThread()->eventDispatcher();
+
+            if (eventDispatcher)
+                eventDispatcher->processEvents(QEventLoop::AllEvents);
+        }
     }
+#endif
 
     this->d->updateDevices();
 }
@@ -632,33 +637,6 @@ bool CaptureNdkCamera::resetCameraControls()
     return this->setCameraControls(controls);
 }
 
-Capture::FlashModeList CaptureNdkCamera::supportedFlashModes(const QString &webcam) const
-{
-    return this->d->m_supportedFlashModes.value(webcam);
-}
-
-Capture::FlashMode CaptureNdkCamera::flashMode() const
-{
-    acamera_metadata_enum_android_control_ae_mode_t mode =
-            ACAMERA_CONTROL_AE_MODE_OFF;
-
-    this->d->m_mutex.lockForWrite();
-
-    if (this->d->m_captureRequest) {
-        ACameraMetadata_const_entry aeModeEntry;
-
-        if (ACaptureRequest_getConstEntry(this->d->m_captureRequest,
-                                          ACAMERA_CONTROL_AE_MODE,
-                                          &aeModeEntry) == ACAMERA_OK) {
-            mode = acamera_metadata_enum_android_control_ae_mode_t(aeModeEntry.data.u8[0]);
-        }
-    }
-
-    this->d->m_mutex.unlock();
-
-    return aeFlashModeMap->value(mode, FlashMode_Off);
-}
-
 AkPacket CaptureNdkCamera::readFrame()
 {
     this->d->m_controlsMutex.lockForRead();
@@ -697,12 +675,415 @@ AkPacket CaptureNdkCamera::readFrame()
 
     this->d->m_mutex.unlock();
 
+    if (!this->d->m_rotate)
+        return packet;
+
+    auto angle = this->d->cameraRotation(this->d->m_curDeviceId);
+    this->d->m_rotate->setProperty("angle", angle);
+
     return this->d->m_rotate->iStream(packet);
+}
+
+bool CaptureNdkCamera::isTorchSupported() const
+{
+    return this->d->m_isTorchSupported.value(this->d->m_device);
+}
+
+Capture::TorchMode CaptureNdkCamera::torchMode() const
+{
+    return this->d->m_torchMode;
+}
+
+Capture::PermissionStatus CaptureNdkCamera::permissionStatus() const
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    switch (qApp->checkPermission(this->d->m_cameraPermission)) {
+    case Qt::PermissionStatus::Undetermined:
+        return PermissionStatus_Undetermined;
+
+    case Qt::PermissionStatus::Granted:
+        return PermissionStatus_Granted;
+
+    case Qt::PermissionStatus::Denied:
+        return PermissionStatus_Denied;
+
+    default:
+        break;
+    }
+#endif
+    return PermissionStatus_Granted;
+}
+
+bool CaptureNdkCamera::init()
+{
+    this->d->m_localImageControls.clear();
+    this->d->m_localCameraControls.clear();
+    this->uninit();
+
+    QList<int> streams;
+    CaptureVideoCaps supportedCaps;
+    AIMAGE_FORMATS format;
+    AkCaps caps;
+    int32_t fpsRange[2];
+    int width = 0;
+    int height = 0;
+    AkFrac fps;
+
+    auto cameraId = this->d->m_device;
+    cameraId.remove(QRegularExpression("^NdkCamera:"));
+    ACameraDevice_StateCallbacks deviceStateCb {
+        this->d,
+        CaptureNdkCameraPrivate::deviceDisconnected,
+        CaptureNdkCameraPrivate::deviceError,
+    };
+    AImageReader_ImageListener imageListenerCb {
+        this->d,
+        CaptureNdkCameraPrivate::imageAvailable
+    };
+    ACameraCaptureSession_stateCallbacks sessionStateCb {
+        this->d,
+        CaptureNdkCameraPrivate::sessionClosed,
+        CaptureNdkCameraPrivate::sessionReady,
+        CaptureNdkCameraPrivate::sessionActive,
+    };
+
+    this->d->m_curDeviceId = cameraId;
+
+    if (ACameraManager_openCamera(this->d->m_manager.data(),
+                                  cameraId.toStdString().c_str(),
+                                  &deviceStateCb,
+                                  &this->d->m_camera) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (ACameraDevice_createCaptureRequest(this->d->m_camera,
+                                           TEMPLATE_PREVIEW,
+                                           &this->d->m_captureRequest) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    streams = this->streams();
+
+    if (streams.isEmpty()) {
+        this->uninit();
+
+        return false;
+    }
+
+    supportedCaps = this->caps(this->d->m_device);
+    caps = supportedCaps[streams[0]];
+
+    if (caps.type() == AkCaps::CapsVideo) {
+        AkVideoCaps videoCaps(caps);
+        format = rawFmtToAkMap->key(videoCaps.format(),
+                                    AIMAGE_FORMAT_PRIVATE);
+        width = videoCaps.width();
+        height = videoCaps.height();
+        fps = videoCaps.fps();
+    } else {
+        AkCompressedVideoCaps videoCaps(caps);
+        format = compressedFmtToAkMap->key(videoCaps.format(),
+                                           AIMAGE_FORMAT_PRIVATE);
+        width = videoCaps.width();
+        height = videoCaps.height();
+        fps = videoCaps.fps();
+    }
+
+    if (!this->d->nearestFpsRangue(cameraId, fps, fpsRange[0], fpsRange[1])) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (ACaptureRequest_setEntry_i32(this->d->m_captureRequest,
+                                     ACAMERA_CONTROL_AE_TARGET_FPS_RANGE,
+                                     2,
+                                     fpsRange) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (AImageReader_new(width,
+                         height,
+                         format,
+                         this->d->m_nBuffers,
+                         &this->d->m_imageReader) != AMEDIA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (AImageReader_setImageListener(this->d->m_imageReader,
+                                      &imageListenerCb) != AMEDIA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (AImageReader_getWindow(this->d->m_imageReader,
+                               &this->d->m_imageReaderWindow) != AMEDIA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    ANativeWindow_acquire(this->d->m_imageReaderWindow);
+
+    if (ACaptureSessionOutput_create(this->d->m_imageReaderWindow,
+                                     &this->d->m_sessionOutput) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (ACaptureSessionOutputContainer_create(&this->d->m_outputContainer) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (ACaptureSessionOutputContainer_add(this->d->m_outputContainer,
+                                           this->d->m_sessionOutput) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (ACameraOutputTarget_create(this->d->m_imageReaderWindow,
+                                   &this->d->m_outputTarget) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (ACaptureRequest_addTarget(this->d->m_captureRequest,
+                                  this->d->m_outputTarget) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    if (ACameraDevice_createCaptureSession(this->d->m_camera,
+                                           this->d->m_outputContainer,
+                                           &sessionStateCb,
+                                           &this->d->m_captureSession) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    this->setTorchMode(Capture::Torch_Off);
+
+    if (ACameraCaptureSession_setRepeatingRequest(this->d->m_captureSession,
+                                                  nullptr,
+                                                  1,
+                                                  &this->d->m_captureRequest,
+                                                  nullptr) != ACAMERA_OK) {
+        this->uninit();
+
+        return false;
+    }
+
+    this->d->m_id = Ak::id();
+    this->d->m_caps = caps;
+    this->d->m_fps = fps;
+
+    return true;
+}
+
+void CaptureNdkCamera::uninit()
+{
+    if (this->d->m_captureSession) {
+        ACameraCaptureSession_stopRepeating(this->d->m_captureSession);
+        ACameraCaptureSession_close(this->d->m_captureSession);
+        this->d->m_captureSession = nullptr;
+    }
+
+    if (this->d->m_outputTarget) {
+        if (this->d->m_captureRequest)
+            ACaptureRequest_removeTarget(this->d->m_captureRequest,
+                                         this->d->m_outputTarget);
+
+        ACameraOutputTarget_free(this->d->m_outputTarget);
+        this->d->m_outputTarget = nullptr;
+    }
+
+    if (this->d->m_sessionOutput) {
+        if (this->d->m_outputContainer)
+            ACaptureSessionOutputContainer_remove(this->d->m_outputContainer,
+                                                  this->d->m_sessionOutput);
+
+        ACaptureSessionOutput_free(this->d->m_sessionOutput);
+        this->d->m_sessionOutput = nullptr;
+    }
+
+    if (this->d->m_outputContainer) {
+        ACaptureSessionOutputContainer_free(this->d->m_outputContainer);
+        this->d->m_outputContainer = nullptr;
+    }
+
+    if (this->d->m_imageReaderWindow) {
+        ANativeWindow_release(this->d->m_imageReaderWindow);
+        this->d->m_imageReaderWindow = nullptr;
+    }
+
+    if (this->d->m_captureRequest) {
+        ACaptureRequest_free(this->d->m_captureRequest);
+        this->d->m_captureRequest = nullptr;
+    }
+
+    if (this->d->m_camera) {
+        ACameraDevice_close(this->d->m_camera);
+        this->d->m_camera = nullptr;
+    }
+
+    QThread::sleep(1);
+
+    if (this->d->m_imageReader) {
+        AImageReader_delete(this->d->m_imageReader);
+        this->d->m_imageReader = nullptr;
+    }
+
+    this->d->m_curDeviceId = QString();
+}
+
+void CaptureNdkCamera::setDevice(const QString &device)
+{
+    if (this->d->m_device == device)
+        return;
+
+    auto wasTorchSupported =
+            this->d->m_isTorchSupported.value(this->d->m_device);
+    this->d->m_device = device;
+
+    if (device.isEmpty()) {
+        this->d->m_controlsMutex.lockForWrite();
+        this->d->m_globalImageControls.clear();
+        this->d->m_globalCameraControls.clear();
+        this->d->m_controlsMutex.unlock();
+    } else {
+        this->d->m_controlsMutex.lockForWrite();
+        this->d->m_globalImageControls =
+                this->d->controls(*globalImageControls, device);
+        this->d->m_globalCameraControls =
+                this->d->controls(*globalCameraControls, device);
+        this->d->m_controlsMutex.unlock();
+    }
+
+    this->d->m_controlsMutex.lockForWrite();
+    auto imageStatus = this->d->controlStatus(this->d->m_globalImageControls);
+    auto cameraStatus = this->d->controlStatus(this->d->m_globalCameraControls);
+    this->d->m_controlsMutex.unlock();
+
+    emit this->deviceChanged(device);
+    emit this->imageControlsChanged(imageStatus);
+    emit this->cameraControlsChanged(cameraStatus);
+
+    bool isTorchSupported =
+            this->d->m_isTorchSupported.value(this->d->m_device);
+
+    if (wasTorchSupported != isTorchSupported)
+        emit this->isTorchSupportedChanged(isTorchSupported);
+
+    this->setTorchMode(Torch_Off);
+}
+
+void CaptureNdkCamera::setStreams(const QList<int> &streams)
+{
+    if (streams.isEmpty())
+        return;
+
+    int stream = streams[0];
+
+    if (stream < 0)
+        return;
+
+    auto supportedCaps = this->caps(this->d->m_device);
+
+    if (stream >= supportedCaps.length())
+        return;
+
+    QList<int> inputStreams {stream};
+
+    if (this->streams() == inputStreams)
+        return;
+
+    this->d->m_streams = inputStreams;
+    emit this->streamsChanged(inputStreams);
+}
+
+void CaptureNdkCamera::setIoMethod(const QString &ioMethod)
+{
+    Q_UNUSED(ioMethod)
+}
+
+void CaptureNdkCamera::setNBuffers(int nBuffers)
+{
+    if (this->d->m_nBuffers == nBuffers)
+        return;
+
+    this->d->m_nBuffers = nBuffers;
+    emit this->nBuffersChanged(nBuffers);
+}
+
+void CaptureNdkCamera::setTorchMode(TorchMode mode)
+{
+    if (this->d->m_torchMode == mode)
+        return;
+
+    this->d->m_torchMode = mode;
+    this->d->setTorchMode(mode);
+    emit this->torchModeChanged(mode);
+}
+
+void CaptureNdkCamera::resetDevice()
+{
+    this->setDevice("");
+}
+
+void CaptureNdkCamera::resetStreams()
+{
+    auto supportedCaps = this->caps(this->d->m_device);
+    QList<int> streams;
+
+    if (!supportedCaps.isEmpty())
+        streams << 0;
+
+    this->setStreams(streams);
+}
+
+void CaptureNdkCamera::resetIoMethod()
+{
+    this->setIoMethod("any");
+}
+
+void CaptureNdkCamera::resetNBuffers()
+{
+    this->setNBuffers(4);
+}
+
+void CaptureNdkCamera::resetTorchMode()
+{
+    this->setTorchMode(Torch_Off);
+}
+
+void CaptureNdkCamera::reset()
+{
+    this->resetStreams();
+    this->resetImageControls();
+    this->resetCameraControls();
 }
 
 CaptureNdkCameraPrivate::CaptureNdkCameraPrivate(CaptureNdkCamera *self):
     self(self)
 {
+    this->m_context =
+        qApp->nativeInterface<QNativeInterface::QAndroidApplication>()->context();
     this->m_manager = CameraManagerPtr(ACameraManager_create(),
                                        [] (ACameraManager *manager) {
         ACameraManager_delete(manager);
@@ -883,30 +1264,29 @@ qreal CaptureNdkCameraPrivate::cameraRotation(const QString &deviceId) const
     if (!characteristics)
         return 0.0;
 
-    auto activity = QtAndroid::androidActivity();
     auto windowManager =
-        activity.callObjectMethod("getWindowManager",
-                                  "()Landroid/view/WindowManager;");
+        this->m_context.callObjectMethod("getWindowManager",
+                                         "()Landroid/view/WindowManager;");
     auto display =
             windowManager.callObjectMethod("getDefaultDisplay",
                                            "()Landroid/view/Display;");
-    int degrees = 0;
+    int screenRotation = 0;
 
-    switch (display.callMethod<jint>("getRotation")) {
+    switch (display.callMethod<jint>("getRotation", "()I")) {
     case SURFACE_ROTATION_0:
-        degrees = 0;
+        screenRotation = 0;
 
         break;
     case SURFACE_ROTATION_90:
-        degrees = 90;
+        screenRotation = 90;
 
         break;
     case SURFACE_ROTATION_180:
-        degrees = 180;
+        screenRotation = 180;
 
         break;
     case SURFACE_ROTATION_270:
-        degrees = 270;
+        screenRotation = 270;
 
         break;
     default:
@@ -925,25 +1305,25 @@ qreal CaptureNdkCameraPrivate::cameraRotation(const QString &deviceId) const
     ACameraMetadata_getConstEntry(characteristics,
                                   ACAMERA_SENSOR_ORIENTATION,
                                   &entry);
-    auto orientation = entry.data.i32[0];
+    auto cameraRotation = entry.data.i32[0];
     int rotation = 0;
 
     switch (facing) {
     case ACAMERA_LENS_FACING_FRONT:
-        rotation = (orientation + degrees) % 360;
-        rotation = (360 - rotation) % 360;
+        rotation = (cameraRotation + screenRotation) % 360;
 
         break;
 
     case ACAMERA_LENS_FACING_BACK:
-        rotation = (orientation - degrees + 360) % 360;
+        rotation = (cameraRotation - screenRotation + 360) % 360;
+
         break;
 
     default:
         break;
     }
 
-    return rotation;
+    return -rotation;
 }
 
 void CaptureNdkCameraPrivate::sessionClosed(void *context,
@@ -972,7 +1352,7 @@ QVariantList CaptureNdkCameraPrivate::controls(const ControlVector &controlsTabl
 {
     ACameraMetadata *metaData {nullptr};
     auto cameraId = device;
-    cameraId.remove(QRegExp("^NdkCamera:"));
+    cameraId.remove(QRegularExpression("^NdkCamera:"));
 
     if (ACameraManager_getCameraCharacteristics(this->m_manager.data(),
                                                 cameraId.toStdString().c_str(),
@@ -1410,87 +1790,167 @@ QVariantMap CaptureNdkCameraPrivate::mapDiff(const QVariantMap &map1,
     return map;
 }
 
-bool CaptureNdkCameraPrivate::canUseCamera()
+bool CaptureNdkCameraPrivate::isTorchSupported(const ACameraMetadata *metaData)
 {
-    static bool done = false;
-    static bool result = false;
+    if (!this->m_context.isValid())
+        return false;
 
-    if (done)
-        return result;
-
-    QStringList permissions {
-        "android.permission.CAMERA"
-    };
-    QStringList neededPermissions;
-
-    for (auto &permission: permissions)
-        if (QtAndroid::checkPermission(permission) == QtAndroid::PermissionResult::Denied)
-            neededPermissions << permission;
-
-    if (!neededPermissions.isEmpty()) {
-        auto results = QtAndroid::requestPermissionsSync(neededPermissions);
-
-        for (auto it = results.constBegin(); it != results.constEnd(); it++)
-            if (it.value() == QtAndroid::PermissionResult::Denied) {
-                done = true;
-
-                return false;
-            }
-    }
-
-    done = true;
-    result = true;
-
-    return true;
-}
-
-bool CaptureNdkCameraPrivate::isFlashSupported() const
-{
-    auto context = QtAndroid::androidContext();
     auto packageManager =
-            context.callObjectMethod("getPackageManager",
-                                     "()Landroid/content/pm/PackageManager;");
+        this->m_context.callObjectMethod("getPackageManager",
+                                         "()Landroid/content/pm/PackageManager;");
 
-    if (packageManager.isValid()) {
-        auto feature = packageManager.getObjectField("FEATURE_CAMERA_FLASH",
-                                                     "java/lang/String");
+    if (!packageManager.isValid())
+        return false;
 
-        if (feature.isValid()) {
-            return packageManager.callMethod<jboolean>("hasSystemFeature",
-                                                       "(Ljava/lang/String;)Z",
-                                                       feature.object());
+    auto feature =
+        QJniObject::getStaticObjectField("android/content/pm/PackageManager",
+                                         "FEATURE_CAMERA_FLASH",
+                                         "Ljava/lang/String;");
+
+    if (!feature.isValid())
+        return false;
+
+    bool isSupported =
+        packageManager.callMethod<jboolean>("hasSystemFeature",
+                                            "(Ljava/lang/String;)Z",
+                                            feature.object());
+
+    if (!isSupported)
+        return false;
+
+    bool isTorchOnSupported = false;
+    bool isTorchOffSupported = false;
+    ACameraMetadata_const_entry flashAvailableEntry;
+    ACameraMetadata_getConstEntry(metaData,
+                                  ACAMERA_FLASH_INFO_AVAILABLE,
+                                  &flashAvailableEntry);
+
+    if (!flashAvailableEntry.data.u8[0])
+        return false;
+
+    ACameraMetadata_const_entry entry;
+
+    if (ACameraMetadata_getConstEntry(metaData,
+                                      ACAMERA_CONTROL_AE_AVAILABLE_MODES,
+                                      &entry) == ACAMERA_OK) {
+
+        for (jint i = 0; i < entry.count; i++) {
+            auto mode =
+                acamera_metadata_enum_android_control_ae_mode_t(entry.data.u8[i]);
+
+            if (mode == ACAMERA_CONTROL_AE_MODE_ON_ALWAYS_FLASH)
+                isTorchOnSupported = true;
+            else if (mode == ACAMERA_CONTROL_AE_MODE_OFF)
+                isTorchOffSupported = true;
         }
     }
 
-    return false;
+    return isTorchOnSupported && isTorchOffSupported;
+}
+
+void CaptureNdkCameraPrivate::setTorchMode(Capture::TorchMode mode)
+{
+    this->m_mutex.lockForWrite();
+
+    if (this->m_captureRequest) {
+        ACameraMetadata_const_entry aeModeEntry;
+
+        if (ACaptureRequest_getConstEntry(this->m_captureRequest,
+                                          ACAMERA_CONTROL_AE_MODE,
+                                          &aeModeEntry) == ACAMERA_OK) {
+            auto aeMode = acamera_metadata_enum_android_control_ae_mode_t(aeModeEntry.data.u8[0]);
+
+            if (aeMode == ACAMERA_CONTROL_AE_MODE_ON_ALWAYS_FLASH
+                || aeMode == ACAMERA_CONTROL_AE_MODE_OFF) {
+                ACameraMetadata_const_entry flashModeEntry;
+
+                if (ACaptureRequest_getConstEntry(this->m_captureRequest,
+                                                  ACAMERA_FLASH_MODE,
+                                                  &flashModeEntry) == ACAMERA_OK) {
+                    auto curAeMode =
+                        aeMode == ACAMERA_CONTROL_AE_MODE_ON_ALWAYS_FLASH?
+                            Capture::Torch_On:
+                            Capture::Torch_Off;
+                    auto curFlashMode =
+                        mode  == Capture::Torch_On?
+                            ACAMERA_FLASH_MODE_TORCH:
+                            ACAMERA_FLASH_MODE_OFF;
+
+                    if  (curAeMode != mode || curFlashMode != flashModeEntry.data.u8[0]) {
+                        uint8_t aeMode =
+                            mode  == Capture::Torch_On?
+                                ACAMERA_CONTROL_AE_MODE_ON_ALWAYS_FLASH:
+                                ACAMERA_CONTROL_AE_MODE_OFF;
+                        ACaptureRequest_setEntry_u8(this->m_captureRequest,
+                                                    ACAMERA_CONTROL_AE_MODE,
+                                                    1,
+                                                    &aeMode);
+                        uint8_t flashMode =
+                            mode  == Capture::Torch_On?
+                                ACAMERA_FLASH_MODE_TORCH:
+                                ACAMERA_FLASH_MODE_OFF;
+                        ACaptureRequest_setEntry_u8(this->m_captureRequest,
+                                                    ACAMERA_FLASH_MODE,
+                                                    1,
+                                                    &flashMode);
+                    }
+                }
+            } else {
+                uint8_t aeMode = mode == Capture::Torch_On?
+                                     ACAMERA_CONTROL_AE_MODE_ON_ALWAYS_FLASH:
+                                     ACAMERA_CONTROL_AE_MODE_OFF;
+                ACaptureRequest_setEntry_u8(this->m_captureRequest,
+                                            ACAMERA_CONTROL_AE_MODE,
+                                            1,
+                                            &aeMode);
+                uint8_t flashMode = mode == Capture::Torch_On?
+                                        ACAMERA_FLASH_MODE_TORCH:
+                                        ACAMERA_FLASH_MODE_OFF;
+                ACaptureRequest_setEntry_u8(this->m_captureRequest,
+                                            ACAMERA_FLASH_MODE,
+                                            1,
+                                            &flashMode);
+            }
+        }
+    }
+
+    this->m_mutex.unlock();
+}
+
+QString CaptureNdkCameraPrivate::cameraFacing(const ACameraMetadata *metaData) const
+{
+    static const QMap<acamera_metadata_enum_android_lens_facing_t, QString> facingToStr {
+        {ACAMERA_LENS_FACING_FRONT   , "Front"   },
+        {ACAMERA_LENS_FACING_BACK    , "Back"    },
+        {ACAMERA_LENS_FACING_EXTERNAL, "External"},
+    };
+
+    ACameraMetadata_const_entry lensFacing;
+    ACameraMetadata_getConstEntry(metaData,
+                                  ACAMERA_LENS_FACING,
+                                  &lensFacing);
+    auto facing =
+            acamera_metadata_enum_android_lens_facing_t(lensFacing.data.u8[0]);
+
+    return facingToStr.value(facing, "External");
 }
 
 void CaptureNdkCameraPrivate::updateDevices()
 {
-    if (!this->canUseCamera())
-        return;
-
     decltype(this->m_devices) devices;
     decltype(this->m_descriptions) descriptions;
     decltype(this->m_devicesCaps) devicesCaps;
-    decltype(this->m_supportedFlashModes) supportedFlashModes;
+    decltype(this->m_isTorchSupported) isTorchSupported;
 
-    bool hasFlash = this->isFlashSupported();
     ACameraIdList *cameras = nullptr;
 
     if (ACameraManager_getCameraIdList(this->m_manager.data(),
                                        &cameras) == ACAMERA_OK) {
         static const QVector<AIMAGE_FORMATS> unsupportedFormats {
             AIMAGE_FORMAT_RAW_PRIVATE,
-            AIMAGE_FORMAT_DEPTH16,
-            AIMAGE_FORMAT_DEPTH_POINT_CLOUD,
-            AIMAGE_FORMAT_PRIVATE,
-        };
-
-        static const QMap<acamera_metadata_enum_android_lens_facing_t, QString> facingToStr {
-            {ACAMERA_LENS_FACING_FRONT   , "Front"},
-            {ACAMERA_LENS_FACING_BACK    , "Back"},
-            {ACAMERA_LENS_FACING_EXTERNAL, "External"},
+                    AIMAGE_FORMAT_DEPTH16,
+                    AIMAGE_FORMAT_DEPTH_POINT_CLOUD,
+                    AIMAGE_FORMAT_PRIVATE,
         };
 
         for (int i = 0; i < cameras->numCameras; i++) {
@@ -1577,42 +2037,14 @@ void CaptureNdkCameraPrivate::updateDevices()
 
             if (!caps.isEmpty()) {
                 auto deviceId = "NdkCamera:" + cameraId;
-                ACameraMetadata_const_entry lensFacing;
-                ACameraMetadata_getConstEntry(metaData,
-                                              ACAMERA_LENS_FACING,
-                                              &lensFacing);
-                auto facing =
-                        acamera_metadata_enum_android_lens_facing_t(lensFacing.data.u8[0]);
-                auto description = QString("%1 Camera %2")
-                                   .arg(facingToStr[facing], cameraId);
+                auto facing = this->cameraFacing(metaData);
+                auto description =
+                        QString("%1 Camera %2").arg(facing, cameraId);
                 devices << deviceId;
                 descriptions[deviceId] = description;
                 devicesCaps[deviceId] = caps;
-
-                ACameraMetadata_const_entry flashAvailableEntry;
-                ACameraMetadata_getConstEntry(metaData,
-                                              ACAMERA_FLASH_INFO_AVAILABLE,
-                                              &flashAvailableEntry);
-
-                if (hasFlash && flashAvailableEntry.data.u8[0]) {
-                    ACameraMetadata_const_entry entry;
-
-                    if (ACameraMetadata_getConstEntry(metaData,
-                                                      ACAMERA_CONTROL_AE_AVAILABLE_MODES,
-                                                      &entry) == ACAMERA_OK) {
-                        Capture::FlashModeList modes;
-
-                        for (jint i = 0; i < entry.count; i++) {
-                            auto mode =
-                                    acamera_metadata_enum_android_control_ae_mode_t(entry.data.u8[i]);
-
-                            if (aeFlashModeMap->contains(mode))
-                                modes << aeFlashModeMap->value(mode);
-                        }
-
-                        supportedFlashModes[deviceId] = modes;
-                    }
-                }
+                isTorchSupported[deviceId] =
+                        this->isTorchSupported(metaData);
             }
 
             ACameraMetadata_free(metaData);
@@ -1624,416 +2056,17 @@ void CaptureNdkCameraPrivate::updateDevices()
     if (devicesCaps.isEmpty()) {
         devices.clear();
         descriptions.clear();
-        supportedFlashModes.clear();
+        isTorchSupported.clear();
     }
 
     this->m_descriptions = descriptions;
     this->m_devicesCaps = devicesCaps;
-    this->m_supportedFlashModes = supportedFlashModes;
+    this->m_isTorchSupported = isTorchSupported;
 
     if (this->m_devices != devices) {
         this->m_devices = devices;
         emit self->webcamsChanged(this->m_devices);
     }
-}
-
-bool CaptureNdkCamera::init()
-{
-    this->d->m_localImageControls.clear();
-    this->d->m_localCameraControls.clear();
-    this->uninit();
-
-    QList<int> streams;
-    CaptureVideoCaps supportedCaps;
-    AIMAGE_FORMATS format;
-    AkCaps caps;
-    int32_t fpsRange[2];
-    int width = 0;
-    int height = 0;
-    AkFrac fps;
-
-    auto cameraId = this->d->m_device;
-    cameraId.remove(QRegExp("^NdkCamera:"));
-    ACameraDevice_StateCallbacks deviceStateCb {
-        this->d,
-        CaptureNdkCameraPrivate::deviceDisconnected,
-        CaptureNdkCameraPrivate::deviceError,
-    };
-    AImageReader_ImageListener imageListenerCb {
-        this->d,
-        CaptureNdkCameraPrivate::imageAvailable
-    };
-    ACameraCaptureSession_stateCallbacks sessionStateCb {
-        this->d,
-        CaptureNdkCameraPrivate::sessionClosed,
-        CaptureNdkCameraPrivate::sessionReady,
-        CaptureNdkCameraPrivate::sessionActive,
-    };
-
-    this->d->m_curDeviceId = cameraId;
-
-    if (ACameraManager_openCamera(this->d->m_manager.data(),
-                                  cameraId.toStdString().c_str(),
-                                  &deviceStateCb,
-                                  &this->d->m_camera) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (ACameraDevice_createCaptureRequest(this->d->m_camera,
-                                           TEMPLATE_PREVIEW,
-                                           &this->d->m_captureRequest) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    streams = this->streams();
-
-    if (streams.isEmpty()) {
-        this->uninit();
-
-        return false;
-    }
-
-    supportedCaps = this->caps(this->d->m_device);
-    caps = supportedCaps[streams[0]];
-
-    if (caps.type() == AkCaps::CapsVideo) {
-        AkVideoCaps videoCaps(caps);
-        format = rawFmtToAkMap->key(videoCaps.format(),
-                                    AIMAGE_FORMAT_PRIVATE);
-        width = videoCaps.width();
-        height = videoCaps.height();
-        fps = videoCaps.fps();
-    } else {
-        AkCompressedVideoCaps videoCaps(caps);
-        format = compressedFmtToAkMap->key(videoCaps.format(),
-                                           AIMAGE_FORMAT_PRIVATE);
-        width = videoCaps.width();
-        height = videoCaps.height();
-        fps = videoCaps.fps();
-    }
-
-    if (!this->d->nearestFpsRangue(cameraId, fps, fpsRange[0], fpsRange[1])) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (ACaptureRequest_setEntry_i32(this->d->m_captureRequest,
-                                     ACAMERA_CONTROL_AE_TARGET_FPS_RANGE,
-                                     2,
-                                     fpsRange) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (AImageReader_new(width,
-                         height,
-                         format,
-                         this->d->m_nBuffers,
-                         &this->d->m_imageReader) != AMEDIA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (AImageReader_setImageListener(this->d->m_imageReader,
-                                      &imageListenerCb) != AMEDIA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (AImageReader_getWindow(this->d->m_imageReader,
-                               &this->d->m_imageReaderWindow) != AMEDIA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    ANativeWindow_acquire(this->d->m_imageReaderWindow);
-
-    if (ACaptureSessionOutput_create(this->d->m_imageReaderWindow,
-                                     &this->d->m_sessionOutput) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (ACaptureSessionOutputContainer_create(&this->d->m_outputContainer) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (ACaptureSessionOutputContainer_add(this->d->m_outputContainer,
-                                           this->d->m_sessionOutput) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (ACameraOutputTarget_create(this->d->m_imageReaderWindow,
-                                   &this->d->m_outputTarget) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (ACaptureRequest_addTarget(this->d->m_captureRequest,
-                                  this->d->m_outputTarget) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (ACameraDevice_createCaptureSession(this->d->m_camera,
-                                           this->d->m_outputContainer,
-                                           &sessionStateCb,
-                                           &this->d->m_captureSession) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    if (ACameraCaptureSession_setRepeatingRequest(this->d->m_captureSession,
-                                                  nullptr,
-                                                  1,
-                                                  &this->d->m_captureRequest,
-                                                  nullptr) != ACAMERA_OK) {
-        this->uninit();
-
-        return false;
-    }
-
-    this->d->m_id = Ak::id();
-    this->d->m_caps = caps;
-    this->d->m_fps = fps;
-
-    auto angle = -this->d->cameraRotation(this->d->m_curDeviceId);
-    this->d->m_rotate->setProperty("angle", angle);
-
-    return true;
-}
-
-void CaptureNdkCamera::uninit()
-{
-    if (this->d->m_captureSession) {
-        ACameraCaptureSession_stopRepeating(this->d->m_captureSession);
-        ACameraCaptureSession_close(this->d->m_captureSession);
-        this->d->m_captureSession = nullptr;
-    }
-
-    if (this->d->m_outputTarget) {
-        if (this->d->m_captureRequest)
-            ACaptureRequest_removeTarget(this->d->m_captureRequest, this->d->m_outputTarget);
-
-        ACameraOutputTarget_free(this->d->m_outputTarget);
-        this->d->m_outputTarget = nullptr;
-    }
-
-    if (this->d->m_sessionOutput) {
-        if (this->d->m_outputContainer)
-            ACaptureSessionOutputContainer_remove(this->d->m_outputContainer,
-                                                  this->d->m_sessionOutput);
-
-        ACaptureSessionOutput_free(this->d->m_sessionOutput);
-        this->d->m_sessionOutput = nullptr;
-    }
-
-    if (this->d->m_outputContainer) {
-        ACaptureSessionOutputContainer_free(this->d->m_outputContainer);
-        this->d->m_outputContainer = nullptr;
-    }
-
-    if (this->d->m_imageReaderWindow) {
-        ANativeWindow_release(this->d->m_imageReaderWindow);
-        this->d->m_imageReaderWindow = nullptr;
-    }
-
-    if (this->d->m_captureRequest) {
-        ACaptureRequest_free(this->d->m_captureRequest);
-        this->d->m_captureRequest = nullptr;
-    }
-
-    if (this->d->m_camera) {
-        ACameraDevice_close(this->d->m_camera);
-        this->d->m_camera = nullptr;
-    }
-
-    QThread::sleep(1);
-
-    if (this->d->m_imageReader) {
-        AImageReader_delete(this->d->m_imageReader);
-        this->d->m_imageReader = nullptr;
-    }
-
-    this->d->m_curDeviceId = QString();
-}
-
-void CaptureNdkCamera::setDevice(const QString &device)
-{
-    if (this->d->m_device == device)
-        return;
-
-    this->d->m_device = device;
-
-    if (device.isEmpty()) {
-        this->d->m_controlsMutex.lockForWrite();
-        this->d->m_globalImageControls.clear();
-        this->d->m_globalCameraControls.clear();
-        this->d->m_controlsMutex.unlock();
-    } else {
-        this->d->m_controlsMutex.lockForWrite();
-        this->d->m_globalImageControls =
-                this->d->controls(*globalImageControls, device);
-        this->d->m_globalCameraControls =
-                this->d->controls(*globalCameraControls, device);
-        this->d->m_controlsMutex.unlock();
-    }
-
-    this->d->m_controlsMutex.lockForWrite();
-    auto imageStatus = this->d->controlStatus(this->d->m_globalImageControls);
-    auto cameraStatus = this->d->controlStatus(this->d->m_globalCameraControls);
-    this->d->m_controlsMutex.unlock();
-
-    emit this->deviceChanged(device);
-    emit this->imageControlsChanged(imageStatus);
-    emit this->cameraControlsChanged(cameraStatus);
-}
-
-void CaptureNdkCamera::setStreams(const QList<int> &streams)
-{
-    if (streams.isEmpty())
-        return;
-
-    int stream = streams[0];
-
-    if (stream < 0)
-        return;
-
-    auto supportedCaps = this->caps(this->d->m_device);
-
-    if (stream >= supportedCaps.length())
-        return;
-
-    QList<int> inputStreams {stream};
-
-    if (this->streams() == inputStreams)
-        return;
-
-    this->d->m_streams = inputStreams;
-    emit this->streamsChanged(inputStreams);
-}
-
-void CaptureNdkCamera::setIoMethod(const QString &ioMethod)
-{
-    Q_UNUSED(ioMethod)
-}
-
-void CaptureNdkCamera::setNBuffers(int nBuffers)
-{
-    if (this->d->m_nBuffers == nBuffers)
-        return;
-
-    this->d->m_nBuffers = nBuffers;
-    emit this->nBuffersChanged(nBuffers);
-}
-
-void CaptureNdkCamera::setFlashMode(FlashMode mode)
-{
-    this->d->m_mutex.lockForWrite();
-
-    if (this->d->m_captureRequest) {
-        ACameraMetadata_const_entry aeModeEntry;
-
-        if (ACaptureRequest_getConstEntry(this->d->m_captureRequest,
-                                          ACAMERA_CONTROL_AE_MODE,
-                                          &aeModeEntry) == ACAMERA_OK) {
-            auto aeMode = acamera_metadata_enum_android_control_ae_mode_t(aeModeEntry.data.u8[0]);
-
-            if (aeFlashModeMap->contains(aeMode)) {
-                ACameraMetadata_const_entry flashModeEntry;
-
-                if (ACaptureRequest_getConstEntry(this->d->m_captureRequest,
-                                                  ACAMERA_FLASH_MODE,
-                                                  &flashModeEntry) == ACAMERA_OK) {
-                    auto curAeMode = aeFlashModeMap->value(aeMode);
-                    auto curFlashMode = flashModeMap->value(mode);
-
-                    if  (curAeMode != mode || curFlashMode != flashModeEntry.data.u8[0]) {
-                        uint8_t aeMode = aeFlashModeMap->key(mode);
-                        ACaptureRequest_setEntry_u8(this->d->m_captureRequest,
-                                                    ACAMERA_CONTROL_AE_MODE,
-                                                    1,
-                                                    &aeMode);
-                        uint8_t flashMode = flashModeMap->value(mode);
-                        ACaptureRequest_setEntry_u8(this->d->m_captureRequest,
-                                                    ACAMERA_FLASH_MODE,
-                                                    1,
-                                                    &flashMode);
-                        emit this->flashModeChanged(mode);
-                    }
-                }
-            } else {
-                uint8_t aeMode = aeFlashModeMap->key(mode);
-                ACaptureRequest_setEntry_u8(this->d->m_captureRequest,
-                                            ACAMERA_CONTROL_AE_MODE,
-                                            1,
-                                            &aeMode);
-                uint8_t flashMode = flashModeMap->value(mode);
-                ACaptureRequest_setEntry_u8(this->d->m_captureRequest,
-                                            ACAMERA_FLASH_MODE,
-                                            1,
-                                            &flashMode);
-                emit this->flashModeChanged(mode);
-            }
-        }
-    }
-
-    this->d->m_mutex.unlock();
-}
-
-void CaptureNdkCamera::resetDevice()
-{
-    this->setDevice("");
-}
-
-void CaptureNdkCamera::resetStreams()
-{
-    auto supportedCaps = this->caps(this->d->m_device);
-    QList<int> streams;
-
-    if (!supportedCaps.isEmpty())
-        streams << 0;
-
-    this->setStreams(streams);
-}
-
-void CaptureNdkCamera::resetIoMethod()
-{
-    this->setIoMethod("any");
-}
-
-void CaptureNdkCamera::resetNBuffers()
-{
-    this->setNBuffers(4);
-}
-
-void CaptureNdkCamera::resetFlashMode()
-{
-    this->setFlashMode(FlashMode_Off);
-}
-
-void CaptureNdkCamera::reset()
-{
-    this->resetStreams();
-    this->resetImageControls();
-    this->resetCameraControls();
 }
 
 #include "moc_capturendkcamera.cpp"

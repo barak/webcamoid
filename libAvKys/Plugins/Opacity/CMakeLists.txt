@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Opacity SHARED
-            src/opacity.h
-            src/opacityelement.h
-            src/opacity.cpp
-            src/opacityelement.cpp
-            Opacity.qrc
-            pspec.json)
+qt_add_plugin(Opacity
+              SHARED
+              CLASS_NAME Opacity)
+target_sources(Opacity PRIVATE
+               src/opacity.h
+               src/opacityelement.h
+               src/opacity.cpp
+               src/opacityelement.cpp
+               Opacity.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Opacity PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Opacity PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Opacity PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Opacity avkys)
@@ -60,8 +64,6 @@ list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_
 target_link_libraries(Opacity avkys ${QT_LIBS})
 set(QML_IMPORT_PATH ../../Lib/share/qml)
 
-if (WIN32)
-    install(TARGETS Opacity RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Opacity DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Opacity
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

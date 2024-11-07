@@ -52,20 +52,24 @@ pkg_check_modules(FFMPEG
                   libavcodec
                   libavutil
                   libswscale)
-link_directories(${FFMPEG_LIBRARY_DIRS})
 
 if (NOT NOFFMPEG AND FFMPEG_FOUND)
-    add_library(VideoCapture_ffmpeg SHARED ${SOURCES})
+    qt_add_plugin(VideoCapture_ffmpeg
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VideoCapture_ffmpeg PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VideoCapture_ffmpeg SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VideoCapture_ffmpeg EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(VideoCapture_ffmpeg PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(VideoCapture_ffmpeg PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(VideoCapture_ffmpeg PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(VideoCapture_ffmpeg avkys)
@@ -77,15 +81,16 @@ target_include_directories(VideoCapture_ffmpeg
                            ../../../../../Lib/src)
 target_compile_definitions(VideoCapture_ffmpeg PRIVATE AVKYS_PLUGIN_VIDEOCAPTURE_FFMPEG)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
+target_link_directories(VideoCapture_ffmpeg
+                        PUBLIC
+                        ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(VideoCapture_ffmpeg
                       ${QT_LIBS}
                       ${FFMPEG_LIBRARIES}
                       avkys)
 
 if (NOT NOFFMPEG AND FFMPEG_FOUND)
-    if (WIN32)
-        install(TARGETS VideoCapture_ffmpeg RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS VideoCapture_ffmpeg DESTINATION ${PLUGINSDIR})
-    endif ()
+    install(TARGETS VideoCapture_ffmpeg
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

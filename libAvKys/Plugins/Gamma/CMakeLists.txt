@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Gamma SHARED
-            src/gamma.h
-            src/gammaelement.h
-            src/gamma.cpp
-            src/gammaelement.cpp
-            Gamma.qrc
-            pspec.json)
+qt_add_plugin(Gamma
+              SHARED
+              CLASS_NAME Gamma)
+target_sources(Gamma PRIVATE
+               src/gamma.h
+               src/gammaelement.h
+               src/gamma.cpp
+               src/gammaelement.cpp
+               Gamma.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Gamma PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Gamma PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Gamma PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Gamma avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Gamma PRIVATE AVKYS_PLUGIN_GAMMA)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Gamma avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Gamma RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Gamma DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Gamma
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

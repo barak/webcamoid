@@ -62,7 +62,7 @@ class CaptureDShow:
 
         bool nativeEventFilter(const QByteArray &eventType,
                                void *message,
-                               long *result) override;
+                               qintptr *result) override;
 
     private:
         CaptureDShowPrivate *d;

@@ -47,20 +47,24 @@ set(SOURCES
     pspec.json)
 
 pkg_check_modules(SDL sdl2)
-link_directories(${SDL_LIBRARY_DIRS})
 
-if (NOT NOSDL AND SDL_FOUND)
-    add_library(AudioDevice_sdl SHARED ${SOURCES})
+if (NOT NOSDL AND SDL_FOUND AND NOT ANDROID)
+    qt_add_plugin(AudioDevice_sdl
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(AudioDevice_sdl PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(AudioDevice_sdl SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(AudioDevice_sdl EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(AudioDevice_sdl PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(AudioDevice_sdl PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(AudioDevice_sdl PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(AudioDevice_sdl avkys)
@@ -72,15 +76,16 @@ target_include_directories(AudioDevice_sdl
                            ../../../../Lib/src)
 target_compile_definitions(AudioDevice_sdl PRIVATE AVKYS_PLUGIN_AUDIODEVICE_SDL)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
+target_link_directories(AudioDevice_sdl
+                        PUBLIC
+                        ${SDL_LIBRARY_DIRS})
 target_link_libraries(AudioDevice_sdl
                       ${QT_LIBS}
                       ${SDL_LIBRARIES}
                       avkys)
 
-if (NOT NOSDL AND SDL_FOUND)
-    if (WIN32)
-        install(TARGETS AudioDevice_sdl RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS AudioDevice_sdl DESTINATION ${PLUGINSDIR})
-    endif ()
+if (NOT NOSDL AND SDL_FOUND AND NOT ANDROID)
+    install(TARGETS AudioDevice_sdl
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

@@ -293,15 +293,15 @@ bool AbstractStream::init()
     this->d->m_runEncodeLoop = true;
     this->d->m_encodeLoopResult =
             QtConcurrent::run(&this->d->m_threadPool,
-                              this->d,
-                              &AbstractStreamPrivate::encodeLoop);
+                              &AbstractStreamPrivate::encodeLoop,
+                              this->d);
 
     this->d->m_runConvertLoop = true;
 
     this->d->m_convertLoopResult =
             QtConcurrent::run(&this->d->m_threadPool,
-                              this->d,
-                              &AbstractStreamPrivate::convertLoop);
+                              &AbstractStreamPrivate::convertLoop,
+                              this->d);
 
     return true;
 }
@@ -314,7 +314,12 @@ void AbstractStream::uninit()
     this->d->m_runEncodeLoop = false;
     waitLoop(this->d->m_encodeLoopResult);
 
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(55, 52, 0)
+    avcodec_free_context(&this->d->m_codecContext);
+#else
     avcodec_close(this->d->m_codecContext);
+    this->d->m_codecContext = nullptr;
+#endif
 
     if (this->d->m_codecOptions)
         av_dict_free(&this->d->m_codecOptions);

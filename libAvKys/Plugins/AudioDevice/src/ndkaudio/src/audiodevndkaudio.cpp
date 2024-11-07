@@ -17,17 +17,17 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QCoreApplication>
 #include <QMap>
 #include <QVector>
 #include <QMutex>
 #include <QWaitCondition>
-
-#ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#endif
-
 #include <akaudiopacket.h>
 #include <aaudio/AAudio.h>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#include <QPermissions>
+#endif
 
 #include "audiodevndkaudio.h"
 
@@ -49,6 +49,7 @@ class AudioDevNDKAudioPrivate
         AAudioStreamBuilder *m_streamBuilder {nullptr};
         AAudioStream *m_stream {nullptr};
         int m_samples {0};
+        bool m_hasAudioCapturePermissions {false};
 
         explicit AudioDevNDKAudioPrivate(AudioDevNDKAudio *self);
         AAudioStream *createStream(AAudioStreamBuilder *streamBuilder,
@@ -57,7 +58,6 @@ class AudioDevNDKAudioPrivate
         static void errorCallback(AAudioStream *stream,
                                   void *userData,
                                   aaudio_result_t error);
-        static bool hasAudioPermissions();
         void updateDevices();
 };
 
@@ -65,7 +65,36 @@ AudioDevNDKAudio::AudioDevNDKAudio(QObject *parent):
     AudioDev(parent)
 {
     this->d = new AudioDevNDKAudioPrivate(this);
-    this->d->updateDevices();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        QMicrophonePermission microphonePermission;
+
+        switch (qApp->checkPermission(microphonePermission)) {
+        case Qt::PermissionStatus::Undetermined:
+            qApp->requestPermission(microphonePermission,
+                                    this,
+                                    [this] (const QPermission &permission) {
+                                        if (permission.status() == Qt::PermissionStatus::Granted)
+                                            this->d->m_hasAudioCapturePermissions = true;
+                                        this->d->updateDevices();
+                                    });
+
+            break;
+
+        case Qt::PermissionStatus::Granted:
+            this->d->m_hasAudioCapturePermissions = true;
+            this->d->updateDevices();
+
+            break;
+
+        default:
+            this->d->updateDevices();
+
+            break;
+        }
+#else
+        this->d->updateDevices();
+#endif
 }
 
 AudioDevNDKAudio::~AudioDevNDKAudio()
@@ -287,48 +316,8 @@ void AudioDevNDKAudioPrivate::errorCallback(AAudioStream *stream,
     Q_UNUSED(error)
 }
 
-bool AudioDevNDKAudioPrivate::hasAudioPermissions()
-{
-#ifdef Q_OS_ANDROID
-    static bool done = false;
-    static bool result = false;
-
-    if (done)
-        return result;
-
-    QStringList permissions {
-        "android.permission.CAPTURE_AUDIO_OUTPUT",
-        "android.permission.RECORD_AUDIO"
-    };
-    QStringList neededPermissions;
-
-    for (auto &permission: permissions)
-        if (QtAndroid::checkPermission(permission) == QtAndroid::PermissionResult::Denied)
-            neededPermissions << permission;
-
-    if (!neededPermissions.isEmpty()) {
-        auto results = QtAndroid::requestPermissionsSync(neededPermissions);
-
-        for (auto it = results.constBegin(); it != results.constEnd(); it++)
-            if (it.value() == QtAndroid::PermissionResult::Denied) {
-                done = true;
-
-                return false;
-            }
-    }
-
-    done = true;
-    result = true;
-#endif
-
-    return true;
-}
-
 void AudioDevNDKAudioPrivate::updateDevices()
 {
-    if (!this->hasAudioPermissions())
-        return;
-
     AAudioStreamBuilder *streamBuilder = nullptr;
 
     if (AAudio_createStreamBuilder(&streamBuilder) != AAUDIO_OK)
@@ -343,39 +332,41 @@ void AudioDevNDKAudioPrivate::updateDevices()
         AkAudioCaps::Layout_stereo,
     };
 
-    // Test audio input
-    for (auto &format: sampleFormats)
-        for (auto &layout: layouts)
-            for (auto &rate: this->self->commonSampleRates()) {
-                AkAudioCaps caps(format, layout, rate);
-                auto stream = this->createStream(streamBuilder,
-                                                 AAUDIO_DIRECTION_INPUT,
-                                                 caps);
+    if (this->m_hasAudioCapturePermissions) {
+        // Test audio input
+        for (auto &format: sampleFormats)
+            for (auto &layout: layouts)
+                for (auto &rate: this->self->commonSampleRates()) {
+                    AkAudioCaps caps(format, layout, rate);
+                    auto stream = this->createStream(streamBuilder,
+                                                     AAUDIO_DIRECTION_INPUT,
+                                                     caps);
 
-                if (stream) {
-                    if (!this->m_supportedFormats[":aaudioinput:"].contains(format))
-                        this->m_supportedFormats[":aaudioinput:"] << format;
+                    if (stream) {
+                        if (!this->m_supportedFormats[":aaudioinput:"].contains(format))
+                            this->m_supportedFormats[":aaudioinput:"] << format;
 
-                    if (!this->m_supportedLayouts[":aaudioinput:"].contains(layout))
-                        this->m_supportedLayouts[":aaudioinput:"] << layout;
+                        if (!this->m_supportedLayouts[":aaudioinput:"].contains(layout))
+                            this->m_supportedLayouts[":aaudioinput:"] << layout;
 
-                    if (!this->m_supportedSampleRates[":aaudioinput:"].contains(rate))
-                        this->m_supportedSampleRates[":aaudioinput:"] << rate;
+                        if (!this->m_supportedSampleRates[":aaudioinput:"].contains(rate))
+                            this->m_supportedSampleRates[":aaudioinput:"] << rate;
 
-                    AAudioStream_close(stream);
+                        AAudioStream_close(stream);
+                    }
                 }
-            }
 
-    if (this->m_supportedFormats.contains(":aaudioinput:")
-        && this->m_supportedLayouts.contains(":aaudioinput:")
-        && this->m_supportedSampleRates.contains(":aaudioinput:")) {
-        this->m_sources = QStringList {":aaudioinput:"};
-        this->m_pinDescriptionMap[":aaudioinput:"] = "Android Audio Input";
-        this->m_preferredCaps[":aaudioinput:"] = {
-            AkAudioCaps::SampleFormat_s16,
-            AkAudioCaps::Layout_mono,
-            44100,
-        };
+        if (this->m_supportedFormats.contains(":aaudioinput:")
+            && this->m_supportedLayouts.contains(":aaudioinput:")
+            && this->m_supportedSampleRates.contains(":aaudioinput:")) {
+            this->m_sources = QStringList {":aaudioinput:"};
+            this->m_pinDescriptionMap[":aaudioinput:"] = "Android Audio Input";
+            this->m_preferredCaps[":aaudioinput:"] = {
+                AkAudioCaps::SampleFormat_s16,
+                AkAudioCaps::Layout_mono,
+                44100,
+            };
+        }
     }
 
     // Test audio output

@@ -79,8 +79,32 @@ class MediaTools: public QObject
     Q_PROPERTY(QString projectDonationsUrl
                READ projectDonationsUrl
                CONSTANT)
+    Q_PROPERTY(QString log
+               READ log
+               NOTIFY logUpdated)
+    Q_PROPERTY(QString documentsDirectory
+               READ documentsDirectory
+               WRITE setDocumentsDirectory
+               RESET resetDocumentsDirectory
+               NOTIFY documentsDirectoryChanged)
+    Q_PROPERTY(int adBannerWidth
+               READ adBannerWidth
+               NOTIFY adBannerWidthChanged)
+    Q_PROPERTY(int adBannerHeight
+               READ adBannerHeight
+               NOTIFY adBannerHeightChanged)
 
     public:
+        enum AdType {
+            AdType_Banner,
+            AdType_AdaptiveBanner,
+            AdType_Appopen,
+            AdType_Interstitial,
+            AdType_Rewarded,
+            AdType_RewardedInterstitial
+        };
+        Q_ENUM(AdType)
+
         MediaTools(QObject *parent=nullptr);
         ~MediaTools();
 
@@ -107,11 +131,15 @@ class MediaTools: public QObject
         Q_INVOKABLE QStringList standardLocations(const QString &type) const;
         Q_INVOKABLE static QString readFile(const QString &fileName);
         Q_INVOKABLE QString urlToLocalFile(const QUrl &url) const;
+        Q_INVOKABLE bool openUrlExternally(const QUrl &url);
         Q_INVOKABLE static QString convertToAbsolute(const QString &path);
-        Q_INVOKABLE static void setLogFile(const QString &logFile);
         Q_INVOKABLE static void messageHandler(QtMsgType type,
                                                const QMessageLogContext &context,
                                                const QString &msg);
+        Q_INVOKABLE QString log() const;
+        Q_INVOKABLE QString documentsDirectory() const;
+        Q_INVOKABLE int adBannerWidth() const;
+        Q_INVOKABLE int adBannerHeight() const;
 
     private:
         MediaToolsPrivate *d;
@@ -121,18 +149,29 @@ class MediaTools: public QObject
         void windowHeightChanged(int windowHeight);
         void interfaceLoaded();
         void newInstanceOpened();
+        void logUpdated(const QString &messageType, const QString &lastLine);
+        void documentsDirectoryChanged(const QString &documentsDirectory);
+        void adBannerWidthChanged(int adBannerWidth);
+        void adBannerHeightChanged(int adBannerHeight);
 
     public slots:
         bool init(const CliOptions &cliOptions);
         void setWindowWidth(int windowWidth);
         void setWindowHeight(int windowHeight);
+        void setDocumentsDirectory(const QString &documentsDirectory);
         void resetWindowWidth();
         void resetWindowHeight();
+        void resetDocumentsDirectory();
         void loadConfigs();
         void saveConfigs();
         void show();
+        bool showAd(AdType adType);
+        void printLog();
+        void saveLog();
         void makedirs(const QString &path);
         void restartApp();
 };
+
+Q_DECLARE_METATYPE(MediaTools::AdType)
 
 #endif // MEDIATOOLS_H

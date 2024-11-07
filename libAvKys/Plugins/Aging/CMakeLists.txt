@@ -36,22 +36,26 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Aging SHARED
-            src/aging.h
-            src/agingelement.h
-            src/scratch.h
-            src/aging.cpp
-            src/agingelement.cpp
-            src/scratch.cpp
-            Aging.qrc
-            pspec.json)
+qt_add_plugin(Aging
+              SHARED
+              CLASS_NAME Aging)
+target_sources(Aging PRIVATE
+               src/aging.h
+               src/agingelement.h
+               src/scratch.h
+               src/aging.cpp
+               src/agingelement.cpp
+               src/scratch.cpp
+               Aging.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Aging PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Aging PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Aging PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Aging avkys)
@@ -61,8 +65,6 @@ target_compile_definitions(Aging PRIVATE AVKYS_PLUGIN_AGING)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Aging avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Aging RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Aging DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Aging
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

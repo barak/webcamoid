@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import FireElement 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import FireElement
 
 GridLayout {
     columns: 3
@@ -142,8 +142,8 @@ GridLayout {
         text: Fire.dissolve
         placeholderText: qsTr("Dissolve")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+        validator: RegularExpressionValidator {
+            regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
@@ -161,8 +161,8 @@ GridLayout {
         text: Fire.blur
         placeholderText: qsTr("Blur")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true
@@ -180,8 +180,8 @@ GridLayout {
         text: Fire.zoom
         placeholderText: qsTr("Zoom")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+        validator: RegularExpressionValidator {
+            regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.columnSpan: 2
         Layout.fillWidth: true

@@ -345,7 +345,7 @@ bool AudioDevJack::write(const AkAudioPacket &packet)
     if (this->d->m_buffer.size() >= this->d->m_maxBufferSize)
         this->d->m_canWrite.wait(&this->d->m_mutex);
 
-    this->d->m_buffer += {packet.constData(), int(packet.size())};
+    this->d->m_buffer += QByteArray(packet.constData(), int(packet.size()));
     this->d->m_mutex.unlock();
 
     return true;

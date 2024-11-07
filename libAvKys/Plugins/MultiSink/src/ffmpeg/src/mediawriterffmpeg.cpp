@@ -55,8 +55,8 @@ struct MediaType
     AVMediaType ffType;
     AkCaps::CapsType akType;
 
-    static inline const MediaType *byFF(AVMediaType ffType);
-    static inline const MediaType *byAk(AkCaps::CapsType akType);
+    inline static const MediaType *byFF(AVMediaType ffType);
+    inline static const MediaType *byAk(AkCaps::CapsType akType);
 };
 
 static const MediaType multiSinkMediaTypeTable[] {
@@ -220,7 +220,11 @@ static const OptionType multiSinkFFOptionTypeStrTable[] {
     {AV_OPT_TYPE_VIDEO_RATE    , "video_rate"    },
     {AV_OPT_TYPE_DURATION      , "duration"      },
     {AV_OPT_TYPE_COLOR         , "color"         },
+#if LIBAVCODEC_VERSION_MAJOR < 61
     {AV_OPT_TYPE_CHANNEL_LAYOUT, "channel_layout"},
+#else
+    {AV_OPT_TYPE_CHLAYOUT      , "channel_layout"},
+#endif
     {AV_OPT_TYPE_BOOL          , "boolean"       },
     {AVOptionType(0)           , ""              },
 };
@@ -246,6 +250,7 @@ class MediaWriterFFmpegGlobal
         QMap<QString, QVariantMap> m_codecDefaults;
 
         MediaWriterFFmpegGlobal();
+        ~MediaWriterFFmpegGlobal();
         inline bool initHasCudaSupport();
         inline SupportedCodecsType initSupportedCodecs();
         inline QMap<QString, QVariantMap> initCodecDefaults();
@@ -312,7 +317,6 @@ MediaWriterFFmpeg::MediaWriterFFmpeg(QObject *parent):
 MediaWriterFFmpeg::~MediaWriterFFmpeg()
 {
     this->uninit();
-    avformat_network_deinit();
     delete this->d;
 }
 
@@ -757,7 +761,11 @@ QVariantList MediaWriterFFmpegPrivate::parseOptions(const AVClass *avClass) cons
             case AV_OPT_TYPE_PIXEL_FMT:
             case AV_OPT_TYPE_SAMPLE_FMT:
             case AV_OPT_TYPE_DURATION:
+#if LIBAVCODEC_VERSION_MAJOR < 61
             case AV_OPT_TYPE_CHANNEL_LAYOUT:
+#else
+            case AV_OPT_TYPE_CHLAYOUT:
+#endif
             case AV_OPT_TYPE_BOOL:
                 value = qint64(option->default_val.i64);
                 step = 1;
@@ -1464,13 +1472,18 @@ MediaWriterFFmpegGlobal::MediaWriterFFmpegGlobal()
 {
     avformat_network_init();
 
-#ifndef QT_DEBUG
+#if 0
     av_log_set_level(AV_LOG_QUIET);
 #endif
 
     this->m_hasCudaSupport = this->initHasCudaSupport();
     this->m_supportedCodecs = this->initSupportedCodecs();
     this->m_codecDefaults = this->initCodecDefaults();
+}
+
+MediaWriterFFmpegGlobal::~MediaWriterFFmpegGlobal()
+{
+    avformat_network_deinit();
 }
 
 bool MediaWriterFFmpegGlobal::initHasCudaSupport()
@@ -1571,7 +1584,11 @@ SupportedCodecsType MediaWriterFFmpegGlobal::initSupportedCodecs()
                         continue;
                 }
 
-                supportedCodecs[outputFormat->name][codec->type] << codecName;
+                auto &formats = supportedCodecs[outputFormat->name];
+                auto &codecs = formats[codec->type];
+
+                if (!codecs.contains(codecName))
+                    codecs << codecName;
             }
         }
     }
@@ -1777,8 +1794,7 @@ QMap<QString, QVariantMap> MediaWriterFFmpegGlobal::initCodecDefaults()
                 }
 
             codecParams["supportedPixelFormats"] = supportedPixelFormats;
-            codecParams["defaultGOP"] = codecContext->gop_size > 0?
-                                            codecContext->gop_size: 12;
+            codecParams["defaultGOP"] = 1000;
             codecParams["defaultBitRate"] = qMax<qint64>(codecContext->bit_rate,
                                                          1500000);
             auto akFormat = VideoStream::ffToAkFormat(codecContext->pix_fmt);

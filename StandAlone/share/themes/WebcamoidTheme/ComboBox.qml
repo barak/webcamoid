@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Templates 2.15 as T
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Templates as T
+import Ak
 
 T.ComboBox {
     id: control
@@ -158,6 +158,7 @@ T.ComboBox {
         y: control.height
            + AkUnit.create(4 * AkTheme.controlScale, "dp").pixels
         width: control.width
+        height: Math.min(contentItem.implicitHeight, control.Window.height - topMargin - bottomMargin)
         implicitHeight: contentItem.implicitHeight + 2 * topPadding
         transformOrigin: Item.Top
         topPadding: AkUnit.create(8 * AkTheme.controlScale, "dp").pixels
@@ -222,11 +223,11 @@ T.ComboBox {
     // Element
     delegate: MenuItem {
         width: control.width
-        text: control.textRole?
-                  (Array.isArray(control.model)?
-                       modelData[control.textRole]:
-                       model[control.textRole]):
-                  modelData
+        text: control.textRole == ""?
+                  control.model[index]:
+              control.model instanceof Array?
+                  control.model[index][control.textRole]:
+                  control.model.get(index)[control.textRole]
         highlighted: control.highlightedIndex == index
         hoverEnabled: control.hoverEnabled
     }

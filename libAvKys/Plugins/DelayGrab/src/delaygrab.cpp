@@ -27,7 +27,6 @@ QObject *DelayGrab::create(const QString &key, const QString &specification)
     Q_UNUSED(key)
     Q_UNUSED(specification)
     qRegisterMetaType<DelayGrabElement::DelayGrabMode>("DelayGrabDelayGrabMode");
-    qRegisterMetaTypeStreamOperators<DelayGrabElement::DelayGrabMode>("DelayGrabDelayGrabMode");
     qmlRegisterType<DelayGrabElement>("DelayGrabElement", 1, 0, "DelayGrabElement");
 
     return new DelayGrabElement();

@@ -17,12 +17,12 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import Qt.labs.platform 1.1 as LABS
-import QtQuick.Layouts 1.3
-import Ak 1.0
-import AkControls 1.0 as AK
+import QtQuick
+import QtQuick.Controls
+import Qt.labs.platform as LABS
+import QtQuick.Layouts
+import Ak
+import AkControls as AK
 
 GridLayout {
     columns: 2
@@ -48,8 +48,8 @@ GridLayout {
         text: Matrix.nDrops
         placeholderText: qsTr("Number of drops")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtNumberOfDrops.text
@@ -256,8 +256,8 @@ GridLayout {
         text: Matrix.minDropLength
         placeholderText: qsTr("Min. drop length")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtMinimumDropLength.text
@@ -272,8 +272,8 @@ GridLayout {
         text: Matrix.maxDropLength
         placeholderText: qsTr("Max. drop length")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtMaximumDropLength.text
@@ -288,8 +288,8 @@ GridLayout {
         text: Matrix.minSpeed
         placeholderText: qsTr("Min. speed")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+\.\d+|\d+\.|\.\d+|\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+\.\d+|\d+\.|\.\d+|\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtMinimumSpeed.text
@@ -304,8 +304,8 @@ GridLayout {
         text: Matrix.maxSpeed
         placeholderText: qsTr("Max. speed")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+\.\d+|\d+\.|\.\d+|\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+\.\d+|\d+\.|\.\d+|\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtMaximumSpeed.text

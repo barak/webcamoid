@@ -97,8 +97,8 @@ AudioDevSDL::AudioDevSDL(QObject *parent):
     this->d->updateDevices();
     this->d->m_threadResult =
             QtConcurrent::run(&this->d->m_threadPool,
-                              this->d,
-                              &AudioDevSDLPrivate::sdlEventLoop);
+                              &AudioDevSDLPrivate::sdlEventLoop,
+                              this->d);
 }
 
 AudioDevSDL::~AudioDevSDL()

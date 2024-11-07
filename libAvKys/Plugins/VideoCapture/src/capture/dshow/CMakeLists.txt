@@ -50,13 +50,24 @@ set(SOURCES
     pspec.json)
 
 if (NOT NODSHOW AND WIN32)
-    add_library(VideoCapture_dshow SHARED ${SOURCES})
+    qt_add_plugin(VideoCapture_dshow
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VideoCapture_dshow PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VideoCapture_dshow SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VideoCapture_dshow EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(VideoCapture_dshow PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(VideoCapture_dshow PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(VideoCapture_dshow avkys)
 target_include_directories(VideoCapture_dshow
                            PRIVATE
@@ -73,5 +84,7 @@ target_link_libraries(VideoCapture_dshow
                       oleaut32)
 
 if (NOT NODSHOW AND WIN32)
-    install(TARGETS VideoCapture_dshow RUNTIME DESTINATION ${PLUGINSDIR})
+    install(TARGETS VideoCapture_dshow
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

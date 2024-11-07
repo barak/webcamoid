@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import DelayGrabElement 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import DelayGrabElement
 
 GridLayout {
     id: configs
@@ -80,8 +80,8 @@ GridLayout {
         text: DelayGrab.blockSize
         placeholderText: qsTr("Block size")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtBlockSize.text
@@ -97,8 +97,8 @@ GridLayout {
         text: DelayGrab.nFrames
         placeholderText: qsTr("Number of frames")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtFramesNumber.text

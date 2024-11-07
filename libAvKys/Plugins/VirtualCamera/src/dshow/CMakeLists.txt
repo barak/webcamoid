@@ -45,13 +45,24 @@ set(SOURCES
     pspec.json)
 
 if (WIN32)
-    add_library(VirtualCamera_dshow SHARED ${SOURCES})
+    qt_add_plugin(VirtualCamera_dshow
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VirtualCamera_dshow PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VirtualCamera_dshow SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VirtualCamera_dshow EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(VirtualCamera_dshow PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(VirtualCamera_dshow PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(VirtualCamera_dshow avkys)
 target_include_directories(VirtualCamera_dshow PRIVATE
                            ..
@@ -62,5 +73,7 @@ target_link_libraries(VirtualCamera_dshow avkys ${QT_LIBS})
 add_definitions(-DUNICODE -D_UNICODE)
 
 if (WIN32)
-    install(TARGETS VirtualCamera_dshow DESTINATION ${PLUGINSDIR})
+    install(TARGETS VirtualCamera_dshow
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

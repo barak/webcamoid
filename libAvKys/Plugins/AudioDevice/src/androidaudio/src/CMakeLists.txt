@@ -30,12 +30,6 @@ set(CMAKE_AUTORCC ON)
 set(QT_COMPONENTS
     Widgets)
 
-if (ANDROID)
-    list(APPEND QT_COMPONENTS AndroidExtras)
-    include(UseJava)
-    find_package(Java ${ANDROID_JAVA_VERSION})
-endif ()
-
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
@@ -52,14 +46,26 @@ set(SOURCES
     plugin.h
     pspec.json)
 
-if (ANDROID AND Java_FOUND)
-    add_library(AudioDevice_androidaudiosrc SHARED ${SOURCES})
+if (ANDROID)
+    qt_add_plugin(AudioDevice_androidaudiosrc
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(AudioDevice_androidaudiosrc PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(AudioDevice_androidaudiosrc SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(AudioDevice_androidaudiosrc EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(AudioDevice_androidaudiosrc PROPERTIES
-                      OUTPUT_NAME AudioDevice_androidaudio)
+                      OUTPUT_NAME AudioDevice_androidaudio
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(AudioDevice_androidaudiosrc PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(AudioDevice_androidaudiosrc avkys)
 target_include_directories(AudioDevice_androidaudiosrc
                            PRIVATE
@@ -68,5 +74,16 @@ target_include_directories(AudioDevice_androidaudiosrc
 target_compile_definitions(AudioDevice_androidaudiosrc PRIVATE AVKYS_PLUGIN_AUDIODEVICE_ANDROIDAUDIO)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(AudioDevice_androidaudiosrc
+                      PUBLIC
                       ${QT_LIBS}
                       avkys)
+
+if (ANDROID)
+    target_link_libraries(AudioDevice_androidaudiosrc
+                          PRIVATE
+                          Qt${QT_VERSION_MAJOR}::CorePrivate)
+
+    install(TARGETS AudioDevice_androidaudiosrc
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
+endif ()

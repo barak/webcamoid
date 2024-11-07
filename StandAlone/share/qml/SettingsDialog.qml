@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Ak
 
 Dialog {
     id: settingsDialog
@@ -40,6 +40,11 @@ Dialog {
         width - AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
     readonly property color activeDark: AkTheme.palette.active.dark
     readonly property color disabledDark: AkTheme.palette.disabled.dark
+
+    function openAtIndex(index) {
+        options.currentIndex = index
+        open()
+    }
 
     onWidthChanged: {
         if (settingsDialog.visible)
@@ -84,6 +89,9 @@ Dialog {
                     ItemDelegate {
                         text: qsTr("Updates")
                     }
+                    ItemDelegate {
+                        text: qsTr("Debug Log")
+                    }
                 }
             }
             Rectangle {
@@ -104,7 +112,7 @@ Dialog {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
 
-                onPositionChanged: {
+                onPositionChanged: function (mouse) {
                     optionsItem.implicitWidth =
                             Math.min(Math.max(settingsDialog.minimumWidth,
                                               optionsItem.implicitWidth
@@ -120,10 +128,11 @@ Dialog {
             Layout.fillHeight: true
 
             ImageCapture { }
-            VideoRecording {}
+            VideoRecording { }
             GeneralConfig { }
             PluginConfig { }
             UpdatesConfig { }
+            DebugLog { }
         }
     }
 }

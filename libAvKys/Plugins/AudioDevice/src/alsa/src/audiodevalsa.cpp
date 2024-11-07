@@ -21,6 +21,7 @@
 #include <QFileSystemWatcher>
 #include <QMap>
 #include <QMutex>
+#include <QRegularExpression>
 #include <QTimer>
 #include <QVector>
 #include <alsa/asoundlib.h>
@@ -190,7 +191,7 @@ bool AudioDevAlsa::init(const QString &device, const AkAudioCaps &caps)
     int error =
             snd_pcm_open(&this->d->m_pcmHnd,
                          QString(device)
-                             .remove(QRegExp(":Input$|:Output$"))
+                             .remove(QRegularExpression(":Input$|:Output$"))
                              .toStdString().c_str(),
                          device.endsWith(":Input")?
                              SND_PCM_STREAM_CAPTURE: SND_PCM_STREAM_PLAYBACK,

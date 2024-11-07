@@ -68,7 +68,7 @@ class MediaWriterGStreamerPrivate
         QFuture<void> m_mainLoopResult;
         guint m_busWatchId {0};
         bool m_isRecording {false};
-        AkVideoConverter m_videoConverter {{AkVideoCaps::Format_rgb24, 0, 0, {}}};
+        AkVideoConverter m_videoConverter;
 
         explicit MediaWriterGStreamerPrivate(MediaWriterGStreamer *self);
         QString guessFormat(const QString &fileName);
@@ -146,10 +146,10 @@ class MediaWriterGStreamerPrivate
                 {AkVideoCaps::Format_yuv420p     , "I420"     },
                 {AkVideoCaps::Format_yuyv422     , "YUY2"     },
                 {AkVideoCaps::Format_uyvy422     , "UYVY"     },
-                {AkVideoCaps::Format_rgb0        , "RGBx"     },
-                {AkVideoCaps::Format_bgr0        , "BGRx"     },
-                {AkVideoCaps::Format_0rgb        , "xRGB"     },
-                {AkVideoCaps::Format_0bgr        , "xBGR"     },
+                {AkVideoCaps::Format_rgbx        , "RGBx"     },
+                {AkVideoCaps::Format_bgrx        , "BGRx"     },
+                {AkVideoCaps::Format_xrgb        , "xRGB"     },
+                {AkVideoCaps::Format_xbgr        , "xBGR"     },
                 {AkVideoCaps::Format_rgba        , "RGBA"     },
                 {AkVideoCaps::Format_bgra        , "BGRA"     },
                 {AkVideoCaps::Format_argb        , "ARGB"     },
@@ -161,9 +161,9 @@ class MediaWriterGStreamerPrivate
                 {AkVideoCaps::Format_yuv444p     , "Y444"     },
                 {AkVideoCaps::Format_nv12        , "NV12"     },
                 {AkVideoCaps::Format_nv21        , "NV21"     },
-                {AkVideoCaps::Format_gray8       , "GRAY8"    },
-                {AkVideoCaps::Format_gray16be    , "GRAY16_BE"},
-                {AkVideoCaps::Format_gray16le    , "GRAY16_LE"},
+                {AkVideoCaps::Format_y8          , "GRAY8"    },
+                {AkVideoCaps::Format_y16be       , "GRAY16_BE"},
+                {AkVideoCaps::Format_y16le       , "GRAY16_LE"},
                 {AkVideoCaps::Format_rgb565le    , "RGB16"    },
                 {AkVideoCaps::Format_bgr565le    , "BGR16"    },
                 {AkVideoCaps::Format_rgb555le    , "RGB15"    },
@@ -263,6 +263,9 @@ MediaWriterGStreamer::MediaWriterGStreamer(QObject *parent):
 {
     this->d = new MediaWriterGStreamerPrivate(this);
     //qputenv("GST_DEBUG", "2");
+
+    this->d->m_videoConverter.setAspectRatioMode(AkVideoConverter::AspectRatioMode_Fit);
+
     auto binDir = QDir(BINDIR).absolutePath();
     auto gstPluginsDir = QDir(GST_PLUGINS_PATH).absolutePath();
     auto relGstPluginsDir = QDir(binDir).relativeFilePath(gstPluginsDir);
@@ -1294,7 +1297,7 @@ QVariantList MediaWriterGStreamerPrivate::parseOptions(const GstElement *element
             case G_TYPE_STRING: {
                 value = g_value_get_string(&gValue);
                 auto spec = G_PARAM_SPEC_STRING(param);
-                defaultValue = spec->default_value;
+                defaultValue = QString(spec->default_value);
                 break;
             }
             case G_TYPE_BOOLEAN: {
@@ -2075,7 +2078,7 @@ bool MediaWriterGStreamerPrivate::setDefaultVideoCodecParams(const QString &code
                 MediaWriterGStreamerPrivate::gstToPixelFormat().key(gstFormat,
                                                                     AkVideoCaps::Format_none);
         codecParams["defaultBitRate"] = 1500000;
-        codecParams["defaultGOP"] = 12;
+        codecParams["defaultGOP"] = 1000;
         codecParams["supportedFrameRates"] = QVariantList();
         codecParams["supportedPixelFormats"] = QVariantList {int(pixelFormat)};
         codecParams["supportedFrameSizes"] = QVariantList();
@@ -2227,8 +2230,8 @@ bool MediaWriterGStreamerPrivate::setDefaultVideoCodecParams(const QString &code
         // Read default bitrate
         int bitrate = 0;
 
-        const char *propBitrate =
-                QRegExp("vp\\d+enc").exactMatch(codec)?
+        static const QRegularExpression re("^vp\\d+enc$");
+        const char *propBitrate = re.match(codec).hasMatch()?
                     "target-bitrate": "bitrate";
 
         if (g_object_class_find_property(G_OBJECT_GET_CLASS(element), propBitrate))
@@ -2243,26 +2246,8 @@ bool MediaWriterGStreamerPrivate::setDefaultVideoCodecParams(const QString &code
         if (bitrate < 1500000)
             bitrate = 1500000;
 
-        // Read default GOP
-        int gop = 0;
-        QStringList gops {"keyframe-max-dist", "gop-size"};
-
-        for (auto &g: gops)
-            if (g_object_class_find_property(G_OBJECT_GET_CLASS(element),
-                                             g.toStdString().c_str())) {
-                g_object_get(G_OBJECT(element),
-                             g.toStdString().c_str(),
-                             &gop,
-                             nullptr);
-
-                break;
-            }
-
-        if (gop < 1)
-            gop = 12;
-
         codecParams["defaultBitRate"] = bitrate;
-        codecParams["defaultGOP"] = gop;
+        codecParams["defaultGOP"] = 1000;
         codecParams["supportedFrameRates"] = supportedFramerates;
         codecParams["supportedPixelFormats"] = supportedPixelFormats;
         codecParams["supportedFrameSizes"] = QVariant::fromValue(supportedFrameSizes);
@@ -2289,6 +2274,7 @@ void MediaWriterGStreamerPrivate::initAudio(int index,
     auto sourceName = QString("audio_%1").arg(index);
     auto source = gst_element_factory_make("appsrc", sourceName.toStdString().c_str());
     gst_app_src_set_stream_type(GST_APP_SRC(source), GST_APP_STREAM_TYPE_STREAM);
+    gst_app_src_set_duration(GST_APP_SRC(source), GST_CLOCK_TIME_NONE);
     g_object_set(G_OBJECT(source), "format", GST_FORMAT_TIME, nullptr);
     g_object_set(G_OBJECT(source), "block", true, nullptr);
 
@@ -2407,6 +2393,7 @@ void MediaWriterGStreamerPrivate::initVideo(int index,
     auto sourceName = QString("video_%1").arg(index);
     auto source = gst_element_factory_make("appsrc", sourceName.toStdString().c_str());
     gst_app_src_set_stream_type(GST_APP_SRC(source), GST_APP_STREAM_TYPE_STREAM);
+    gst_app_src_set_duration(GST_APP_SRC(source), GST_CLOCK_TIME_NONE);
     g_object_set(G_OBJECT(source), "format", GST_FORMAT_TIME, nullptr);
     g_object_set(G_OBJECT(source), "block", true, nullptr);
 
@@ -2458,8 +2445,8 @@ void MediaWriterGStreamerPrivate::initVideo(int index,
     // Set codec options.
 
     // Set bitrate
-    const char *propBitrate =
-            QRegExp("vp\\d+enc").exactMatch(codec)?
+    static const QRegularExpression re("^vp\\d+enc$");
+    const char *propBitrate = re.match(codec).hasMatch()?
                 "target-bitrate": "bitrate";
 
     if (g_object_class_find_property(G_OBJECT_GET_CLASS(videoCodec),
@@ -2479,23 +2466,25 @@ void MediaWriterGStreamerPrivate::initVideo(int index,
                          nullptr);
     }
 
-    // Set GOP
-    int gop = configs["gop"].toInt();
+    // Set intraframe interval, convert the value from milli seconds to frames.
 
-    if (gop > 0) {
-        QStringList gops {"keyframe-max-dist", "gop-size"};
+    int gop = qRound(configs["gop"].toInt() * videoCaps.fps().value() / 1000);
 
-        for (auto &g: gops)
-            if (g_object_class_find_property(G_OBJECT_GET_CLASS(videoCodec),
-                                             g.toStdString().c_str())) {
-                g_object_set(G_OBJECT(videoCodec),
-                             g.toStdString().c_str(),
-                             gop,
-                             nullptr);
+    if (gop < 1)
+        gop = qRound(videoCaps.fps().value());
 
-                break;
-            }
-    }
+    QStringList gops {"keyframe-max-dist", "gop-size"};
+
+    for (auto &g: gops)
+        if (g_object_class_find_property(G_OBJECT_GET_CLASS(videoCodec),
+                                         g.toStdString().c_str())) {
+            g_object_set(G_OBJECT(videoCodec),
+                         g.toStdString().c_str(),
+                         gop,
+                         nullptr);
+
+            break;
+        }
 
     auto codecOptions = this->m_codecOptions.value(optKey);
 
@@ -2527,6 +2516,11 @@ void MediaWriterGStreamerPrivate::initVideo(int index,
     gst_element_link_filtered(videoConvert, videoCodec, gstVideoCaps);
     gst_caps_unref(gstVideoCaps);
     gst_element_link_many(videoCodec, queue, muxer, nullptr);
+
+    this->m_videoConverter.setOutputCaps(AkVideoCaps(AkVideoCaps::Format_rgb24,
+                                                     videoCaps.width(),
+                                                     videoCaps.height(),
+                                                     {}));
 }
 
 void MediaWriterGStreamerPrivate::writeAudioPacket(const AkAudioPacket &packet)
@@ -2625,6 +2619,9 @@ void MediaWriterGStreamerPrivate::writeVideoPacket(const AkVideoPacket &packet)
     this->m_videoConverter.begin();
     auto videoPacket = this->m_videoConverter.convert(packet);
     this->m_videoConverter.end();
+
+    if (!videoPacket)
+        return;
 
     auto souceName = QString("video_%1").arg(streamIndex);
     auto source = gst_bin_get_by_name(GST_BIN(this->m_pipeline),

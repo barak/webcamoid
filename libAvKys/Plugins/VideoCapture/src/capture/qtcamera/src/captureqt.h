@@ -47,6 +47,9 @@ class CaptureQt: public Capture
         Q_INVOKABLE bool setCameraControls(const QVariantMap &cameraControls) override;
         Q_INVOKABLE bool resetCameraControls() override;
         Q_INVOKABLE AkPacket readFrame() override;
+        Q_INVOKABLE bool isTorchSupported() const override;
+        Q_INVOKABLE TorchMode torchMode() const override;
+        Q_INVOKABLE PermissionStatus permissionStatus() const override;
 
     private:
         CaptureQtPrivate *d;
@@ -58,10 +61,12 @@ class CaptureQt: public Capture
         void setStreams(const QList<int> &streams) override;
         void setIoMethod(const QString &ioMethod) override;
         void setNBuffers(int nBuffers) override;
+        void setTorchMode(TorchMode mode) override;
         void resetDevice() override;
         void resetStreams() override;
         void resetIoMethod() override;
         void resetNBuffers() override;
+        void resetTorchMode() override;
         void reset() override;
 };
 

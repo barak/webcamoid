@@ -18,17 +18,25 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 appId=io.github.webcamoid.Webcamoid
 export PACKAGES_DIR=${PWD}/webcamoid-packages/linux
 
-if [ "${GITHUB_SHA}" != "" ]; then
-    branch=${GITHUB_REF##*/}
-else
-    branch=${CIRRUS_BASE_BRANCH}
+export GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+if [ -z "${GIT_BRANCH_NAME}" ]; then
+    if [ ! -z "${GITHUB_REF_NAME}" ]; then
+        export GIT_BRANCH_NAME="${GITHUB_REF_NAME}"
+    elif [ ! -z "${CIRRUS_BRANCH}" ]; then
+        export GIT_BRANCH_NAME="${CIRRUS_BRANCH}"
+    else
+        export GIT_BRANCH_NAME=master
+    fi
 fi
 
 if [ "${DAILY_BUILD}" = 1 ]; then
-    version=daily-${branch}
+    version=daily-${GIT_BRANCH_NAME}
 else
     verMaj=$(grep VER_MAJ libAvKys/cmake/ProjectCommons.cmake | awk '{print $2}' | tr -d ')' | head -n 1)
     verMin=$(grep VER_MIN libAvKys/cmake/ProjectCommons.cmake | awk '{print $2}' | tr -d ')' | head -n 1)
@@ -36,7 +44,21 @@ else
     version=${verMaj}.${verMin}.${verPat}
 fi
 
-architecture="${DOCKERIMG%%/*}"
+if [ -z "${ARCHITECTURE}" ]; then
+    architecture="${DOCKERIMG%%/*}"
+else
+    case "${ARCHITECTURE}" in
+        aarch64)
+            architecture=arm64v8
+            ;;
+        armv7)
+            architecture=arm32v7
+            ;;
+        *)
+            architecture=${ARCHITECTURE}
+            ;;
+    esac
+fi
 
 case "$architecture" in
     arm64v8)

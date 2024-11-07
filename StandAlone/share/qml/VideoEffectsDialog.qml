@@ -17,11 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Ak 1.0
-import Webcamoid 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Ak
+import Webcamoid
 
 Dialog {
     id: videoEffectsDialog
@@ -165,8 +165,7 @@ Dialog {
             anchors.leftMargin:
                 AkUnit.create(24 * AkTheme.controlScale, "dp").pixels
             elide: Label.ElideRight
-            font.bold: true
-            font.pointSize: 16
+            font: AkTheme.fontSettings.h6
             enabled: videoEffectsDialog.enabled
         }
 

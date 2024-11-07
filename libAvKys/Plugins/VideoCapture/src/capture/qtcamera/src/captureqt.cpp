@@ -17,13 +17,17 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <QDebug>
 #include <QApplication>
-#include <QCameraImageCapture>
-#include <QCameraInfo>
-#include <QMediaRecorder>
+#include <QCamera>
+#include <QDebug>
+#include <QMutex>
 #include <QReadWriteLock>
+#include <QMediaCaptureSession>
+#include <QMediaDevices>
 #include <QTimer>
+#include <QVideoSink>
+#include <QWaitCondition>
+#include <QtConcurrent>
 #include <ak.h>
 #include <akfrac.h>
 #include <akcaps.h>
@@ -36,67 +40,80 @@
 #include <akcompressedvideocaps.h>
 #include <akcompressedvideopacket.h>
 
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_OSX)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#include <QPermissions>
+#endif
+
 #include "captureqt.h"
-#include "videosurface.h"
 
-#define CONTROL_BRIGHTNESS         "Brightness"
-#define CONTROL_CONTRAST           "Contrast"
-#define CONTROL_SATURATION         "Saturation"
-#define CONTROL_SHARPENING         "Sharpening"
-#define CONTROL_DENOISING          "Denoising"
-#define CONTROL_WHITE_BALANCE_MODE "White Balance Mode"
-#define CONTROL_COLOR_FILTER       "Color Filter"
+using QtFmtToAkFmtMap = QMap<QVideoFrameFormat::PixelFormat, AkVideoCaps::PixelFormat>;
 
-static const int minControlValue = 0;
-static const int maxControlValue = 255;
-
-using WhiteBalanceModeMap = QMap<QCameraImageProcessing::WhiteBalanceMode, QString>;
-
-inline const WhiteBalanceModeMap initWhiteBalanceModeMap()
+inline QtFmtToAkFmtMap initQtFmtToAkFmt()
 {
-    static const WhiteBalanceModeMap whiteBalanceModeMap {
-        {QCameraImageProcessing::WhiteBalanceAuto       , "Auto"       },
-        {QCameraImageProcessing::WhiteBalanceManual     , "Manual"     },
-        {QCameraImageProcessing::WhiteBalanceSunlight   , "Sunlight"   },
-        {QCameraImageProcessing::WhiteBalanceCloudy     , "Cloudy"     },
-        {QCameraImageProcessing::WhiteBalanceShade      , "Shade"      },
-        {QCameraImageProcessing::WhiteBalanceTungsten   , "Tungsten"   },
-        {QCameraImageProcessing::WhiteBalanceFluorescent, "Fluorescent"},
-        {QCameraImageProcessing::WhiteBalanceFlash      , "Flash"      },
-        {QCameraImageProcessing::WhiteBalanceSunset     , "Sunset"     },
-        {QCameraImageProcessing::WhiteBalanceVendor     , "Vendor"     },
+    QtFmtToAkFmtMap qtFmtToAkFmt {
+        {QVideoFrameFormat::Format_ARGB8888 , AkVideoCaps::Format_argb     },
+        {QVideoFrameFormat::Format_XRGB8888 , AkVideoCaps::Format_xrgb     },
+        {QVideoFrameFormat::Format_BGRA8888 , AkVideoCaps::Format_bgra     },
+        {QVideoFrameFormat::Format_BGRX8888 , AkVideoCaps::Format_bgrx     },
+        {QVideoFrameFormat::Format_ABGR8888 , AkVideoCaps::Format_abgr     },
+        {QVideoFrameFormat::Format_XBGR8888 , AkVideoCaps::Format_xbgr     },
+        {QVideoFrameFormat::Format_RGBA8888 , AkVideoCaps::Format_rgba     },
+        {QVideoFrameFormat::Format_RGBX8888 , AkVideoCaps::Format_rgbx     },
+        {QVideoFrameFormat::Format_AYUV     , AkVideoCaps::Format_ayuv     },
+        {QVideoFrameFormat::Format_YUV420P  , AkVideoCaps::Format_yuv420p  },
+        {QVideoFrameFormat::Format_YUV422P  , AkVideoCaps::Format_yuv422p  },
+        {QVideoFrameFormat::Format_YV12     , AkVideoCaps::Format_yvu420p  },
+        {QVideoFrameFormat::Format_UYVY     , AkVideoCaps::Format_uyvy422  },
+        {QVideoFrameFormat::Format_YUYV     , AkVideoCaps::Format_yuyv422  },
+        {QVideoFrameFormat::Format_NV12     , AkVideoCaps::Format_nv12     },
+        {QVideoFrameFormat::Format_NV21     , AkVideoCaps::Format_nv21     },
+        {QVideoFrameFormat::Format_Y8       , AkVideoCaps::Format_y8       },
+        {QVideoFrameFormat::Format_Y16      , AkVideoCaps::Format_y16      },
+        {QVideoFrameFormat::Format_P010     , AkVideoCaps::Format_p010     },
+        {QVideoFrameFormat::Format_P016     , AkVideoCaps::Format_p016     },
+        {QVideoFrameFormat::Format_YUV420P10, AkVideoCaps::Format_yuv420p10},
     };
 
-    return whiteBalanceModeMap;
+    return qtFmtToAkFmt;
 }
 
-Q_GLOBAL_STATIC_WITH_ARGS(WhiteBalanceModeMap,
-                          whiteBalanceModeMap,
-                          (initWhiteBalanceModeMap()))
+Q_GLOBAL_STATIC_WITH_ARGS(QtFmtToAkFmtMap, qtFmtToAkFmt, (initQtFmtToAkFmt()))
 
-using ColorFilterMap = QMap<QCameraImageProcessing::ColorFilter, QString>;
+using QtCompressedFmtToAkFmtMap = QMap<QVideoFrameFormat::PixelFormat, QString>;
 
-inline const ColorFilterMap initColorFilterMap()
+inline QtCompressedFmtToAkFmtMap initQtCompressedFmtToAkFmt()
 {
-    static const ColorFilterMap colorFilterMap {
-        {QCameraImageProcessing::ColorFilterNone      , "None"      },
-        {QCameraImageProcessing::ColorFilterGrayscale , "Grayscale" },
-        {QCameraImageProcessing::ColorFilterNegative  , "Negative"  },
-        {QCameraImageProcessing::ColorFilterSolarize  , "Solarize"  },
-        {QCameraImageProcessing::ColorFilterSepia     , "Sepia"     },
-        {QCameraImageProcessing::ColorFilterPosterize , "Posterize" },
-        {QCameraImageProcessing::ColorFilterWhiteboard, "Whiteboard"},
-        {QCameraImageProcessing::ColorFilterBlackboard, "Blackboard"},
-        {QCameraImageProcessing::ColorFilterAqua      , "Aqua"      },
-        {QCameraImageProcessing::ColorFilterVendor    , "Vendor"    },
+    QtCompressedFmtToAkFmtMap qtCompressedFmtToAkFmt {
+        {QVideoFrameFormat::Format_Jpeg, "jpeg"},
     };
 
-    return colorFilterMap;
+    return qtCompressedFmtToAkFmt;
 }
 
-Q_GLOBAL_STATIC_WITH_ARGS(ColorFilterMap,
-                          colorFilterMap,
-                          (initColorFilterMap()))
+Q_GLOBAL_STATIC_WITH_ARGS(QtCompressedFmtToAkFmtMap,
+                          qtCompressedFmtToAkFmt,
+                          (initQtCompressedFmtToAkFmt()))
+
+using ImageToPixelFormatMap = QMap<QImage::Format, AkVideoCaps::PixelFormat>;
+
+inline ImageToPixelFormatMap initImageToPixelFormatMap()
+{
+    ImageToPixelFormatMap imageToAkFormat {
+        {QImage::Format_RGB32     , AkVideoCaps::Format_xrgbpack},
+        {QImage::Format_ARGB32    , AkVideoCaps::Format_argbpack},
+        {QImage::Format_RGB16     , AkVideoCaps::Format_rgb565  },
+        {QImage::Format_RGB555    , AkVideoCaps::Format_rgb555  },
+        {QImage::Format_RGB888    , AkVideoCaps::Format_rgb24   },
+        {QImage::Format_RGB444    , AkVideoCaps::Format_rgb444  },
+        {QImage::Format_Grayscale8, AkVideoCaps::Format_y8      }
+    };
+
+    return imageToAkFormat;
+}
+
+Q_GLOBAL_STATIC_WITH_ARGS(ImageToPixelFormatMap,
+                          imageToAkFormat,
+                          (initImageToPixelFormatMap()))
 
 using CameraPtr = QSharedPointer<QCamera>;
 
@@ -110,30 +127,43 @@ class CaptureQtPrivate
         QMap<QString, QString> m_descriptions;
         QMap<QString, CaptureVideoCaps> m_devicesCaps;
         QReadWriteLock m_controlsMutex;
+        QReadWriteLock m_frameMutex;
+        AkPacket m_videoPacket;
+        QWaitCondition m_packetReady;
         QVariantList m_globalImageControls;
         QVariantList m_globalCameraControls;
         QVariantMap m_localImageControls;
         QVariantMap m_localCameraControls;
         CameraPtr m_camera;
-        VideoSurface m_surface;
-        QTimer m_timer;
+        QMediaDevices m_mediaDevices;
+        QMediaCaptureSession m_captureSession;
+        QVideoSink m_videoSink;
+
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_OSX)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        QCameraPermission m_cameraPermission;
+        bool m_permissionResultReady {false};
+#endif
+
         AkElementPtr m_hslFilter {akPluginManager->create<AkElement>("VideoFilter/AdjustHSL")};
         AkElementPtr m_contrastFilter {akPluginManager->create<AkElement>("VideoFilter/Contrast")};
         AkElementPtr m_gammaFilter {akPluginManager->create<AkElement>("VideoFilter/Gamma")};
+        AkElementPtr m_rotateFilter {akPluginManager->create<AkElement>("VideoFilter/Rotate")};
+        qint64 m_id {-1};
+        AkFrac m_fps;
+        bool m_isTorchSupported {false};
+        Capture::TorchMode m_torchMode {Capture::Torch_Off};
 
         explicit CaptureQtPrivate(CaptureQt *self);
         ~CaptureQtPrivate();
-        QSize nearestResolution(const QSize &resolution,
-                                const QList<QSize> &resolutions) const;
-        QVariantList imageControls(const CameraPtr &camera) const;
-        bool setImageControls(const CameraPtr &camera,
-                              const QVariantMap &imageControls) const;
-        QVariantList cameraControls(const CameraPtr &camera) const;
-        bool setCameraControls(const CameraPtr &camera,
-                               const QVariantMap &cameraControls) const;
+        int nearestResolution(const QSize &resolution,
+                              const CaptureVideoCaps &caps) const;
+        QVariantList imageControls() const;
+        bool setImageControls(const QVariantMap &imageControls) const;
         QVariantMap controlStatus(const QVariantList &controls) const;
         QVariantMap mapDiff(const QVariantMap &map1,
                             const QVariantMap &map2) const;
+        qreal cameraRotation(const QVideoFrame &frame) const;
+        void frameReady(const QVideoFrame &frame);
         void updateDevices();
 };
 
@@ -141,17 +171,64 @@ CaptureQt::CaptureQt(QObject *parent):
     Capture(parent)
 {
     this->d = new CaptureQtPrivate(this);
-    this->d->m_timer.setInterval(3000);
 
-    QObject::connect(&this->d->m_timer,
-                     &QTimer::timeout,
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_OSX)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    auto permissionStatus = qApp->checkPermission(this->d->m_cameraPermission);
+
+    if (permissionStatus != Qt::PermissionStatus::Granted) {
+        this->d->m_permissionResultReady = false;
+        qApp->requestPermission(this->d->m_cameraPermission,
+                                this,
+                                [this, permissionStatus] (const QPermission &permission) {
+                                    if (permissionStatus != permission.status()) {
+                                        PermissionStatus curStatus = PermissionStatus_Granted;
+
+                                        switch (permission.status()) {
+                                        case Qt::PermissionStatus::Undetermined:
+                                            curStatus = PermissionStatus_Undetermined;
+                                            break;
+
+                                        case Qt::PermissionStatus::Granted:
+                                            curStatus = PermissionStatus_Granted;
+                                            break;
+
+                                        case Qt::PermissionStatus::Denied:
+                                            curStatus = PermissionStatus_Denied;
+                                            break;
+
+                                        default:
+                                            break;
+                                        }
+
+                                        emit this->permissionStatusChanged(curStatus);
+                                    }
+
+                                    this->d->m_permissionResultReady = true;
+                                });
+
+        while (!this->d->m_permissionResultReady) {
+            auto eventDispatcher = QThread::currentThread()->eventDispatcher();
+
+            if (eventDispatcher)
+                eventDispatcher->processEvents(QEventLoop::AllEvents);
+        }
+    }
+#endif
+
+    QObject::connect(&this->d->m_videoSink,
+                     &QVideoSink::videoFrameChanged,
+                     this,
+                     [this] (const QVideoFrame &frame) {
+                         this->d->frameReady(frame);
+                     });
+    QObject::connect(&this->d->m_mediaDevices,
+                     &QMediaDevices::videoInputsChanged,
                      this,
                      [this] () {
                          this->d->updateDevices();
                      });
 
     this->d->updateDevices();
-    this->d->m_timer.start();
 }
 
 CaptureQt::~CaptureQt()
@@ -330,41 +407,67 @@ AkPacket CaptureQt::readFrame()
     if (this->d->m_localImageControls != imageControls) {
         auto controls = this->d->mapDiff(this->d->m_localImageControls,
                                          imageControls);
-        this->d->setImageControls(this->d->m_camera, controls);
+        this->d->setImageControls(controls);
         this->d->m_localImageControls = imageControls;
     }
 
-    this->d->m_controlsMutex.lockForRead();
-    auto cameraControls = this->d->controlStatus(this->d->m_globalCameraControls);
-    this->d->m_controlsMutex.unlock();
+    if (!this->d->m_videoPacket)
+        if (!this->d->m_packetReady.wait(&this->d->m_frameMutex, 1000)) {
+            this->d->m_frameMutex.unlock();
 
-    if (this->d->m_localCameraControls != cameraControls) {
-        auto controls = this->d->mapDiff(this->d->m_localCameraControls,
-                                         cameraControls);
-        this->d->setCameraControls(this->d->m_camera, controls);
-        this->d->m_localCameraControls = cameraControls;
-    }
+            return {};
+        }
 
-    auto packet = this->d->m_surface.readFrame();
+    auto packet = this->d->m_videoPacket;
+    this->d->m_videoPacket = {};
+    this->d->m_frameMutex.unlock();
 
-    auto imageProcessing = this->d->m_camera->imageProcessing();
-
-    if (!imageProcessing || !imageProcessing->isAvailable()) {
+    if (this->d->m_hslFilter)
         packet = this->d->m_hslFilter->iStream(packet);
+
+    if (this->d->m_gammaFilter)
         packet = this->d->m_gammaFilter->iStream(packet);
+
+    if (this->d->m_contrastFilter)
         packet = this->d->m_contrastFilter->iStream(packet);
-    }
 
     return packet;
+}
+
+bool CaptureQt::isTorchSupported() const
+{
+    return this->d->m_isTorchSupported;
+}
+
+Capture::TorchMode CaptureQt::torchMode() const
+{
+    return this->d->m_torchMode;
+}
+
+Capture::PermissionStatus CaptureQt::permissionStatus() const
+{
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_OSX)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    switch (qApp->checkPermission(this->d->m_cameraPermission)) {
+    case Qt::PermissionStatus::Undetermined:
+        return PermissionStatus_Undetermined;
+
+    case Qt::PermissionStatus::Granted:
+        return PermissionStatus_Granted;
+
+    case Qt::PermissionStatus::Denied:
+        return PermissionStatus_Denied;
+
+    default:
+        break;
+    }
+#endif
+    return PermissionStatus_Granted;
 }
 
 bool CaptureQt::init()
 {
     this->d->m_localImageControls.clear();
     this->d->m_localCameraControls.clear();
-
-    if (!this->d->m_camera)
-        return false;
 
     auto streams = this->streams();
 
@@ -376,40 +479,69 @@ bool CaptureQt::init()
 
     auto supportedCaps = this->d->m_devicesCaps.value(this->d->m_device);
     auto caps = supportedCaps[streams[0]];
-    QVideoFrame::PixelFormat pixelFormat = QVideoFrame::Format_Invalid;
+    QVideoFrameFormat::PixelFormat pixelFormat =
+        QVideoFrameFormat::Format_Invalid;
     int width = 0;
     int height = 0;
     AkFrac fps;
 
     if (caps.type() == AkCaps::CapsVideo) {
         AkVideoCaps videoCaps(caps);
-        pixelFormat = VideoSurface::fromRaw(videoCaps.format());
+        pixelFormat = qtFmtToAkFmt->key(videoCaps.format(),
+                                        QVideoFrameFormat::Format_Invalid);
         width = videoCaps.width();
         height = videoCaps.height();
         fps = videoCaps.fps();
     } else {
         AkCompressedVideoCaps videoCaps(caps);
-        pixelFormat = VideoSurface::fromCompressed(videoCaps.format());
+        pixelFormat = qtCompressedFmtToAkFmt->key(videoCaps.format(),
+                                                  QVideoFrameFormat::Format_Invalid);
         width = videoCaps.width();
         height = videoCaps.height();
         fps = videoCaps.fps();
     }
 
-    this->d->m_camera->load();
-    QMediaRecorder mediaRecorder(this->d->m_camera.data());
-    auto frameRates = mediaRecorder.supportedFrameRates();
-    auto minimumFrameRate = *std::min_element(frameRates.begin(), frameRates.end());
-    auto maximumFrameRate = *std::max_element(frameRates.begin(), frameRates.end());
-    this->d->m_camera->unload();
+    QCameraDevice cameraDevice;
+    QCameraFormat cameraFormat;
+    quint64 k = std::numeric_limits<quint64>::max();
 
-    this->d->m_surface.setId(Ak::id());
-    this->d->m_surface.setFps(fps);
+    for (auto &camera: QMediaDevices::videoInputs()) {
+        cameraDevice = camera;
 
-    auto settings = this->d->m_camera->viewfinderSettings();
-    settings.setResolution(width, height);
-    settings.setMinimumFrameRate(minimumFrameRate);
-    settings.setMaximumFrameRate(maximumFrameRate);
-    this->d->m_camera->setViewfinderSettings(settings);
+        if (camera.id() == this->d->m_device)
+            for (auto &format: camera.videoFormats()) {
+                quint64 diffFormat = format.pixelFormat() - pixelFormat;
+                quint64 diffWidth = format.resolution().width() - width;
+                quint64 diffHeight = format.resolution().height() - height;
+                quint64 q = diffFormat * diffFormat
+                            + diffWidth * diffWidth
+                            + diffHeight * diffHeight;
+
+                if (q < k) {
+                    cameraFormat = format;
+                    k = q;
+                }
+            }
+    }
+
+    if (cameraDevice.isNull() || cameraFormat.isNull())
+        return false;
+
+    this->d->m_id = Ak::id();
+    this->d->m_fps = fps;
+
+    this->d->m_camera = CameraPtr(new QCamera(cameraDevice));
+
+    if (this->d->m_torchMode == Torch_Off
+        && this->d->m_camera->torchMode() == QCamera::TorchOn)
+        this->d->m_camera->setTorchMode(QCamera::TorchOff);
+    else if (this->d->m_torchMode == Torch_On
+             && this->d->m_camera->torchMode() == QCamera::TorchOff)
+        this->d->m_camera->setTorchMode(QCamera::TorchOn);
+
+    this->d->m_camera->setCameraFormat(cameraFormat);
+    this->d->m_captureSession.setCamera(this->d->m_camera.data());
+    this->d->m_captureSession.setVideoSink(&this->d->m_videoSink);
     this->d->m_camera->start();
 
     return true;
@@ -417,7 +549,10 @@ bool CaptureQt::init()
 
 void CaptureQt::uninit()
 {
-    this->d->m_camera->stop();
+    if (this->d->m_camera) {
+        this->d->m_camera->stop();
+        this->d->m_camera = {};
+    }
 }
 
 void CaptureQt::setDevice(const QString &device)
@@ -427,10 +562,6 @@ void CaptureQt::setDevice(const QString &device)
 
     this->d->m_device = device;
 
-    this->d->m_camera = CameraPtr(new QCamera(device.toUtf8()));
-    this->d->m_camera->setCaptureMode(QCamera::CaptureViewfinder);
-    this->d->m_camera->setViewfinder(&this->d->m_surface);
-
     if (device.isEmpty()) {
         this->d->m_controlsMutex.lockForWrite();
         this->d->m_globalImageControls.clear();
@@ -438,10 +569,11 @@ void CaptureQt::setDevice(const QString &device)
         this->d->m_controlsMutex.unlock();
     } else {
         this->d->m_controlsMutex.lockForWrite();
-        this->d->m_camera->load();
-        this->d->m_globalImageControls = this->d->imageControls(this->d->m_camera);
-        this->d->m_globalCameraControls = this->d->cameraControls(this->d->m_camera);
-        this->d->m_camera->unload();
+
+        for (auto &cameraDevice: QMediaDevices::videoInputs())
+            if (cameraDevice.id() == device)
+                this->d->m_globalImageControls = this->d->imageControls();
+
         this->d->m_controlsMutex.unlock();
     }
 
@@ -453,6 +585,28 @@ void CaptureQt::setDevice(const QString &device)
     emit this->deviceChanged(device);
     emit this->imageControlsChanged(imageStatus);
     emit this->cameraControlsChanged(cameraStatus);
+
+    bool isTorchSupported = false;
+    Capture::TorchMode torchMode = Capture::Torch_Off;
+
+    for (auto &cameraDevice: QMediaDevices::videoInputs())
+        if (cameraDevice.id() == device) {
+            QCamera camera(cameraDevice);
+            isTorchSupported = camera.isTorchModeSupported(QCamera::TorchOff)
+                               && isTorchSupported;
+            torchMode = camera.torchMode() == QCamera::TorchOn?
+                Capture::Torch_On: Capture::Torch_Off;
+        }
+
+    if (this->d->m_isTorchSupported != isTorchSupported) {
+        this->d->m_isTorchSupported = isTorchSupported;
+        emit this->isTorchSupportedChanged(isTorchSupported);
+    }
+
+    if (this->d->m_torchMode != torchMode) {
+        this->d->m_torchMode = torchMode;
+        emit this->torchModeChanged(torchMode);
+    }
 }
 
 void CaptureQt::setStreams(const QList<int> &streams)
@@ -487,6 +641,24 @@ void CaptureQt::setNBuffers(int nBuffers)
 {
 }
 
+void CaptureQt::setTorchMode(TorchMode mode)
+{
+    if (this->d->m_torchMode == mode)
+        return;
+
+    this->d->m_torchMode = mode;
+    emit this->torchModeChanged(mode);
+
+    if (this->d->m_camera) {
+        if (this->d->m_torchMode == Torch_Off
+            && this->d->m_camera->torchMode() == QCamera::TorchOn)
+            this->d->m_camera->setTorchMode(QCamera::TorchOff);
+        else if (this->d->m_torchMode == Torch_On
+                 && this->d->m_camera->torchMode() == QCamera::TorchOff)
+            this->d->m_camera->setTorchMode(QCamera::TorchOn);
+    }
+}
+
 void CaptureQt::resetDevice()
 {
     this->setDevice("");
@@ -513,6 +685,11 @@ void CaptureQt::resetNBuffers()
     this->setNBuffers(32);
 }
 
+void CaptureQt::resetTorchMode()
+{
+    this->setTorchMode(Torch_Off);
+}
+
 void CaptureQt::reset()
 {
     this->resetStreams();
@@ -529,21 +706,23 @@ CaptureQtPrivate::~CaptureQtPrivate()
 {
 }
 
-QSize CaptureQtPrivate::nearestResolution(const QSize &resolution, const QList<QSize> &resolutions) const
+int CaptureQtPrivate::nearestResolution(const QSize &resolution,
+                                        const CaptureVideoCaps &caps) const
 {
-    if (resolutions.isEmpty())
-        return {};
+    if (caps.isEmpty())
+        return -1;
 
-    QSize nearestResolution;
+    int index = -1;
     qreal q = std::numeric_limits<qreal>::max();
 
-    for (auto &size: resolutions) {
-        qreal dw = size.width() - resolution.width();
-        qreal dh = size.height() - resolution.height();
+    for (int i = 0; i < caps.size(); ++i) {
+        AkVideoCaps videoCaps = caps.value(i);
+        qreal dw = videoCaps.width() - resolution.width();
+        qreal dh = videoCaps.height() - resolution.height();
         qreal k = dw * dw + dh * dh;
 
         if (k < q) {
-            nearestResolution = size;
+            index = i;
             q = k;
 
             if (k == 0.)
@@ -551,231 +730,98 @@ QSize CaptureQtPrivate::nearestResolution(const QSize &resolution, const QList<Q
         }
     }
 
-    return nearestResolution;
+    return index;
 }
 
-QVariantList CaptureQtPrivate::imageControls(const CameraPtr &camera) const
+QVariantList CaptureQtPrivate::imageControls() const
 {
     QVariantList controlsList;
-    auto imageProcessing = camera->imageProcessing();
 
-    if (imageProcessing && imageProcessing->isAvailable()) {
-        QMap<QString, qreal> integerControls {
-            {CONTROL_BRIGHTNESS, imageProcessing->brightness()     },
-            {CONTROL_CONTRAST  , imageProcessing->contrast()       },
-            {CONTROL_SATURATION, imageProcessing->saturation()     },
-            {CONTROL_SHARPENING, imageProcessing->sharpeningLevel()},
-            {CONTROL_DENOISING , imageProcessing->denoisingLevel() },
-        };
+    if (this->m_hslFilter)
+        controlsList << QVariant(QVariantList {
+            "Brightness",
+            "integer",
+            -255,
+            255,
+            1,
+            0,
+            this->m_hslFilter->property("luminance").toInt(),
+            QStringList()
+        });
 
-        for (auto it = integerControls.begin(); it != integerControls.end(); it++) {
-            auto value = ((it.value() + 1.0) * (maxControlValue - minControlValue) + 2.0 * minControlValue) / 2.0;
-            QVariantList params {
-                it.key(),
-                "integer",
-                minControlValue,
-                maxControlValue,
-                1,
-                (minControlValue + maxControlValue) / 2,
-                qRound(value),
-                QStringList()
-            };
-            controlsList << QVariant(params);
-        }
+    if (this->m_contrastFilter)
+        controlsList << QVariant(QVariantList {
+            "Contrast",
+            "integer",
+            -255,
+            255,
+            1,
+            0,
+            this->m_contrastFilter->property("contrast").toInt(),
+            QStringList()
+        });
 
-        QStringList wbModes;
+    if (this->m_hslFilter)
+        controlsList << QVariant(QVariantList {
+            "Saturation",
+            "integer",
+            -255,
+            255,
+            1,
+            0,
+            this->m_hslFilter->property("saturation").toInt(),
+            QStringList()
+        });
 
-        for (auto it = whiteBalanceModeMap->begin(); it != whiteBalanceModeMap->end(); it++)
-            if (imageProcessing->isWhiteBalanceModeSupported(it.key()))
-                wbModes << it.value();
+    if (this->m_hslFilter)
+        controlsList << QVariant(QVariantList {
+            "Hue",
+            "integer",
+            -359,
+            359,
+            1,
+            0,
+            this->m_hslFilter->property("hue").toInt(),
+            QStringList()
+        });
 
-        if (wbModes.size() > 1) {
-            auto wbMode = whiteBalanceModeMap->value(imageProcessing->whiteBalanceMode());
-            QVariantList params {
-                CONTROL_WHITE_BALANCE_MODE,
-                "menu",
-                0,
-                wbModes.size() - 1,
-                1,
-                0,
-                qMax(wbModes.indexOf(wbMode), 0),
-                wbModes
-            };
-            controlsList << QVariant(params);
-         }
-
-        QStringList colorFilters;
-
-        for (auto it = colorFilterMap->begin(); it != colorFilterMap->end(); it++)
-            if (imageProcessing->isColorFilterSupported(it.key()))
-                colorFilters << it.value();
-
-        if (colorFilters.size() > 1) {
-            auto colorFilter = colorFilterMap->value(imageProcessing->colorFilter());
-            QVariantList params {
-                CONTROL_COLOR_FILTER,
-                "menu",
-                0,
-                colorFilters.size() - 1,
-                1,
-                0,
-                qMax(colorFilters.indexOf(colorFilter), 0),
-                colorFilter
-            };
-            controlsList << QVariant(params);
-        }
-    } else {
-        return {
-            QVariant(QVariantList {
-                                  "Brightness",
-                                  "integer",
-                                  -255,
-                                  255,
-                                  1,
-                                  0,
-                                  this->m_hslFilter->property("luminance").toInt(),
-                                  QStringList()}),
-            QVariant(QVariantList {
-                                  "Contrast",
-                                  "integer",
-                                  -255,
-                                  255,
-                                  1,
-                                  0,
-                                  this->m_contrastFilter->property("contrast").toInt(),
-                                  QStringList()}),
-            QVariant(QVariantList {
-                                  "Saturation",
-                                  "integer",
-                                  -255,
-                                  255,
-                                  1,
-                                  0,
-                                  this->m_hslFilter->property("saturation").toInt(),
-                                  QStringList()}),
-            QVariant(QVariantList {
-                                  "Hue",
-                                  "integer",
-                                  -359,
-                                  359,
-                                  1,
-                                  0,
-                                  this->m_hslFilter->property("hue").toInt(),
-                                  QStringList()}),
-            QVariant(QVariantList {
-                                  "Gamma",
-                                  "integer",
-                                  -255,
-                                  255,
-                                  1,
-                                  0,
-                                  this->m_gammaFilter->property("gamma").toInt(),
-                                  QStringList()}),
-        };
-    }
+    if (this->m_gammaFilter)
+        controlsList << QVariant(QVariantList {
+            "Gamma",
+            "integer",
+            -255,
+            255,
+            1,
+            0,
+            this->m_gammaFilter->property("gamma").toInt(),
+            QStringList()
+        });
 
     return controlsList;
 }
 
-bool CaptureQtPrivate::setImageControls(const CameraPtr &camera,
-                                        const QVariantMap &imageControls) const
+bool CaptureQtPrivate::setImageControls(const QVariantMap &imageControls) const
 {
-    if (!camera)
-        return false;
-
-    static const QStringList integerControls {
-        CONTROL_BRIGHTNESS,
-        CONTROL_CONTRAST,
-        CONTROL_SATURATION,
-        CONTROL_SHARPENING,
-        CONTROL_DENOISING,
-    };
-
-    static const QStringList menuControls {
-        CONTROL_WHITE_BALANCE_MODE,
-        CONTROL_COLOR_FILTER,
-    };
-
-    auto imageProcessing = camera->imageProcessing();
-    bool ok = true;
-
-    if (imageProcessing && imageProcessing->isAvailable()) {
-        for (auto it = imageControls.cbegin(); it != imageControls.cend(); it++) {
-            if (integerControls.contains(it.key())) {
-                auto value = qreal(2 * it.value().toInt()
-                                   - maxControlValue - minControlValue)
-                             / qreal(maxControlValue - minControlValue);
-
-                if (it.key() == CONTROL_BRIGHTNESS)
-                    imageProcessing->setBrightness(value);
-                else if (it.key() == CONTROL_CONTRAST)
-                    imageProcessing->setContrast(value);
-                else if (it.key() == CONTROL_SATURATION)
-                    imageProcessing->setSaturation(value);
-                else if (it.key() == CONTROL_SHARPENING)
-                    imageProcessing->setSharpeningLevel(value);
-                else if (it.key() == CONTROL_DENOISING)
-                    imageProcessing->setDenoisingLevel(value);
-            } else if (menuControls.contains(it.key())) {
-                if (it.key() == CONTROL_WHITE_BALANCE_MODE) {
-                    QStringList wbModes;
-
-                    for (auto it = whiteBalanceModeMap->begin(); it != whiteBalanceModeMap->end(); it++)
-                        if (imageProcessing->isWhiteBalanceModeSupported(it.key()))
-                            wbModes << it.value();
-
-                    auto value = wbModes.value(it.value().toInt());
-                    auto mode = whiteBalanceModeMap->key(value, QCameraImageProcessing::WhiteBalanceAuto);
-                    imageProcessing->setWhiteBalanceMode(mode);
-                } else if (it.key() == CONTROL_COLOR_FILTER) {
-                    QStringList colorFilters;
-
-                    for (auto it = colorFilterMap->begin(); it != colorFilterMap->end(); it++)
-                        if (imageProcessing->isColorFilterSupported(it.key()))
-                            colorFilters << it.value();
-
-                    auto value = colorFilters.value(it.value().toInt());
-                    auto filter = colorFilterMap->key(value, QCameraImageProcessing::ColorFilterNone);
-                    imageProcessing->setColorFilter(filter);
-                }
-            } else {
-                ok = false;
-            }
-        }
-    } else {
-        for (auto it = imageControls.cbegin(); it != imageControls.cend(); it++) {
-            if (it.key() == "Brightness")
+    for (auto it = imageControls.cbegin(); it != imageControls.cend(); it++) {
+        if (it.key() == "Brightness") {
+            if (this->m_hslFilter)
                 this->m_hslFilter->setProperty("luminance", it.value());
-            else if (it.key() == "Contrast")
+        } else if (it.key() == "Contrast") {
+            if (this->m_contrastFilter)
                 this->m_contrastFilter->setProperty("contrast", it.value());
-            else if (it.key() == "Saturation")
+        } else if (it.key() == "Saturation") {
+            if (this->m_hslFilter)
                 this->m_hslFilter->setProperty("saturation", it.value());
-            else if (it.key() == "Hue")
+        } else if (it.key() == "Hue") {
+            if (this->m_hslFilter)
                 this->m_hslFilter->setProperty("hue", it.value());
-            else if (it.key() == "Gamma")
+        } else if (it.key() == "Gamma") {
+            if (this->m_gammaFilter)
                 this->m_gammaFilter->setProperty("gamma", it.value());
-            else
-                ok = false;
         }
     }
 
-    return ok;
-}
-
-QVariantList CaptureQtPrivate::cameraControls(const CameraPtr &camera) const
-{
-    Q_UNUSED(camera)
-
-    return {};
-}
-
-bool CaptureQtPrivate::setCameraControls(const CameraPtr &camera,
-                                         const QVariantMap &cameraControls) const
-{
-    Q_UNUSED(camera)
-    Q_UNUSED(cameraControls)
-
-    return false;
+    return true;
 }
 
 QVariantMap CaptureQtPrivate::controlStatus(const QVariantList &controls) const
@@ -805,69 +851,142 @@ QVariantMap CaptureQtPrivate::mapDiff(const QVariantMap &map1,
     return map;
 }
 
+qreal CaptureQtPrivate::cameraRotation(const QVideoFrame &frame) const
+{
+    return -frame.rotationAngle();
+}
+
+void CaptureQtPrivate::frameReady(const QVideoFrame &frame)
+{
+    QVideoFrame videoFrame(frame);
+    AkPacket videoPacket;
+
+    if (qtFmtToAkFmt->contains(videoFrame.pixelFormat())) {
+        AkVideoCaps videoCaps(qtFmtToAkFmt->value(videoFrame.pixelFormat()),
+                              videoFrame.width(),
+                              videoFrame.height(),
+                              this->m_fps);
+        AkVideoPacket packet(videoCaps);
+        packet.setPts(videoFrame.startTime());
+        packet.setTimeBase({1, 1000000});
+        packet.setIndex(0);
+        packet.setId(this->m_id);
+
+        videoFrame.map(QVideoFrame::ReadOnly);
+
+        for (int plane = 0; plane < packet.planes(); ++plane) {
+            auto line = videoFrame.bits(plane);
+            auto srcLineSize = videoFrame.bytesPerLine(plane);
+            auto lineSize = qMin<size_t>(packet.lineSize(plane), srcLineSize);
+            auto heightDiv = packet.heightDiv(plane);
+
+            for (int y = 0; y < videoFrame.height(); ++y) {
+                auto ys = y >> heightDiv;
+                memcpy(packet.line(plane, y),
+                       line + ys * srcLineSize,
+                       lineSize);
+            }
+        }
+
+        videoFrame.unmap();
+        videoPacket = packet;
+    } else if (qtCompressedFmtToAkFmt->contains(videoFrame.pixelFormat())) {
+        auto image = videoFrame.toImage();
+
+        if (imageToAkFormat->contains(image.format())) {
+            AkVideoCaps videoCaps(imageToAkFormat->value(image.format()),
+                                  videoFrame.width(),
+                                  videoFrame.height(),
+                                  this->m_fps);
+            AkVideoPacket packet(videoCaps);
+            packet.setPts(videoFrame.startTime());
+            packet.setTimeBase({1, 1000000});
+            packet.setIndex(0);
+            packet.setId(this->m_id);
+
+            auto lineSize = qMin<size_t>(packet.lineSize(0),
+                                         image.bytesPerLine());
+
+            for (int y = 0; y < videoFrame.height(); ++y)
+                memcpy(packet.line(0, y),
+                       image.constScanLine(y),
+                       lineSize);
+
+            videoPacket = packet;
+        }
+    }
+
+    if (videoPacket) {
+        auto angle = this->cameraRotation(frame);
+
+        if (this->m_rotateFilter)
+            this->m_rotateFilter->setProperty("angle", angle);
+
+        this->m_frameMutex.lockForWrite();
+        this->m_videoPacket =
+            this->m_rotateFilter?
+                this->m_rotateFilter->iStream(videoPacket):
+                videoPacket;
+        this->m_packetReady.wakeAll();
+        this->m_frameMutex.unlock();
+    }
+}
+
 void CaptureQtPrivate::updateDevices()
 {
     decltype(this->m_devices) devices;
     decltype(this->m_descriptions) descriptions;
     decltype(this->m_devicesCaps) devicesCaps;
 
-    auto cameras = QCameraInfo::availableCameras();
-    VideoSurface surface;
-
-    for (auto &cameraInfo: cameras) {
-        auto deviceName = cameraInfo.deviceName();
-        QCamera camera(cameraInfo);
-        QCameraImageCapture imageCapture(&camera);
-        QMediaRecorder mediaRecorder(&camera);
-
-        camera.setCaptureMode(QCamera::CaptureViewfinder);
-        camera.setViewfinder(&surface);
-        camera.load();
-
-        while (camera.state() == QCamera::UnloadedState)
-            qApp->processEvents();
-
-        auto formats = imageCapture.supportedBufferFormats();
-        auto resolutions = imageCapture.supportedResolutions();
-        auto frameRates = mediaRecorder.supportedFrameRates();
-
-        // Set 640x480 as default most common resolution.
-        auto defaultResolution = this->nearestResolution({640, 480},
-                                                         resolutions);
-        resolutions.removeAll(defaultResolution);
-        resolutions.prepend(defaultResolution);
-
-        // Sort frame rates in descending order.
-        std::sort(frameRates.begin(), frameRates.end(), std::greater<qreal>());
-
+    for (auto &cameraDevice: QMediaDevices::videoInputs()) {
         CaptureVideoCaps caps;
 
-        for (auto &format: formats)
-            for (auto &resolution: resolutions)
-                for (auto &rate: frameRates) {
-                    AkFrac fps(qRound(rate), 1);
+        for (auto &format: cameraDevice.videoFormats()) {
+            QVector<AkFrac> frameRates;
 
-                    if (VideoSurface::isRaw(format)) {
-                        AkVideoCaps videoCaps(VideoSurface::rawFormat(format),
-                                              resolution.width(),
-                                              resolution.height(),
-                                              fps);
-                        caps << videoCaps;
-                    } else if (VideoSurface::isCompessed(format)) {
-                        AkCompressedVideoCaps videoCaps(VideoSurface::compressedFormat(format),
-                                                        resolution.width(),
-                                                        resolution.height(),
-                                                        fps);
-                        caps << videoCaps;
-                    }
+            if (format.maxFrameRate() == format.minFrameRate()) {
+                frameRates << AkFrac(qRound(format.maxFrameRate()), 1);
+            } else {
+                static const int nFrameRates = 4;
+
+                for (int i = 0; i < nFrameRates; i++) {
+                    auto frameRate =
+                        i
+                        * (format.minFrameRate() - format.maxFrameRate())
+                        / (nFrameRates - 1) + format.maxFrameRate();
+                    AkFrac fps(qRound(frameRate), 1);
+
+                    if (!frameRates.contains(fps))
+                        frameRates << fps;
                 }
+            }
 
-        camera.unload();
+            for (auto &fps: frameRates)
+                if (qtFmtToAkFmt->contains(format.pixelFormat())) {
+                    AkVideoCaps videoCaps(qtFmtToAkFmt->value(format.pixelFormat(), AkVideoCaps::Format_none),
+                                          format.resolution().width(),
+                                          format.resolution().height(),
+                                          fps);
+                    caps << videoCaps;
+                } else if (qtCompressedFmtToAkFmt->contains(format.pixelFormat())) {
+                    AkCompressedVideoCaps videoCaps(qtCompressedFmtToAkFmt->value(format.pixelFormat(), ""),
+                                                    format.resolution().width(),
+                                                    format.resolution().height(),
+                                                    fps);
+                    caps << videoCaps;
+                }
+        }
 
         if (!caps.isEmpty()) {
-            devices << deviceName;
-            descriptions[deviceName] = cameraInfo.description();
-            devicesCaps[deviceName] = caps;
+            auto index = this->nearestResolution({640, 480}, caps);
+
+            if (index > 0)
+                caps.move(index, 0);
+
+            auto deviceId = cameraDevice.id();
+            devices << deviceId;
+            descriptions[deviceId] = cameraDevice.description();
+            devicesCaps[deviceId] = caps;
         }
     }
 

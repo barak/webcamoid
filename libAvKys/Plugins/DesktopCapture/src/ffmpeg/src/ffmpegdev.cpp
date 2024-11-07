@@ -26,17 +26,19 @@
 #include <QMutex>
 #include <ak.h>
 #include <akcaps.h>
+#include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
+#include <akpluginmanager.h>
 #include <akvideopacket.h>
 
 extern "C"
 {
-#include <libavcodec/avcodec.h>
-#include <libavdevice/avdevice.h>
-#include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libswscale/swscale.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavdevice/avdevice.h>
+    #include <libavformat/avformat.h>
+    #include <libavutil/imgutils.h>
+    #include <libswscale/swscale.h>
 }
 
 #include "ffmpegdev.h"
@@ -58,6 +60,7 @@ class FFmpegDevPrivate
         AVStream *m_stream {nullptr};
         SwsContext *m_scaleContext {nullptr};
         AkFrac m_fps {30000, 1001};
+        bool m_showCursor {false};
         qint64 m_id {-1};
         QThreadPool m_threadPool;
         QFuture<void> m_threadStatus;
@@ -159,6 +162,26 @@ AkVideoCaps FFmpegDev::caps(int stream)
     return this->d->m_devicesCaps.value(this->d->m_device);
 }
 
+bool FFmpegDev::canCaptureCursor() const
+{
+    return true;
+}
+
+bool FFmpegDev::canChangeCursorSize() const
+{
+    return false;
+}
+
+bool FFmpegDev::showCursor() const
+{
+    return this->d->m_showCursor;
+}
+
+int FFmpegDev::cursorSize() const
+{
+    return 0;
+}
+
 void FFmpegDev::setFps(const AkFrac &fps)
 {
     if (this->d->m_fps == fps)
@@ -182,6 +205,25 @@ void FFmpegDev::setMedia(const QString &media)
 
     this->d->m_device = media;
     emit this->mediaChanged(media);
+}
+
+void FFmpegDev::setShowCursor(bool showCursor)
+{
+    if (this->d->m_showCursor == showCursor)
+        return;
+
+    this->d->m_showCursor = showCursor;
+    emit this->showCursorChanged(showCursor);
+
+    if (this->d->m_run) {
+        this->uninit();
+        this->init();
+    }
+}
+
+void FFmpegDev::setCursorSize(int cursorSize)
+{
+    Q_UNUSED(cursorSize)
 }
 
 void FFmpegDev::resetMedia()
@@ -216,6 +258,16 @@ void FFmpegDev::resetStreams()
 
 }
 
+void FFmpegDev::resetShowCursor()
+{
+    this->setShowCursor(false);
+}
+
+void FFmpegDev::resetCursorSize()
+{
+
+}
+
 bool FFmpegDev::init()
 {
     auto device = this->d->m_device;
@@ -245,10 +297,9 @@ bool FFmpegDev::init()
     this->d->m_mutex.unlock();
     av_dict_set(&inputOptions, "framerate", fps.toString().toStdString().c_str(), 0);
 
-    static const bool showCursor = false;
     char showCursorStr[8];
 
-    if (showCursor)
+    if (this->d->m_showCursor)
         snprintf(showCursorStr, 8, "%s", "1");
     else
         snprintf(showCursorStr, 8, "%s", "0");
@@ -323,8 +374,8 @@ bool FFmpegDev::init()
     this->d->m_id = Ak::id();
     this->d->m_run = true;
     auto result = QtConcurrent::run(&this->d->m_threadPool,
-                                    this->d,
-                                    &FFmpegDevPrivate::readPackets);
+                                    &FFmpegDevPrivate::readPackets,
+                                    this->d);
     Q_UNUSED(result)
 
     return true;
@@ -581,8 +632,8 @@ void FFmpegDevPrivate::readPacket()
 
                         this->m_threadStatus =
                             QtConcurrent::run(&this->m_threadPool,
-                                              this,
                                               &FFmpegDevPrivate::sendPacket,
+                                              this,
                                               this->m_curPacket);
                     }
                 } else {
@@ -653,7 +704,7 @@ void FFmpegDevPrivate::updateDevices()
     for (auto &screen: QGuiApplication::screens()) {
         auto deviceId = QString("screen://%1.0").arg(i);
         devices << deviceId;
-        descriptions[deviceId] = QString("Screen %1").arg(i);
+        descriptions[deviceId] = QString("Screen %1").arg(screen->name());
         devicesCaps[deviceId] = AkVideoCaps(AkVideoCaps::Format_rgb24,
                                             screen->size().width(),
                                             screen->size().height(),

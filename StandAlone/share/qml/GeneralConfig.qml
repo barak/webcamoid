@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Ak
 
 Page {
     ScrollView {
@@ -82,8 +82,7 @@ Page {
 
             Label {
                 text: qsTr("Frameworks and libraries")
-                font.pointSize: 12
-                font.bold: true
+                font: AkTheme.fontSettings.h6
                 Layout.topMargin: AkUnit.create(12 * AkTheme.controlScale, "dp").pixels
                 Layout.bottomMargin: AkUnit.create(12 * AkTheme.controlScale, "dp").pixels
                 Layout.columnSpan: 2
@@ -206,6 +205,7 @@ Page {
             Label {
                 id: txtVcamDriver
                 text: qsTr("Virtual camera driver")
+                visible: videoLayer.isVCamSupported
             }
             ComboBox {
                 Accessible.description: txtVcamDriver.text
@@ -213,6 +213,8 @@ Page {
                 textRole: "description"
                 model: ListModel {
                 }
+                visible: videoLayer.isVCamSupported
+                enabled: visible
 
                 Component.onCompleted:
                     generalConfigs.fillControl(this,
@@ -228,12 +230,15 @@ Page {
                     privileges in the system.
                  */
                 text: qsTr("Root method")
+                visible: videoLayer.isVCamSupported
             }
             ComboBox {
                 Layout.fillWidth: true
                 model: videoLayer.availableRootMethods
                 currentIndex: model.indexOf(videoLayer.rootMethod)
                 Accessible.description: txtRootMethod.text
+                visible: videoLayer.isVCamSupported
+                enabled: visible
 
                 onCurrentIndexChanged: videoLayer.rootMethod = model[currentIndex]
             }

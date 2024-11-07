@@ -18,6 +18,14 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
+if [ ! -z "${GITHUB_SHA}" ]; then
+    export GIT_COMMIT_HASH="${GITHUB_SHA}"
+elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
+    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
+fi
+
 if [ "${COMPILER}" = clang ]; then
     COMPILER_C=clang
     COMPILER_CXX=clang++
@@ -30,20 +38,67 @@ if [ -z "${DISABLE_CCACHE}" ]; then
     EXTRA_PARAMS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OBJCXX_COMPILER_LAUNCHER=ccache"
 fi
 
-export PATH=$HOME/.local/bin:$PATH
-INSTALL_PREFIX=${PWD}/webcamoid-data-${COMPILER}
-buildDir=build-${COMPILER}
+if [ "${UPLOAD}" == 1 ]; then
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON -DNOLIBUVC=ON"
+fi
+
+export PATH=${HOME}/.local/bin:${PATH}
+
+if [ -z "${DISTRO}" ]; then
+    distro=${DOCKERIMG#*:}
+else
+    distro=${DISTRO}
+fi
+
+if [ -z "${ARCHITECTURE}" ]; then
+    architecture=amd64
+else
+    case "${ARCHITECTURE}" in
+        aarch64)
+            architecture=arm64v8
+            ;;
+        armv7)
+            architecture=arm32v7
+            ;;
+        *)
+            architecture=${ARCHITECTURE}
+            ;;
+    esac
+fi
+
+case "$architecture" in
+    arm64v8)
+        libArchDir=aarch64-linux-gnu
+        ;;
+    arm32v7)
+        libArchDir=arm-linux-gnueabihf
+        ;;
+    *)
+        libArchDir=x86_64-linux-gnu
+        ;;
+esac
+
+QMAKE_EXECUTABLE=/usr/lib/qt6/bin/qmake
+LRELEASE_TOOL=/usr/lib/qt6/bin/lrelease
+LUPDATE_TOOL=/usr/lib/qt6/bin/lupdate
+
+INSTALL_PREFIX=${PWD}/webcamoid-data-${distro}-${COMPILER}
+buildDir=build-${distro}-${COMPILER}
 mkdir "${buildDir}"
 cmake \
     -LA \
     -S . \
     -B "${buildDir}" \
-    -DQT_QMAKE_EXECUTABLE=/usr/lib/qt5/bin/qmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
     -DCMAKE_C_COMPILER="${COMPILER_C}" \
     -DCMAKE_CXX_COMPILER="${COMPILER_CXX}" \
+    -DQT_QMAKE_EXECUTABLE="${QMAKE_EXECUTABLE}" \
+    -DLRELEASE_TOOL="${LRELEASE_TOOL}" \
+    -DLUPDATE_TOOL="${LUPDATE_TOOL}" \
+    -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
+    -DGST_PLUGINS_SCANNER_PATH="/usr/lib/${libArchDir}/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner" \
     -DDAILY_BUILD="${DAILY_BUILD}"
 cmake --build "${buildDir}" --parallel "${NJOBS}"
 cmake --install "${buildDir}"

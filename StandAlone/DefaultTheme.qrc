@@ -34,6 +34,7 @@
         <file>share/themes/WebcamoidTheme/ScrollBar.qml</file>
         <file>share/themes/WebcamoidTheme/ScrollIndicator.qml</file>
         <file>share/themes/WebcamoidTheme/ScrollView.qml</file>
+        <file>share/themes/WebcamoidTheme/SelectionRectangle.qml</file>
         <file>share/themes/WebcamoidTheme/Slider.qml</file>
         <file>share/themes/WebcamoidTheme/SpinBox.qml</file>
         <file>share/themes/WebcamoidTheme/SplitView.qml</file>

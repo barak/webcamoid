@@ -17,15 +17,15 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Templates 2.15 as T
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Templates as T
+import Ak
 import "Private"
 
 T.ToolButton {
     id: control
-    font.bold: true
+    font: AkTheme.fontSettings.button
     icon.width: AkUnit.create(18 * AkTheme.controlScale, "dp").pixels
     icon.height: AkUnit.create(18 * AkTheme.controlScale, "dp").pixels
     icon.color: activeHighlightedText

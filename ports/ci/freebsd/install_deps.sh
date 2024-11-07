@@ -18,6 +18,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 pkg update -f
 pkg install -y \
     alsa-lib \
@@ -29,23 +31,20 @@ pkg install -y \
     gstreamer1-plugins-good \
     jackit \
     libuvc \
+    libXext \
+    libXfixes \
     pkgconf \
     patchelf \
     pipewire \
     portaudio \
     pulseaudio \
     python3 \
-    qt5-buildtools \
-    qt5-concurrent \
-    qt5-linguisttools \
-    qt5-multimedia \
-    qt5-opengl \
-    qt5-qmake \
-    qt5-quickcontrols \
-    qt5-quickcontrols2 \
-    qt5-svg \
-    qt5-wayland \
-    qt5-xml \
+    qt6-base \
+    qt6-declarative \
+    qt6-multimedia \
+    qt6-svg \
+    qt6-tools \
+    qt6-wayland \
     sdl2 \
     v4l_compat \
     vlc

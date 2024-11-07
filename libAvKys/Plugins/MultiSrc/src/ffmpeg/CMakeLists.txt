@@ -69,20 +69,23 @@ endif ()
 
 pkg_check_modules(FFMPEG ${MODULES})
 
-link_directories(${FFMPEG_LIBRARY_DIRS})
-
 if (NOT NOFFMPEG AND FFMPEG_FOUND)
-    add_library(MultiSrc_ffmpeg SHARED ${SOURCES})
+    qt_add_plugin(MultiSrc_ffmpeg
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(MultiSrc_ffmpeg PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(MultiSrc_ffmpeg SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(MultiSrc_ffmpeg EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(MultiSrc_ffmpeg PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(MultiSrc_ffmpeg PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(MultiSrc_ffmpeg PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(MultiSrc_ffmpeg avkys)
@@ -94,15 +97,16 @@ target_include_directories(MultiSrc_ffmpeg
                            ../../../../Lib/src)
 target_compile_definitions(MultiSrc_ffmpeg PRIVATE AVKYS_PLUGIN_MULTISRC_FFMPEG)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
+target_link_directories(MultiSrc_ffmpeg
+                        PUBLIC
+                        ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(MultiSrc_ffmpeg
                       ${QT_LIBS}
                       ${FFMPEG_LIBRARIES}
                       avkys)
 
 if (NOT NOFFMPEG AND FFMPEG_FOUND)
-    if (WIN32)
-        install(TARGETS MultiSrc_ffmpeg RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS MultiSrc_ffmpeg DESTINATION ${PLUGINSDIR})
-    endif ()
+    install(TARGETS MultiSrc_ffmpeg
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

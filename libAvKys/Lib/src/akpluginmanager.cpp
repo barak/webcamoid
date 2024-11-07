@@ -22,7 +22,6 @@
 #include <QDirIterator>
 #include <QPluginLoader>
 #include <QQmlEngine>
-#include <QRegExp>
 #include <QStringList>
 
 #include "akpluginmanager.h"
@@ -119,6 +118,11 @@ bool AkPluginManager::recursiveSearch() const
     return this->d->m_recursiveSearchPaths;
 }
 
+QStringList AkPluginManager::internalSearchPaths() const
+{
+    return this->d->m_defaultPluginsSearchPaths.values();
+}
+
 QStringList AkPluginManager::searchPaths() const
 {
     return this->d->m_pluginsSearchPaths.values();
@@ -129,19 +133,24 @@ AkPluginLinks AkPluginManager::links() const
     return this->d->m_pluginsLinks;
 }
 
+QString AkPluginManager::pluginFilePattern() const
+{
+    return this->d->m_pluginFilePattern;
+}
+
 QStringList AkPluginManager::listPlugins(const QString &pluginId,
                                          const QStringList &implements,
                                          PluginsFilters filter) const
 {
     QStringList plugins;
-    QRegExp regexp(pluginId, Qt::CaseSensitive, QRegExp::Wildcard);
+    auto regexp = QRegularExpression::fromWildcard(pluginId, Qt::CaseSensitive);
     StringSet interfaces(implements.begin(), implements.end());
 
     if ((filter & FilterAll) == FilterNone)
         filter |= FilterAll;
 
     for (auto &pluginInfo: this->d->m_pluginsList) {
-        if (!pluginId.isEmpty() && !regexp.exactMatch(pluginInfo.id()))
+        if (!pluginId.isEmpty() && !regexp.match(pluginInfo.id()).hasMatch())
             continue;
 
         auto implements = pluginInfo.implements();
@@ -304,8 +313,8 @@ void AkPluginManager::scanPlugins()
         flags |= QDirIterator::Subdirectories;
 
     for (auto sPath: sPaths)
-        for (auto searchDir: qAsConst(*sPath)) {
-            searchDir.replace(QRegExp(R"(((\\/?)|(/\\?))+)"),
+        for (auto searchDir: std::as_const(*sPath)) {
+            searchDir.replace(QRegularExpression(R"(((\\/?)|(/\\?))+)"),
                               QDir::separator());
 
             while (searchDir.endsWith(QDir::separator()))
@@ -358,8 +367,11 @@ void AkPluginManager::scanPlugins()
                             pluginInfo["path"] = pluginPath;
                             this->d->m_pluginsList << AkPluginInfo {pluginInfo};
                             libLoader.unload();
+                            qDebug() << QString("Plugin found: %1 (%2)")
+                                        .arg(pluginPath)
+                                        .arg(this->d->m_pluginsList.last().name());
                         } else {
-                            qDebug() << libLoader.errorString();
+                            qCritical() << libLoader.errorString();
                         }
                     }
                 }
@@ -414,7 +426,7 @@ AkPluginManagerPrivate::AkPluginManagerPrivate(AkPluginManager *self):
     self(self)
 {
     auto binDir = QDir(BINDIR).absolutePath();
-    auto pluginsDir = QDir(PLUGINSDIR).absolutePath();
+    auto pluginsDir = QDir(AKPLUGINSDIR).absolutePath();
     auto relPluginsDir = QDir(binDir).relativeFilePath(pluginsDir);
     QDir appDir = QCoreApplication::applicationDirPath();
 
@@ -427,8 +439,14 @@ AkPluginManagerPrivate::AkPluginManagerPrivate(AkPluginManager *self):
     platformTargetSuffix = "_" PLATFORM_TARGET_SUFFIX;
 #endif
 
+#ifdef Q_OS_WIN32
+    QString prefix;
+#else
+    QString prefix(PREFIX_SHLIB);
+#endif
+
     this->m_pluginFilePattern =
-            QString("%1*%2").arg(PREFIX_SHLIB, platformTargetSuffix);
+            QString("%1*%2").arg(prefix, platformTargetSuffix);
 
     if (!QString(EXTENSION_SHLIB).isEmpty())
         this->m_pluginFilePattern += EXTENSION_SHLIB;

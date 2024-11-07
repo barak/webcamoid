@@ -123,9 +123,9 @@ inline const ImageFormatToPixelFormatMap &imageFormatToPixelFormat()
         {COLOR_FormatCbYCrY                , AkVideoCaps::Format_uyvy422   },
         {COLOR_FormatCrYCbY                , AkVideoCaps::Format_vyuy422   },
         {COLOR_FormatYUV444Interleaved     , AkVideoCaps::Format_yuv444    },
-        {COLOR_FormatL8                    , AkVideoCaps::Format_gray8     },
-        {COLOR_FormatL16                   , AkVideoCaps::Format_gray16le  },
-        {COLOR_FormatL32                   , AkVideoCaps::Format_gray32le  },
+        {COLOR_FormatL8                    , AkVideoCaps::Format_y8        },
+        {COLOR_FormatL16                   , AkVideoCaps::Format_y16le     },
+        {COLOR_FormatL32                   , AkVideoCaps::Format_y32le     },
         {COLOR_FormatYUV420PackedSemiPlanar, AkVideoCaps::Format_yuv420p   },
         {COLOR_FormatYUV422PackedSemiPlanar, AkVideoCaps::Format_yuv422p   },
         {COLOR_Format32bitABGR8888         , AkVideoCaps::Format_abgr      },
@@ -140,11 +140,15 @@ inline const ImageFormatToPixelFormatMap &imageFormatToPixelFormat()
 }
 
 #if __ANDROID_API__ < 28
-#define AMEDIAFORMAT_KEY_SLICE_HEIGHT "slice-height"
+#define FORMAT_KEY_SLICE_HEIGHT "slice-height"
+#else
+#define FORMAT_KEY_SLICE_HEIGHT AMEDIAFORMAT_KEY_SLICE_HEIGHT
 #endif
 
 #if __ANDROID_API__ < 29
-#define AMEDIAFORMAT_KEY_FRAME_COUNT "frame-count"
+#define FORMAT_KEY_FRAME_COUNT "frame-count"
+#else
+#define FORMAT_KEY_FRAME_COUNT AMEDIAFORMAT_KEY_FRAME_COUNT
 #endif
 
 class VideoStreamPrivate
@@ -207,7 +211,7 @@ AkCaps VideoStream::caps() const
                               &duration);
         int64_t frameCount = 0;
         AMediaFormat_getInt64(this->mediaFormat(),
-                              AMEDIAFORMAT_KEY_FRAME_COUNT,
+                              FORMAT_KEY_FRAME_COUNT,
                               &frameCount);
         frameRate = duration > 0.0f?
                         1.0e6f * frameCount / duration:
@@ -362,14 +366,14 @@ AkPacket VideoStreamPrivate::readPacket(size_t bufferIndex,
                               &duration);
         int64_t frameCount = 0;
         AMediaFormat_getInt64(format,
-                              AMEDIAFORMAT_KEY_FRAME_COUNT,
+                              FORMAT_KEY_FRAME_COUNT,
                               &frameCount);
         frameRate = duration > 0.0f?
                         1.0e6f * frameCount / duration:
                         0.0f;
     }
 
-    if (frameRate < 1.0)
+    if (frameRate < 1.0f)
         frameRate = DEFAULT_FRAMERATE;
 
     int32_t stride = 0;
@@ -378,7 +382,7 @@ AkPacket VideoStreamPrivate::readPacket(size_t bufferIndex,
                           &stride);
     int32_t sliceHeight = 0;
     AMediaFormat_getInt32(format,
-                          AMEDIAFORMAT_KEY_SLICE_HEIGHT,
+                          FORMAT_KEY_SLICE_HEIGHT,
                           &sliceHeight);
 
     if (sliceHeight < height)

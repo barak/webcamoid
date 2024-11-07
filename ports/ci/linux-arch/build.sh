@@ -18,6 +18,14 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
+if [ ! -z "${GITHUB_SHA}" ]; then
+    export GIT_COMMIT_HASH="${GITHUB_SHA}"
+elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
+    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
+fi
+
 if [ "${COMPILER}" = clang ]; then
     COMPILER_C=clang
     COMPILER_CXX=clang++
@@ -30,7 +38,11 @@ if [ -z "${DISABLE_CCACHE}" ]; then
     EXTRA_PARAMS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OBJCXX_COMPILER_LAUNCHER=ccache"
 fi
 
-export PATH=$HOME/.local/bin:$PATH
+QMAKE_EXECUTABLE=/usr/lib/qt6/bin/qmake
+LRELEASE_TOOL=/usr/lib/qt6/bin/lrelease
+LUPDATE_TOOL=/usr/lib/qt6/bin/lupdate
+
+export PATH=${HOME}/.local/bin:${PATH}
 INSTALL_PREFIX=${PWD}/webcamoid-data-${COMPILER}
 buildDir=build-${COMPILER}
 mkdir "${buildDir}"
@@ -42,6 +54,10 @@ cmake \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
     -DCMAKE_C_COMPILER="${COMPILER_C}" \
     -DCMAKE_CXX_COMPILER="${COMPILER_CXX}" \
+    -DQT_QMAKE_EXECUTABLE="${QMAKE_EXECUTABLE}" \
+    -DLRELEASE_TOOL="${LRELEASE_TOOL}" \
+    -DLUPDATE_TOOL="${LUPDATE_TOOL}" \
+    -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
     -DDAILY_BUILD="${DAILY_BUILD}"
 cmake --build "${buildDir}" --parallel "${NJOBS}"

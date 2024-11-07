@@ -17,10 +17,10 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Ak
 
 ColumnLayout {
     id: configs
@@ -55,8 +55,8 @@ ColumnLayout {
             id: k00
             text: Convolve.kernel[0]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 0, Row 0")
@@ -67,8 +67,8 @@ ColumnLayout {
             id: k01
             text: Convolve.kernel[1]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 1, Row 0")
@@ -79,8 +79,8 @@ ColumnLayout {
             id: k02
             text: Convolve.kernel[2]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 2, Row 0")
@@ -93,8 +93,8 @@ ColumnLayout {
             id: k10
             text: Convolve.kernel[3]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 0, Row 1")
@@ -105,8 +105,8 @@ ColumnLayout {
             id: k11
             text: Convolve.kernel[4]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 1, Row 1")
@@ -117,8 +117,8 @@ ColumnLayout {
             id: k12
             text: Convolve.kernel[5]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 2, Row 1")
@@ -131,8 +131,8 @@ ColumnLayout {
             id: k20
             text: Convolve.kernel[6]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 0, Row 2")
@@ -143,8 +143,8 @@ ColumnLayout {
             id: k21
             text: Convolve.kernel[7]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 1, Row 2")
@@ -155,8 +155,8 @@ ColumnLayout {
             id: k22
             text: Convolve.kernel[8]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+/
             }
             Layout.preferredWidth: cellSize
             Accessible.name: qsTr("Column 2, Row 2")
@@ -175,8 +175,8 @@ ColumnLayout {
         TextField {
             text: AkFrac.create(Convolve.factor).string
             placeholderText: qsTr("Factor")
-            validator: RegExpValidator {
-                regExp: /-?\d+\/\d+/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?\d+\/\d+/
             }
             Layout.columnSpan: 2
             Layout.fillWidth: true

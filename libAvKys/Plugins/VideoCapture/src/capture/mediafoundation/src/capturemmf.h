@@ -61,7 +61,7 @@ class CaptureMMF:
 
         bool nativeEventFilter(const QByteArray &eventType,
                                void *message,
-                               long *result) override;
+                               qintptr *result) override;
 
     private:
         CaptureMMFPrivate *d;

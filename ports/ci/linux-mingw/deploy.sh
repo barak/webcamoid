@@ -18,23 +18,55 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
+if [ ! -z "${GITHUB_SHA}" ]; then
+    export GIT_COMMIT_HASH="${GITHUB_SHA}"
+elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
+    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
+fi
+
+export GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+if [ -z "${GIT_BRANCH_NAME}" ]; then
+    if [ ! -z "${GITHUB_REF_NAME}" ]; then
+        export GIT_BRANCH_NAME="${GITHUB_REF_NAME}"
+    elif [ ! -z "${CIRRUS_BRANCH}" ]; then
+        export GIT_BRANCH_NAME="${CIRRUS_BRANCH}"
+    else
+        export GIT_BRANCH_NAME=master
+    fi
+fi
+
 git clone https://github.com/webcamoid/DeployTools.git
+
+export WINEPREFIX=/opt/.wine
+export NSIS_VERSION=3.10
+export PATH="${PWD}/nsis-${NSIS_VERSION}:${PWD}/.local/bin:${PATH}"
+export MINGW_PREFIX=/usr/${TARGET_ARCH}-w64-mingw32
+export INSTALL_PREFIX=${PWD}/webcamoid-data-${COMPILER}-${TARGET_ARCH}
+export PACKAGES_DIR=${PWD}/webcamoid-packages/windows-${COMPILER}-${TARGET_ARCH}
+export BUILD_PATH=${PWD}/build-${COMPILER}-${TARGET_ARCH}
+export PYTHONPATH="${PWD}/DeployTools"
+export TEMP="${PWD}/.tmp"
+
+mkdir -p "${TEMP}"
+
+qtInstallBins=$("${MINGW_PREFIX}/lib/qt6/bin/qmake" -query QT_INSTALL_BINS)
+cat << EOF > overwrite_syslibdir.conf
+[System]
+libDir = ${qtInstallBins}, ${MINGW_PREFIX}/bin
+EOF
 
 cat << EOF > package_info_strip.conf
 [System]
 stripCmd = ${TARGET_ARCH}-w64-mingw32-strip
 EOF
 
-export WINEPREFIX=/opt/.wine
-export PATH="${PWD}/.local/bin:${PATH}"
-export INSTALL_PREFIX=${PWD}/webcamoid-data-${COMPILER}-${TARGET_ARCH}
-export PACKAGES_DIR=${PWD}/webcamoid-packages/widows-${COMPILER}-${TARGET_ARCH}
-export BUILD_PATH=${PWD}/build-${COMPILER}-${TARGET_ARCH}
-export PYTHONPATH="${PWD}/DeployTools"
-
 python DeployTools/deploy.py \
     -d "${INSTALL_PREFIX}" \
     -c "${BUILD_PATH}/package_info.conf" \
     -c "${BUILD_PATH}/package_info_windows.conf" \
+    -c "${PWD}/overwrite_syslibdir.conf" \
     -c "${PWD}/package_info_strip.conf" \
     -o "${PACKAGES_DIR}"

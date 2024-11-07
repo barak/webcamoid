@@ -48,21 +48,56 @@ using FormatContextPtr = QSharedPointer<AVFormatContext>;
 using AbstractStreamPtr = QSharedPointer<AbstractStream>;
 using AvMediaTypeAkMap = QMap<AVMediaType, AkCaps::CapsType>;
 
-inline AvMediaTypeAkMap initAvMediaTypeAkMap()
+struct MediaSourceType
 {
-    AvMediaTypeAkMap mediaTypeToAk {
-        {AVMEDIA_TYPE_UNKNOWN , AkCaps::CapsUnknown },
-        {AVMEDIA_TYPE_VIDEO   , AkCaps::CapsVideo   },
-        {AVMEDIA_TYPE_AUDIO   , AkCaps::CapsAudio   },
-        {AVMEDIA_TYPE_SUBTITLE, AkCaps::CapsSubtitle},
-    };
+    AVMediaType ffType;
+    AkCaps::CapsType akType;
 
-    return mediaTypeToAk;
+    static inline const MediaSourceType *byFF(AVMediaType ffType);
+    static inline const MediaSourceType *byAk(AkCaps::CapsType akType);
+};
+
+static const MediaSourceType multiSourceMediaTypeTable[] {
+    {AVMEDIA_TYPE_VIDEO   , AkCaps::CapsVideo   },
+    {AVMEDIA_TYPE_AUDIO   , AkCaps::CapsAudio   },
+    {AVMEDIA_TYPE_SUBTITLE, AkCaps::CapsSubtitle},
+    {AVMEDIA_TYPE_UNKNOWN , AkCaps::CapsUnknown },
+};
+
+const MediaSourceType *MediaSourceType::byFF(AVMediaType ffType)
+{
+    auto type = multiSourceMediaTypeTable;
+
+    for (; type->akType != AkCaps::CapsUnknown; type++)
+        if (type->ffType == ffType)
+            return type;
+
+    return type;
 }
 
-Q_GLOBAL_STATIC_WITH_ARGS(AvMediaTypeAkMap,
-                          mediaTypeToAk,
-                          (initAvMediaTypeAkMap()))
+const MediaSourceType *MediaSourceType::byAk(AkCaps::CapsType akType)
+{
+    auto type = multiSourceMediaTypeTable;
+
+    for (; type->akType != AkCaps::CapsUnknown; type++)
+        if (type->akType == akType)
+            return type;
+
+    return type;
+}
+
+class MediaSourceFFmpegGlobal
+{
+    public:
+        std::atomic<bool> m_isInitialized {false};
+
+        MediaSourceFFmpegGlobal();
+        ~MediaSourceFFmpegGlobal();
+
+        void init();
+};
+
+Q_GLOBAL_STATIC(MediaSourceFFmpegGlobal, mediaSourceFFmpegGlobal)
 
 class MediaSourceFFmpegPrivate
 {
@@ -105,7 +140,7 @@ MediaSourceFFmpeg::MediaSourceFFmpeg(QObject *parent):
     avdevice_register_all();
 #endif
 
-    avformat_network_init();
+    mediaSourceFFmpegGlobal->init();
 
     this->d = new MediaSourceFFmpegPrivate(this);
 
@@ -159,7 +194,7 @@ QList<int> MediaSourceFFmpeg::listTracks(AkCaps::CapsType type)
         auto ffType = this->d->m_inputContext->streams[stream]->codecpar->codec_type;
 
         if (type == AkCaps::CapsUnknown
-            || mediaTypeToAk->value(ffType) == type)
+            || MediaSourceType::byFF(ffType)->akType == type)
             tracks << int(stream);
     }
 
@@ -226,7 +261,7 @@ int MediaSourceFFmpeg::defaultStream(AkCaps::CapsType type)
     for (uint i = 0; i < this->d->m_inputContext->nb_streams; i++) {
         auto ffType = this->d->m_inputContext->streams[i]->codecpar->codec_type;
 
-        if (mediaTypeToAk->value(ffType) == type) {
+        if (MediaSourceType::byFF(ffType)->akType == type) {
             stream = int(i);
 
             break;
@@ -340,7 +375,7 @@ void MediaSourceFFmpeg::seek(qint64 mSecs,
         break;
     }
 
-    pts = qBound<qint64>(0, pts, this->durationMSecs()) * AV_TIME_BASE / 1000;
+    pts = qBound(0, qint64(pts), this->durationMSecs()) * AV_TIME_BASE / 1000;
 
     this->d->m_dataMutex.lock();
 
@@ -517,8 +552,8 @@ bool MediaSourceFFmpeg::setState(AkElement::ElementState state)
             this->d->m_paused = state == AkElement::ElementStatePaused;
             this->d->m_eos = false;
             auto result = QtConcurrent::run(&this->d->m_threadPool,
-                                            this->d,
-                                            &MediaSourceFFmpegPrivate::readPackets);
+                                            &MediaSourceFFmpegPrivate::readPackets,
+                                            this->d);
             Q_UNUSED(result)
             this->d->m_state = state;
             emit this->stateChanged(state);
@@ -622,8 +657,8 @@ void MediaSourceFFmpeg::doLoop()
 void MediaSourceFFmpeg::packetConsumed()
 {
     auto result = QtConcurrent::run(&this->d->m_threadPool,
-                                    this->d,
-                                    &MediaSourceFFmpegPrivate::unlockQueue);
+                                    &MediaSourceFFmpegPrivate::unlockQueue,
+                                    this->d);
     Q_UNUSED(result)
 }
 
@@ -688,9 +723,9 @@ bool MediaSourceFFmpeg::initContext()
     const AVInputFormat *inputFormat = nullptr;
     AVDictionary *inputOptions = nullptr;
 
-    if (QRegExp("/dev/video\\d*").exactMatch(uri)) {
+    if (QRegularExpression("^/dev/video\\d*$").match(uri).hasMatch()) {
         inputFormat = av_find_input_format("v4l2");
-    } else if (QRegExp(R"(:\d+\.\d+(?:\+\d+,\d+)?)").exactMatch(uri)) {
+    } else if (QRegularExpression(R"(^:\d+\.\d+(?:\+\d+,\d+)?$)").match(uri).hasMatch()) {
         inputFormat = av_find_input_format("x11grab");
         auto screen = QGuiApplication::primaryScreen();
         int width = this->d->roundDown(screen->geometry().width(), 4);
@@ -706,7 +741,7 @@ bool MediaSourceFFmpeg::initContext()
         // draw_mouse (int)
     }
     else if (uri == "pulse" ||
-             QRegExp("hw:\\d+").exactMatch(uri))
+             QRegularExpression("^hw:\\d+$").match(uri).hasMatch())
         inputFormat = av_find_input_format("alsa");
     else if (uri == "/dev/dsp")
         inputFormat = av_find_input_format("oss");
@@ -722,7 +757,7 @@ bool MediaSourceFFmpeg::initContext()
     if (mmsSchemes.contains(uriScheme)) {
         for (auto &scheme: mmsSchemes) {
             QString uriCopy = uri;
-            uriCopy.replace(QRegExp("^" + uriScheme), scheme);
+            uriCopy.replace(QRegularExpression("^" + uriScheme), scheme);
             inputContext = nullptr;
 
             if (avformat_open_input(&inputContext,
@@ -763,6 +798,25 @@ bool MediaSourceFFmpeg::initContext()
             FormatContextPtr(inputContext, this->d->deleteFormatContext);
 
     return true;
+}
+
+MediaSourceFFmpegGlobal::MediaSourceFFmpegGlobal()
+{
+    this->init();
+}
+
+MediaSourceFFmpegGlobal::~MediaSourceFFmpegGlobal()
+{
+    if (this->m_isInitialized)
+        avformat_network_deinit();
+}
+
+void MediaSourceFFmpegGlobal::init()
+{
+    if (!this->m_isInitialized) {
+        avformat_network_init();
+        this->m_isInitialized = true;
+    }
 }
 
 MediaSourceFFmpegPrivate::MediaSourceFFmpegPrivate(MediaSourceFFmpeg *self):

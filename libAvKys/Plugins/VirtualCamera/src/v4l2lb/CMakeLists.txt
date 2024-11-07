@@ -76,13 +76,24 @@ set(SOURCES
     pspec.json)
 
 if (NOT NOV4L2 AND HAVE_V4L2 AND NOT ANDROID)
-    add_library(VirtualCamera_v4l2lb SHARED ${SOURCES})
+    qt_add_plugin(VirtualCamera_v4l2lb
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VirtualCamera_v4l2lb PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VirtualCamera_v4l2lb SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VirtualCamera_v4l2lb EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(VirtualCamera_v4l2lb PROPERTIES
-                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(VirtualCamera_v4l2lb PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(VirtualCamera_v4l2lb avkys)
 target_include_directories(VirtualCamera_v4l2lb
                            PUBLIC
@@ -106,5 +117,7 @@ if (NOT "${EXTRA_SUDOER_TOOL_DIR}" STREQUAL "")
 endif ()
 
 if (NOT NOV4L2 AND HAVE_V4L2 AND NOT ANDROID)
-    install(TARGETS VirtualCamera_v4l2lb DESTINATION ${PLUGINSDIR})
+    install(TARGETS VirtualCamera_v4l2lb
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

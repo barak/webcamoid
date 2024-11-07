@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(FalseColor SHARED
-            src/falsecolor.h
-            src/falsecolorelement.h
-            src/falsecolor.cpp
-            src/falsecolorelement.cpp
-            FalseColor.qrc
-            pspec.json)
+qt_add_plugin(FalseColor
+              SHARED
+              CLASS_NAME FalseColor)
+target_sources(FalseColor PRIVATE
+               src/falsecolor.h
+               src/falsecolorelement.h
+               src/falsecolor.cpp
+               src/falsecolorelement.cpp
+               FalseColor.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(FalseColor PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(FalseColor PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(FalseColor PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(FalseColor avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(FalseColor PRIVATE AVKYS_PLUGIN_FALSECOLOR)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(FalseColor avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS FalseColor RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS FalseColor DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS FalseColor
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

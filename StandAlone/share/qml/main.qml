@@ -17,13 +17,13 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Ak 1.0
-import AkControls 1.0 as AK
-import Webcamoid 1.0
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Layouts
+import Ak
+import AkControls as AK
+import Webcamoid
 
 ApplicationWindow {
     id: wdgMainWidget
@@ -120,6 +120,16 @@ ApplicationWindow {
     Connections {
         target: videoLayer
 
+        function onVideoInputChanged(videoInput)
+        {
+            if (recording.state == AkElement.ElementStatePlaying
+                && captureSettingsDialog.useFlash
+                && flash.isHardwareFlash
+                && videoLayer.deviceType(videoInput) == VideoLayer.InputCamera) {
+                videoLayer.torchMode = VideoLayer.Torch_On
+            }
+        }
+
         function onVcamCliInstallStarted()
         {
             runCommandDialog.start()
@@ -135,6 +145,11 @@ ApplicationWindow {
         {
             runCommandDialog.stop()
         }
+    }
+
+    footer: Label {
+        height: mediaTools.adBannerHeight
+        clip: true
     }
 
     VideoDisplay {
@@ -185,7 +200,8 @@ ApplicationWindow {
         icon.source: "image://icons/menu"
         text: qsTr("Main menu")
         display: AbstractButton.IconOnly
-        flat: true
+        width: AkUnit.create(36 * AkTheme.controlScale, "dp").pixels
+        height: AkUnit.create(36 * AkTheme.controlScale, "dp").pixels
         anchors.top: parent.top
         anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
         anchors.left: parent.left
@@ -204,16 +220,20 @@ ApplicationWindow {
         onOpenAudioSettings: mainPanel.openAudioSettings()
         onOpenVideoSettings: mainPanel.openVideoSettings()
         onOpenVideoEffectsPanel: mainPanel.openVideoEffects()
-        onOpenSettings: settingsDialog.open()
+        onOpenSettings: {
+            mediaTools.showAd(MediaTools.AdType_Interstitial);
+            settingsDialog.open();
+        }
         onOpenDonationsDialog: Qt.openUrlExternally(mediaTools.projectDonationsUrl)
         onOpenAboutDialog: aboutDialog.open()
     }
     Button {
         id: rightControls
         icon.source: "image://icons/settings"
-        text: qsTr("Image capture options")
+        text: qsTr("Capture options")
         display: AbstractButton.IconOnly
-        flat: true
+        width: AkUnit.create(36 * AkTheme.controlScale, "dp").pixels
+        height: AkUnit.create(36 * AkTheme.controlScale, "dp").pixels
         anchors.top: parent.top
         anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
         anchors.right: parent.right
@@ -221,9 +241,8 @@ ApplicationWindow {
         ToolTip.visible: hovered
         ToolTip.text: text
         Accessible.name: text
-        Accessible.description: qsTr("Open image capture options menu")
+        Accessible.description: qsTr("Open capture options menu")
         enabled: videoLayer.state == AkElement.ElementStatePlaying
-        visible: cameraControls.state == ""
 
         onClicked: localSettings.popup()
     }
@@ -231,8 +250,12 @@ ApplicationWindow {
         id: localSettings
         width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
 
-        onCopyToClipboard: snapshotToClipboard()
-        onOpenImageCaptureSettings: imageCaptureDialog.open()
+        onCopyToClipboard: {
+            mediaTools.showAd(MediaTools.AdType_Interstitial);
+            snapshotToClipboard();
+        }
+        onOpenCaptureSettings: captureSettingsDialog.open()
+        onOpenRecordingSettings: settingsDialog.openAtIndex(1)
     }
     RecordingNotice {
         anchors.top: parent.top
@@ -274,13 +297,13 @@ ApplicationWindow {
                 Accessible.description: qsTr("Open last photo taken")
 
                 onClicked: {
-                    if (photoPreview.status == AkColorizedImage.Ready) {
+                    if (photoPreview.status == Image.Ready) {
                         let url = "" + photoPreview.icon.source
 
                         if (!url.startsWith(wdgMainWidget.filePrefix))
                             url = wdgMainWidget.filePrefix + url
 
-                        Qt.openUrlExternally(url)
+                        mediaTools.openUrlExternally(url)
                     }
                 }
             }
@@ -310,15 +333,17 @@ ApplicationWindow {
                     if (cameraControls.state == "Video") {
                         cameraControls.state = ""
                     } else {
-                        if (!imageCaptureDialog.useFlash
+                        mediaTools.showAd(MediaTools.AdType_Interstitial);
+
+                        if (!captureSettingsDialog.useFlash
                             || videoLayer.deviceType(videoLayer.videoInput) != VideoLayer.InputCamera) {
                             savePhoto()
 
                             return
                         }
 
-                        if (imageCaptureDialog.delay == 0) {
-                            if (imageCaptureDialog.useFlash)
+                        if (captureSettingsDialog.delay == 0) {
+                            if (captureSettingsDialog.useFlash)
                                 flash.shot()
                             else
                                 savePhoto()
@@ -368,9 +393,18 @@ ApplicationWindow {
                     if (cameraControls.state == "") {
                         cameraControls.state = "Video"
                     } else if (recording.state == AkElement.ElementStateNull) {
+                        mediaTools.showAd(MediaTools.AdType_Interstitial);
+
+                        if (captureSettingsDialog.useFlash
+                            && flash.isHardwareFlash
+                            && videoLayer.deviceType(videoLayer.videoInput) == VideoLayer.InputCamera) {
+                            videoLayer.torchMode = VideoLayer.Torch_On
+                        }
+
                         recording.state = AkElement.ElementStatePlaying
                     } else {
                         recording.state = AkElement.ElementStateNull
+                        videoLayer.torchMode = VideoLayer.Torch_Off
                         videoPreviewSaveAnimation.start()
                     }
                 }
@@ -398,7 +432,7 @@ ApplicationWindow {
                         if (!url.startsWith(wdgMainWidget.filePrefix))
                             url = wdgMainWidget.filePrefix + url
 
-                        Qt.openUrlExternally(url)
+                        mediaTools.openUrlExternally(url)
                     }
                 }
             }
@@ -430,6 +464,14 @@ ApplicationWindow {
                         width: cameraControls.previewSize
                         height: cameraControls.previewSize
                         visible: true
+                    }
+                    PropertyChanges {
+                        target: localSettings
+                        videoSettings: true
+                    }
+                    PropertyChanges {
+                        target: captureSettingsDialog
+                        videoSettings: true
                     }
                 }
             ]
@@ -469,7 +511,7 @@ ApplicationWindow {
                     updateProgress.stop()
                     value = 0
 
-                    if (imageCaptureDialog.useFlash)
+                    if (captureSettingsDialog.useFlash)
                         flash.shot()
                     else
                         savePhoto()
@@ -480,8 +522,18 @@ ApplicationWindow {
     MainPanel {
         id: mainPanel
 
-        onOpenErrorDialog: videoOutputError.openError(title, message)
-        onOpenVideoEffectsDialog: videoEffectsDialog.open()
+        onOpenErrorDialog: (title, message) =>
+            videoOutputError.openError(title, message)
+        onOpenVideoEffectsDialog: {
+            mediaTools.showAd(MediaTools.AdType_Interstitial);
+            videoEffectsDialog.open()
+        }
+    }
+    Rectangle {
+        id: flashRectangle
+        color: "white"
+        anchors.fill: parent
+        visible: false
     }
 
     SequentialAnimation {
@@ -571,7 +623,7 @@ ApplicationWindow {
 
         onTriggered: {
             pgbPhotoShot.value = (new Date().getTime() - pgbPhotoShot.start)
-                                 / imageCaptureDialog.delay
+                                 / captureSettingsDialog.delay
         }
     }
     Flash {
@@ -579,12 +631,16 @@ ApplicationWindow {
 
         onShotStarted: {
             if (isHardwareFlash)
-                videoLayer.flashMode = VideoLayer.FlashMode_Torch
+                videoLayer.torchMode = VideoLayer.Torch_On
+            else if (Ak.platform() == "android")
+                flashRectangle.visible = true
         }
         onTriggered: savePhoto()
         onShotFinished: {
             if (isHardwareFlash)
-                videoLayer.flashMode = VideoLayer.FlashMode_Off
+                videoLayer.torchMode = VideoLayer.Torch_Off
+            else if (Ak.platform() == "android")
+                flashRectangle.visible = false
         }
     }
     RunCommandDialog {
@@ -593,8 +649,8 @@ ApplicationWindow {
         message: qsTr("Running commands")
         anchors.centerIn: Overlay.overlay
     }
-    ImageCaptureDialog {
-        id: imageCaptureDialog
+    CaptureSettingsDialog {
+        id: captureSettingsDialog
         anchors.centerIn: Overlay.overlay
     }
     VideoEffectsDialog {

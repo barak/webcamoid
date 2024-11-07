@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Saturated SHARED
-            src/saturated.h
-            src/saturatedelement.h
-            src/saturated.cpp
-            src/saturatedelement.cpp
-            Saturated.qrc
-            pspec.json)
+qt_add_plugin(Saturated
+              SHARED
+              CLASS_NAME Saturated)
+target_sources(Saturated PRIVATE
+               src/saturated.h
+               src/saturatedelement.h
+               src/saturated.cpp
+               src/saturatedelement.cpp
+               Saturated.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Saturated PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Saturated PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Saturated PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Saturated avkys)
@@ -60,8 +64,6 @@ list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_
 target_link_libraries(Saturated avkys ${QT_LIBS})
 set(QML_IMPORT_PATH ../../Lib/share/qml)
 
-if (WIN32)
-    install(TARGETS Saturated RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Saturated DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Saturated
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

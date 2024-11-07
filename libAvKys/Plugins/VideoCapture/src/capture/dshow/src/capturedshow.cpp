@@ -39,12 +39,23 @@
 #include <aviriff.h>
 #include <mmsystem.h>
 #include <usbiodef.h>
+#include <uuids.h>
+#include <wmcodecdsp.h>
 
 #include "capturedshow.h"
 #include "framegrabber.h"
 
 #define TIME_BASE 1.0e7
 #define SOURCE_FILTER_NAME L"Source"
+
+#define AK_DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+    static const GUID name = {l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8}}
+
+AK_DEFINE_GUID(AK_MEDIASUBTYPE_AVC1, 0x31435641, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+AK_DEFINE_GUID(AK_MEDIASUBTYPE_H264, 0x34363248, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+AK_DEFINE_GUID(AK_MEDIASUBTYPE_h264, 0x34363268, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+AK_DEFINE_GUID(AK_MEDIASUBTYPE_X264, 0x34363258, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+AK_DEFINE_GUID(AK_MEDIASUBTYPE_x264, 0x34363278, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
 DEFINE_GUID(CLSID_SampleGrabber, 0xc1f400a0, 0x3f08, 0x11d3, 0x9f, 0x0b, 0x00, 0x60, 0x08, 0x03, 0x9e, 0x37);
 DEFINE_GUID(CLSID_NullRenderer, 0xc1f400a4, 0x3f08, 0x11d3, 0x9f, 0x0b, 0x00, 0x60, 0x08, 0x03, 0x9e, 0x37);
@@ -109,8 +120,8 @@ inline RawFmtToAkFmtMap initRawFmtToAkFmt()
         {MEDIASUBTYPE_IF09    , AkVideoCaps::Format_yvu410p },
         {MEDIASUBTYPE_IYUV    , AkVideoCaps::Format_yuv420p },
         {MEDIASUBTYPE_NV12    , AkVideoCaps::Format_nv12    },
-        {MEDIASUBTYPE_RGB24   , AkVideoCaps::Format_rgb24   },
-        {MEDIASUBTYPE_RGB32   , AkVideoCaps::Format_0rgbpack},
+        {MEDIASUBTYPE_RGB24   , AkVideoCaps::Format_bgr24   },
+        {MEDIASUBTYPE_RGB32   , AkVideoCaps::Format_xrgbpack},
         {MEDIASUBTYPE_RGB555  , AkVideoCaps::Format_rgb555  },
         {MEDIASUBTYPE_RGB565  , AkVideoCaps::Format_rgb565  },
         {MEDIASUBTYPE_UYVY    , AkVideoCaps::Format_uyvy422 },
@@ -133,23 +144,28 @@ using CompressedFormatToStrMap = QMap<GUID, QString>;
 inline CompressedFormatToStrMap initCompressedFormatToStr()
 {
     CompressedFormatToStrMap compressedFormatToStr {
-        {MEDIASUBTYPE_CFCC  , "mjpg"  },
-        {MEDIASUBTYPE_IJPG  , "jpeg"  },
-        {MEDIASUBTYPE_MDVF  , "dv"    },
-        {MEDIASUBTYPE_MJPG  , "mjpg"  },
-        {MEDIASUBTYPE_Plum  , "mjpg"  },
-        {MEDIASUBTYPE_QTJpeg, "jpeg"  },
-        {MEDIASUBTYPE_QTRle , "qtrle" },
-        {MEDIASUBTYPE_QTRpza, "qtrpza"},
-        {MEDIASUBTYPE_QTSmc , "qtsmc" },
-        {MEDIASUBTYPE_TVMJ  , "mjpg"  },
-        {MEDIASUBTYPE_WAKE  , "mjpg"  },
-        {MEDIASUBTYPE_dv25  , "dv25"  },
-        {MEDIASUBTYPE_dv50  , "dv50"  },
-        {MEDIASUBTYPE_dvh1  , "dvh1"  },
-        {MEDIASUBTYPE_dvhd  , "dvhd"  },
-        {MEDIASUBTYPE_dvsd  , "dvsd"  },
-        {MEDIASUBTYPE_dvsl  , "dvsl"  },
+        {MEDIASUBTYPE_CFCC   , "mjpg"  },
+        {MEDIASUBTYPE_IJPG   , "jpeg"  },
+        {MEDIASUBTYPE_MDVF   , "dv"    },
+        {MEDIASUBTYPE_MJPG   , "mjpg"  },
+        {MEDIASUBTYPE_Plum   , "mjpg"  },
+        {MEDIASUBTYPE_QTJpeg , "jpeg"  },
+        {MEDIASUBTYPE_QTRle  , "qtrle" },
+        {MEDIASUBTYPE_QTRpza , "qtrpza"},
+        {MEDIASUBTYPE_QTSmc  , "qtsmc" },
+        {MEDIASUBTYPE_TVMJ   , "mjpg"  },
+        {MEDIASUBTYPE_WAKE   , "mjpg"  },
+        {MEDIASUBTYPE_dv25   , "dv25"  },
+        {MEDIASUBTYPE_dv50   , "dv50"  },
+        {MEDIASUBTYPE_dvh1   , "dvh1"  },
+        {MEDIASUBTYPE_dvhd   , "dvhd"  },
+        {MEDIASUBTYPE_dvsd   , "dvsd"  },
+        {MEDIASUBTYPE_dvsl   , "dvsl"  },
+        {AK_MEDIASUBTYPE_AVC1, "h264"  },
+        {AK_MEDIASUBTYPE_H264, "h264"  },
+        {AK_MEDIASUBTYPE_h264, "h264"  },
+        {AK_MEDIASUBTYPE_X264, "h264"  },
+        {AK_MEDIASUBTYPE_x264, "h264"  },
     };
 
     return compressedFormatToStr;
@@ -532,7 +548,7 @@ AkPacket CaptureDShow::readFrame()
 
 bool CaptureDShow::nativeEventFilter(const QByteArray &eventType,
                                      void *message,
-                                     long *result)
+                                     qintptr *result)
 {
     Q_UNUSED(eventType)
 
@@ -675,9 +691,9 @@ AkVideoCaps::PixelFormat CaptureDShowPrivate::nearestFormat(const BITMAPINFOHEAD
             return AkVideoCaps::Format_rgb565;
     }
     case 24:
-        return AkVideoCaps::Format_rgb24;
+        return AkVideoCaps::Format_bgr24;
     case 32:
-        return AkVideoCaps::Format_0rgbpack;
+        return AkVideoCaps::Format_xrgbpack;
     default:
         break;
     }
@@ -690,7 +706,7 @@ AkCaps CaptureDShowPrivate::capsFromMediaType(const AM_MEDIA_TYPE *mediaType,
                                               size_t *lineSize,
                                               bool *mirror) const
 {
-    if (!mediaType)
+    if (!mediaType || !mediaType->pbFormat)
         return {};
 
     AkVideoCaps::PixelFormat format = AkVideoCaps::Format_none;
@@ -751,7 +767,7 @@ AkCaps CaptureDShowPrivate::capsFromMediaType(const AM_MEDIA_TYPE *mediaType,
     if (height < 1)
         height = int(qAbs(biHeight));
 
-    AkFrac fps(TIME_BASE, AvgTimePerFrame);
+    AkFrac fps = AvgTimePerFrame < 1? AkFrac(30, 1): AkFrac(TIME_BASE, AvgTimePerFrame);
 
     if (isRawFmt) {
         return AkVideoCaps(format, width, height, fps);
@@ -857,8 +873,11 @@ QString CaptureDShowPrivate::monikerDisplayName(IMoniker *moniker) const
         return {};
 
     LPOLESTR olestr = nullptr;
-    moniker->GetDisplayName(bind_ctx, nullptr, &olestr);
+    auto result = moniker->GetDisplayName(bind_ctx, nullptr, &olestr);
     bind_ctx->Release();
+
+    if (FAILED(result))
+        return QString();
 
     return QString::fromWCharArray(olestr);
 }
@@ -1521,39 +1540,42 @@ bool CaptureDShow::init()
     this->d->m_localImageControls.clear();
     this->d->m_localCameraControls.clear();
 
-    // Create the pipeline.
+    qDebug() << "Creating FilterGraph";
+
     if (FAILED(CoCreateInstance(CLSID_FilterGraph,
                                 nullptr,
                                 CLSCTX_INPROC_SERVER,
                                 IID_IGraphBuilder,
                                 reinterpret_cast<void **>(&this->d->m_graph)))) {
-        qFatal("Error creating FilterGraph instance.");
+        qCritical() << "Error creating FilterGraph instance.";
 
         return false;
     }
 
-    // Create the webcam filter.
+    qDebug() << "Creating camera filter";
     this->d->m_webcamFilter = this->d->findFilter(this->d->m_device);
 
     if (!this->d->m_webcamFilter) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
-        qFatal("Error creating camera filter.");
+        qCritical() << "Error creating camera filter.";
 
         return false;
     }
+
+    qDebug() << "Adding camera filter to the graph";
 
     if (FAILED(this->d->m_graph->AddFilter(this->d->m_webcamFilter.data(),
                                            SOURCE_FILTER_NAME))) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error adding camera filter to the graph.");
+        qCritical() << "Error adding camera filter to the graph.";
 
         return false;
     }
 
-    // Create the Sample Grabber filter.
+    qDebug() << "Creating SampleGrabber instance.";
     IBaseFilter *grabberFilter = nullptr;
 
     if (FAILED(CoCreateInstance(CLSID_SampleGrabber,
@@ -1564,20 +1586,23 @@ bool CaptureDShow::init()
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error creating SampleGrabber instance.");
+        qCritical() << "Error creating SampleGrabber instance.";
 
         return false;
     }
+
+    qDebug() << "Adding sample grabber to the graph.";
 
     if (FAILED(this->d->m_graph->AddFilter(grabberFilter, L"Grabber"))) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error adding sample grabber to the graph.");
+        qCritical() << "Error adding sample grabber to the graph.";
 
         return false;
     }
 
+    qDebug() << "Querying SampleGrabber interface.";
     ISampleGrabber *grabberPtr = nullptr;
 
     if (FAILED(grabberFilter->QueryInterface(IID_ISampleGrabber,
@@ -1585,27 +1610,30 @@ bool CaptureDShow::init()
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error querying SampleGrabber interface.");
+        qCritical() << "Error querying SampleGrabber interface.";
 
         return false;
     }
+
+    qDebug() << "Setting sample grabber to one shot.";
 
     if (FAILED(grabberPtr->SetOneShot(FALSE))) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error setting sample grabber to one shot.");
+        qCritical() << "Error setting sample grabber to one shot.";
 
         return false;
     }
 
+    qDebug() << "Setting sample grabber to sampling mode.";
     HRESULT hr = grabberPtr->SetBufferSamples(TRUE);
 
     if (FAILED(hr)) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error setting sample grabber to sampling mode.");
+        qCritical() << "Error setting sample grabber to sampling mode.";
 
         return false;
     }
@@ -1620,18 +1648,20 @@ bool CaptureDShow::init()
         sampleGrabber->Release();
     });
 
+    qDebug() << "Connecting filters.";
+
     if (!this->d->connectFilters(this->d->m_graph,
                                  this->d->m_webcamFilter.data(),
                                  grabberFilter)) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error connecting filters.");
+        qCritical() << "Error connecting filters.";
 
         return false;
     }
 
-    // Create null filter.
+    qDebug() << "Creating NullRenderer instance.";
     IBaseFilter *nullFilter = nullptr;
 
     if (FAILED(CoCreateInstance(CLSID_NullRenderer,
@@ -1642,19 +1672,23 @@ bool CaptureDShow::init()
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error creating NullRenderer instance.");
+        qCritical() << "Error creating NullRenderer instance.";
 
         return false;
     }
+
+    qDebug() << "Adding null filter to the graph.";
 
     if (FAILED(this->d->m_graph->AddFilter(nullFilter, L"NullFilter"))) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error adding null filter to the graph.");
+        qCritical() << "Error adding null filter to the graph.";
 
         return false;
     }
+
+    qDebug() << "Connecting null filter.";
 
     if (!this->d->connectFilters(this->d->m_graph,
                                  grabberFilter,
@@ -1662,34 +1696,36 @@ bool CaptureDShow::init()
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error connecting null filter.");
+        qCritical() << "Error connecting null filter.";
 
         return false;
     }
 
-    // Set capture format
+    qDebug() << "Reading camera streams.";
     auto streams = this->streams();
 
     if (streams.isEmpty()) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Camera streams are empty.");
+        qCritical() << "Camera streams are empty.";
 
         return false;
     }
 
+    qDebug() << "Reading media types.";
     auto mediaTypes = this->d->listMediaTypes(this->d->m_webcamFilter.data());
 
     if (mediaTypes.isEmpty()) {
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Can't get camera media types.");
+        qCritical() << "Can't get camera media types.";
 
         return false;
     }
 
+    qDebug() << "Setting grabber media type.";
     MediaTypePtr mediaType = streams[0] < mediaTypes.size()?
                                 mediaTypes[streams[0]]:
                                 mediaTypes.first();
@@ -1698,11 +1734,12 @@ bool CaptureDShow::init()
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error setting grabber media type.");
+        qCritical() << "Error setting grabber media type.";
 
         return false;
     }
 
+    qDebug() << "Setting the media type for the camera filter pins.";
     auto pins = this->d->enumPins(this->d->m_webcamFilter.data(),
                                   PINDIR_OUTPUT);
 
@@ -1719,7 +1756,7 @@ bool CaptureDShow::init()
             pStreamConfig->Release();
     }
 
-    // Run the pipeline
+    qDebug() << "Querying MediaControl interface.";
     IMediaControl *control = nullptr;
 
     if (FAILED(this->d->m_graph->QueryInterface(IID_IMediaControl,
@@ -1727,7 +1764,7 @@ bool CaptureDShow::init()
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Error querying MediaControl interface.");
+        qCritical() << "Error querying MediaControl interface.";
 
         return false;
     }
@@ -1757,17 +1794,21 @@ bool CaptureDShow::init()
         this->d->m_curMediaType = nullptr;
     }
 
+    qDebug() << "Running the graph.";
+
     if (FAILED(control->Run())) {
         control->Release();
         this->d->m_graph->Release();
         this->d->m_graph = nullptr;
         this->d->m_webcamFilter.clear();
-        qFatal("Failed to run the graph.");
+        qCritical() << "Failed to run the graph.";
 
         return false;
     }
 
     control->Release();
+
+    qDebug() << "Starting camera capture.";
 
     return true;
 }

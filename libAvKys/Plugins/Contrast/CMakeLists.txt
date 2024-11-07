@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Contrast SHARED
-            src/contrast.h
-            src/contrastelement.h
-            src/contrast.cpp
-            src/contrastelement.cpp
-            Contrast.qrc
-            pspec.json)
+qt_add_plugin(Contrast
+              SHARED
+              CLASS_NAME Contrast)
+target_sources(Contrast PRIVATE
+               src/contrast.h
+               src/contrastelement.h
+               src/contrast.cpp
+               src/contrastelement.cpp
+               Contrast.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Contrast PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Contrast PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Contrast PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Contrast avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Contrast PRIVATE AVKYS_PLUGIN_CONTRAST)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Contrast avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Contrast RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Contrast DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Contrast
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

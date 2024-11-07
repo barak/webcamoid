@@ -17,9 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 ColumnLayout {
     property int cellSize: 50
@@ -44,8 +44,8 @@ ColumnLayout {
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[0]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Accessible.name: qsTr("Column 0, Row 0")
 
@@ -56,8 +56,8 @@ ColumnLayout {
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[1]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Accessible.name: qsTr("Column 1, Row 0")
 
@@ -68,8 +68,8 @@ ColumnLayout {
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[2]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Accessible.name: qsTr("Column 2, Row 0")
 
@@ -82,8 +82,8 @@ ColumnLayout {
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[3]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Accessible.name: qsTr("Column 0, Row 1")
 
@@ -94,8 +94,8 @@ ColumnLayout {
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[4]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Accessible.name: qsTr("Column 1, Row 1")
 
@@ -106,8 +106,8 @@ ColumnLayout {
             Layout.preferredWidth: cellSize
             text: MatrixTransform.kernel[5]
             selectByMouse: true
-            validator: RegExpValidator {
-                regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+            validator: RegularExpressionValidator {
+                regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
             }
             Accessible.name: qsTr("Column 2, Row 1")
 

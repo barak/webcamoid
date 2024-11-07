@@ -17,11 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Ak 1.0
-import Webcamoid 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Ak
+import Webcamoid
 
 Dialog {
     id: addEdit
@@ -52,6 +52,7 @@ Dialog {
         obj.formatWidth = caps.width
         obj.formatHeight = caps.height
         obj.fps = fps.value
+        vcamFormats.minHeight += obj.height
 
         obj.onClicked.connect((index => function () {
             let element = vcamFormats.itemAt(index)
@@ -113,7 +114,7 @@ Dialog {
             let defaultPixelFormats = [
                 AkVideoCaps.Format_yuyv422,
                 AkVideoCaps.Format_uyvy422,
-                AkVideoCaps.Format_0rgb,
+                AkVideoCaps.Format_xrgb,
                 AkVideoCaps.Format_rgb24
             ]
             let pixelFormats = []
@@ -159,6 +160,7 @@ Dialog {
             obj.formatWidth = caps.width
             obj.formatHeight = caps.height
             obj.fps = fps.value
+            vcamFormats.minHeight += obj.height
 
             obj.onClicked.connect((index => function () {
                 let element = vcamFormats.itemAt(index)
@@ -207,10 +209,20 @@ Dialog {
                 placeholderText: qsTr("Virtual camera name")
                 selectByMouse: true
                 Layout.fillWidth: true
+                visible: videoLayer.canEditVCamDescription && text.length > 0
+            }
+            Label {
+                id: lblDeviceDescription
+                text: deviceDescription.text
+                font.bold: true
+                visible: !videoLayer.canEditVCamDescription
+                         && text.length > 0
+                         && deviceId.text.length
             }
             Label {
                 id: deviceId
                 font.italic: true
+                visible: text.length > 0
             }
             Button {
                 text: qsTr("Add format")
@@ -233,8 +245,13 @@ Dialog {
                 id: vcamFormats
                 enableHighlight: false
                 Layout.fillWidth: true
+                Layout.minimumHeight: minHeight
+
+                property int minHeight: 0
 
                 function clear() {
+                    minHeight = 0
+
                     for (let i = count - 1; i >= 0; i--)
                         removeItem(itemAt(i))
                 }

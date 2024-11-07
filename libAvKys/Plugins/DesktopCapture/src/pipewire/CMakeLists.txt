@@ -53,23 +53,27 @@ set(SOURCES
     pspec.json)
 
 pkg_check_modules(PIPEWIRE libpipewire-0.3)
-link_directories(${PIPEWIRE_LIBRARY_DIRS})
 add_definitions(-DBINDIR="${BINDIR}"
                 -DPIPEWIRE_MODULES_PATH="${PIPEWIRE_MODULES_PATH}"
                 -DPIPEWIRE_SPA_PLUGINS_PATH="${PIPEWIRE_SPA_PLUGINS_PATH}")
 
-if (NOT ANDROID AND NOT NOPIPEWIRE AND PIPEWIRE_FOUND)
-    add_library(DesktopCapture_pipewire SHARED ${SOURCES})
+if (PIPEWIRE_FOUND AND NOT ANDROID AND NOT NOPIPEWIRE AND NOT NOSCREENCAPTURE)
+    qt_add_plugin(DesktopCapture_pipewire
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(DesktopCapture_pipewire PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(DesktopCapture_pipewire SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(DesktopCapture_pipewire EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(DesktopCapture_pipewire PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(DesktopCapture_pipewire PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(DesktopCapture_pipewire PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(DesktopCapture_pipewire avkys)
@@ -81,15 +85,16 @@ target_include_directories(DesktopCapture_pipewire PRIVATE
                            ../../../../Lib/src)
 target_compile_definitions(DesktopCapture_pipewire PRIVATE AVKYS_PLUGIN_DESKTOPCAPTURE_PIPEWIRE)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
+target_link_directories(DesktopCapture_pipewire
+                        PUBLIC
+                        ${PIPEWIRE_LIBRARY_DIRS})
 target_link_libraries(DesktopCapture_pipewire
                       ${QT_LIBS}
                       ${PIPEWIRE_LIBRARIES}
                       avkys)
 
-if (NOT ANDROID AND NOT NOPIPEWIRE AND PIPEWIRE_FOUND)
-    if (WIN32)
-        install(TARGETS DesktopCapture_pipewire RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS DesktopCapture_pipewire DESTINATION ${PLUGINSDIR})
-    endif ()
+if (PIPEWIRE_FOUND AND NOT ANDROID AND NOT NOPIPEWIRE AND NOT NOSCREENCAPTURE)
+    install(TARGETS DesktopCapture_pipewire
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

@@ -108,10 +108,22 @@ VideoCaptureElement::VideoCaptureElement():
                          this,
                          &VideoCaptureElement::pictureTaken);
         QObject::connect(this->d->m_capture.data(),
-                         &Capture::flashModeChanged,
+                         &Capture::isTorchSupportedChanged,
                          this,
-                         [this] (Capture::FlashMode mode) {
-                             emit this->flashModeChanged(FlashMode(mode));
+                         [this] (bool supported) {
+                             emit this->isTorchSupportedChanged(supported);
+                         });
+        QObject::connect(this->d->m_capture.data(),
+                         &Capture::torchModeChanged,
+                         this,
+                         [this] (Capture::TorchMode mode) {
+                             emit this->torchModeChanged(TorchMode(mode));
+                         });
+        QObject::connect(this->d->m_capture.data(),
+                         &Capture::permissionStatusChanged,
+                         this,
+                         [this] (Capture::PermissionStatus status) {
+                             emit this->permissionStatusChanged(PermissionStatus(status));
                          });
 
         auto medias = this->d->m_capture->webcams();
@@ -132,9 +144,14 @@ VideoCaptureElement::VideoCaptureElement():
 
                 if (deviceId == media && description == deviceDescription) {
                     streamIndex = settings.value("stream", 0).toInt();
-                    streamIndex = qBound(0,
-                                         streamIndex,
-                                         this->d->m_capture->listTracks({}).size() - 1);
+                    auto tracks = this->d->m_capture->listTracks(AkCaps::CapsVideo);
+
+                    if (tracks.isEmpty())
+                        streamIndex = 0;
+                    else
+                        streamIndex = qBound<int>(0,
+                                                  streamIndex,
+                                                  tracks.size() - 1);
 
                     break;
                 }
@@ -441,34 +458,44 @@ bool VideoCaptureElement::resetCameraControls()
     return result;
 }
 
-VideoCaptureElement::FlashModeList VideoCaptureElement::supportedFlashModes(const QString &webcam) const
+bool VideoCaptureElement::isTorchSupported() const
 {
     this->d->m_mutex.lockForRead();
     auto capture = this->d->m_capture;
     this->d->m_mutex.unlock();
 
-    FlashModeList result;
+    bool isSupported = false;
 
-    if (capture) {
-        auto modes = capture->supportedFlashModes(webcam);
+    if (capture)
+        isSupported = capture->isTorchSupported();
 
-        for (auto &mode: modes)
-            result << FlashMode(mode);
-    }
+    return isSupported;
+}
+
+VideoCaptureElement::TorchMode VideoCaptureElement::torchMode() const
+{
+    this->d->m_mutex.lockForRead();
+    auto capture = this->d->m_capture;
+    this->d->m_mutex.unlock();
+
+    TorchMode result = Torch_Off;
+
+    if (capture)
+        result = TorchMode(capture->torchMode());
 
     return result;
 }
 
-VideoCaptureElement::FlashMode VideoCaptureElement::flashMode() const
+VideoCaptureElement::PermissionStatus VideoCaptureElement::permissionStatus() const
 {
     this->d->m_mutex.lockForRead();
     auto capture = this->d->m_capture;
     this->d->m_mutex.unlock();
 
-    FlashMode result = FlashMode_Off;
+    PermissionStatus result = PermissionStatus_Undetermined;
 
     if (capture)
-        result = FlashMode(capture->flashMode());
+        result = PermissionStatus(capture->permissionStatus());
 
     return result;
 }
@@ -513,9 +540,14 @@ void VideoCaptureElement::setMedia(const QString &media)
 
         if (deviceId == media && description == deviceDescription) {
             streamIndex = settings.value("stream", 0).toInt();
-            streamIndex = qBound(0,
-                                 streamIndex,
-                                 capture->listTracks({}).size() - 1);
+            auto tracks = capture->listTracks(AkCaps::CapsVideo);
+
+            if (tracks.isEmpty())
+                streamIndex = 0;
+            else
+                streamIndex = qBound<int>(0,
+                                          streamIndex,
+                                          tracks.size() - 1);
 
             break;
         }
@@ -524,7 +556,7 @@ void VideoCaptureElement::setMedia(const QString &media)
     settings.endArray();
     settings.endGroup();
 
-    capture->setStreams({streamIndex});
+   capture->setStreams({streamIndex});
 }
 
 void VideoCaptureElement::setStreams(const QList<int> &streams)
@@ -594,14 +626,14 @@ void VideoCaptureElement::setNBuffers(int nBuffers)
         capture->setNBuffers(nBuffers);
 }
 
-void VideoCaptureElement::setFlashMode(FlashMode mode)
+void VideoCaptureElement::setTorchMode(TorchMode mode)
 {
     this->d->m_mutex.lockForRead();
     auto capture = this->d->m_capture;
     this->d->m_mutex.unlock();
 
     if (capture)
-        capture->setFlashMode(Capture::FlashMode(mode));
+        capture->setTorchMode(Capture::TorchMode(mode));
 }
 
 void VideoCaptureElement::resetMedia()
@@ -644,14 +676,14 @@ void VideoCaptureElement::resetNBuffers()
         capture->resetNBuffers();
 }
 
-void VideoCaptureElement::resetFlashMode()
+void VideoCaptureElement::resetTorchMode()
 {
     this->d->m_mutex.lockForRead();
     auto capture = this->d->m_capture;
     this->d->m_mutex.unlock();
 
     if (capture)
-        capture->resetFlashMode();
+        capture->resetTorchMode();
 }
 
 void VideoCaptureElement::reset()
@@ -730,8 +762,8 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
             this->d->m_runCameraLoop = true;
             this->d->m_cameraLoopResult =
                     QtConcurrent::run(&this->d->m_threadPool,
-                                      this->d,
-                                      &VideoCaptureElementPrivate::cameraLoop);
+                                      &VideoCaptureElementPrivate::cameraLoop,
+                                      this->d);
 
             return AkElement::setState(state);
         }
@@ -740,8 +772,8 @@ bool VideoCaptureElement::setState(AkElement::ElementState state)
             this->d->m_runCameraLoop = true;
             this->d->m_cameraLoopResult =
                     QtConcurrent::run(&this->d->m_threadPool,
-                                      this->d,
-                                      &VideoCaptureElementPrivate::cameraLoop);
+                                      &VideoCaptureElementPrivate::cameraLoop,
+                                      this->d);
 
             return AkElement::setState(state);
         }
@@ -810,9 +842,9 @@ QString VideoCaptureElementPrivate::capsDescription(const AkCaps &caps) const
         auto format = AkVideoCaps::pixelFormatToString(videoCaps.format());
 
         return QString("%1, %2x%3, %4 FPS")
-                .arg(format.toUpper(),
-                     videoCaps.width(),
-                     videoCaps.height())
+                .arg(format.toUpper())
+                .arg(videoCaps.width())
+                .arg(videoCaps.height())
                 .arg(qRound(videoCaps.fps().value()));
     }
 
@@ -820,9 +852,9 @@ QString VideoCaptureElementPrivate::capsDescription(const AkCaps &caps) const
         AkCompressedVideoCaps videoCaps(caps);
 
         return QString("%1, %2x%3, %4 FPS")
-                .arg(videoCaps.format().toUpper(),
-                     videoCaps.width(),
-                     videoCaps.height())
+                .arg(videoCaps.format().toUpper())
+                .arg(videoCaps.width())
+                .arg(videoCaps.height())
                 .arg(qRound(videoCaps.fps().value()));
     }
 
@@ -933,10 +965,22 @@ void VideoCaptureElementPrivate::linksChanged(const AkPluginLinks &links)
                      self,
                      &VideoCaptureElement::pictureTaken);
     QObject::connect(this->m_capture.data(),
-                     &Capture::flashModeChanged,
+                     &Capture::isTorchSupportedChanged,
                      self,
-                     [=] (Capture::FlashMode mode) {
-                         emit self->flashModeChanged(VideoCaptureElement::FlashMode(mode));
+                     [=] (bool supported) {
+                         emit self->isTorchSupportedChanged(supported);
+                     });
+    QObject::connect(this->m_capture.data(),
+                     &Capture::torchModeChanged,
+                     self,
+                     [=] (Capture::TorchMode mode) {
+                         emit self->torchModeChanged(VideoCaptureElement::TorchMode(mode));
+                     });
+    QObject::connect(this->m_capture.data(),
+                     &Capture::permissionStatusChanged,
+                     self,
+                     [=] (Capture::PermissionStatus status) {
+                         emit self->permissionStatusChanged(VideoCaptureElement::PermissionStatus(status));
                      });
 
     emit self->mediasChanged(self->medias());

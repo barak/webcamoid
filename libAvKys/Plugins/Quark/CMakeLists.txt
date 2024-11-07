@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Quark SHARED
-            src/quark.h
-            src/quarkelement.h
-            src/quark.cpp
-            src/quarkelement.cpp
-            Quark.qrc
-            pspec.json)
+qt_add_plugin(Quark
+              SHARED
+              CLASS_NAME Quark)
+target_sources(Quark PRIVATE
+               src/quark.h
+               src/quarkelement.h
+               src/quark.cpp
+               src/quarkelement.cpp
+               Quark.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Quark PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Quark PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Quark PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Quark avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Quark PRIVATE AVKYS_PLUGIN_QUARK)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Quark avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Quark RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Quark DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Quark
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

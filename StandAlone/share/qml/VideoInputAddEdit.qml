@@ -17,11 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Qt.labs.platform 1.1 as LABS
-import Ak 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt.labs.platform as LABS
+import Ak
 
 Dialog {
     id: addEdit
@@ -232,11 +232,17 @@ Dialog {
         nameFilters: videoLayer.videoSourceFileFilters
 
         onAccepted: {
-            filePath.text = mediaTools.urlToLocalFile(fileDialog.file)
-            urlPath.text = ""
+            let fpath = mediaTools.urlToLocalFile(fileDialog.file);
+            let suffix = fpath.split('.').pop();
+
+            if (videoLayer.supportedFileFormats.indexOf(suffix) < 0)
+                return;
+
+            filePath.text = fpath;
+            urlPath.text = "";
             fileDescription.text =
-                    addEdit.defaultDescription(filePath.text)
-            urlDescription.text = fileDescription.text
+                    addEdit.defaultDescription(filePath.text);
+            urlDescription.text = fileDescription.text;
         }
     }
 }

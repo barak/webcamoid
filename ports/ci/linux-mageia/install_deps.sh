@@ -18,6 +18,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 #qtIinstallerVerbose=--verbose
 
 if [ ! -z "${USE_WGET}" ]; then
@@ -26,14 +28,7 @@ else
     export DOWNLOAD_CMD="curl --retry 10 -sS -kLOC -"
 fi
 
-dnf -y install dnf-plugins-core
-dnf config-manager --set-enabled \
-    mageia-x86_64-nonfree \
-    mageia-x86_64-tainted \
-    updates-x86_64-nonfree \
-    updates-x86_64-tainted
-dnf repolist
-dnf -y update
+dnf -y upgrade-minimal --exclude=filesystem
 dnf -y install \
     lib64fontconfig1 \
     lib64gl1 \
@@ -102,21 +97,24 @@ dnf -y install \
     lib64pipewire-devel \
     lib64portaudio-devel \
     lib64pulseaudio-devel \
-    lib64qt5concurrent-devel \
-    lib64qt5multimedia-devel \
-    lib64qt5opengl-devel \
-    lib64qt5quick-devel \
-    lib64qt5quickcontrols2-devel \
-    lib64qt5svg-devel \
+    lib64qt6concurrent-devel \
+    lib64qt6multimedia-devel \
+    lib64qt6opengl-devel \
+    lib64qt6quick-devel \
+    lib64qt6quickcontrols2-devel \
+    lib64qt6svg-devel \
+    lib64qt6widgets-devel \
+    lib64usb1.0-devel \
     lib64v4l-devel \
     lib64vlc-devel \
+    lib64xext-devel \
+    lib64xfixes-devel \
     make \
     patchelf \
-    qtbase5-common-devel \
+    qtbase6-common-devel \
     qtquickcontrols25 \
-    qttools5 \
-    qtwayland5 \
+    qttools6 \
+    qtwayland6 \
     vlc-plugin-common \
-    which \
     x11-server-xvfb \
     xauth

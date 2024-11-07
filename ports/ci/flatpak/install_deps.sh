@@ -18,10 +18,13 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 if [ "${ARM_BUILD}" != 1 ]; then
     SUDO_CMD=sudo
 fi
 
+${SUDO_CMD} apt-get -y install software-properties-common
 ${SUDO_CMD} add-apt-repository ppa:flatpak/stable
 ${SUDO_CMD} apt-get -qq -y update
 ${SUDO_CMD} apt-get -qq -y upgrade
@@ -33,3 +36,7 @@ flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flath
 flatpak --user -y install \
     "org.kde.Platform//${RUNTIME_VERSION}" \
     "org.kde.Sdk//${RUNTIME_VERSION}"
+
+if [ "${ARM_BUILD}" = 1 ]; then
+    git config --global --add safe.directory /sources
+fi

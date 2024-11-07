@@ -29,7 +29,6 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTemporaryDir>
-#include <QTextCodec>
 #include <QVariant>
 #include <QWaitCondition>
 #include <QXmlStreamReader>
@@ -341,14 +340,6 @@ QString VCamCMIO::deviceCreate(const QString &description,
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
 
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
-
     // Write 'config.ini'.
     int i = 0;
     int j = 0;
@@ -481,14 +472,6 @@ bool VCamCMIO::deviceEdit(const QString &deviceId,
 
     QTemporaryDir tempDir;
     QSettings settings(tempDir.path() + "/config.ini", QSettings::IniFormat);
-
-    // Set file encoding.
-    auto codec = QTextCodec::codecForLocale();
-
-    if (codec)
-        settings.setIniCodec(codec->name());
-    else
-        settings.setIniCodec("UTF-8");
 
     // Write 'config.ini'.
     int i = 0;
@@ -951,13 +934,13 @@ const CMIOAkFormatMap &VCamCMIOPrivate::cmioAkFormatMap() const
 {
     static const CMIOAkFormatMap formatMap {
         // RGB formats
-        {AkVideoCaps::Format_0rgb    , "RGB32"},
+        {AkVideoCaps::Format_xrgb    , "RGB32"},
         {AkVideoCaps::Format_rgb24   , "RGB24"},
         {AkVideoCaps::Format_rgb565le, "RGB16"},
         {AkVideoCaps::Format_rgb555le, "RGB15"},
 
         // RGB formats
-        {AkVideoCaps::Format_0bgr    , "BGR32"},
+        {AkVideoCaps::Format_xbgr    , "BGR32"},
         {AkVideoCaps::Format_bgr24   , "BGR24"},
         {AkVideoCaps::Format_bgr565le, "BGR16"},
         {AkVideoCaps::Format_bgr555le, "BGR15"},

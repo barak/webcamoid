@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Crop SHARED
-            src/crop.h
-            src/cropelement.h
-            src/crop.cpp
-            src/cropelement.cpp
-            Crop.qrc
-            pspec.json)
+qt_add_plugin(Crop
+              SHARED
+              CLASS_NAME Crop)
+target_sources(Crop PRIVATE
+               src/crop.h
+               src/cropelement.h
+               src/crop.cpp
+               src/cropelement.cpp
+               Crop.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Crop PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Crop PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Crop PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Crop avkys)
@@ -60,8 +64,6 @@ list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_
 target_link_libraries(Crop avkys ${QT_LIBS})
 set(QML_IMPORT_PATH ../../Lib/share/qml)
 
-if (WIN32)
-    install(TARGETS Crop RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Crop DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Crop
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

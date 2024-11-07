@@ -151,7 +151,6 @@ void AkColorPlane::registerTypes()
 {
     qRegisterMetaType<AkColorPlane>("AkColorPlane");
     qRegisterMetaType<AkColorPlanes>("AkColorPlanes");
-    qRegisterMetaTypeStreamOperators<AkColorPlane>("AkColorPlane");
     qmlRegisterSingletonType<AkColorPlane>("Ak", 1, 0, "AkColorPlane",
                                           [] (QQmlEngine *qmlEngine,
                                               QJSEngine *jsEngine) -> QObject * {

@@ -47,20 +47,24 @@ set(SOURCES
     pspec.json)
 
 pkg_check_modules(PORTAUDIO portaudio-2.0)
-link_directories(${PORTAUDIO_LIBRARY_DIRS})
 
 if (NOT NOPORTAUDIO AND PORTAUDIO_FOUND)
-    add_library(AudioDevice_portaudio SHARED ${SOURCES})
+    qt_add_plugin(AudioDevice_portaudio
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(AudioDevice_portaudio PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(AudioDevice_portaudio SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(AudioDevice_portaudio EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
-if (WIN32)
+set_target_properties(AudioDevice_portaudio PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(AudioDevice_portaudio PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(AudioDevice_portaudio PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(AudioDevice_portaudio avkys)
@@ -72,15 +76,16 @@ target_include_directories(AudioDevice_portaudio
                            ../../../../Lib/src)
 target_compile_definitions(AudioDevice_portaudio PRIVATE AVKYS_PLUGIN_AUDIODEVICE_PORTAUDIO)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
+target_link_directories(AudioDevice_portaudio
+                        PUBLIC
+                        ${PORTAUDIO_LIBRARY_DIRS})
 target_link_libraries(AudioDevice_portaudio
                       ${QT_LIBS}
                       ${PORTAUDIO_LIBRARIES}
                       avkys)
 
 if (NOT NOPORTAUDIO AND PORTAUDIO_FOUND)
-    if (WIN32)
-        install(TARGETS AudioDevice_portaudio RUNTIME DESTINATION ${PLUGINSDIR})
-    elseif (NOT ANDROID)
-        install(TARGETS AudioDevice_portaudio DESTINATION ${PLUGINSDIR})
-    endif ()
+    install(TARGETS AudioDevice_portaudio
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

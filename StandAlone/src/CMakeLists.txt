@@ -37,13 +37,9 @@ set(QT_COMPONENTS
 
 if (ANDROID)
     list(APPEND QT_COMPONENTS
-         Xml
-         AndroidExtras)
+         Xml)
 endif()
 
-find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
-             ${QT_COMPONENTS}
-             REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
@@ -84,15 +80,7 @@ elseif (WIN32)
     list(APPEND PROJECT_SOURCES ../Webcamoid.rc)
 endif ()
 
-if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    add_executable(StandAlone ${PROJECT_SOURCES})
-else ()
-    if (ANDROID)
-        add_library(StandAlone SHARED ${PROJECT_SOURCES})
-    else ()
-        add_executable(StandAlone ${PROJECT_SOURCES})
-    endif ()
-endif ()
+qt_add_executable(StandAlone ${PROJECT_SOURCES})
 
 if (APPLE)
     string(TIMESTAMP YEAR "%Y")
@@ -103,7 +91,7 @@ if (APPLE)
                           MACOSX_BUNDLE_BUNDLE_NAME Webcamoid
                           MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION}
                           MACOSX_BUNDLE_COPYRIGHT "Copyright (C)  2011-${YEAR}  Gonzalo Exequiel Pedone"
-                          MACOSX_BUNDLE_GUI_IDENTIFIER io.github.webcamoid.Webcamoid
+                          MACOSX_BUNDLE_GUI_IDENTIFIER "${APP_IDENTIFIER}"
                           MACOSX_BUNDLE_ICON_FILE webcamoid.icns
                           MACOSX_BUNDLE_INFO_STRING "Webcamoid, The ultimate webcam suite!"
                           MACOSX_BUNDLE_LONG_VERSION_STRING "Webcamoid ${VERSION}"
@@ -123,10 +111,16 @@ endif ()
 
 if (APPLE)
     set_target_properties(StandAlone PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
-elseif (NOT ANDROID)
+                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR})
+else ()
     set_target_properties(StandAlone PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${BINDIR})
+                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${BINDIR}
+                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${BINDIR})
+endif ()
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(StandAlone PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(StandAlone avkys)
@@ -135,22 +129,57 @@ target_include_directories(StandAlone
 target_compile_definitions(StandAlone
                            PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
-target_link_libraries(StandAlone avkys ${QT_LIBS})
+target_link_libraries(StandAlone
+                      PUBLIC
+                      avkys
+                      ${QT_LIBS})
 
 if (WIN32)
-    target_link_libraries(StandAlone ole32)
+    target_link_libraries(StandAlone
+                          PUBLIC
+                          ole32)
 endif ()
 
 if (ANDROID)
-    target_link_libraries(StandAlone log)
+    target_link_libraries(StandAlone
+                          PUBLIC
+                          log
+                          PRIVATE
+                          Qt${QT_VERSION_MAJOR}::CorePrivate)
 endif ()
+
+string(REPLACE "." ";" ORGANIZATION_DOMAIN "${ORGANIZATION_IDENTIFIER}")
+list(REVERSE ORGANIZATION_DOMAIN)
+string(JOIN "." ORGANIZATION_DOMAIN ${ORGANIZATION_DOMAIN})
 
 add_definitions(-DCOMMONS_TARGET="webcamoid"
                 -DCOMMONS_APPNAME="Webcamoid"
                 -DCOMMONS_VERSION="${VERSION}"
+                -DORGANIZATION_DOMAIN="${ORGANIZATION_DOMAIN}"
                 -DBINDIR="${BINDIR}"
+                -DDATAROOTDIR="${DATAROOTDIR}"
                 -DTRANSLATIONSDIR="${TRANSLATIONSDIR}"
-                -DTARGET_ARCH="${TARGET_ARCH}")
+                -DTARGET_ARCH="${TARGET_ARCH}"
+                -DANDROID_OPENSSL_SUFFIX="${ANDROID_OPENSSL_SUFFIX}")
+
+if (ANDROID)
+    if (ENABLE_ANDROID_DEBUGGING)
+        add_definitions(-DENABLE_ANDROID_DEBUGGING)
+    endif ()
+
+    if (ENABLE_ANDROID_ADS AND MVN_BIN AND (ANDROID_TARGET_SDK_VERSION GREATER_EQUAL 31))
+        add_definitions(-DENABLE_ANDROID_ADS
+                        -DANDROID_AD_UNIT_ID_APP_OPEN="${ANDROID_AD_UNIT_ID_APP_OPEN}"
+                        -DANDROID_AD_UNIT_ID_BANNER="${ANDROID_AD_UNIT_ID_BANNER}"
+                        -DANDROID_AD_UNIT_ID_ADAPTIVE_BANNER="${ANDROID_AD_UNIT_ID_ADAPTIVE_BANNER}"
+                        -DANDROID_AD_UNIT_ID_ADAPTIVE_INTERSTITIAL="${ANDROID_AD_UNIT_ID_ADAPTIVE_INTERSTITIAL}"
+                        -DANDROID_AD_UNIT_ID_ADAPTIVE_REWARDED="${ANDROID_AD_UNIT_ID_ADAPTIVE_REWARDED}"
+                        -DANDROID_AD_UNIT_ID_ADAPTIVE_REWARDED_INTERSTITIAL="${ANDROID_AD_UNIT_ID_ADAPTIVE_REWARDED_INTERSTITIAL}")
+    endif ()
+
+    configure_file(android_values_appid.xml
+                   "${CMAKE_BINARY_DIR}/${BUILDDIR}/res/values/appid.xml")
+endif ()
 
 if (APPLE)
     install(TARGETS StandAlone DESTINATION ${CMAKE_INSTALL_PREFIX})
@@ -181,6 +210,6 @@ if (ANDROID)
 
     foreach (FILE IN LISTS ANDROID_PACKAGE_TEMPLATES)
         file(RELATIVE_PATH FILE_DST ${CMAKE_CURRENT_SOURCE_DIR}/../share/android ${FILE})
-        configure_file(${FILE} "${CMAKE_BINARY_DIR}/android-build/${FILE_DST}" COPYONLY)
+        configure_file(${FILE} "${CMAKE_BINARY_DIR}/${BUILDDIR}/${FILE_DST}" COPYONLY)
     endforeach ()
 endif()

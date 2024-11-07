@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Dice SHARED
-            src/dice.h
-            src/diceelement.h
-            src/dice.cpp
-            src/diceelement.cpp
-            Dice.qrc
-            pspec.json)
+qt_add_plugin(Dice
+              SHARED
+              CLASS_NAME Dice)
+target_sources(Dice PRIVATE
+               src/dice.h
+               src/diceelement.h
+               src/dice.cpp
+               src/diceelement.cpp
+               Dice.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Dice PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Dice PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Dice PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Dice avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Dice PRIVATE AVKYS_PLUGIN_DICE)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Dice avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Dice RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Dice DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Dice
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

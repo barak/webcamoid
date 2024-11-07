@@ -37,13 +37,13 @@ using ImageToPixelFormatMap = QMap<QImage::Format, AkVideoCaps::PixelFormat>;
 inline ImageToPixelFormatMap initImageToPixelFormatMap()
 {
     ImageToPixelFormatMap imageToAkFormat {
-        {QImage::Format_RGB32     , AkVideoCaps::Format_0rgbpack},
+        {QImage::Format_RGB32     , AkVideoCaps::Format_xrgbpack},
         {QImage::Format_ARGB32    , AkVideoCaps::Format_argbpack},
         {QImage::Format_RGB16     , AkVideoCaps::Format_rgb565  },
         {QImage::Format_RGB555    , AkVideoCaps::Format_rgb555  },
         {QImage::Format_RGB888    , AkVideoCaps::Format_rgb24   },
         {QImage::Format_RGB444    , AkVideoCaps::Format_rgb444  },
-        {QImage::Format_Grayscale8, AkVideoCaps::Format_gray8   }
+        {QImage::Format_Grayscale8, AkVideoCaps::Format_y8      }
     };
 
     return imageToAkFormat;
@@ -185,9 +185,12 @@ AkFrac ImageSrcElement::fps() const
 
 QStringList ImageSrcElement::supportedFormats() const
 {
-    auto formats = QImageReader::supportedImageFormats();
+    QStringList supportedFormats;
 
-    return QStringList(formats.begin(), formats.end());
+    for (auto &format: QImageReader::supportedImageFormats())
+        supportedFormats << format.toLower();
+
+    return supportedFormats;
 }
 
 QString ImageSrcElement::controlInterfaceProvide(const QString &controlId) const
@@ -309,8 +312,8 @@ bool ImageSrcElement::setState(AkElement::ElementState state)
             this->d->m_run = true;
             this->d->m_framesThreadStatus =
                     QtConcurrent::run(&this->d->m_threadPool,
-                                      this->d,
-                                      &ImageSrcElementPrivate::readFrame);
+                                      &ImageSrcElementPrivate::readFrame,
+                                      this->d);
 
             return AkElement::setState(state);
         case AkElement::ElementStateNull:
@@ -327,8 +330,8 @@ bool ImageSrcElement::setState(AkElement::ElementState state)
             this->d->m_run = true;
             this->d->m_framesThreadStatus =
                     QtConcurrent::run(&this->d->m_threadPool,
-                                      this->d,
-                                      &ImageSrcElementPrivate::readFrame);
+                                      &ImageSrcElementPrivate::readFrame,
+                                      this->d);
 
             return AkElement::setState(state);
         case AkElement::ElementStatePaused:
@@ -414,8 +417,8 @@ void ImageSrcElementPrivate::readFrame()
         } else if (!this->m_threadStatus.isRunning()) {
             this->m_threadStatus =
                     QtConcurrent::run(&this->m_threadPool,
-                                      this,
                                       &ImageSrcElementPrivate::sendPacket,
+                                      this,
                                       packet);
         }
 

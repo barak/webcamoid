@@ -127,16 +127,19 @@ bool Capture::resetCameraControls()
     return false;
 }
 
-Capture::FlashModeList Capture::supportedFlashModes(const QString &webcam) const
+bool Capture::isTorchSupported() const
 {
-    Q_UNUSED(webcam)
-
-    return {};
+    return false;
 }
 
-Capture::FlashMode Capture::flashMode() const
+Capture::TorchMode Capture::torchMode() const
 {
-    return FlashMode_Off;
+    return Torch_Off;
+}
+
+Capture::PermissionStatus Capture::permissionStatus() const
+{
+    return PermissionStatus_Granted;
 }
 
 AkPacket Capture::readFrame()
@@ -173,7 +176,7 @@ void Capture::setNBuffers(int nBuffers)
     Q_UNUSED(nBuffers)
 }
 
-void Capture::setFlashMode(FlashMode mode)
+void Capture::setTorchMode(TorchMode mode)
 {
     Q_UNUSED(mode)
 }
@@ -194,7 +197,7 @@ void Capture::resetNBuffers()
 {
 }
 
-void Capture::resetFlashMode()
+void Capture::resetTorchMode()
 {
 
 }
@@ -205,14 +208,16 @@ void Capture::reset()
 
 void Capture::takePictures(int count, int delayMsecs)
 {
-    QtConcurrent::run(&this->d->m_threadPool,
-                      [this, count, delayMsecs] () {
-        for (int i = 0; i < count; i++) {
-            auto frame = this->readFrame();
-            emit this->pictureTaken(i, frame);
-            QThread::msleep(delayMsecs);
-        }
-    });
+    auto result =
+        QtConcurrent::run(&this->d->m_threadPool,
+                          [this, count, delayMsecs] () {
+            for (int i = 0; i < count; i++) {
+                auto frame = this->readFrame();
+                emit this->pictureTaken(i, frame);
+                QThread::msleep(delayMsecs);
+            }
+        });
+    Q_UNUSED(result)
 }
 
 #include "moc_capture.cpp"

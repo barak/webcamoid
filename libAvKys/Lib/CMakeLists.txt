@@ -36,70 +36,72 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(avkys SHARED
-            src/ak.cpp
-            src/ak.h
-            src/akaudiocaps.cpp
-            src/akaudiocaps.h
-            src/akaudioconverter.cpp
-            src/akaudioconverter.h
-            src/akaudiopacket.cpp
-            src/akaudiopacket.h
-            src/akcaps.cpp
-            src/akcaps.h
-            src/akcolorcomponent.cpp
-            src/akcolorcomponent.h
-            src/akcolorconvert.h
-            src/akcolorconvert.cpp
-            src/akcolorplane.cpp
-            src/akcolorplane.h
-            src/akcommons.h
-            src/akcompressedvideocaps.cpp
-            src/akcompressedvideocaps.h
-            src/akcompressedvideopacket.cpp
-            src/akcompressedvideopacket.h
-            src/akelement.cpp
-            src/akelement.h
-            src/akfrac.cpp
-            src/akfrac.h
-            src/akmultimediasourceelement.cpp
-            src/akmultimediasourceelement.h
-            src/akpacket.cpp
-            src/akpacket.h
-            src/akpacketbase.cpp
-            src/akpacketbase.h
-            src/akplugin.h
-            src/akplugininfo.cpp
-            src/akplugininfo.h
-            src/akpluginmanager.cpp
-            src/akpluginmanager.h
-            src/aksubtitlecaps.cpp
-            src/aksubtitlecaps.h
-            src/aksubtitlepacket.cpp
-            src/aksubtitlepacket.h
-            src/akunit.cpp
-            src/akunit.h
-            src/akvideocaps.cpp
-            src/akvideocaps.h
-            src/akvideoconverter.cpp
-            src/akvideoconverter.h
-            src/akvideoformatspec.cpp
-            src/akvideoformatspec.h
-            src/akvideomixer.cpp
-            src/akvideomixer.h
-            src/akvideopacket.cpp
-            src/akvideopacket.h
-            src/qml/akcolorizedimage.cpp
-            src/qml/akcolorizedimage.h
-            src/qml/akpalette.cpp
-            src/qml/akpalette.h
-            src/qml/akpalettegroup.cpp
-            src/qml/akpalettegroup.h
-            src/qml/aktheme.cpp
-            src/qml/aktheme.h
-            src/qml/akutils.cpp
-            src/qml/akutils.h
-            AvKys.qrc)
+qt_add_library(avkys
+               src/ak.cpp
+               src/ak.h
+               src/akaudiocaps.cpp
+               src/akaudiocaps.h
+               src/akaudioconverter.cpp
+               src/akaudioconverter.h
+               src/akaudiopacket.cpp
+               src/akaudiopacket.h
+               src/akcaps.cpp
+               src/akcaps.h
+               src/akcolorcomponent.cpp
+               src/akcolorcomponent.h
+               src/akcolorconvert.h
+               src/akcolorconvert.cpp
+               src/akcolorplane.cpp
+               src/akcolorplane.h
+               src/akcommons.h
+               src/akcompressedvideocaps.cpp
+               src/akcompressedvideocaps.h
+               src/akcompressedvideopacket.cpp
+               src/akcompressedvideopacket.h
+               src/akelement.cpp
+               src/akelement.h
+               src/akfrac.cpp
+               src/akfrac.h
+               src/akmultimediasourceelement.cpp
+               src/akmultimediasourceelement.h
+               src/akpacket.cpp
+               src/akpacket.h
+               src/akpacketbase.cpp
+               src/akpacketbase.h
+               src/akplugin.h
+               src/akplugininfo.cpp
+               src/akplugininfo.h
+               src/akpluginmanager.cpp
+               src/akpluginmanager.h
+               src/aksubtitlecaps.cpp
+               src/aksubtitlecaps.h
+               src/aksubtitlepacket.cpp
+               src/aksubtitlepacket.h
+               src/akunit.cpp
+               src/akunit.h
+               src/akvideocaps.cpp
+               src/akvideocaps.h
+               src/akvideoconverter.cpp
+               src/akvideoconverter.h
+               src/akvideoformatspec.cpp
+               src/akvideoformatspec.h
+               src/akvideomixer.cpp
+               src/akvideomixer.h
+               src/akvideopacket.cpp
+               src/akvideopacket.h
+               src/qml/akcolorizedimage.cpp
+               src/qml/akcolorizedimage.h
+               src/qml/akfontsettings.cpp
+               src/qml/akfontsettings.h
+               src/qml/akpalette.cpp
+               src/qml/akpalette.h
+               src/qml/akpalettegroup.cpp
+               src/qml/akpalettegroup.h
+               src/qml/aktheme.cpp
+               src/qml/aktheme.h
+               src/qml/akutils.cpp
+               src/qml/akutils.h
+               AvKys.qrc)
 
 if (UNIX AND NOT ANDROID AND NOT APPLE)
     set_target_properties(avkys
@@ -108,12 +110,13 @@ if (UNIX AND NOT ANDROID AND NOT APPLE)
                           SOVERSION ${VER_MAJ})
 endif ()
 
-if (WIN32)
+set_target_properties(avkys PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${LIBDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${BINDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(avkys PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${BINDIR})
-elseif (NOT ANDROID)
-    set_target_properties(avkys PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${LIBDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 target_compile_definitions(avkys PRIVATE AVKYS_LIBRARY)
@@ -121,13 +124,11 @@ list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_
 target_link_libraries(avkys ${QT_LIBS})
 add_definitions(-DAKCOMMONS_LIBRARY
                 -DBINDIR="${BINDIR}"
-                -DPLUGINSDIR="${PLUGINSDIR}"
+                -DAKPLUGINSDIR="${AKPLUGINSDIR}"
                 -DEXTENSION_SHLIB="${CMAKE_SHARED_LIBRARY_SUFFIX}"
                 -DPREFIX_SHLIB="${CMAKE_SHARED_LIBRARY_PREFIX}"
                 -DPLATFORM_TARGET_SUFFIX="${CMAKE_ANDROID_ARCH_ABI}")
 
-if (WIN32)
-    install(TARGETS avkys RUNTIME DESTINATION ${BINDIR})
-elseif (NOT ANDROID)
-    install(TARGETS avkys DESTINATION ${LIBDIR})
-endif ()
+install(TARGETS avkys
+        LIBRARY DESTINATION ${LIBDIR}
+        RUNTIME DESTINATION ${BINDIR})

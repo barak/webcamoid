@@ -17,11 +17,11 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Ak 1.0
-import Webcamoid 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Ak
+import Webcamoid
 
 ScrollView {
     id: view
@@ -86,10 +86,13 @@ ScrollView {
         OptionList {
             id: devicesList
             Layout.fillWidth: true
+            Layout.minimumHeight: minHeight
 
             property bool updating: false
+            property int minHeight: 0
 
             function update() {
+                devicesList.minHeight = 0
                 let devices = videoLayer.inputs
 
                 for (let i = count - 1; i >= 0; i--)
@@ -116,6 +119,7 @@ ScrollView {
                     obj.text = videoLayer.description(devices[i])
                     obj.device = devices[i]
                     obj.highlighted = i == index
+                    devicesList.minHeight += obj.height
 
                     obj.Keys.onSpacePressed.connect(() => view.openVideoInputOptions(videoLayer.videoInput))
                 }
@@ -124,9 +128,12 @@ ScrollView {
                 setCurrentIndex(index)
             }
 
-            onCurrentIndexChanged:
-                if (!updating && itemAt(currentIndex))
+            onCurrentIndexChanged: {
+                if (!updating && itemAt(currentIndex)) {
+                    mediaTools.showAd(MediaTools.AdType_Interstitial);
                     videoLayer.videoInput = itemAt(currentIndex).device
+                }
+            }
         }
     }
 }

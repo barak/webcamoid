@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Pixelate SHARED
-            src/pixelate.h
-            src/pixelateelement.h
-            src/pixelate.cpp
-            src/pixelateelement.cpp
-            Pixelate.qrc
-            pspec.json)
+qt_add_plugin(Pixelate
+              SHARED
+              CLASS_NAME Pixelate)
+target_sources(Pixelate PRIVATE
+               src/pixelate.h
+               src/pixelateelement.h
+               src/pixelate.cpp
+               src/pixelateelement.cpp
+               Pixelate.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Pixelate PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Pixelate PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Pixelate PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Pixelate avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Pixelate PRIVATE AVKYS_PLUGIN_PIXELATE)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Pixelate avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Pixelate RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Pixelate DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Pixelate
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

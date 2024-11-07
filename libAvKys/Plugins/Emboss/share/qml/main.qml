@@ -17,9 +17,9 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 GridLayout {
     columns: 2
@@ -33,8 +33,8 @@ GridLayout {
         text: Emboss.factor
         placeholderText: qsTr("Factor")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+        validator: RegularExpressionValidator {
+            regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
         Accessible.name: txtFactor.text
@@ -51,8 +51,8 @@ GridLayout {
         text: Emboss.bias
         placeholderText: qsTr("Bias")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
+        validator: RegularExpressionValidator {
+            regularExpression: /-?(\d+\.\d+|\d+\.|\.\d+|\d+)/
         }
         Layout.fillWidth: true
         Accessible.name: txtBias.text

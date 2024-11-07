@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Emboss SHARED
-            src/emboss.h
-            src/embosselement.h
-            src/emboss.cpp
-            src/embosselement.cpp
-            Emboss.qrc
-            pspec.json)
+qt_add_plugin(Emboss
+              SHARED
+              CLASS_NAME Emboss)
+target_sources(Emboss PRIVATE
+               src/emboss.h
+               src/embosselement.h
+               src/emboss.cpp
+               src/embosselement.cpp
+               Emboss.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Emboss PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Emboss PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Emboss PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Emboss avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Emboss PRIVATE AVKYS_PLUGIN_EMBOSS)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Emboss avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Emboss RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Emboss DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Emboss
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

@@ -231,9 +231,7 @@ void AkVideoFormatSpec::registerTypes()
 {
     qRegisterMetaType<AkVideoFormatSpec>("AkVideoFormatSpec");
     qRegisterMetaType<AkColorPlanes>("AkColorPlanes");
-    qRegisterMetaTypeStreamOperators<AkVideoFormatSpec>("AkVideoFormatSpec");
     qRegisterMetaType<VideoFormatType>("AkVideoFormatType");
-    QMetaType::registerDebugStreamOperator<VideoFormatType>();
     qmlRegisterSingletonType<AkVideoFormatSpec>("Ak", 1, 0, "AkVideoFormatSpec",
                                           [] (QQmlEngine *qmlEngine,
                                               QJSEngine *jsEngine) -> QObject * {

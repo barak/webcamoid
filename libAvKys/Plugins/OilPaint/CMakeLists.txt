@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(OilPaint SHARED
-            src/oilpaint.h
-            src/oilpaintelement.h
-            src/oilpaint.cpp
-            src/oilpaintelement.cpp
-            OilPaint.qrc
-            pspec.json)
+qt_add_plugin(OilPaint
+              SHARED
+              CLASS_NAME OilPaint)
+target_sources(OilPaint PRIVATE
+               src/oilpaint.h
+               src/oilpaintelement.h
+               src/oilpaint.cpp
+               src/oilpaintelement.cpp
+               OilPaint.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(OilPaint PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(OilPaint PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(OilPaint PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(OilPaint avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(OilPaint PRIVATE AVKYS_PLUGIN_OILPAINT)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(OilPaint avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS OilPaint RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS OilPaint DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS OilPaint
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

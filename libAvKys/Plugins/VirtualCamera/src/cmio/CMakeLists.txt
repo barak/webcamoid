@@ -45,13 +45,24 @@ set(SOURCES
     pspec.json)
 
 if (APPLE)
-    add_library(VirtualCamera_cmio SHARED ${SOURCES})
+    qt_add_plugin(VirtualCamera_cmio
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VirtualCamera_cmio PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VirtualCamera_cmio SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VirtualCamera_cmio EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(VirtualCamera_cmio PROPERTIES
-                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(VirtualCamera_cmio PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(VirtualCamera_cmio avkys)
 target_include_directories(VirtualCamera_cmio PRIVATE
                            ..
@@ -61,5 +72,7 @@ list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_
 target_link_libraries(VirtualCamera_cmio avkys ${QT_LIBS})
 
 if (APPLE)
-    install(TARGETS VirtualCamera_cmio DESTINATION ${PLUGINSDIR})
+    install(TARGETS VirtualCamera_cmio
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

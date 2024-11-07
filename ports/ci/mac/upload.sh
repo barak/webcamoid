@@ -18,6 +18,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 if [ "${UPLOAD}" != 1 ]; then
     exit 0
 fi
@@ -39,4 +41,4 @@ else
     releaseName=${verMaj}.${verMin}.${verPat}
 fi
 
-gh release upload "$releaseName" webcamoid-packages/mac/* --clobber -R "webcamoid/webcamoid"
+gh release upload "$releaseName" webcamoid-packages/mac/* --clobber -R "webcamoid/WebcamoidPrivate"

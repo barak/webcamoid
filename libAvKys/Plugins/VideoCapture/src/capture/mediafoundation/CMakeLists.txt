@@ -70,13 +70,24 @@ set(SOURCES
     pspec.json)
 
 if (NOT NOMEDIAFOUNDATION AND WIN32 AND HAVE_MEDIAFOUNDATION)
-    add_library(VideoCapture_mediafoundation SHARED ${SOURCES})
+    qt_add_plugin(VideoCapture_mediafoundation
+                  SHARED
+                  CLASS_NAME Plugin)
+    target_sources(VideoCapture_mediafoundation PRIVATE
+                   ${SOURCES})
 else ()
-    add_library(VideoCapture_mediafoundation SHARED EXCLUDE_FROM_ALL ${SOURCES})
+    add_library(VideoCapture_mediafoundation EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
 
 set_target_properties(VideoCapture_mediafoundation PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
+    set_target_properties(VideoCapture_mediafoundation PROPERTIES
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 add_dependencies(VideoCapture_mediafoundation avkys)
 target_include_directories(VideoCapture_mediafoundation
                            PRIVATE
@@ -95,5 +106,7 @@ target_link_libraries(VideoCapture_mediafoundation
                       strmiids)
 
 if (NOT NOMEDIAFOUNDATION AND WIN32 AND HAVE_MEDIAFOUNDATION)
-    install(TARGETS VideoCapture_mediafoundation RUNTIME DESTINATION ${PLUGINSDIR})
+    install(TARGETS VideoCapture_mediafoundation
+            LIBRARY DESTINATION ${AKPLUGINSDIR}
+            RUNTIME DESTINATION ${AKPLUGINSDIR})
 endif ()

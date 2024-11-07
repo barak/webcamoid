@@ -17,13 +17,13 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Qt.labs.platform 1.1 as LABS
-import Ak 1.0
-import AkControls 1.0 as AK
-import FaceDetectElement 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt.labs.platform as LABS
+import Ak
+import AkControls as AK
+import FaceDetectElement
 
 GridLayout {
     id: clyFaceDetect
@@ -225,8 +225,8 @@ GridLayout {
         text: FaceDetect.scanSize.width + "x" + FaceDetect.scanSize.height
         placeholderText: qsTr("Scan block")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+x\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+x\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtScanBlock.text
@@ -346,8 +346,8 @@ GridLayout {
         text: FaceDetect.markerWidth
         placeholderText: qsTr("Marker width")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtMarkerWidth.text
@@ -648,8 +648,8 @@ GridLayout {
         text: FaceDetect.pixelGridSize.width + "x" + FaceDetect.pixelGridSize.height
         placeholderText: qsTr("Pixel grid size")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+x\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+x\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtPixelGridSize.text
@@ -666,8 +666,8 @@ GridLayout {
         text: FaceDetect.blurRadius
         placeholderText: qsTr("Blur radius")
         selectByMouse: true
-        validator: RegExpValidator {
-            regExp: /\d+/
+        validator: RegularExpressionValidator {
+            regularExpression: /\d+/
         }
         Layout.fillWidth: true
         Accessible.name: txtBlurRadius.text

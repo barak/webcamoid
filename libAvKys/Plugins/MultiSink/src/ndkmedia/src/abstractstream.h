@@ -40,8 +40,8 @@ class AbstractStream: public QObject
     Q_OBJECT
 
     public:
-        AbstractStream(AMediaMuxer *mediaMuxer=nullptr,
-                       uint index=0, int streamIndex=-1,
+        AbstractStream(uint index=0,
+                       int streamIndex=-1,
                        const QVariantMap &configs={},
                        const QMap<QString, QVariantMap> &codecOptions={},
                        MediaWriterNDKMedia *mediaWriter=nullptr,
@@ -68,16 +68,11 @@ class AbstractStream: public QObject
     private:
         AbstractStreamPrivate *d;
 
-    signals:
-        void packetReady(size_t trackIdx,
-                         const uint8_t *data,
-                         const AMediaCodecBufferInfo *info);
-
     public slots:
         virtual bool init();
         virtual void uninit();
 
-        friend class AbstractStreamPrivate;
+    friend class AbstractStreamPrivate;
 };
 
 #endif // ABSTRACTSTREAM_H

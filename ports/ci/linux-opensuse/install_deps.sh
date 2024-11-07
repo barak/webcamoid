@@ -18,6 +18,8 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 if [ ! -z "${USE_WGET}" ]; then
     export DOWNLOAD_CMD="wget -nv -c"
 else
@@ -86,15 +88,6 @@ if [ -e ".local/${appimage}" ]; then
     cd ..
 fi
 
-if [[ "${DOCKERIMG}" == *leap* ]]; then
-    zypper ar \
-        -p 1 \
-        -f \
-        -G \
-        "https://download.opensuse.org/repositories/KDE:/Qt5/openSUSE_Leap_${DOCKERIMG#*:}" KDE-Qt5
-    zypper -v -n dup --allow-vendor-change
-fi
-
 zypper -n in \
     alsa-devel \
     ccache \
@@ -105,24 +98,26 @@ zypper -n in \
     gstreamer-plugins-base \
     gstreamer-plugins-base-devel \
     gstreamer-plugins-good \
-    gzip \
-    libQt5QuickControls2-devel \
     libjack-devel \
     libkmod-devel \
     libpulse-devel \
-    libqt5-linguist \
-    libqt5-qtbase-devel \
-    libqt5-qtdeclarative-devel \
-    libqt5-qtmultimedia-devel \
-    libqt5-qtquickcontrols2 \
-    libqt5-qtsvg-devel \
-    libqt5-qtwayland \
     libusb-1_0-devel \
     libv4l-devel \
+    libXext-devel \
+    libXfixes-devel \
     patchelf \
     pipewire-devel \
     portaudio-devel \
     python3 \
+    qt6-concurrent-devel \
+    qt6-declarative-devel \
+    qt6-multimedia-devel \
+    qt6-quickcontrols2-devel \
+    qt6-svg-devel \
+    qt6-tools-linguist \
+    qt6-wayland \
+    qt6-widgets-devel \
+    qt6-xml-devel \
     vlc-devel \
     vlc-noX \
     which \

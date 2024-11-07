@@ -30,9 +30,13 @@
 #include <QtConcurrent>
 
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
+#include <QJniObject>
+
+#define PERMISSION_GRANTED  0
+#define PERMISSION_DENIED  -1
 #endif
 
+#include <ak.h>
 #include <akaudiocaps.h>
 #include <akcaps.h>
 #include <akpacket.h>
@@ -72,7 +76,9 @@ class VideoLayerPrivate
         QStringList m_inputs;
         QMap<QString, QString> m_images;
         QMap<QString, QString> m_streams;
+        QStringList m_supportedFileFormats;
         QStringList m_supportedImageFormats;
+        QMap<QString, QString> m_formatsDescription;
         AkAudioCaps m_inputAudioCaps;
         AkVideoCaps m_inputVideoCaps;
         AkElementPtr m_cameraCapture {akPluginManager->create<AkElement>("VideoSource/CameraCapture")};
@@ -89,7 +95,6 @@ class VideoLayerPrivate
         bool m_currentVCamInstalled;
 
         explicit VideoLayerPrivate(VideoLayer *self);
-        bool isFlatpak() const;
         static bool canAccessStorage();
         void connectSignals();
         AkElementPtr sourceElement(const QString &stream) const;
@@ -187,44 +192,13 @@ VideoLayer::~VideoLayer()
 
 QStringList VideoLayer::videoSourceFileFilters() const
 {
-    static const QMap<QString, QString> formatsDescription {
-        {"3gp" , tr("3GP Video")                            },
-        {"avi" , tr("AVI Video")                            },
-        {"bmp" , tr("Windows Bitmap")                       },
-        {"cur" , tr("Microsoft Windows Cursor")             },
-        //: Adobe FLV Flash video
-        {"flv" , tr("Flash Video")                          },
-        {"gif" , tr("Animated GIF")                         },
-        {"gif" , tr("Graphic Interchange Format")           },
-        {"icns", tr("Apple Icon Image")                     },
-        {"ico" , tr("Microsoft Windows Icon")               },
-        {"jpg" , tr("Joint Photographic Experts Group")     },
-        {"mkv" , tr("MKV Video")                            },
-        {"mng" , tr("Animated PNG")                         },
-        {"mng" , tr("Multiple-image Network Graphics")      },
-        {"mov" , tr("QuickTime Video")                      },
-        {"mp4" , tr("MP4 Video")                            },
-        {"mpg" , tr("MPEG Video")                           },
-        {"ogg" , tr("Ogg Video")                            },
-        {"pbm" , tr("Portable Bitmap")                      },
-        {"pgm" , tr("Portable Graymap")                     },
-        {"png" , tr("Portable Network Graphics")            },
-        {"ppm" , tr("Portable Pixmap")                      },
-        //: Don't translate "RealMedia", leave it as is.
-        {"rm"  , tr("RealMedia Video")                      },
-        {"svg" , tr("Scalable Vector Graphics")             },
-        {"tga" , tr("Truevision TGA")                       },
-        {"tiff", tr("Tagged Image File Format")             },
-        {"vob" , tr("DVD Video")                            },
-        {"wbmp", tr("Wireless Bitmap")                      },
-        {"webm", tr("WebM Video")                           },
-        {"webp", tr("WebP")                                 },
-        //: Also known as WMV, is a video file format.
-        {"wmv" , tr("Windows Media Video")                  },
-        {"xbm" , tr("X11 Bitmap")                           },
-        {"xpm" , tr("X11 Pixmap")                           },
-    };
+    QStringList filters;
 
+    /* Android's file selection dialog seems to be ignoring the file filters,
+     * so allow selecting any type of file.
+     */
+#ifndef Q_OS_ANDROID
+    //  Alternative extension names
     static const QMap<QString, QString> formatsMapping {
         {"jp2" , "jpg" },
         {"jpeg", "jpg" },
@@ -234,40 +208,15 @@ QStringList VideoLayer::videoSourceFileFilters() const
         {"mpeg", "mpg" },
     };
 
-    static const QStringList supportedVideoFormats {
-        "3gp",
-        "avi",
-        "flv",
-        "gif",
-        "mkv",
-        "mng",
-        "mov",
-        "mp4",
-        "m4v",
-        "mpg",
-        "mpeg",
-        "ogg",
-        "rm",
-        "vob",
-        "webm",
-        "wmv"
-    };
-
-    auto supportedImageFormats = QImageReader::supportedImageFormats();
-    supportedImageFormats.removeAll("pdf");
-    QStringList supportedFormats = supportedVideoFormats
-                                   + QStringList(supportedImageFormats.begin(),
-                                                 supportedImageFormats.end());
     QString extensions =
-            "*." + supportedFormats.join(" *.");
+            "*." + this->d->m_supportedFileFormats.join(" *.");
 
-    QStringList filters;
     filters << tr("All Image and Video Files")
                + QString(" (%1)").arg(extensions);
 
     QStringList formats;
 
-    for (auto &format: supportedFormats) {
+    for (auto &format: this->d->m_supportedFileFormats) {
         QString fmt;
 
         if (formatsMapping.contains(format))
@@ -287,8 +236,8 @@ QStringList VideoLayer::videoSourceFileFilters() const
                                  + formatsMapping.keys(format);
         QString extensionsFilter = "*." + extensions.join(" *.");
 
-        if (formatsDescription.contains(format))
-            filter = format.toUpper() + " - " + formatsDescription[format];
+        if (this->d->m_formatsDescription.contains(format))
+            filter = format.toUpper() + " - " + this->d->m_formatsDescription[format];
         else
             filter = format.toUpper();
 
@@ -297,6 +246,8 @@ QStringList VideoLayer::videoSourceFileFilters() const
 
     fileFilters.sort();
     filters << fileFilters;
+#endif
+
     filters << tr("All Files") + " (*)";
 
     return filters;
@@ -339,6 +290,11 @@ AkAudioCaps VideoLayer::inputAudioCaps() const
 AkVideoCaps VideoLayer::inputVideoCaps() const
 {
     return this->d->m_inputVideoCaps;
+}
+
+QStringList VideoLayer::supportedFileFormats() const
+{
+    return this->d->m_supportedFileFormats;
 }
 
 AkVideoCaps::PixelFormatList VideoLayer::supportedOutputPixelFormats() const
@@ -386,25 +342,28 @@ AkElement::ElementState VideoLayer::state() const
     return this->d->m_state;
 }
 
-VideoLayer::FlashModeList VideoLayer::supportedFlashModes(const QString &videoInput) const
+bool VideoLayer::isTorchSupported() const
 {
     if (!this->d->m_cameraCapture)
-        return {};
+        return false;
 
-    FlashModeList modes;
-    QMetaObject::invokeMethod(this->d->m_cameraCapture.data(),
-                              "supportedFlashModes",
-                              Q_RETURN_ARG(FlashModeList, modes),
-                              Q_ARG(QString, videoInput));
-    return modes;
+    return this->d->m_cameraCapture->property("isTorchSupported").toBool();
 }
 
-VideoLayer::FlashMode VideoLayer::flashMode() const
+VideoLayer::TorchMode VideoLayer::torchMode() const
 {
     if (!this->d->m_cameraCapture)
-        return FlashMode_Off;
+        return Torch_Off;
 
-    return this->d->m_cameraCapture->property("flashMode").value<FlashMode>();
+    return this->d->m_cameraCapture->property("torchMode").value<TorchMode>();
+}
+
+VideoLayer::PermissionStatus VideoLayer::cameraPermissionStatus() const
+{
+    if (!this->d->m_cameraCapture)
+        return PermissionStatus_Granted;
+
+    return this->d->m_cameraCapture->property("permissionStatus").value<PermissionStatus>();
 }
 
 bool VideoLayer::playOnStart() const
@@ -703,7 +662,8 @@ bool VideoLayer::isVCamSupported() const
 {
 #if defined(Q_OS_WIN32) \
     || defined(Q_OS_OSX) \
-    || (defined(Q_OS_LINUX) && ! defined(Q_OS_ANDROID))
+    || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID) \
+    || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN)))
     return true;
 #else
     return false;
@@ -757,6 +717,14 @@ QString VideoLayer::currentVCamVersion() const
 bool VideoLayer::isCurrentVCamInstalled() const
 {
     return this->d->m_currentVCamInstalled;
+}
+
+bool VideoLayer::canEditVCamDescription() const
+{
+    if (this->d->m_cameraOutput)
+        return this->d->m_cameraOutput->property("canEditVCamDescription").toBool();
+
+    return false;
 }
 
 QString VideoLayer::vcamUpdateUrl() const
@@ -889,7 +857,7 @@ bool VideoLayer::executeVCamInstaller(const QString &installer)
         QProcess proc;
 
     #ifdef Q_PROCESSOR_X86
-        if (this->d->isFlatpak())
+        if (Ak::isFlatpak())
             proc.start("flatpak-spawn", QStringList {"--host", installer});
         else
             proc.start(installer, QStringList {});
@@ -914,7 +882,7 @@ bool VideoLayer::executeVCamInstaller(const QString &installer)
                          readLine,
                          Qt::DirectConnection);
 
-        if (this->d->isFlatpak())
+        if (Ak::isFlatpak())
             proc.start("flatpak-spawn",
                        QStringList {"--host",
                                     "pkexec",
@@ -989,9 +957,16 @@ void VideoLayer::setInputStream(const QString &stream,
         return;
 
     QFileInfo fileInfo(stream);
+
+    if (!fileInfo.exists())
+        return;
+
     auto suffix = fileInfo.suffix().toLower();
 
-    if (fileInfo.exists() && this->d->m_supportedImageFormats.contains(suffix))
+    if (!this->d->m_supportedFileFormats.contains(suffix))
+        return;
+
+    if (this->d->m_supportedImageFormats.contains(suffix))
         this->d->m_images[stream] = description;
     else
         this->d->m_streams[stream] = description;
@@ -1132,10 +1107,10 @@ void VideoLayer::setState(AkElement::ElementState state)
     }
 }
 
-void VideoLayer::setFlashMode(FlashMode mode)
+void VideoLayer::setTorchMode(TorchMode mode)
 {
     if (this->d->m_cameraCapture)
-        this->d->m_cameraCapture->setProperty("flashMode", mode);
+        this->d->m_cameraCapture->setProperty("torchMode", mode);
 }
 
 void VideoLayer::setPlayOnStart(bool playOnStart)
@@ -1185,9 +1160,9 @@ void VideoLayer::resetState()
     this->setState(AkElement::ElementStateNull);
 }
 
-void VideoLayer::resetFlashMode()
+void VideoLayer::resetTorchMode()
 {
-    this->setFlashMode(FlashMode_Off);
+    this->setTorchMode(Torch_Off);
 }
 
 void VideoLayer::resetPlayOnStart()
@@ -1226,8 +1201,8 @@ void VideoLayer::setQmlEngine(QQmlApplicationEngine *engine)
         qRegisterMetaType<InputType>("VideoInputType");
         qRegisterMetaType<OutputType>("VideoOutputType");
         qRegisterMetaType<VCamStatus>("VCamStatus");
-        qRegisterMetaType<FlashMode>("FlashMode");
-        qRegisterMetaType<FlashModeList>("FlashModeList");
+        qRegisterMetaType<TorchMode>("TorchMode");
+        qRegisterMetaType<PermissionStatus>("PermissionStatus");
         qmlRegisterType<VideoLayer>("Webcamoid", 1, 0, "VideoLayer");
     }
 }
@@ -1371,13 +1346,68 @@ AkPacket VideoLayer::iStream(const AkPacket &packet)
 VideoLayerPrivate::VideoLayerPrivate(VideoLayer *self):
     self(self)
 {
-}
+    this->m_formatsDescription = {
+        {"3gp" , QObject::tr("3GP Video")                       },
+        {"avi" , QObject::tr("AVI Video")                       },
+        {"bmp" , QObject::tr("Windows Bitmap")                  },
+        {"cur" , QObject::tr("Microsoft Windows Cursor")        },
+        //: Adobe FLV Flash video
+        {"flv" , QObject::tr("Flash Video")                     },
+        {"gif" , QObject::tr("Animated GIF")                    },
+        {"gif" , QObject::tr("Graphic Interchange Format")      },
+        {"icns", QObject::tr("Apple Icon Image")                },
+        {"ico" , QObject::tr("Microsoft Windows Icon")          },
+        {"jpg" , QObject::tr("Joint Photographic Experts Group")},
+        {"mkv" , QObject::tr("MKV Video")                       },
+        {"mng" , QObject::tr("Animated PNG")                    },
+        {"mng" , QObject::tr("Multiple-image Network Graphics") },
+        {"mov" , QObject::tr("QuickTime Video")                 },
+        {"mp4" , QObject::tr("MP4 Video")                       },
+        {"mpg" , QObject::tr("MPEG Video")                      },
+        {"ogg" , QObject::tr("Ogg Video")                       },
+        {"pbm" , QObject::tr("Portable Bitmap")                 },
+        {"pgm" , QObject::tr("Portable Graymap")                },
+        {"png" , QObject::tr("Portable Network Graphics")       },
+        {"ppm" , QObject::tr("Portable Pixmap")                 },
+        //: Don't translate "RealMedia", leave it as is.
+        {"rm"  , QObject::tr("RealMedia Video")                 },
+        {"svg" , QObject::tr("Scalable Vector Graphics")        },
+        {"tga" , QObject::tr("Truevision TGA")                  },
+        {"tiff", QObject::tr("Tagged Image File Format")        },
+        {"vob" , QObject::tr("DVD Video")                       },
+        {"wbmp", QObject::tr("Wireless Bitmap")                 },
+        {"webm", QObject::tr("WebM Video")                      },
+        {"webp", QObject::tr("WebP")                            },
+        //: Also known as WMV, is a video file format.
+        {"wmv" , QObject::tr("Windows Media Video")             },
+        {"xbm" , QObject::tr("X11 Bitmap")                      },
+        {"xpm" , QObject::tr("X11 Pixmap")                      },
+    };
 
-bool VideoLayerPrivate::isFlatpak() const
-{
-    static const bool isFlatpak = QFile::exists("/.flatpak-info");
+    static const QStringList supportedVideoFormats {
+        "3gp",
+        "avi",
+        "flv",
+        "gif",
+        "mkv",
+        "mng",
+        "mov",
+        "mp4",
+        "m4v",
+        "mpg",
+        "mpeg",
+        "ogg",
+        "rm",
+        "vob",
+        "webm",
+        "wmv"
+    };
 
-    return isFlatpak;
+    auto supportedImageFormats = QImageReader::supportedImageFormats();
+    supportedImageFormats.removeAll("pdf");
+    this->m_supportedFileFormats =
+        supportedVideoFormats + QStringList(supportedImageFormats.begin(),
+                                            supportedImageFormats.end());
 }
 
 bool VideoLayerPrivate::canAccessStorage()
@@ -1389,24 +1419,80 @@ bool VideoLayerPrivate::canAccessStorage()
     if (done)
         return result;
 
+    QJniObject context =
+        qApp->nativeInterface<QNativeInterface::QAndroidApplication>()->context();
+
+    if (!context.isValid()) {
+        done = false;
+
+        return result;
+    }
+
     QStringList permissions {
         "android.permission.READ_EXTERNAL_STORAGE"
     };
     QStringList neededPermissions;
 
-    for (auto &permission: permissions)
-        if (QtAndroid::checkPermission(permission) == QtAndroid::PermissionResult::Denied)
+    for (auto &permission: permissions) {
+        auto permissionStr = QJniObject::fromString(permission);
+        auto result =
+            context.callMethod<jint>("checkSelfPermission",
+                                     "(Ljava/lang/String;)I",
+                                     permissionStr.object());
+
+        if (result != PERMISSION_GRANTED)
             neededPermissions << permission;
+    }
 
     if (!neededPermissions.isEmpty()) {
-        auto results = QtAndroid::requestPermissionsSync(neededPermissions);
+        QJniEnvironment jniEnv;
+        jobjectArray permissionsArray =
+            jniEnv->NewObjectArray(permissions.size(),
+                                   jniEnv->FindClass("java/lang/String"),
+                                   nullptr);
+        int i = 0;
 
-        for (auto it = results.constBegin(); it != results.constEnd(); it++)
-            if (it.value() == QtAndroid::PermissionResult::Denied) {
-                done = true;
+        for (auto &permission: permissions) {
+            auto permissionObject = QJniObject::fromString(permission);
+            jniEnv->SetObjectArrayElement(permissionsArray,
+                                          i,
+                                          permissionObject.object());
+            i++;
+        }
 
-                return false;
+        context.callMethod<void>("requestPermissions",
+                                 "([Ljava/lang/String;I)V",
+                                 permissionsArray,
+                                 jint(Ak::id()));
+        QElapsedTimer timer;
+        timer.start();
+        static const int timeout = 5000;
+
+        while (timer.elapsed() < timeout) {
+            bool permissionsGranted = true;
+
+            for (auto &permission: permissions) {
+                auto permissionStr = QJniObject::fromString(permission);
+                auto result =
+                    context.callMethod<jint>("checkSelfPermission",
+                                             "(Ljava/lang/String;)I",
+                                             permissionStr.object());
+
+                if (result != PERMISSION_GRANTED) {
+                    permissionsGranted = false;
+
+                    break;
+                }
             }
+
+            if (permissionsGranted)
+                break;
+
+            auto eventDispatcher = QThread::currentThread()->eventDispatcher();
+
+            if (eventDispatcher)
+                eventDispatcher->processEvents(QEventLoop::AllEvents);
+        }
     }
 
     done = true;
@@ -1437,9 +1523,17 @@ void VideoLayerPrivate::connectSignals()
                          self,
                          SLOT(updateCaps()));
         QObject::connect(this->m_cameraCapture.data(),
-                         SIGNAL(flashModeChanged(FlashMode)),
+                         SIGNAL(isTorchSupportedChanged(bool)),
                          self,
-                         SIGNAL(flashModeChanged(FlashMode)));
+                         SIGNAL(isTorchSupportedChanged(bool)));
+        QObject::connect(this->m_cameraCapture.data(),
+                         SIGNAL(torchModeChanged(TorchMode)),
+                         self,
+                         SIGNAL(torchModeChanged(TorchMode)));
+        QObject::connect(this->m_cameraCapture.data(),
+                         SIGNAL(permissionStatusChanged(PermissionStatus)),
+                         self,
+                         SIGNAL(cameraPermissionStatusChanged(PermissionStatus)));
     }
 
     if (this->m_desktopCapture) {
@@ -1678,9 +1772,16 @@ void VideoLayerPrivate::loadProperties()
         auto description = config.value("description").toString();
 
         QFileInfo fileInfo(uri);
+
+        if (!fileInfo.exists())
+            continue;
+
         auto suffix = fileInfo.suffix().toLower();
 
-        if (fileInfo.exists() && this->m_supportedImageFormats.contains(suffix))
+        if (!this->m_supportedFileFormats.contains(suffix))
+            continue;
+
+        if (this->m_supportedImageFormats.contains(suffix))
             this->m_images[uri] = description;
         else
             this->m_streams[uri] = description;

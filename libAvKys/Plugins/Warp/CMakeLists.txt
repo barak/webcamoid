@@ -36,20 +36,24 @@ find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
-add_library(Warp SHARED
-            src/warp.h
-            src/warpelement.h
-            src/warp.cpp
-            src/warpelement.cpp
-            Warp.qrc
-            pspec.json)
+qt_add_plugin(Warp
+              SHARED
+              CLASS_NAME Warp)
+target_sources(Warp PRIVATE
+               src/warp.h
+               src/warpelement.h
+               src/warp.cpp
+               src/warpelement.cpp
+               Warp.qrc
+               pspec.json)
 
-if (WIN32)
+set_target_properties(Warp PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR})
+
+if (IPO_IS_SUPPORTED)
     set_target_properties(Warp PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
-elseif (NOT ANDROID)
-    set_target_properties(Warp PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/${PLUGINSDIR})
+                          INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()
 
 add_dependencies(Warp avkys)
@@ -59,8 +63,6 @@ target_compile_definitions(Warp PRIVATE AVKYS_PLUGIN_WARP)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(Warp avkys ${QT_LIBS})
 
-if (WIN32)
-    install(TARGETS Warp RUNTIME DESTINATION ${PLUGINSDIR})
-elseif (NOT ANDROID)
-    install(TARGETS Warp DESTINATION ${PLUGINSDIR})
-endif ()
+install(TARGETS Warp
+        LIBRARY DESTINATION ${AKPLUGINSDIR}
+        RUNTIME DESTINATION ${AKPLUGINSDIR})

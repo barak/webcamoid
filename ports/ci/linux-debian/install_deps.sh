@@ -18,10 +18,28 @@
 #
 # Web-Site: http://webcamoid.github.io/
 
+set -e
+
 if [ ! -z "${USE_WGET}" ]; then
     export DOWNLOAD_CMD="wget -nv -c"
 else
     export DOWNLOAD_CMD="curl --retry 10 -sS -kLOC -"
+fi
+
+if [ -z "${ARCHITECTURE}" ]; then
+    architecture=amd64
+else
+    case "${ARCHITECTURE}" in
+        aarch64)
+            architecture=arm64v8
+            ;;
+        armv7)
+            architecture=arm32v7
+            ;;
+        *)
+            architecture=${ARCHITECTURE}
+            ;;
+    esac
 fi
 
 # Fix keyboard layout bug when running apt
@@ -37,6 +55,7 @@ EOF
 export LC_ALL=C
 export DEBIAN_FRONTEND=noninteractive
 
+apt-get -qq -y update
 apt-get install -qq -y keyboard-configuration
 cp -vf keyboard_config /etc/default/keyboard
 dpkg-reconfigure --frontend noninteractive keyboard-configuration
@@ -47,6 +66,7 @@ apt-get -qq -y update
 apt-get -qq -y upgrade
 apt-get -qq -y install \
     curl \
+    file \
     libdbus-1-3 \
     libfontconfig1 \
     libgl1 \
@@ -62,94 +82,154 @@ apt-get -qq -y install \
     libxext6 \
     libxkbcommon-x11-0 \
     libxrender1 \
+    python3-pip \
     wget
+
+apt-get -qq -y install \
+    libgpgme11
 
 mkdir -p .local/bin
 
-# Install Qt Installer Framework
+if [[ ( "${architecture}" = amd64 || "${architecture}" = arm64v8 ) && ! -z "${QTIFWVER}" ]]; then
+    # Install Qt Installer Framework
 
-qtIFW=QtInstallerFramework-linux-x64-${QTIFWVER}.run
-${DOWNLOAD_CMD} "http://download.qt.io/official_releases/qt-installer-framework/${QTIFWVER}/${qtIFW}" || true
+    case "${architecture}" in
+        arm64v8)
+            qtArch=arm64
+            ;;
+        *)
+            qtArch=x64
+            ;;
+    esac
 
-if [ -e "${qtIFW}" ]; then
-    chmod +x "${qtIFW}"
-    QT_QPA_PLATFORM=minimal \
-    ./"${qtIFW}" \
-        --verbose \
-        --root ~/QtIFW \
-        --accept-licenses \
-        --accept-messages \
-        --confirm-command \
-        install
-    cd .local
-    cp -rvf ~/QtIFW/* .
-    cd ..
+    qtIFW=QtInstallerFramework-linux-${qtArch}-${QTIFWVER}.run
+    ${DOWNLOAD_CMD} "http://download.qt.io/official_releases/qt-installer-framework/${QTIFWVER}/${qtIFW}" || true
+
+    if [ -e "${qtIFW}" ]; then
+        if [ "${architecture}" = arm64v8 ]; then
+            ln -svf libtiff.so.6 /usr/lib/aarch64-linux-gnu/libtiff.so.5
+            ln -svf libwebp.so.7 /usr/lib/aarch64-linux-gnu/libwebp.so.6
+        fi
+
+        chmod +x "${qtIFW}"
+        QT_QPA_PLATFORM=minimal \
+        ./"${qtIFW}" \
+            --verbose \
+            --root ~/QtIFW \
+            --accept-licenses \
+            --accept-messages \
+            --confirm-command \
+            install
+        cd .local
+        cp -rvf ~/QtIFW/* .
+        cd ..
+    fi
 fi
 
 # Install AppImageTool
 
-appimage=appimagetool-x86_64.AppImage
+case "${architecture}" in
+    arm64v8)
+        appimage=appimagetool-aarch64.AppImage
+        ;;
+    arm32v7)
+        appimage=appimagetool-armhf.AppImage
+        ;;
+    *)
+        appimage=appimagetool-x86_64.AppImage
+        ;;
+esac
+
 wget -c -O ".local/${appimage}" "https://github.com/AppImage/AppImageKit/releases/download/${APPIMAGEVER}/${appimage}" || true
 
 if [ -e ".local/${appimage}" ]; then
     chmod +x ".local/${appimage}"
 
     cd .local
-    ./${appimage} --appimage-extract
-    cp -rvf squashfs-root/usr/* .
+    ./${appimage} --appimage-extract || true
+
+    if [ -e squashfs-root/usr ]; then
+        cp -rvf squashfs-root/usr/* .
+    fi
+
     cd ..
 fi
+
+# Install build dependecies
 
 apt-get -y install \
     ccache \
     clang \
     cmake \
+    dpkg \
+    fakeroot \
     file \
     g++ \
     git \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
     libasound2-dev \
     libavcodec-dev \
     libavdevice-dev \
     libavformat-dev \
     libavutil-dev \
     libgl1-mesa-dev \
-    libgstreamer-plugins-base1.0-dev \
-    libgstreamer1.0-0 \
     libjack-dev \
     libkmod-dev \
     libpipewire-0.3-dev \
+    libpipewire-0.3-modules \
     libpulse-dev \
-    libqt5opengl5-dev \
-    libqt5svg5-dev \
+    libqt6opengl6-dev \
+    libqt6svg6-dev \
     libsdl2-dev \
     libswresample-dev \
     libswscale-dev \
     libusb-dev \
+    libusb-1.0-0-dev \
     libuvc-dev \
     libv4l-dev \
     libvlc-dev \
     libvlccore-dev \
+    libvulkan-dev \
+    libwebpdemux2 \
+    libxext-dev \
+    libxfixes-dev \
+    lintian \
     linux-libc-dev \
     make \
     patchelf \
     pkg-config \
     portaudio19-dev \
-    qml-module-qt-labs-folderlistmodel \
-    qml-module-qt-labs-platform \
-    qml-module-qt-labs-settings \
-    qml-module-qtqml-models2 \
-    qml-module-qtquick-controls2 \
-    qml-module-qtquick-dialogs \
-    qml-module-qtquick-extras \
-    qml-module-qtquick-privatewidgets \
-    qml-module-qtquick-templates2 \
-    qt5-qmake \
-    qtdeclarative5-dev \
-    qtmultimedia5-dev \
-    qtquickcontrols2-5-dev \
-    qttools5-dev-tools \
-    qtwayland5 \
+    qmake6 \
+    qml6-module-qt-labs-folderlistmodel \
+    qml6-module-qt-labs-platform \
+    qml6-module-qt-labs-settings \
+    qml6-module-qtcore \
+    qml6-module-qtmultimedia \
+    qml6-module-qtqml \
+    qml6-module-qtqml-models \
+    qml6-module-qtqml-workerscript \
+    qml6-module-qtquick-controls \
+    qml6-module-qtquick-dialogs \
+    qml6-module-qtquick-layouts \
+    qml6-module-qtquick-nativestyle \
+    qml6-module-qtquick-shapes \
+    qml6-module-qtquick-templates \
+    qml6-module-qtquick-window \
+    qml6-module-qtquick3d-spatialaudio \
+    qml6-module-qttest \
+    qml6-module-qtwayland-compositor \
+    qt6-declarative-dev \
+    qt6-l10n-tools \
+    qt6-multimedia-dev \
+    qt6-wayland \
+    rpm \
+    rpmlint \
     vlc-plugin-base \
     xvfb
+
+if [ "${UPLOAD}" != 1 ]; then
+    apt-get -y install \
+        gstreamer1.0-plugins-base \
+        gstreamer1.0-plugins-good \
+        libgstreamer-plugins-base1.0-dev \
+        libgstreamer1.0-0
+fi
