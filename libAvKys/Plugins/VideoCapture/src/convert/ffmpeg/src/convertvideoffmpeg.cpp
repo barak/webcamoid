@@ -55,24 +55,19 @@ extern "C"
 // no AV correction is done if too big error
 #define AV_NOSYNC_THRESHOLD 10.0
 
-using FFCodecMap = QMap<AVCodecID, QString>;
+using FFCodecMap = QMap<AVCodecID, AkCompressedVideoCaps::VideoCodecID>;
 
 inline FFCodecMap initCompressedFFToStr()
 {
     FFCodecMap compressedToFF {
-        {AV_CODEC_ID_DVVIDEO   , "dvsd" },
-        {AV_CODEC_ID_H263      , "h263" },
-        {AV_CODEC_ID_H264      , "h264" },
-        {AV_CODEC_ID_HEVC      , "hevc" },
-        {AV_CODEC_ID_MJPEG     , "jpeg" },
-        {AV_CODEC_ID_MJPEG     , "mjpg" },
-        {AV_CODEC_ID_MPEG2VIDEO, "mpeg1"},
-        {AV_CODEC_ID_MPEG1VIDEO, "mpeg2"},
-        {AV_CODEC_ID_MPEG4     , "mpeg4"},
-        {AV_CODEC_ID_VC1       , "vc1"  },
-        {AV_CODEC_ID_VP8       , "vp8"  },
-        {AV_CODEC_ID_VP8       , "vp9"  },
-        {AV_CODEC_ID_MPEG4     , "xvid" },
+        {AV_CODEC_ID_H264      , AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AV_CODEC_ID_HEVC      , AkCompressedVideoCaps::VideoCodecID_hevc },
+        {AV_CODEC_ID_MJPEG     , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {AV_CODEC_ID_MPEG1VIDEO, AkCompressedVideoCaps::VideoCodecID_mpeg1},
+        {AV_CODEC_ID_MPEG2VIDEO, AkCompressedVideoCaps::VideoCodecID_mpeg2},
+        {AV_CODEC_ID_MPEG4     , AkCompressedVideoCaps::VideoCodecID_mpeg4},
+        {AV_CODEC_ID_VP8       , AkCompressedVideoCaps::VideoCodecID_vp8  },
+        {AV_CODEC_ID_VP9       , AkCompressedVideoCaps::VideoCodecID_vp9  },
     };
 
     return compressedToFF;
@@ -86,6 +81,7 @@ class ConvertVideoFFmpegPrivate
 {
     public:
         ConvertVideoFFmpeg *self {nullptr};
+        AkCompressedVideoCaps::VideoCodecList m_supportedCodecs;
         SwsContext *m_scaleContext {nullptr};
         AVDictionary *m_codecOptions {nullptr};
         AVCodecContext *m_codecContext {nullptr};
@@ -113,6 +109,7 @@ class ConvertVideoFFmpegPrivate
 
         explicit ConvertVideoFFmpegPrivate(ConvertVideoFFmpeg *self);
         inline AVPixelFormat defaultPixelFormat(const AVCodec *codec) const;
+        void listCodecs();
         static void packetLoop(ConvertVideoFFmpeg *stream);
         static void dataLoop(ConvertVideoFFmpeg *stream);
         static void deleteFrame(AVFrame *frame);
@@ -132,6 +129,8 @@ ConvertVideoFFmpeg::ConvertVideoFFmpeg(QObject *parent):
     av_log_set_level(AV_LOG_QUIET);
 #endif
 
+    this->d->listCodecs();
+
     if (this->d->m_threadPool.maxThreadCount() < 2)
         this->d->m_threadPool.setMaxThreadCount(2);
 }
@@ -150,6 +149,11 @@ qint64 ConvertVideoFFmpeg::maxPacketQueueSize() const
 bool ConvertVideoFFmpeg::showLog() const
 {
     return this->d->m_showLog;
+}
+
+AkCompressedVideoCaps::VideoCodecList ConvertVideoFFmpeg::supportedCodecs() const
+{
+    return this->d->m_supportedCodecs;
 }
 
 void ConvertVideoFFmpeg::packetEnqueue(const AkPacket &packet)
@@ -181,18 +185,18 @@ void ConvertVideoFFmpeg::dataEnqueue(AVFrame *frame)
 bool ConvertVideoFFmpeg::init(const AkCaps &caps)
 {
     AkCompressedVideoCaps videoCaps(caps);
-    auto format = videoCaps.format();
+    auto codecId = videoCaps.codec();
 
-    if (!compressedFFToStr->values().contains(format)) {
-        qDebug() << "Compressed format not supported:" << format;
+    if (!compressedFFToStr->values().contains(codecId)) {
+        qDebug() << "Compressed format not supported:" << codecId;
 
         return false;
     }
 
-    auto codec = avcodec_find_decoder(compressedFFToStr->key(format, AV_CODEC_ID_NONE));
+    auto codec = avcodec_find_decoder(compressedFFToStr->key(codecId, AV_CODEC_ID_NONE));
 
     if (!codec) {
-        qDebug() << "Decoder not found for" << format;
+        qDebug() << "Decoder not found for" << codecId;
 
         return false;
     }
@@ -216,9 +220,9 @@ bool ConvertVideoFFmpeg::init(const AkCaps &caps)
 #endif
 
     this->d->m_codecContext->pix_fmt = this->d->defaultPixelFormat(codec);
-    this->d->m_codecContext->width = videoCaps.width();
-    this->d->m_codecContext->height = videoCaps.height();
-    this->d->m_fps = videoCaps.fps();
+    this->d->m_codecContext->width = videoCaps.rawCaps().width();
+    this->d->m_codecContext->height = videoCaps.rawCaps().height();
+    this->d->m_fps = videoCaps.rawCaps().fps();
     this->d->m_codecContext->framerate.num = int(this->d->m_fps.num());
     this->d->m_codecContext->framerate.den = int(this->d->m_fps.den());
     this->d->m_codecContext->workaround_bugs = 1;
@@ -323,10 +327,38 @@ ConvertVideoFFmpegPrivate::ConvertVideoFFmpegPrivate(ConvertVideoFFmpeg *self):
 
 AVPixelFormat ConvertVideoFFmpegPrivate::defaultPixelFormat(const AVCodec *codec) const
 {
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 13, 100)
+    const AVPixelFormat *avFormats = nullptr;
+    int nFormats = 0;
+
+    avcodec_get_supported_config(nullptr,
+                                 codec,
+                                 AV_CODEC_CONFIG_PIX_FORMAT,
+                                 0,
+                                 reinterpret_cast<const void **>(&avFormats),
+                                 &nFormats);
+
+    if (nFormats > 0)
+        return avFormats[0];
+#else
     if (codec->pix_fmts)
         return codec->pix_fmts[0];
+#endif
 
     return AV_PIX_FMT_NONE;
+}
+
+void ConvertVideoFFmpegPrivate::listCodecs()
+{
+    void *opaqueCdc = nullptr;
+
+    while (auto codec = av_codec_iterate(&opaqueCdc))
+        if (av_codec_is_decoder(codec) && compressedFFToStr->contains(codec->id)) {
+            auto codecId = compressedFFToStr->value(codec->id);
+
+            if (!this->m_supportedCodecs.contains(codecId))
+                this->m_supportedCodecs << codecId;
+        }
 }
 
 void ConvertVideoFFmpegPrivate::packetLoop(ConvertVideoFFmpeg *stream)
@@ -566,6 +598,13 @@ AkVideoPacket ConvertVideoFFmpegPrivate::convert(const AVFrame *frame)
 
     oPacket.setId(this->m_id);
     oPacket.setPts(frame->pts);
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 30, 100)
+    oPacket.setDuration(frame->duration);
+#else
+    oPacket.setDuration(frame->pkt_duration);
+#endif
+
     oPacket.setTimeBase({timeBase.num, timeBase.den});
     oPacket.setIndex(0);
     av_freep(&oFrame.data[0]);

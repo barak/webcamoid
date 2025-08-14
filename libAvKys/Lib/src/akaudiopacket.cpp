@@ -19,6 +19,7 @@
 
 #include <QDebug>
 #include <QQmlEngine>
+#include <QtEndian>
 
 #include "akaudiopacket.h"
 #include "akaudioconverter.h"
@@ -42,6 +43,68 @@ class AkAudioPacketPrivate
         void clearBuffers();
         void updateParams();
         inline void updatePlanes();
+
+        template<typename T>
+        inline static T from_(T value) {
+            return value;
+        }
+
+        template<typename T>
+        inline static T fromLE(T value) {
+            return qFromLittleEndian(value);
+        }
+
+        template<typename T>
+        inline static T fromBE(T value) {
+            return qFromBigEndian(value);
+        }
+
+        template<typename T>
+        inline static T to_(T value) {
+            return value;
+        }
+
+        template<typename T>
+        inline static T toLE(T value) {
+            return qToLittleEndian(value);
+        }
+
+        template<typename T>
+        inline static T toBE(T value) {
+            return qToBigEndian(value);
+        }
+
+        template<typename SampleType, typename TransformFuncType>
+        inline qreal volume(TransformFuncType transformFrom) const
+        {
+            auto amplitude = SampleType(0);
+
+            if (this->m_nPlanes > 0) {
+                for (int plane = 0; plane < this->m_nPlanes; ++plane) {
+                    auto samples = reinterpret_cast<SampleType *>(this->m_planes[plane]);
+
+                    for (int sample = 0; sample < this->m_samples; ++sample)
+                        amplitude = qMax(qAbs(transformFrom(samples[sample])), amplitude);
+                }
+            } else {
+                auto samples = reinterpret_cast<SampleType *>(this->m_data);
+                auto totalSamples = this->m_samples * this->m_caps.channels();
+
+                for (int sample = 0; sample < totalSamples; ++sample)
+                    amplitude = qMax(qAbs(transformFrom(samples[sample])), amplitude);
+            }
+
+            SampleType max;
+
+            if (typeid(SampleType) == typeid(float))
+                max = SampleType(1.0f);
+            else if (typeid(SampleType) == typeid(qreal))
+                max = SampleType(1.0);
+            else
+                max = std::numeric_limits<SampleType>::max();
+
+            return qreal(amplitude) / max;
+        }
 };
 
 AkAudioPacket::AkAudioPacket(QObject *parent):
@@ -72,6 +135,8 @@ AkAudioPacket::AkAudioPacket(const AkAudioCaps &caps,
     }
 
     this->d->updatePlanes();
+    this->setDuration(this->d->m_samples);
+    this->setTimeBase({1, this->d->m_caps.rate()});
 }
 
 AkAudioPacket::AkAudioPacket(size_t size,
@@ -97,6 +162,8 @@ AkAudioPacket::AkAudioPacket(size_t size,
     }
 
     this->d->updatePlanes();
+    this->setDuration(this->d->m_samples);
+    this->setTimeBase({1, this->d->m_caps.rate()});
 }
 
 AkAudioPacket::AkAudioPacket(const AkPacket &other):
@@ -124,6 +191,8 @@ AkAudioPacket::AkAudioPacket(const AkPacket &other):
         }
 
         this->d->updatePlanes();
+        this->setDuration(this->d->m_samples);
+        this->setTimeBase({1, this->d->m_caps.rate()});
     }
 }
 
@@ -186,6 +255,8 @@ AkAudioPacket &AkAudioPacket::operator =(const AkPacket &other)
         }
 
         this->d->updatePlanes();
+        this->setDuration(this->d->m_samples);
+        this->setTimeBase({1, this->d->m_caps.rate()});
     } else {
         this->d->m_caps = AkAudioCaps();
 
@@ -198,6 +269,8 @@ AkAudioPacket &AkAudioPacket::operator =(const AkPacket &other)
         this->d->m_samples = 0;
         this->d->m_nPlanes = 0;
         this->d->clearBuffers();
+        this->setDuration(0);
+        this->setTimeBase({});
     }
 
     this->copyMetadata(other);
@@ -232,6 +305,8 @@ AkAudioPacket &AkAudioPacket::operator =(const AkAudioPacket &other)
 
         this->copyMetadata(other);
         this->d->updatePlanes();
+        this->setDuration(this->d->m_samples);
+        this->setTimeBase({1, this->d->m_caps.rate()});
     }
 
     return *this;
@@ -248,6 +323,7 @@ AkAudioPacket AkAudioPacket::operator +(const AkAudioPacket &other)
     AkAudioPacket packet(this->d->m_caps,
                          this->d->m_samples + tmpPacket.d->m_samples);
     packet.copyMetadata(*this);
+    packet.setDuration(packet.samples());
 
     for (int plane = 0; plane < this->d->m_nPlanes; ++plane) {
         auto start = this->d->m_planeSize[plane];
@@ -273,6 +349,7 @@ AkAudioPacket &AkAudioPacket::operator +=(const AkAudioPacket &other)
     AkAudioPacket packet(this->d->m_caps,
                          this->d->m_samples + tmpPacket.d->m_samples);
     packet.copyMetadata(*this);
+    packet.setDuration(packet.samples());
 
     for (int plane = 0; plane < this->d->m_nPlanes; ++plane) {
         auto start = this->d->m_planeSize[plane];
@@ -393,14 +470,12 @@ AkAudioPacket AkAudioPacket::pop(int samples)
 
     AkAudioPacket dst(this->d->m_caps, samples);
     dst.copyMetadata(*this);
+    dst.setDuration(dst.samples());
 
     AkAudioPacket tmpPacket(this->d->m_caps, this->d->m_samples - samples);
     tmpPacket.copyMetadata(*this);
-    auto pts = this->pts()
-               + samples
-               * this->timeBase().invert().value()
-               / this->d->m_caps.rate();
-    tmpPacket.setPts(qRound64(pts));
+    tmpPacket.setPts(this->pts() + samples);
+    tmpPacket.setDuration(tmpPacket.samples());
 
     for (int plane = 0; plane < dst.d->m_nPlanes; ++plane) {
         auto src_line = this->d->m_planes[plane];
@@ -419,6 +494,43 @@ AkAudioPacket AkAudioPacket::pop(int samples)
     *this = tmpPacket;
 
     return dst;
+}
+
+AkAudioPacket AkAudioPacket::pop()
+{
+    return this->pop(this->d->m_samples);
+}
+
+#define HANDLE_CASE_VOLUME(format, sampleType, endian) \
+        case AkAudioCaps::SampleFormat_##format: \
+            return this->d->volume<sampleType>(AkAudioPacketPrivate::from##endian<sampleType>);
+
+qreal AkAudioPacket::volume() const
+{
+    switch (this->d->m_caps.format()) {
+    HANDLE_CASE_VOLUME(s8   , qint8  ,  _)
+    HANDLE_CASE_VOLUME(u8   , quint8 ,  _)
+    HANDLE_CASE_VOLUME(s16le, qint16 , LE)
+    HANDLE_CASE_VOLUME(s16be, qint16 , BE)
+    HANDLE_CASE_VOLUME(u16le, quint16, LE)
+    HANDLE_CASE_VOLUME(u16be, quint16, BE)
+    HANDLE_CASE_VOLUME(s32le, qint32 , LE)
+    HANDLE_CASE_VOLUME(s32be, qint32 , BE)
+    HANDLE_CASE_VOLUME(u32le, quint32, LE)
+    HANDLE_CASE_VOLUME(u32be, quint32, BE)
+    HANDLE_CASE_VOLUME(s64le, qint64 , LE)
+    HANDLE_CASE_VOLUME(s64be, qint64 , BE)
+    HANDLE_CASE_VOLUME(u64le, quint64, LE)
+    HANDLE_CASE_VOLUME(u64be, quint64, BE)
+    HANDLE_CASE_VOLUME(fltle, float  , LE)
+    HANDLE_CASE_VOLUME(fltbe, float  , BE)
+    HANDLE_CASE_VOLUME(dblle, qreal  , LE)
+    HANDLE_CASE_VOLUME(dblbe, qreal  , BE)
+    default:
+        break;
+    }
+
+    return 0.0;
 }
 
 void AkAudioPacket::registerTypes()
@@ -452,7 +564,10 @@ QDebug operator <<(QDebug debug, const AkAudioPacket &packet)
                     << packet.pts() * packet.timeBase().value()
                     << ")"
                     << ",duration="
-                    << qreal(packet.samples()) / packet.caps().rate()
+                    << packet.duration()
+                    << "("
+                    << packet.duration() * packet.timeBase().value()
+                    << ")"
                     << "s"
                     << ",timeBase="
                     << packet.timeBase()

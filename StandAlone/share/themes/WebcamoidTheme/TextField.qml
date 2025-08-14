@@ -40,6 +40,7 @@ T.TextField {
                  placeholder.implicitHeight + topPadding + bottomPadding,
                  AkUnit.create(36 * AkTheme.controlScale, "dp").pixels)
     hoverEnabled: true
+    font: AkTheme.fontSettings.body1
 
     readonly property int animationTime: 200
     readonly property int placeHolderPadding:
@@ -58,6 +59,7 @@ T.TextField {
     readonly property color disabledLink: AkTheme.palette.disabled.link
     readonly property color disabledMid: AkTheme.palette.disabled.mid
     readonly property color disabledPlaceholderText: AkTheme.palette.disabled.placeholderText
+    readonly property color disabledText: AkTheme.palette.disabled.text
 
     Text {
         id: placeholder
@@ -68,6 +70,7 @@ T.TextField {
         text: control.placeholderText
         font: control.font
         color: control.placeholderTextColor
+        linkColor: control.activeLink
         verticalAlignment: control.verticalAlignment
         elide: Text.ElideRight
         renderType: control.renderType
@@ -75,9 +78,6 @@ T.TextField {
                  && !control.preeditText
                  && (!control.activeFocus
                      || control.horizontalAlignment !== Qt.AlignHCenter)
-        linkColor: control.enabled?
-                       control.activeLink:
-                       control.disabledLink
         enabled: control.enabled
     }
 
@@ -116,8 +116,13 @@ T.TextField {
             when: !control.enabled
 
             PropertyChanges {
+                target: control
+                color: control.disabledText
+            }
+            PropertyChanges {
                 target: placeholder
                 color: control.disabledPlaceholderText
+                linkColor: control.disabledLink
             }
             PropertyChanges {
                 target: textAreaBackground

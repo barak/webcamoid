@@ -39,8 +39,11 @@ if [ -z "${DISABLE_CCACHE}" ]; then
 fi
 
 if [ "${UPLOAD}" == 1 ]; then
-    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON -DNOLIBUVC=ON"
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON -DNOLIBUVC=ON -DPIPEWIRE_DYNLOAD=ON"
 fi
+
+# Apparently this codec is causing Webcamoid to hang in old versions of FFmpeg
+EXTRA_PARAMS="${EXTRA_PARAMS} -DFFMPEG_DISABLED_VIDEO_ENCODERS='libsvtav1'"
 
 export PATH=${HOME}/.local/bin:${PATH}
 
@@ -66,7 +69,7 @@ else
     esac
 fi
 
-case "$architecture" in
+case "${architecture}" in
     arm64v8)
         libArchDir=aarch64-linux-gnu
         ;;
@@ -77,6 +80,10 @@ case "$architecture" in
         libArchDir=x86_64-linux-gnu
         ;;
 esac
+
+if [[ "${architecture}" = arm32v7 ]]; then
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOSIMDNEON=ON"
+fi
 
 QMAKE_EXECUTABLE=/usr/lib/qt6/bin/qmake
 LRELEASE_TOOL=/usr/lib/qt6/bin/lrelease

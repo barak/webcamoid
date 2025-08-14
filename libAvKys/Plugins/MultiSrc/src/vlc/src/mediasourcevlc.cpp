@@ -130,7 +130,7 @@ MediaSourceVLC::MediaSourceVLC(QObject *parent):
             if (qEnvironmentVariableIsEmpty("VLC_PLUGIN_PATH"))
                 qputenv("VLC_PLUGIN_PATH", path.toLocal8Bit());
         } else {
-#ifdef Q_OS_OSX
+#ifdef Q_OS_MACOS
             QString path;
             QString vlcDir;
             QString vlcInstallPath = VLC_INSTALL_PATH;
@@ -540,7 +540,7 @@ bool MediaSourceVLC::setState(AkElement::ElementState state)
 
             this->d->m_mutex.lock();
 
-            for (int &i: filterStreams) {
+            for (auto &i: filterStreams) {
                 auto caps = this->caps(i);
 
                 switch (caps.type()) {
@@ -778,8 +778,9 @@ void MediaSourceVLCPrivate::audioPlayCallback(void *userData,
 
     AkAudioPacket packet(self->d->m_audioCaps, count);
     memcpy(packet.data(), samples, packet.size());
-    packet.setPts(pts);
-    packet.setTimeBase({1, 1000});
+    packet.setPts(pts * self->d->m_audioCaps.rate() / 1000000);
+    packet.setDuration(count);
+    packet.setTimeBase({1, self->d->m_audioCaps.rate()});
     packet.setIndex(int(self->d->m_audioIndex));
     packet.setId(self->d->m_audioId);
 
@@ -800,6 +801,14 @@ unsigned MediaSourceVLCPrivate::videoFormatCallback(void **userData,
                      int(*height),
                      self->d->m_fps);
     self->d->m_videoFrame = AkVideoPacket(caps);
+
+    if (self->d->m_fps)
+        self->d->m_videoFrame.setDuration(1000
+                                          * self->d->m_fps.den()
+                                          / self->d->m_fps.num());
+    else
+        self->d->m_videoFrame.setDuration(0);
+
     self->d->m_videoFrame.setTimeBase(AkFrac(1, 1000));
     self->d->m_videoFrame.setIndex(int(self->d->m_videoIndex));
     self->d->m_videoFrame.setId(self->d->m_videoId);

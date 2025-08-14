@@ -22,9 +22,12 @@
 
 #include "akpacketbase.h"
 
+class AkAudioPacket;
 class AkAudioPacketPrivate;
 class AkAudioCaps;
 class AkPacket;
+
+using AkAudioPackets = QVector<AkAudioPacket>;
 
 class AKCOMMONS_EXPORT AkAudioPacket: public AkPacketBase
 {
@@ -45,7 +48,7 @@ class AKCOMMONS_EXPORT AkAudioPacket: public AkPacketBase
     public:
         AkAudioPacket(QObject *parent=nullptr);
         AkAudioPacket(const AkAudioCaps &caps,
-                      size_t samples,
+                      size_t samples=0,
                       bool initialized=false);
         AkAudioPacket(size_t size,
                       const AkAudioCaps &caps,
@@ -73,6 +76,8 @@ class AKCOMMONS_EXPORT AkAudioPacket: public AkPacketBase
         Q_INVOKABLE quint8 *sample(int channel, int i);
         Q_INVOKABLE void setSample(int channel, int i, const quint8 *sample);
         Q_INVOKABLE AkAudioPacket pop(int samples);
+        Q_INVOKABLE AkAudioPacket pop();
+        Q_INVOKABLE qreal volume() const;
 
     private:
         AkAudioPacketPrivate *d;

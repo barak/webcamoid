@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/VideoCapture">
+        <file>share/cameras/logitech.json</file>
+    </qresource>
+</RCC>

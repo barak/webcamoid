@@ -31,12 +31,11 @@
 #include <QtConcurrent>
 #include <ak.h>
 #include <akcaps.h>
-#include <akcompressedvideocaps.h>
-#include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
 #include <akpluginmanager.h>
 #include <akvideopacket.h>
+#include <iak/akelement.h>
 #include <camera/NdkCameraManager.h>
 #include <media/NdkImageReader.h>
 
@@ -71,21 +70,9 @@ Q_GLOBAL_STATIC_WITH_ARGS(RawFmtToAkMap,
                           rawFmtToAkMap,
                           (initRawFmtToAkMap()))
 
-using CompressedFmtToAkMap = QMap<AIMAGE_FORMATS, QString>;
-
-inline const CompressedFmtToAkMap initCompressedFmtToAkMap()
-{
-    const CompressedFmtToAkMap compressedFmtToAkMap {
-        {AIMAGE_FORMAT_JPEG, "jpeg"},
-        {AIMAGE_FORMAT_HEIC, "heic"},
-    };
-
-    return compressedFmtToAkMap;
-}
-
-Q_GLOBAL_STATIC_WITH_ARGS(CompressedFmtToAkMap,
-                          compressedFmtToAkMap,
-                          (initCompressedFmtToAkMap()))
+/* NOTE: Compressed formats are more like intended to be used with still
+ * capture and recording, meanwhile we use the preview mode for frame capturing.
+ */
 
 enum ControlType
 {
@@ -334,7 +321,7 @@ class CaptureNdkCameraPrivate
         QList<int> m_streams;
         QStringList m_devices;
         QMap<QString, QString> m_descriptions;
-        QMap<QString, CaptureVideoCaps> m_devicesCaps;
+        QMap<QString, AkCapsList> m_devicesCaps;
         QMap<QString, bool> m_isTorchSupported;
         QReadWriteLock m_controlsMutex;
         QVariantList m_globalImageControls;
@@ -434,7 +421,9 @@ CaptureNdkCamera::CaptureNdkCamera(QObject *parent):
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     auto permissionStatus = qApp->checkPermission(this->d->m_cameraPermission);
 
-    if (permissionStatus != Qt::PermissionStatus::Granted) {
+    if (permissionStatus == Qt::PermissionStatus::Granted) {
+        qInfo() << "Permission granted for camera capture with Android NDK API";
+    } else {
         this->d->m_permissionResultReady = false;
         qApp->requestPermission(this->d->m_cameraPermission,
                                 this,
@@ -444,15 +433,21 @@ CaptureNdkCamera::CaptureNdkCamera(QObject *parent):
 
                                         switch (permission.status()) {
                                         case Qt::PermissionStatus::Undetermined:
+                                            qInfo() << "Permission undetermined for camera capture with Android NDK API";
                                             curStatus = PermissionStatus_Undetermined;
+
                                             break;
 
                                         case Qt::PermissionStatus::Granted:
+                                            qInfo() << "Permission granted for camera capture with Android NDK API";
                                             curStatus = PermissionStatus_Granted;
+
                                             break;
 
                                         case Qt::PermissionStatus::Denied:
+                                            qInfo() << "Permission denied for camera capture with Android NDK API";
                                             curStatus = PermissionStatus_Denied;
+
                                             break;
 
                                         default:
@@ -503,7 +498,7 @@ QList<int> CaptureNdkCamera::streams()
     if (caps.isEmpty())
         return {};
 
-    return QList<int> {0};
+    return {0};
 }
 
 QList<int> CaptureNdkCamera::listTracks(AkCaps::CapsType type)
@@ -535,7 +530,7 @@ QString CaptureNdkCamera::description(const QString &webcam) const
     return this->d->m_descriptions.value(webcam);
 }
 
-CaptureVideoCaps CaptureNdkCamera::caps(const QString &webcam) const
+AkCapsList CaptureNdkCamera::caps(const QString &webcam) const
 {
     return this->d->m_devicesCaps.value(webcam);
 }
@@ -721,7 +716,7 @@ bool CaptureNdkCamera::init()
     this->uninit();
 
     QList<int> streams;
-    CaptureVideoCaps supportedCaps;
+    AkCapsList supportedCaps;
     AIMAGE_FORMATS format;
     AkCaps caps;
     int32_t fpsRange[2];
@@ -781,13 +776,6 @@ bool CaptureNdkCamera::init()
         AkVideoCaps videoCaps(caps);
         format = rawFmtToAkMap->key(videoCaps.format(),
                                     AIMAGE_FORMAT_PRIVATE);
-        width = videoCaps.width();
-        height = videoCaps.height();
-        fps = videoCaps.fps();
-    } else {
-        AkCompressedVideoCaps videoCaps(caps);
-        format = compressedFmtToAkMap->key(videoCaps.format(),
-                                           AIMAGE_FORMAT_PRIVATE);
         width = videoCaps.width();
         height = videoCaps.height();
         fps = videoCaps.fps();
@@ -1210,41 +1198,88 @@ void CaptureNdkCameraPrivate::imageAvailable(void *context,
         return;
     }
 
-    AkVideoPacket packet({rawFmtToAkMap->value(AIMAGE_FORMATS(format)),
-                          width,
-                          height,
-                          self->m_fps});
+    if (!rawFmtToAkMap->contains(AIMAGE_FORMATS(format)))
+        return;
 
-    for (int32_t plane = 0; plane < numPlanes; plane++) {
-        uint8_t *data = nullptr;
-        int dataLength = 0;
+    AkVideoPacket videoPacket({rawFmtToAkMap->value(AIMAGE_FORMATS(format)),
+                               width,
+                               height,
+                               self->m_fps});
 
-        if (AImage_getPlaneData(image, plane, &data, &dataLength) != AMEDIA_OK)
-            continue;
+    if (format == AIMAGE_FORMAT_YUV_420_888) {
+        for (int32_t plane = 0; plane < numPlanes; plane++) {
+            uint8_t *data = nullptr;
+            int dataLength = 0;
 
-        int32_t iLineSize = 0;
-        AImage_getPlaneRowStride(image, plane, &iLineSize);
-        auto oLineSize = packet.lineSize(plane);
-        auto lineSize = qMin<size_t>(iLineSize, oLineSize);
-        auto heightDiv = packet.heightDiv(plane);
+            if (AImage_getPlaneData(image, plane, &data, &dataLength) != AMEDIA_OK)
+                continue;
 
-        for (int y = 0; y < height; y++) {
-            auto ys = y >> heightDiv;
-            auto srcLine = data + ys * iLineSize;
-            auto dstLine = packet.line(plane, y);
-            memcpy(dstLine, srcLine, lineSize);
+            int32_t pixelStride = 0;
+            AImage_getPlanePixelStride(image, plane, &pixelStride);
+            int32_t iLineSize = 0;
+            AImage_getPlaneRowStride(image, plane, &iLineSize);
+            auto oLineSize = videoPacket.lineSize(plane);
+            auto lineSize = qMin<size_t>(iLineSize, oLineSize);
+            auto widthDiv = videoPacket.widthDiv(plane);
+            auto heightDiv = videoPacket.heightDiv(plane);
+
+            if (pixelStride == 1) {
+                for (int y = 0; y < height; ++y) {
+                    auto ys = y >> heightDiv;
+                    auto srcLine = data + ys * iLineSize;
+                    auto dstLine = videoPacket.line(plane, y);
+                    memcpy(dstLine, srcLine, lineSize);
+                }
+            } else {
+                for (int y = 0; y < height; ++y) {
+                    auto ys = y >> heightDiv;
+                    auto srcLine = data + ys * iLineSize;
+                    auto dstLine = videoPacket.line(plane, y);
+
+                    for (int x = 0; x < width; ++x) {
+                        auto xs = x >> widthDiv;
+                        dstLine[xs] = srcLine[xs * pixelStride];
+                    }
+                }
+            }
+
+            data += iLineSize * (height >> heightDiv);
         }
+    } else {
+        for (int32_t plane = 0; plane < numPlanes; plane++) {
+            uint8_t *data = nullptr;
+            int dataLength = 0;
 
-        data += iLineSize * (height >> heightDiv);
+            if (AImage_getPlaneData(image, plane, &data, &dataLength) != AMEDIA_OK)
+                continue;
+
+            int32_t iLineSize = 0;
+            AImage_getPlaneRowStride(image, plane, &iLineSize);
+            auto oLineSize = videoPacket.lineSize(plane);
+            auto lineSize = qMin<size_t>(iLineSize, oLineSize);
+            auto heightDiv = videoPacket.heightDiv(plane);
+
+            for (int y = 0; y < height; ++y) {
+                auto ys = y >> heightDiv;
+                auto srcLine = data + ys * iLineSize;
+                auto dstLine = videoPacket.line(plane, y);
+                memcpy(dstLine, srcLine, lineSize);
+            }
+
+            data += iLineSize * (height >> heightDiv);
+        }
     }
 
-    packet.setPts(timestampNs);
-    packet.setTimeBase({1, qint64(1e9)});
-    packet.setIndex(0);
-    packet.setId(self->m_id);
+    videoPacket.setPts(timestampNs);
+    videoPacket.setDuration(1000000000L
+                            * self->m_fps.den()
+                            / self->m_fps.num());
+    videoPacket.setTimeBase({1, 1000000000L});
+    videoPacket.setIndex(0);
+    videoPacket.setId(self->m_id);
 
     self->m_mutex.lockForWrite();
-    self->m_curPacket = packet;
+    self->m_curPacket = videoPacket;
     self->m_waitCondition.wakeAll();
     self->m_mutex.unlock();
 
@@ -1948,9 +1983,9 @@ void CaptureNdkCameraPrivate::updateDevices()
                                        &cameras) == ACAMERA_OK) {
         static const QVector<AIMAGE_FORMATS> unsupportedFormats {
             AIMAGE_FORMAT_RAW_PRIVATE,
-                    AIMAGE_FORMAT_DEPTH16,
-                    AIMAGE_FORMAT_DEPTH_POINT_CLOUD,
-                    AIMAGE_FORMAT_PRIVATE,
+            AIMAGE_FORMAT_DEPTH16,
+            AIMAGE_FORMAT_DEPTH_POINT_CLOUD,
+            AIMAGE_FORMAT_PRIVATE,
         };
 
         for (int i = 0; i < cameras->numCameras; i++) {
@@ -1990,7 +2025,7 @@ void CaptureNdkCameraPrivate::updateDevices()
                 continue;
             }
 
-            CaptureVideoCaps supportedFormats;
+            QVector<AkVideoCaps> rawCaps;
 
             for (uint32_t i = 0; i < formats.count; i += 4) {
                 if (formats.data.i32[i + 3])
@@ -2013,29 +2048,36 @@ void CaptureNdkCameraPrivate::updateDevices()
                                           height,
                                           {});
 
-                    if (!supportedFormats.contains(videoCaps))
-                        supportedFormats << videoCaps;
-                } else if (compressedFmtToAkMap->contains(format)) {
-                    AkCompressedVideoCaps videoCaps(compressedFmtToAkMap->value(format),
-                                                    width,
-                                                    height,
-                                                    {});
-
-                    if (!supportedFormats.contains(videoCaps))
-                        supportedFormats << videoCaps;
+                    if (!rawCaps.contains(videoCaps))
+                        rawCaps << videoCaps;
                 }
             }
 
-            CaptureVideoCaps caps;
+            QVector<AkVideoCaps> rawFormats;
 
-            for (auto &format: supportedFormats)
-                for (auto &fps: supportedFrameRates) {
+            for (auto &fps: supportedFrameRates)
+                for (auto &format: rawCaps) {
                     AkVideoCaps videoCaps(format);
                     videoCaps.setFps(fps);
-                    caps << videoCaps;
+                    rawFormats << videoCaps;
                 }
 
+            std::sort(rawFormats.begin(), rawFormats.begin());
+            AkCapsList caps;
+
+            for (auto &format: rawFormats)
+                caps << format;
+
             if (!caps.isEmpty()) {
+                auto index =
+                        Capture::nearestResolution({DEFAULT_FRAME_WIDTH,
+                                                    DEFAULT_FRAME_HEIGHT},
+                                                    DEFAULT_FRAME_FPS,
+                                                   caps);
+
+                if (index > 0)
+                    caps.move(index, 0);
+
                 auto deviceId = "NdkCamera:" + cameraId;
                 auto facing = this->cameraFacing(metaData);
                 auto description =

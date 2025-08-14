@@ -22,47 +22,77 @@
 
 #include "akpacketbase.h"
 
+class AkCompressedVideoPacket;
 class AkCompressedVideoPacketPrivate;
 class AkCompressedVideoCaps;
 class AkPacket;
+class AkCompressedPacket;
+
+using AkCompressedVideoPackets = QVector<AkCompressedVideoPacket>;
 
 class AKCOMMONS_EXPORT AkCompressedVideoPacket: public AkPacketBase
 {
     Q_OBJECT
+    Q_FLAGS(VideoPacketTypeFlag)
     Q_PROPERTY(AkCompressedVideoCaps caps
                READ caps
                CONSTANT)
     Q_PROPERTY(size_t size
                READ size
                CONSTANT)
+    Q_PROPERTY(VideoPacketTypeFlag flags
+               READ flags
+               WRITE setFlags
+               RESET resetFlags
+               NOTIFY flagsChanged)
 
     public:
+        enum VideoPacketTypeFlag
+        {
+            VideoPacketTypeFlag_None     = 0x0,
+            VideoPacketTypeFlag_Header   = 0x1,
+            VideoPacketTypeFlag_KeyFrame = 0x2,
+        };
+        Q_DECLARE_FLAGS(VideoPacketTypeFlags, VideoPacketTypeFlag)
+        Q_FLAG(VideoPacketTypeFlags)
+        Q_ENUM(VideoPacketTypeFlag)
+
         AkCompressedVideoPacket(QObject *parent=nullptr);
         AkCompressedVideoPacket(const AkCompressedVideoCaps &caps,
                                 size_t size,
                                 bool initialized=false);
         AkCompressedVideoPacket(const AkPacket &other);
+        AkCompressedVideoPacket(const AkCompressedPacket &other);
         AkCompressedVideoPacket(const AkCompressedVideoPacket &other);
         ~AkCompressedVideoPacket();
         AkCompressedVideoPacket &operator =(const AkPacket &other);
+        AkCompressedVideoPacket &operator =(const AkCompressedPacket &other);
         AkCompressedVideoPacket &operator =(const AkCompressedVideoPacket &other);
         operator bool() const;
         operator AkPacket() const;
+        operator AkCompressedPacket() const;
 
         Q_INVOKABLE const AkCompressedVideoCaps &caps() const;
         Q_INVOKABLE char *data() const;
         Q_INVOKABLE const char *constData() const;
         Q_INVOKABLE size_t size() const;
+        Q_INVOKABLE VideoPacketTypeFlag flags() const;
 
     private:
         AkCompressedVideoPacketPrivate *d;
 
+    Q_SIGNALS:
+        void flagsChanged(VideoPacketTypeFlag flags);
+
     public Q_SLOTS:
+        void setFlags(VideoPacketTypeFlag flags);
+        void resetFlags();
         static void registerTypes();
 };
 
 AKCOMMONS_EXPORT QDebug operator <<(QDebug debug, const AkCompressedVideoPacket &packet);
 
 Q_DECLARE_METATYPE(AkCompressedVideoPacket)
+Q_DECLARE_METATYPE(AkCompressedVideoPacket::VideoPacketTypeFlag)
 
 #endif // AKCOMPRESSEDVIDEOPACKET_H

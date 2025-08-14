@@ -24,33 +24,6 @@
 
 #include "akcommons.h"
 
-#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-    #define AK_MAKE_FOURCC_LE(a, b, c, d) \
-          (((quint32(a) & 0xff)) \
-         | ((quint32(b) & 0xff) <<  8) \
-         | ((quint32(c) & 0xff) << 16) \
-         |  (quint32(d) & 0xff) << 24)
-
-    #define AK_MAKE_FOURCC_BE(a, b, c, d) \
-        (((quint32(a) & 0xff) << 24) \
-         | ((quint32(b) & 0xff) << 16) \
-         | ((quint32(c) & 0xff) <<  8) \
-         |  (quint32(d) & 0xff))
-    #define AK_MAKE_FOURCC(a, b, c, d) AK_MAKE_FOURCC_LE(a, b, c, d)
-#else
-    #define AK_MAKE_FOURCC_LE(a, b, c, d) \
-          (((quint32(a) & 0xff) << 24) \
-         | ((quint32(b) & 0xff) << 16) \
-         | ((quint32(c) & 0xff) <<  8) \
-         |  (quint32(d) & 0xff))
-    #define AK_MAKE_FOURCC_BE(a, b, c, d) \
-          (((quint32(a) & 0xff)) \
-         | ((quint32(b) & 0xff) <<  8) \
-         | ((quint32(c) & 0xff) << 16) \
-         |  (quint32(d) & 0xff) << 24)
-    #define AK_MAKE_FOURCC(a, b, c, d) AK_MAKE_FOURCC_BE(a, b, c, d)
-#endif
-
 class AkVideoCaps;
 class AkVideoCapsPrivate;
 class AkCaps;
@@ -95,6 +68,7 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
         enum PixelFormat
         {
             Format_none            = AK_MAKE_FOURCC(0, 0, 0, 0),
+            Format_unknown         = Format_none,
             Format_xbgr            = AK_MAKE_FOURCC('X', 'B', 'G', 'R'),
             Format_xbgr444be       = AK_MAKE_FOURCC_BE('X', 'B', 4, 44),
             Format_xbgr444le       = AK_MAKE_FOURCC_LE('X', 'B', 4, 44),
@@ -290,6 +264,10 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuv440p10le     = AK_MAKE_FOURCC_LE('Y', 4, 0, 10),
             Format_yuv440p12be     = AK_MAKE_FOURCC_BE('Y', 4, 0, 12),
             Format_yuv440p12le     = AK_MAKE_FOURCC_LE('Y', 4, 0, 12),
+            Format_yuv440p14be     = AK_MAKE_FOURCC_BE('Y', 4, 0, 14),
+            Format_yuv440p14le     = AK_MAKE_FOURCC_LE('Y', 4, 0, 14),
+            Format_yuv440p16be     = AK_MAKE_FOURCC_BE('Y', 4, 0, 16),
+            Format_yuv440p16le     = AK_MAKE_FOURCC_LE('Y', 4, 0, 16),
             Format_yuv444          = AK_MAKE_FOURCC('Y', 'U', 'V', 44),
             Format_yuv444p         = AK_MAKE_FOURCC('Y', 4, 4, 4),
             Format_yuv444p10be     = AK_MAKE_FOURCC_BE('Y', 4, 4, 10),
@@ -341,6 +319,12 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuyv422_32le    = AK_MAKE_FOURCC_LE('Y', 'U', 'Y', 32),
             Format_yvu410p         = AK_MAKE_FOURCC('Y', 'V', 10, 'P'),
             Format_yvu420p         = AK_MAKE_FOURCC('Y', 'V', 20, 'P'),
+            Format_yvu420p10be     = AK_MAKE_FOURCC_BE('Y', 'V', 20, 10),
+            Format_yvu420p10le     = AK_MAKE_FOURCC_BE('Y', 'V', 20, 10),
+            Format_yvu420p12be     = AK_MAKE_FOURCC_BE('Y', 'V', 20, 12),
+            Format_yvu420p12le     = AK_MAKE_FOURCC_LE('Y', 'V', 20, 12),
+            Format_yvu420p16be     = AK_MAKE_FOURCC_BE('Y', 'V', 20, 16),
+            Format_yvu420p16le     = AK_MAKE_FOURCC_LE('Y', 'V', 20, 16),
             Format_yvu422p         = AK_MAKE_FOURCC('Y', 'V', 22, 'P'),
             Format_yvu444p         = AK_MAKE_FOURCC('Y', 'V', 44, 'P'),
             Format_yvyu422         = AK_MAKE_FOURCC('Y', 'V', 4, 22),
@@ -450,6 +434,8 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuv422p9      = Format_yuv422p9le,
             Format_yuv440p10     = Format_yuv440p10le,
             Format_yuv440p12     = Format_yuv440p12le,
+            Format_yuv440p14     = Format_yuv440p14le,
+            Format_yuv440p16     = Format_yuv440p16le,
             Format_yuv444p10     = Format_yuv444p10le,
             Format_yuv444p12     = Format_yuv444p12le,
             Format_yuv444p14     = Format_yuv444p14le,
@@ -471,6 +457,9 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuva444p9     = Format_yuva444p9le,
             Format_yuyv422_32    = Format_yuyv422_32le,
             Format_yuyv422_32_10 = Format_yuyv422_32_10le,
+            Format_yvu420p10     = Format_yvu420p10le,
+            Format_yvu420p12     = Format_yvu420p12le,
+            Format_yvu420p16     = Format_yvu420p16le,
 #else
             Format_xbgr444       = Format_xbgr444be,
             Format_xbgr2101010   = Format_xbgr2101010be,
@@ -576,6 +565,8 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuv422p9      = Format_yuv422p9be,
             Format_yuv440p10     = Format_yuv440p10be,
             Format_yuv440p12     = Format_yuv440p12be,
+            Format_yuv440p14     = Format_yuv440p14be,
+            Format_yuv440p16     = Format_yuv440p16be,
             Format_yuv444p10     = Format_yuv444p10be,
             Format_yuv444p12     = Format_yuv444p12be,
             Format_yuv444p14     = Format_yuv444p14be,
@@ -597,6 +588,9 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
             Format_yuva444p9     = Format_yuva444p9be,
             Format_yuyv422_32    = Format_yuyv422_32be,
             Format_yuyv422_32_10 = Format_yuyv422_32_10be,
+            Format_yvu420p10     = Format_yvu420p10be,
+            Format_yvu420p12     = Format_yvu420p12be,
+            Format_yvu420p16     = Format_yvu420p16be,
 #endif
         };
         Q_ENUM(PixelFormat)
@@ -642,6 +636,7 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
 
         Q_INVOKABLE AkVideoCaps nearest(const AkVideoCapsList &caps) const;
         Q_INVOKABLE bool isSameFormat(const AkVideoCaps &other) const;
+        Q_INVOKABLE size_t dataSize() const;
 
         Q_INVOKABLE static int bitsPerPixel(AkVideoCaps::PixelFormat pixelFormat);
         Q_INVOKABLE static QString pixelFormatToString(AkVideoCaps::PixelFormat pixelFormat);
@@ -669,12 +664,15 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
         void resetHeight();
         void resetFps();
         static void registerTypes();
+
+    friend bool operator <(const AkVideoCaps &caps1, const AkVideoCaps &caps2);
 };
 
 AKCOMMONS_EXPORT QDebug operator <<(QDebug debug, const AkVideoCaps &caps);
 AKCOMMONS_EXPORT QDebug operator <<(QDebug debug, AkVideoCaps::PixelFormat format);
 AKCOMMONS_EXPORT QDataStream &operator >>(QDataStream &istream, AkVideoCaps &caps);
 AKCOMMONS_EXPORT QDataStream &operator <<(QDataStream &ostream, const AkVideoCaps &caps);
+AKCOMMONS_EXPORT bool operator <(const AkVideoCaps &caps1, const AkVideoCaps &caps2);
 
 Q_DECLARE_METATYPE(AkVideoCaps)
 Q_DECLARE_METATYPE(AkVideoCapsList)

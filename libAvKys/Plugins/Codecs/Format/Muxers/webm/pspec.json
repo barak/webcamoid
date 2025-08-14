@@ -1,0 +1,13 @@
+{
+    "type": "WebcamoidPluginsCollection",
+    "plugins": [
+        {
+            "name": "Webm (libwebm)",
+            "description": "Webm muxer using libwebm",
+            "id": "VideoMuxer/Webm/libwebm",
+            "implements": ["Element", "VideoMuxer"],
+            "priority": 400,
+            "type": "qtplugin"
+        }
+    ]
+}

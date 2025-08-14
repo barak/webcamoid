@@ -20,20 +20,19 @@
 #include <QDataStream>
 #include <QDebug>
 #include <QMetaEnum>
-#include <QSize>
 #include <QQmlEngine>
 
 #include "akcompressedvideocaps.h"
-#include "akfrac.h"
 #include "akcaps.h"
+#include "akcompressedcaps.h"
+#include "akvideocaps.h"
 
 class AkCompressedVideoCapsPrivate
 {
     public:
-        QString m_format;
-        int m_width {0};
-        int m_height {0};
-        AkFrac m_fps;
+        AkCompressedVideoCaps::VideoCodecID m_codec {AkCompressedVideoCaps::VideoCodecID_unknown};
+        AkVideoCaps m_rawCaps;
+        int m_bitrate {0};
 };
 
 AkCompressedVideoCaps::AkCompressedVideoCaps(QObject *parent):
@@ -42,29 +41,15 @@ AkCompressedVideoCaps::AkCompressedVideoCaps(QObject *parent):
     this->d = new AkCompressedVideoCapsPrivate();
 }
 
-AkCompressedVideoCaps::AkCompressedVideoCaps(const QString &format,
-                                             int width,
-                                             int height,
-                                             const AkFrac &fps):
+AkCompressedVideoCaps::AkCompressedVideoCaps(VideoCodecID codec,
+                                             const AkVideoCaps &rawCaps,
+                                             int bitrate):
     QObject()
 {
     this->d = new AkCompressedVideoCapsPrivate();
-    this->d->m_format = format;
-    this->d->m_width = width;
-    this->d->m_height = height;
-    this->d->m_fps = fps;
-}
-
-AkCompressedVideoCaps::AkCompressedVideoCaps(const QString &format,
-                                             const QSize &size,
-                                             const AkFrac &fps):
-    QObject()
-{
-    this->d = new AkCompressedVideoCapsPrivate();
-    this->d->m_format = format;
-    this->d->m_width = size.width();
-    this->d->m_height = size.height();
-    this->d->m_fps = fps;
+    this->d->m_codec = codec;
+    this->d->m_rawCaps = rawCaps;
+    this->d->m_bitrate = bitrate;
 }
 
 AkCompressedVideoCaps::AkCompressedVideoCaps(const AkCaps &other):
@@ -74,10 +59,21 @@ AkCompressedVideoCaps::AkCompressedVideoCaps(const AkCaps &other):
 
     if (other.type() == AkCaps::CapsVideoCompressed) {
         auto data = reinterpret_cast<AkCompressedVideoCaps *>(other.privateData());
-        this->d->m_format = data->d->m_format;
-        this->d->m_width = data->d->m_width;
-        this->d->m_height = data->d->m_height;
-        this->d->m_fps = data->d->m_fps;
+        this->d->m_codec = data->d->m_codec;
+        this->d->m_rawCaps = data->d->m_rawCaps;
+        this->d->m_bitrate = data->d->m_bitrate;
+    }
+}
+
+AkCompressedVideoCaps::AkCompressedVideoCaps(const AkCompressedCaps &other)
+{
+    this->d = new AkCompressedVideoCapsPrivate();
+
+    if (other.type() == AkCompressedCaps::CapsType_Video) {
+        auto data = reinterpret_cast<AkCompressedVideoCaps *>(other.privateData());
+        this->d->m_codec = data->d->m_codec;
+        this->d->m_rawCaps = data->d->m_rawCaps;
+        this->d->m_bitrate = data->d->m_bitrate;
     }
 }
 
@@ -85,10 +81,9 @@ AkCompressedVideoCaps::AkCompressedVideoCaps(const AkCompressedVideoCaps &other)
     QObject()
 {
     this->d = new AkCompressedVideoCapsPrivate();
-    this->d->m_format = other.d->m_format;
-    this->d->m_width = other.d->m_width;
-    this->d->m_height = other.d->m_height;
-    this->d->m_fps = other.d->m_fps;
+    this->d->m_codec = other.d->m_codec;
+    this->d->m_rawCaps = other.d->m_rawCaps;
+    this->d->m_bitrate = other.d->m_bitrate;
 }
 
 AkCompressedVideoCaps::~AkCompressedVideoCaps()
@@ -100,15 +95,29 @@ AkCompressedVideoCaps &AkCompressedVideoCaps::operator =(const AkCaps &other)
 {
     if (other.type() == AkCaps::CapsVideoCompressed) {
         auto data = reinterpret_cast<AkCompressedVideoCaps *>(other.privateData());
-        this->d->m_format = data->d->m_format;
-        this->d->m_width = data->d->m_width;
-        this->d->m_height = data->d->m_height;
-        this->d->m_fps = data->d->m_fps;
+        this->d->m_codec = data->d->m_codec;
+        this->d->m_rawCaps = data->d->m_rawCaps;
+        this->d->m_bitrate = data->d->m_bitrate;
     } else {
-        this->d->m_format = "";
-        this->d->m_width = 0;
-        this->d->m_height = 0;
-        this->d->m_fps = {};
+        this->d->m_codec = VideoCodecID_unknown;
+        this->d->m_rawCaps = AkVideoCaps();
+        this->d->m_bitrate = 0;
+    }
+
+    return *this;
+}
+
+AkCompressedVideoCaps &AkCompressedVideoCaps::operator =(const AkCompressedCaps &other)
+{
+    if (other.type() == AkCompressedCaps::CapsType_Video) {
+        auto data = reinterpret_cast<AkCompressedVideoCaps *>(other.privateData());
+        this->d->m_codec = data->d->m_codec;
+        this->d->m_rawCaps = data->d->m_rawCaps;
+        this->d->m_bitrate = data->d->m_bitrate;
+    } else {
+        this->d->m_codec = VideoCodecID_unknown;
+        this->d->m_rawCaps = AkVideoCaps();
+        this->d->m_bitrate = 0;
     }
 
     return *this;
@@ -117,10 +126,9 @@ AkCompressedVideoCaps &AkCompressedVideoCaps::operator =(const AkCaps &other)
 AkCompressedVideoCaps &AkCompressedVideoCaps::operator =(const AkCompressedVideoCaps &other)
 {
     if (this != &other) {
-        this->d->m_format = other.d->m_format;
-        this->d->m_width = other.d->m_width;
-        this->d->m_height = other.d->m_height;
-        this->d->m_fps = other.d->m_fps;
+        this->d->m_codec = other.d->m_codec;
+        this->d->m_rawCaps = other.d->m_rawCaps;
+        this->d->m_bitrate = other.d->m_bitrate;
     }
 
     return *this;
@@ -128,10 +136,9 @@ AkCompressedVideoCaps &AkCompressedVideoCaps::operator =(const AkCompressedVideo
 
 bool AkCompressedVideoCaps::operator ==(const AkCompressedVideoCaps &other) const
 {
-    return this->d->m_format == other.d->m_format
-            && this->d->m_width == other.d->m_width
-            && this->d->m_height == other.d->m_height
-            && this->d->m_fps == other.d->m_fps;
+    return this->d->m_codec == other.d->m_codec
+            && this->d->m_rawCaps == other.d->m_rawCaps
+            && this->d->m_bitrate == other.d->m_bitrate;
 }
 
 bool AkCompressedVideoCaps::operator !=(const AkCompressedVideoCaps &other) const
@@ -141,15 +148,31 @@ bool AkCompressedVideoCaps::operator !=(const AkCompressedVideoCaps &other) cons
 
 AkCompressedVideoCaps::operator bool() const
 {
-    return !this->d->m_format.isEmpty()
-           && this->d->m_width > 0
-           && this->d->m_height > 0;
+    return this->d->m_codec != VideoCodecID_unknown
+           && this->d->m_rawCaps.width() > 0
+           && this->d->m_rawCaps.height() > 0;
 }
 
 AkCompressedVideoCaps::operator AkCaps() const
 {
     AkCaps caps;
     caps.setType(AkCaps::CapsVideoCompressed);
+    caps.setPrivateData(new AkCompressedVideoCaps(*this),
+                        [] (void *data) -> void * {
+                            return new AkCompressedVideoCaps(*reinterpret_cast<AkCompressedVideoCaps *>(data));
+                        },
+                        [] (void *data) {
+                            delete reinterpret_cast<AkCompressedVideoCaps *>(data);
+                        });
+
+    return caps;
+}
+
+AkCompressedVideoCaps::operator AkCompressedCaps() const
+{
+    AkCompressedCaps caps;
+    caps.setType(AkCompressedCaps::CapsType_Video);
+    caps.setCodecID(this->d->m_codec);
     caps.setPrivateData(new AkCompressedVideoCaps(*this),
                         [] (void *data) -> void * {
                             return new AkCompressedVideoCaps(*reinterpret_cast<AkCompressedVideoCaps *>(data));
@@ -171,24 +194,21 @@ QObject *AkCompressedVideoCaps::create(const AkCaps &caps)
     return new AkCompressedVideoCaps(caps);
 }
 
+QObject *AkCompressedVideoCaps::create(const AkCompressedCaps &caps)
+{
+    return new AkCompressedVideoCaps(caps);
+}
+
 QObject *AkCompressedVideoCaps::create(const AkCompressedVideoCaps &caps)
 {
     return new AkCompressedVideoCaps(caps);
 }
 
-QObject *AkCompressedVideoCaps::create(const QString &format,
-                                       int width,
-                                       int height,
-                                       const AkFrac &fps)
+QObject *AkCompressedVideoCaps::create(VideoCodecID codec,
+                                       const AkVideoCaps &rawCaps,
+                                       int bitrate)
 {
-    return new AkCompressedVideoCaps(format, width, height, fps);
-}
-
-QObject *AkCompressedVideoCaps::create(const QString &format,
-                             const QSize &size,
-                             const AkFrac &fps)
-{
-    return new AkCompressedVideoCaps(format, size, fps);
+    return new AkCompressedVideoCaps(codec, rawCaps, bitrate);
 }
 
 QVariant AkCompressedVideoCaps::toVariant() const
@@ -196,109 +216,100 @@ QVariant AkCompressedVideoCaps::toVariant() const
     return QVariant::fromValue(*this);
 }
 
-QString AkCompressedVideoCaps::format() const
+AkCompressedVideoCaps::VideoCodecID AkCompressedVideoCaps::codec() const
 {
-    return this->d->m_format;
+    return this->d->m_codec;
 }
 
-int AkCompressedVideoCaps::width() const
+AkVideoCaps AkCompressedVideoCaps::rawCaps() const
 {
-    return this->d->m_width;
+    return this->d->m_rawCaps;
 }
 
-int AkCompressedVideoCaps::height() const
+int AkCompressedVideoCaps::bitrate() const
 {
-    return this->d->m_height;
+    return this->d->m_bitrate;
 }
 
-AkFrac AkCompressedVideoCaps::fps() const
+QString AkCompressedVideoCaps::videoCodecIDToString(VideoCodecID codecID)
 {
-    return this->d->m_fps;
+    AkCompressedVideoCaps caps;
+    int codecIndex = caps.metaObject()->indexOfEnumerator("VideoCodecID");
+    QMetaEnum codecEnum = caps.metaObject()->enumerator(codecIndex);
+    QString codec(codecEnum.valueToKey(codecID));
+
+    if (codec.isEmpty()) {
+        QString str;
+        QTextStream ss(&str, QIODeviceBase::WriteOnly);
+        ss << "VideoCodecID(";
+        auto codecIDBytes = reinterpret_cast<char *>(&codecID);
+
+        for (qsizetype i = 0; i < sizeof(VideoCodecID); ++i) {
+            if (i > 0)
+                ss << ' ';
+
+            if (codecIDBytes[i] >= 32 && codecIDBytes[i] < 127)
+                ss << "'" << codecIDBytes[i] << "'";
+            else
+                ss << (quint32(codecIDBytes[i]) & 0xff);
+        }
+
+        ss << ")";
+
+        return str;
+    }
+
+    codec.remove("VideoCodecID_");
+
+    return codec;
 }
 
-AkFrac &AkCompressedVideoCaps::fps()
+void AkCompressedVideoCaps::setCodec(VideoCodecID codec)
 {
-    return this->d->m_fps;
-}
-
-void AkCompressedVideoCaps::setFormat(const QString &format)
-{
-    if (this->d->m_format == format)
+    if (this->d->m_codec == codec)
         return;
 
-    this->d->m_format = format;
-    emit this->formatChanged(format);
+    this->d->m_codec = codec;
+    emit this->codecChanged(codec);
 }
 
-void AkCompressedVideoCaps::setSize(const QSize &size)
+void AkCompressedVideoCaps::setRawCaps(const AkVideoCaps &rawCaps)
 {
-    QSize curSize(this->d->m_width, this->d->m_height);
-
-    if (curSize == size)
+    if (this->d->m_rawCaps == rawCaps)
         return;
 
-    this->d->m_width = size.width();
-    this->d->m_height = size.height();
-    emit this->widthChanged(size.width());
-    emit this->heightChanged(size.height());
-    emit sizeChanged(size);
+    this->d->m_rawCaps = rawCaps;
+    emit this->rawCapsChanged(rawCaps);
 }
 
-void AkCompressedVideoCaps::setWidth(int width)
+void AkCompressedVideoCaps::setBitrate(int bitrate)
 {
-    if (this->d->m_width == width)
+    if (this->d->m_bitrate == bitrate)
         return;
 
-    this->d->m_width = width;
-    emit this->widthChanged(width);
+    this->d->m_bitrate = bitrate;
+    emit this->bitrateChanged(bitrate);
 }
 
-void AkCompressedVideoCaps::setHeight(int height)
+void AkCompressedVideoCaps::resetCodec()
 {
-    if (this->d->m_height == height)
-        return;
-
-    this->d->m_height = height;
-    emit this->heightChanged(height);
+    this->setCodec(VideoCodecID_unknown);
 }
 
-void AkCompressedVideoCaps::setFps(const AkFrac &fps)
+void AkCompressedVideoCaps::resetRawCaps()
 {
-    if (this->d->m_fps == fps)
-        return;
-
-    this->d->m_fps = fps;
-    emit this->fpsChanged(fps);
+    this->setRawCaps(AkVideoCaps());
 }
 
-void AkCompressedVideoCaps::resetFormat()
+void AkCompressedVideoCaps::resetBitrate()
 {
-    this->setFormat({});
-}
-
-void AkCompressedVideoCaps::resetSize()
-{
-    this->setSize({});
-}
-
-void AkCompressedVideoCaps::resetWidth()
-{
-    this->setWidth(0);
-}
-
-void AkCompressedVideoCaps::resetHeight()
-{
-    this->setHeight(0);
-}
-
-void AkCompressedVideoCaps::resetFps()
-{
-    this->setFps(AkFrac());
+    this->setBitrate(0);
 }
 
 void AkCompressedVideoCaps::registerTypes()
 {
     qRegisterMetaType<AkCompressedVideoCaps>("AkCompressedVideoCaps");
+    qRegisterMetaType<VideoCodecID>("AkVideoCodecID");
     qmlRegisterSingletonType<AkCompressedVideoCaps>("Ak", 1, 0, "AkCompressedVideoCaps",
                                           [] (QQmlEngine *qmlEngine,
                                               QJSEngine *jsEngine) -> QObject * {
@@ -312,45 +323,63 @@ void AkCompressedVideoCaps::registerTypes()
 QDebug operator <<(QDebug debug, const AkCompressedVideoCaps &caps)
 {
     debug.nospace() << "AkCompressedVideoCaps("
-                    << "format="
-                    << caps.format()
-                    << ",width="
-                    << caps.width()
-                    << ",height="
-                    << caps.height()
-                    << ",fps="
-                    << caps.fps()
+                    << "codec="
+                    << caps.codec()
+                    << ",rawCaps="
+                    << caps.rawCaps()
+                    << ",bitrate="
+                    << caps.bitrate()
                     << ")";
+
+    return debug.space();
+}
+
+QDebug operator <<(QDebug debug, AkCompressedVideoCaps::VideoCodecID codecID)
+{
+    debug.nospace() << AkCompressedVideoCaps::videoCodecIDToString(codecID).toStdString().c_str();
 
     return debug.space();
 }
 
 QDataStream &operator >>(QDataStream &istream, AkCompressedVideoCaps &caps)
 {
-    QString format;
-    istream >> format;
-    caps.setFormat(format);
-    int width = 0;
-    istream >> width;
-    caps.setWidth(width);
-    int height = 0;
-    istream >> height;
-    caps.setHeight(height);
-    AkFrac fps;
-    istream >> fps;
-    caps.setFps(fps);
+    AkCompressedVideoCaps::VideoCodecID codec;
+    istream >> codec;
+    caps.setCodec(codec);
+    AkVideoCaps rawCaps;
+    istream >> rawCaps;
+    caps.setRawCaps(rawCaps);
+    int bitrate = 0;
+    istream >> bitrate;
+    caps.setBitrate(bitrate);
 
     return istream;
 }
 
-QDataStream &operator <<(QDataStream &ostream, const AkCompressedVideoCaps &caps)
+QDataStream &operator <<(QDataStream &ostream,
+                         const AkCompressedVideoCaps &caps)
 {
-    ostream << caps.format();
-    ostream << caps.width();
-    ostream << caps.height();
-    ostream << caps.fps();
+    ostream << caps.codec();
+    ostream << caps.rawCaps();
+    ostream << caps.bitrate();
 
     return ostream;
+}
+
+bool operator <(const AkCompressedVideoCaps &caps1,
+                const AkCompressedVideoCaps &caps2)
+{
+    if (caps1.d->m_codec < caps2.d->m_codec)
+        return true;
+    else if (caps1.d->m_codec > caps2.d->m_codec)
+        return false;
+
+    if (caps1.d->m_rawCaps < caps2.d->m_rawCaps)
+        return true;
+    else if (caps1.d->m_rawCaps > caps2.d->m_rawCaps)
+        return false;
+
+    return caps1.d->m_bitrate < caps2.d->m_bitrate;
 }
 
 #include "moc_akcompressedvideocaps.cpp"

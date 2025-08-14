@@ -37,6 +37,7 @@ T.ComboBox {
     leftPadding: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
     rightPadding: AkUnit.create(40 * AkTheme.controlScale, "dp").pixels
     hoverEnabled: true
+    font: AkTheme.fontSettings.body1
     clip: true
 
     readonly property int radius:
@@ -227,7 +228,9 @@ T.ComboBox {
                   control.model[index]:
               control.model instanceof Array?
                   control.model[index][control.textRole]:
-                  control.model.get(index)[control.textRole]
+              index >= 0 && index < control.model.count?
+                  control.model.get(index)[control.textRole]:
+                  ""
         highlighted: control.highlightedIndex == index
         hoverEnabled: control.hoverEnabled
     }

@@ -20,7 +20,7 @@
 #ifndef CONTRAST_H
 #define CONTRAST_H
 
-#include <akplugin.h>
+#include <iak/akplugin.h>
 
 class Contrast: public QObject, public AkPlugin
 {
@@ -29,8 +29,7 @@ class Contrast: public QObject, public AkPlugin
     Q_PLUGIN_METADATA(IID AkPlugin_IID FILE "pspec.json")
 
     public:
-        QObject *create(const QString &key, const QString &specification) override;
-        QStringList keys() const override;
+        QObject *create() override;
 };
 
 #endif // CONTRAST_H

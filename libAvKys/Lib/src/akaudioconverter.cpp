@@ -29,7 +29,7 @@
 #include "akfrac.h"
 
 using AudioConvertFuntion =
-    std::function<AkAudioPacket (const AkAudioPacket &src)>;
+    AkAudioPacket (*)(const AkAudioPacket &src);
 
 class AkAudioConverterPrivate
 {
@@ -142,6 +142,7 @@ class AkAudioConverterPrivate
             caps.setFormat(format);
             AkAudioPacket dst(caps, src.samples());
             dst.copyMetadata(src);
+            dst.setDuration(dst.samples());
             auto n = caps.channels() - src.planes() + 1;
 
             for (int plane = 0; plane < src.planes(); ++plane) {
@@ -241,6 +242,7 @@ class AkAudioConverterPrivate
             caps.setLayout(outputLayout);
             AkAudioPacket dst(caps, src.samples());
             dst.copyMetadata(src);
+            dst.setDuration(dst.samples());
 
             // Precalculate positional factors
             QVector<qreal> factors;
@@ -409,6 +411,7 @@ class AkAudioConverterPrivate
             caps.setPlanar(planar);
             AkAudioPacket outPacket(caps, packet.samples());
             outPacket.copyMetadata(packet);
+            outPacket.setDuration(outPacket.samples());
 
             if (planar) {
                 auto src_line = reinterpret_cast<const SampleType *>(packet.constPlane(0));
@@ -434,8 +437,7 @@ class AkAudioConverterPrivate
         }
 
         using ConvertChannelModelFunction =
-            std::function<AkAudioPacket (const AkAudioPacket &packet,
-                                         bool planar)>;
+            AkAudioPacket (*)(const AkAudioPacket &packet, bool planar);
 
 #define DEFINE_CONVERT_CHANNEL_MODEL_FUNCTION(sitype, itype) \
         {AkAudioCaps::SampleFormat_##sitype, \
@@ -546,6 +548,7 @@ class AkAudioConverterPrivate
             auto iSamples = packet.samples();
             AkAudioPacket outPacket(packet.caps(), samples);
             outPacket.copyMetadata(packet);
+            outPacket.setDuration(outPacket.samples());
             QVector<int> sampleValues;
 
             for (int sample = 0; sample < outPacket.samples(); ++sample)
@@ -612,6 +615,7 @@ class AkAudioConverterPrivate
             auto iSamples = packet.samples();
             AkAudioPacket outPacket(packet.caps(), samples);
             outPacket.copyMetadata(packet);
+            outPacket.setDuration(outPacket.samples());
             QVector<ValuesMinMax> sampleValues;
 
             for (int sample = 0; sample < outPacket.samples(); ++sample) {
@@ -678,6 +682,7 @@ class AkAudioConverterPrivate
             auto iSamples = int(packet.samples());
             AkAudioPacket outPacket(packet.caps(), samples);
             outPacket.copyMetadata(packet);
+            outPacket.setDuration(outPacket.samples());
             QVector<ValuesMinMax> sampleValues;
 
             for (int sample = 0; sample < outPacket.samples(); ++sample) {
@@ -741,8 +746,7 @@ class AkAudioConverterPrivate
         }
 
         using ScalingFunction =
-            std::function<AkAudioPacket (const AkAudioPacket &packet,
-                                         int samples)>;
+            AkAudioPacket (*)(const AkAudioPacket &packet, int samples);
 
 #define DEFINE_SAMPLE_SCALING_FUNCTION(sitype, \
                                        itype, \
@@ -1136,8 +1140,8 @@ AkAudioPacket AkAudioConverterPrivate::convertSampleRate(const AkAudioPacket &pa
     AkAudioPacket outPacket(caps, samples);
     outPacket.copyMetadata(tmpPacket);
     outPacket.setPts(packet.pts() * oSampleRate / packet.caps().rate());
-    outPacket.setTimeBase(packet.timeBase() * AkFrac(packet.caps().rate(),
-                                                     oSampleRate));
+    outPacket.setDuration(outPacket.samples());
+    outPacket.setTimeBase({1, oSampleRate});
 
     for (int plane = 0; plane < outPacket.planes(); plane++)
         memcpy(outPacket.plane(plane),

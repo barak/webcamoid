@@ -25,11 +25,18 @@
 #include <QtEndian>
 #include <QtMath>
 
-#include "akvideoconverter.h"
-#include "akvideocaps.h"
-#include "akvideopacket.h"
-#include "akvideoformatspec.h"
+#include "akalgorithm.h"
+#include "akcpufeatures.h"
 #include "akfrac.h"
+#include "aksimd.h"
+#include "akvideocaps.h"
+#include "akvideoconverter.h"
+#include "akvideoformatspec.h"
+#include "akvideopacket.h"
+
+#ifdef OPENMP_ENABLED
+#include <omp.h>
+#endif
 
 #define SCALE_EMULT 8
 
@@ -81,6 +88,228 @@ enum ResizeMode
     ResizeMode_Down,
 };
 
+using CreateConvertParametersType =
+    void *(*)(qint64 *colorMatrix,
+              qint64 *alphaMatrix,
+              qint64 *minValues,
+              qint64 *maxValues,
+              qint64 colorShift,
+              qint64 alphaShift);
+using FreeConvertParametersType =
+    void (*)(void *convertParameters);
+using ConvertFast8bits3to3Type =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             int *x);
+using ConvertFast8bits3to3AType =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             const int *dstWidthOffsetA,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             quint8 *dst_line_a,
+             int *x);
+using ConvertFast8bits3Ato3Type =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             int *x);
+using ConvertFast8bits3Ato3AType =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             const int *dstWidthOffsetA,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             quint8 *dst_line_a,
+             int *x);
+using ConvertFast8bitsV3Ato3Type =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             int *x);
+using ConvertFast8bits3to1Type =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *dstWidthOffsetX,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             quint8 *dst_line_x,
+             int *x);
+using ConvertFast8bits3to1AType =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetA,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             quint8 *dst_line_x,
+             quint8 *dst_line_a,
+             int *x);
+using ConvertFast8bits3Ato1Type =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             int *x);
+using ConvertFast8bits3Ato1AType =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetA,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_a,
+             int *x);
+using ConvertFast8bits1to3Type =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             int xmax,
+             const quint8 *src_line_x,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             int *x);
+using ConvertFast8bits1to3AType =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             const int *dstWidthOffsetA,
+             int xmax,
+             const quint8 *src_line_x,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             quint8 *dst_line_a,
+             int *x);
+using ConvertFast8bits1Ato3Type =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             int *x);
+using ConvertFast8bits1Ato3AType =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             const int *dstWidthOffsetA,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             quint8 *dst_line_a,
+             int *x);
+using ConvertFast8bits1Ato1Type =
+    void (*)(void *convertParameters,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             int xmax,
+             const quint8 *src_line_x,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             int *x);
+
 class FrameConvertParameters
 {
     public:
@@ -99,6 +328,7 @@ class FrameConvertParameters
         ConvertDataTypes convertDataTypes {ConvertDataTypes_8_8};
         ConvertAlphaMode alphaMode {ConvertAlphaMode_AI_AO};
         ResizeMode resizeMode {ResizeMode_Keep};
+        bool fastConvertion {false};
 
         int fromEndian {Q_BYTE_ORDER};
         int toEndian {Q_BYTE_ORDER};
@@ -199,6 +429,28 @@ class FrameConvertParameters
         quint64 maskAo {0};
 
         quint64 alphaMask {0};
+
+        void *simdConvertParameters {nullptr};
+
+        CreateConvertParametersType createSIMDConvertParameters {nullptr};
+        FreeConvertParametersType   freeSIMDConvertParameters   {nullptr};
+        ConvertFast8bits3to3Type    convertSIMDFast8bits3to3    {nullptr};
+        ConvertFast8bits3to3AType   convertSIMDFast8bits3to3A   {nullptr};
+        ConvertFast8bits3Ato3Type   convertSIMDFast8bits3Ato3   {nullptr};
+        ConvertFast8bits3Ato3AType  convertSIMDFast8bits3Ato3A  {nullptr};
+        ConvertFast8bitsV3Ato3Type  convertSIMDFast8bitsV3Ato3  {nullptr};
+        ConvertFast8bits3to1Type    convertSIMDFast8bits3to1    {nullptr};
+        ConvertFast8bits3to1AType   convertSIMDFast8bits3to1A   {nullptr};
+        ConvertFast8bits3Ato1Type   convertSIMDFast8bits3Ato1   {nullptr};
+        ConvertFast8bits3Ato1AType  convertSIMDFast8bits3Ato1A  {nullptr};
+        ConvertFast8bits1to3Type    convertSIMDFast8bits1to3    {nullptr};
+        ConvertFast8bits1to3AType   convertSIMDFast8bits1to3A   {nullptr};
+        ConvertFast8bits1Ato3Type   convertSIMDFast8bits1Ato3   {nullptr};
+        ConvertFast8bits1Ato3AType  convertSIMDFast8bits1Ato3A  {nullptr};
+        ConvertFast8bits1Ato1Type   convertSIMDFast8bits1Ato1   {nullptr};
+
+        size_t parallelizationThreshold {0};
+        bool paralelize {false};
 
         FrameConvertParameters();
         FrameConvertParameters(const FrameConvertParameters &other);
@@ -309,65 +561,6 @@ class AkVideoConverterPrivate
                            c + 3);
         }
 
-        // Endianness conversion functions for color components
-
-        inline quint8 swapBytes(quint8 &&value, int endianness) const
-        {
-            Q_UNUSED(endianness)
-
-            return value;
-        }
-
-        inline quint16 swapBytes(quint16 &&value, int endianness) const
-        {
-            if (endianness == Q_BYTE_ORDER)
-                return value;
-
-            quint16 result;
-            auto pv = reinterpret_cast<quint8 *>(&value);
-            auto pr = reinterpret_cast<quint8 *>(&result);
-            pr[0] = pv[1];
-            pr[1] = pv[0];
-
-            return result;
-        }
-
-        inline quint32 swapBytes(quint32 &&value, int endianness) const
-        {
-            if (endianness == Q_BYTE_ORDER)
-                return value;
-
-            quint32 result;
-            auto pv = reinterpret_cast<quint8 *>(&value);
-            auto pr = reinterpret_cast<quint8 *>(&result);
-            pr[0] = pv[3];
-            pr[1] = pv[2];
-            pr[2] = pv[1];
-            pr[3] = pv[0];
-
-            return result;
-        }
-
-        inline quint64 swapBytes(quint64 &&value, int endianness) const
-        {
-            if (endianness == Q_BYTE_ORDER)
-                return value;
-
-            quint64 result;
-            auto pv = reinterpret_cast<quint8 *>(&value);
-            auto pr = reinterpret_cast<quint8 *>(&result);
-            pr[0] = pv[7];
-            pr[1] = pv[6];
-            pr[2] = pv[5];
-            pr[3] = pv[4];
-            pr[4] = pv[3];
-            pr[5] = pv[2];
-            pr[6] = pv[1];
-            pr[7] = pv[0];
-
-            return result;
-        }
-
         /* Component reading functions */
 
         template <typename InputType>
@@ -378,7 +571,11 @@ class AkVideoConverterPrivate
         {
             int &xs_x = fc.srcWidthOffsetX[x];
             *xi = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
-            *xi = (this->swapBytes(InputType(*xi), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
+
+            if (fc.fromEndian != Q_BYTE_ORDER)
+                *xi = AkAlgorithm::swapBytes(InputType(*xi));
+
+            *xi = (*xi >> fc.xiShift) & fc.maxXi;
         }
 
         template <typename InputType>
@@ -392,11 +589,16 @@ class AkVideoConverterPrivate
             int &xs_x = fc.srcWidthOffsetX[x];
             int &xs_a = fc.srcWidthOffsetA[x];
 
-            *xi = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
-            *ai = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
+            auto xit = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
+            auto ait = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
 
-            *xi = (this->swapBytes(InputType(*xi), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            *ai = (this->swapBytes(InputType(*ai), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
+            if (fc.fromEndian != Q_BYTE_ORDER) {
+                xit = AkAlgorithm::swapBytes(InputType(xit));
+                ait = AkAlgorithm::swapBytes(InputType(ait));
+            }
+
+            *xi = (xit >> fc.xiShift) & fc.maxXi;
+            *ai = (ait >> fc.aiShift) & fc.maxAi;
         }
 
         template <typename InputType>
@@ -448,9 +650,15 @@ class AkVideoConverterPrivate
             auto xi_x = *reinterpret_cast<const InputType *>(src_line_x + xs_x_1);
             auto xi_y = *reinterpret_cast<const InputType *>(src_line_x_1 + xs_x);
 
-            xi_ = (this->swapBytes(InputType(xi_), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xi_x = (this->swapBytes(InputType(xi_x), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xi_y = (this->swapBytes(InputType(xi_y), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
+            if (fc.fromEndian != Q_BYTE_ORDER) {
+                xi_ = AkAlgorithm::swapBytes(InputType(xi_));
+                xi_x = AkAlgorithm::swapBytes(InputType(xi_x));
+                xi_y = AkAlgorithm::swapBytes(InputType(xi_y));
+            }
+
+            xi_ = (xi_ >> fc.xiShift) & fc.maxXi;
+            xi_x = (xi_x >> fc.xiShift) & fc.maxXi;
+            xi_y = (xi_y >> fc.xiShift) & fc.maxXi;
 
             qint64 xib = 0;
             this->blend<SCALE_EMULT>(xi_,
@@ -458,6 +666,28 @@ class AkVideoConverterPrivate
                                      fc.kx[x], ky,
                                      &xib);
             *xi = xib;
+        }
+
+        inline void readF8UL1(const FrameConvertParameters &fc,
+                              const quint8 *src_line_x,
+                              const quint8 *src_line_x_1,
+                              int x,
+                              qint64 ky,
+                              quint8 *xi) const
+        {
+            int &xs_x = fc.srcWidthOffsetX[x];
+            int &xs_x_1 = fc.srcWidthOffsetX_1[x];
+
+            auto xi_ = src_line_x[xs_x];
+            auto xi_x = src_line_x[xs_x_1];
+            auto xi_y = src_line_x_1[xs_x];
+
+            qint64 xib = 0;
+            this->blend<SCALE_EMULT>(xi_,
+                                     xi_x, xi_y,
+                                     fc.kx[x], ky,
+                                     &xib);
+            *xi = quint8(xib);
         }
 
         template <typename InputType>
@@ -481,19 +711,28 @@ class AkVideoConverterPrivate
             qint64 xai_x[2];
             qint64 xai_y[2];
 
-            xai[0] = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
-            xai[1] = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
-            xai_x[0] = *reinterpret_cast<const InputType *>(src_line_x + xs_x_1);
-            xai_x[1] = *reinterpret_cast<const InputType *>(src_line_a + xs_a_1);
-            xai_y[0] = *reinterpret_cast<const InputType *>(src_line_x_1 + xs_x);
-            xai_y[1] = *reinterpret_cast<const InputType *>(src_line_a_1 + xs_a);
+            auto xai0 = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
+            auto xai1 = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
+            auto xai_x0 = *reinterpret_cast<const InputType *>(src_line_x + xs_x_1);
+            auto xai_x1 = *reinterpret_cast<const InputType *>(src_line_a + xs_a_1);
+            auto xai_y0 = *reinterpret_cast<const InputType *>(src_line_x_1 + xs_x);
+            auto xai_y1 = *reinterpret_cast<const InputType *>(src_line_a_1 + xs_a);
 
-            xai[0] = (this->swapBytes(InputType(xai[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xai[1] = (this->swapBytes(InputType(xai[1]), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
-            xai_x[0] = (this->swapBytes(InputType(xai_x[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xai_x[1] = (this->swapBytes(InputType(xai_x[1]), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
-            xai_y[0] = (this->swapBytes(InputType(xai_y[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xai_y[1] = (this->swapBytes(InputType(xai_y[1]), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
+            if (fc.fromEndian != Q_BYTE_ORDER) {
+                xai0 = AkAlgorithm::swapBytes(InputType(xai0));
+                xai1 = AkAlgorithm::swapBytes(InputType(xai1));
+                xai_x0 = AkAlgorithm::swapBytes(InputType(xai_x0));
+                xai_x1 = AkAlgorithm::swapBytes(InputType(xai_x1));
+                xai_y0 = AkAlgorithm::swapBytes(InputType(xai_y0));
+                xai_y1 = AkAlgorithm::swapBytes(InputType(xai_y1));
+            }
+
+            xai[0] = (xai0 >> fc.xiShift) & fc.maxXi;
+            xai[1] = (xai1 >> fc.aiShift) & fc.maxAi;
+            xai_x[0] = (xai_x0 >> fc.xiShift) & fc.maxXi;
+            xai_x[1] = (xai_x1 >> fc.aiShift) & fc.maxAi;
+            xai_y[0] = (xai_y0 >> fc.xiShift) & fc.maxXi;
+            xai_y[1] = (xai_y1 >> fc.aiShift) & fc.maxAi;
 
             qint64 xaib[2];
             this->blend2<SCALE_EMULT>(xai,
@@ -503,6 +742,45 @@ class AkVideoConverterPrivate
 
             *xi = xaib[0];
             *ai = xaib[1];
+        }
+
+        inline void readF8UL1A(const FrameConvertParameters &fc,
+                               const quint8 *src_line_x,
+                               const quint8 *src_line_a,
+                               const quint8 *src_line_x_1,
+                               const quint8 *src_line_a_1,
+                               int x,
+                               qint64 ky,
+                               quint8 *xi,
+                               quint8 *ai) const
+        {
+            int &xs_x = fc.srcWidthOffsetX[x];
+            int &xs_a = fc.srcWidthOffsetA[x];
+
+            int &xs_x_1 = fc.srcWidthOffsetX_1[x];
+            int &xs_a_1 = fc.srcWidthOffsetA_1[x];
+
+            qint64 xai[] = {
+                src_line_x[xs_x],
+                src_line_a[xs_a]
+            };
+            qint64 xai_x[] = {
+                src_line_x[xs_x_1],
+                src_line_a[xs_a_1]
+            };
+            qint64 xai_y[] = {
+                src_line_x_1[xs_x],
+                src_line_a_1[xs_a]
+            };
+
+            qint64 xaib[2];
+            this->blend2<SCALE_EMULT>(xai,
+                                      xai_x, xai_y,
+                                      fc.kx[x], ky,
+                                      xaib);
+
+            *xi = quint8(xaib[0]);
+            *ai = quint8(xaib[1]);
         }
 
         template <typename InputType>
@@ -519,13 +797,19 @@ class AkVideoConverterPrivate
             int &xs_y = fc.srcWidthOffsetY[x];
             int &xs_z = fc.srcWidthOffsetZ[x];
 
-            *xi = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
-            *yi = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
-            *zi = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
+            auto xit = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
+            auto yit = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
+            auto zit = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
 
-            *xi = (this->swapBytes(InputType(*xi), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            *yi = (this->swapBytes(InputType(*yi), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-            *zi = (this->swapBytes(InputType(*zi), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
+            if (fc.fromEndian != Q_BYTE_ORDER) {
+                xit = AkAlgorithm::swapBytes(InputType(xit));
+                yit = AkAlgorithm::swapBytes(InputType(yit));
+                zit = AkAlgorithm::swapBytes(InputType(zit));
+            }
+
+            *xi = (xit >> fc.xiShift) & fc.maxXi;
+            *yi = (yit >> fc.yiShift) & fc.maxYi;
+            *zi = (zit >> fc.ziShift) & fc.maxZi;
         }
 
         template <typename InputType>
@@ -545,15 +829,22 @@ class AkVideoConverterPrivate
             int &xs_z = fc.srcWidthOffsetZ[x];
             int &xs_a = fc.srcWidthOffsetA[x];
 
-            *xi = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
-            *yi = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
-            *zi = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
-            *ai = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
+            auto xit = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
+            auto yit = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
+            auto zit = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
+            auto ait = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
 
-            *xi = (this->swapBytes(InputType(*xi), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            *yi = (this->swapBytes(InputType(*yi), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-            *zi = (this->swapBytes(InputType(*zi), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
-            *ai = (this->swapBytes(InputType(*ai), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
+            if (fc.fromEndian != Q_BYTE_ORDER) {
+                xit = AkAlgorithm::swapBytes(InputType(xit));
+                yit = AkAlgorithm::swapBytes(InputType(yit));
+                zit = AkAlgorithm::swapBytes(InputType(zit));
+                ait = AkAlgorithm::swapBytes(InputType(ait));
+            }
+
+            *xi = (xit >> fc.xiShift) & fc.maxXi;
+            *yi = (yit >> fc.yiShift) & fc.maxYi;
+            *zi = (zit >> fc.ziShift) & fc.maxZi;
+            *ai = (ait >> fc.aiShift) & fc.maxAi;
         }
 
         template <typename InputType>
@@ -632,25 +923,37 @@ class AkVideoConverterPrivate
             qint64 xyzi_x[3];
             qint64 xyzi_y[3];
 
-            xyzi[0] = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
-            xyzi[1] = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
-            xyzi[2] = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
-            xyzi_x[0] = *reinterpret_cast<const InputType *>(src_line_x + xs_x_1);
-            xyzi_x[1] = *reinterpret_cast<const InputType *>(src_line_y + xs_y_1);
-            xyzi_x[2] = *reinterpret_cast<const InputType *>(src_line_z + xs_z_1);
-            xyzi_y[0] = *reinterpret_cast<const InputType *>(src_line_x_1 + xs_x);
-            xyzi_y[1] = *reinterpret_cast<const InputType *>(src_line_y_1 + xs_y);
-            xyzi_y[2] = *reinterpret_cast<const InputType *>(src_line_z_1 + xs_z);
+            auto xyzi0 = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
+            auto xyzi1 = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
+            auto xyzi2 = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
+            auto xyzi_x0 = *reinterpret_cast<const InputType *>(src_line_x + xs_x_1);
+            auto xyzi_x1 = *reinterpret_cast<const InputType *>(src_line_y + xs_y_1);
+            auto xyzi_x2 = *reinterpret_cast<const InputType *>(src_line_z + xs_z_1);
+            auto xyzi_y0 = *reinterpret_cast<const InputType *>(src_line_x_1 + xs_x);
+            auto xyzi_y1 = *reinterpret_cast<const InputType *>(src_line_y_1 + xs_y);
+            auto xyzi_y2 = *reinterpret_cast<const InputType *>(src_line_z_1 + xs_z);
 
-            xyzi[0] = (this->swapBytes(InputType(xyzi[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xyzi[1] = (this->swapBytes(InputType(xyzi[1]), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-            xyzi[2] = (this->swapBytes(InputType(xyzi[2]), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
-            xyzi_x[0] = (this->swapBytes(InputType(xyzi_x[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xyzi_x[1] = (this->swapBytes(InputType(xyzi_x[1]), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-            xyzi_x[2] = (this->swapBytes(InputType(xyzi_x[2]), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
-            xyzi_y[0] = (this->swapBytes(InputType(xyzi_y[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xyzi_y[1] = (this->swapBytes(InputType(xyzi_y[1]), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-            xyzi_y[2] = (this->swapBytes(InputType(xyzi_y[2]), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
+            if (fc.fromEndian != Q_BYTE_ORDER) {
+                xyzi0 = AkAlgorithm::swapBytes(InputType(xyzi0));
+                xyzi1 = AkAlgorithm::swapBytes(InputType(xyzi1));
+                xyzi2 = AkAlgorithm::swapBytes(InputType(xyzi2));
+                xyzi_x0 = AkAlgorithm::swapBytes(InputType(xyzi_x0));
+                xyzi_x1 = AkAlgorithm::swapBytes(InputType(xyzi_x1));
+                xyzi_x2 = AkAlgorithm::swapBytes(InputType(xyzi_x2));
+                xyzi_y0 = AkAlgorithm::swapBytes(InputType(xyzi_y0));
+                xyzi_y1 = AkAlgorithm::swapBytes(InputType(xyzi_y1));
+                xyzi_y2 = AkAlgorithm::swapBytes(InputType(xyzi_y2));
+            }
+
+            xyzi[0] = (xyzi0 >> fc.xiShift) & fc.maxXi;
+            xyzi[1] = (xyzi1 >> fc.yiShift) & fc.maxYi;
+            xyzi[2] = (xyzi2 >> fc.ziShift) & fc.maxZi;
+            xyzi_x[0] = (xyzi_x0 >> fc.xiShift) & fc.maxXi;
+            xyzi_x[1] = (xyzi_x1 >> fc.yiShift) & fc.maxYi;
+            xyzi_x[2] = (xyzi_x2 >> fc.ziShift) & fc.maxZi;
+            xyzi_y[0] = (xyzi_y0 >> fc.xiShift) & fc.maxXi;
+            xyzi_y[1] = (xyzi_y1 >> fc.yiShift) & fc.maxYi;
+            xyzi_y[2] = (xyzi_y2 >> fc.ziShift) & fc.maxZi;
 
             qint64 xyzib[3];
             this->blend3<SCALE_EMULT>(xyzi,
@@ -661,6 +964,54 @@ class AkVideoConverterPrivate
             *xi = xyzib[0];
             *yi = xyzib[1];
             *zi = xyzib[2];
+        }
+
+        inline void readF8UL3(const FrameConvertParameters &fc,
+                              const quint8 *src_line_x,
+                              const quint8 *src_line_y,
+                              const quint8 *src_line_z,
+                              const quint8 *src_line_x_1,
+                              const quint8 *src_line_y_1,
+                              const quint8 *src_line_z_1,
+                              int x,
+                              qint64 ky,
+                              quint8 *xi,
+                              quint8 *yi,
+                              quint8 *zi) const
+        {
+            int &xs_x = fc.srcWidthOffsetX[x];
+            int &xs_y = fc.srcWidthOffsetY[x];
+            int &xs_z = fc.srcWidthOffsetZ[x];
+
+            int &xs_x_1 = fc.srcWidthOffsetX_1[x];
+            int &xs_y_1 = fc.srcWidthOffsetY_1[x];
+            int &xs_z_1 = fc.srcWidthOffsetZ_1[x];
+
+            qint64 xyzi[] = {
+                src_line_x[xs_x],
+                src_line_y[xs_y],
+                src_line_z[xs_z]
+            };
+            qint64 xyzi_x[] = {
+                src_line_x[xs_x_1],
+                src_line_y[xs_y_1],
+                src_line_z[xs_z_1]
+            };
+            qint64 xyzi_y[] = {
+                src_line_x_1[xs_x],
+                src_line_y_1[xs_y],
+                src_line_z_1[xs_z]
+            };
+
+            qint64 xyzib[3];
+            this->blend3<SCALE_EMULT>(xyzi,
+                                      xyzi_x, xyzi_y,
+                                      fc.kx[x], ky,
+                                      xyzib);
+
+            *xi = quint8(xyzib[0]);
+            *yi = quint8(xyzib[1]);
+            *zi = quint8(xyzib[2]);
         }
 
         template <typename InputType>
@@ -694,31 +1045,46 @@ class AkVideoConverterPrivate
             qint64 xyzai_x[4];
             qint64 xyzai_y[4];
 
-            xyzai[0] = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
-            xyzai[1] = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
-            xyzai[2] = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
-            xyzai[3] = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
-            xyzai_x[0] = *reinterpret_cast<const InputType *>(src_line_x + xs_x_1);
-            xyzai_x[1] = *reinterpret_cast<const InputType *>(src_line_y + xs_y_1);
-            xyzai_x[2] = *reinterpret_cast<const InputType *>(src_line_z + xs_z_1);
-            xyzai_x[3] = *reinterpret_cast<const InputType *>(src_line_a + xs_a_1);
-            xyzai_y[0] = *reinterpret_cast<const InputType *>(src_line_x_1 + xs_x);
-            xyzai_y[1] = *reinterpret_cast<const InputType *>(src_line_y_1 + xs_y);
-            xyzai_y[2] = *reinterpret_cast<const InputType *>(src_line_z_1 + xs_z);
-            xyzai_y[3] = *reinterpret_cast<const InputType *>(src_line_a_1 + xs_a);
+            auto xyzai0 = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
+            auto xyzai1 = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
+            auto xyzai2 = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
+            auto xyzai3 = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
+            auto xyzai_x0 = *reinterpret_cast<const InputType *>(src_line_x + xs_x_1);
+            auto xyzai_x1 = *reinterpret_cast<const InputType *>(src_line_y + xs_y_1);
+            auto xyzai_x2 = *reinterpret_cast<const InputType *>(src_line_z + xs_z_1);
+            auto xyzai_x3 = *reinterpret_cast<const InputType *>(src_line_a + xs_a_1);
+            auto xyzai_y0 = *reinterpret_cast<const InputType *>(src_line_x_1 + xs_x);
+            auto xyzai_y1 = *reinterpret_cast<const InputType *>(src_line_y_1 + xs_y);
+            auto xyzai_y2 = *reinterpret_cast<const InputType *>(src_line_z_1 + xs_z);
+            auto xyzai_y3 = *reinterpret_cast<const InputType *>(src_line_a_1 + xs_a);
 
-            xyzai[0] = (this->swapBytes(InputType(xyzai[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xyzai[1] = (this->swapBytes(InputType(xyzai[1]), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-            xyzai[2] = (this->swapBytes(InputType(xyzai[2]), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
-            xyzai[3] = (this->swapBytes(InputType(xyzai[3]), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
-            xyzai_x[0] = (this->swapBytes(InputType(xyzai_x[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xyzai_x[1] = (this->swapBytes(InputType(xyzai_x[1]), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-            xyzai_x[2] = (this->swapBytes(InputType(xyzai_x[2]), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
-            xyzai_x[3] = (this->swapBytes(InputType(xyzai_x[3]), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
-            xyzai_y[0] = (this->swapBytes(InputType(xyzai_y[0]), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-            xyzai_y[1] = (this->swapBytes(InputType(xyzai_y[1]), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-            xyzai_y[2] = (this->swapBytes(InputType(xyzai_y[2]), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
-            xyzai_y[3] = (this->swapBytes(InputType(xyzai_y[3]), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
+            if (fc.fromEndian != Q_BYTE_ORDER) {
+                xyzai0 = AkAlgorithm::swapBytes(InputType(xyzai0));
+                xyzai1 = AkAlgorithm::swapBytes(InputType(xyzai1));
+                xyzai2 = AkAlgorithm::swapBytes(InputType(xyzai2));
+                xyzai3 = AkAlgorithm::swapBytes(InputType(xyzai3));
+                xyzai_x0 = AkAlgorithm::swapBytes(InputType(xyzai_x0));
+                xyzai_x1 = AkAlgorithm::swapBytes(InputType(xyzai_x1));
+                xyzai_x2 = AkAlgorithm::swapBytes(InputType(xyzai_x2));
+                xyzai_x3 = AkAlgorithm::swapBytes(InputType(xyzai_x3));
+                xyzai_y0 = AkAlgorithm::swapBytes(InputType(xyzai_y0));
+                xyzai_y1 = AkAlgorithm::swapBytes(InputType(xyzai_y1));
+                xyzai_y2 = AkAlgorithm::swapBytes(InputType(xyzai_y2));
+                xyzai_y3 = AkAlgorithm::swapBytes(InputType(xyzai_y3));
+            }
+
+            xyzai[0] = (xyzai0 >> fc.xiShift) & fc.maxXi;
+            xyzai[1] = (xyzai1 >> fc.yiShift) & fc.maxYi;
+            xyzai[2] = (xyzai2 >> fc.ziShift) & fc.maxZi;
+            xyzai[3] = (xyzai3 >> fc.aiShift) & fc.maxAi;
+            xyzai_x[0] = (xyzai_x0 >> fc.xiShift) & fc.maxXi;
+            xyzai_x[1] = (xyzai_x1 >> fc.yiShift) & fc.maxYi;
+            xyzai_x[2] = (xyzai_x2 >> fc.ziShift) & fc.maxZi;
+            xyzai_x[3] = (xyzai_x3 >> fc.aiShift) & fc.maxAi;
+            xyzai_y[0] = (xyzai_y0 >> fc.xiShift) & fc.maxXi;
+            xyzai_y[1] = (xyzai_y1 >> fc.yiShift) & fc.maxYi;
+            xyzai_y[2] = (xyzai_y2 >> fc.ziShift) & fc.maxZi;
+            xyzai_y[3] = (xyzai_y3 >> fc.aiShift) & fc.maxAi;
 
             qint64 xyzaib[4];
             this->blend4<SCALE_EMULT>(xyzai,
@@ -732,6 +1098,63 @@ class AkVideoConverterPrivate
             *ai = xyzaib[3];
         }
 
+        inline void readF8UL3A(const FrameConvertParameters &fc,
+                               const quint8 *src_line_x,
+                               const quint8 *src_line_y,
+                               const quint8 *src_line_z,
+                               const quint8 *src_line_a,
+                               const quint8 *src_line_x_1,
+                               const quint8 *src_line_y_1,
+                               const quint8 *src_line_z_1,
+                               const quint8 *src_line_a_1,
+                               int x,
+                               qint64 ky,
+                               quint8 *xi,
+                               quint8 *yi,
+                               quint8 *zi,
+                               quint8 *ai) const
+        {
+            int &xs_x = fc.srcWidthOffsetX[x];
+            int &xs_y = fc.srcWidthOffsetY[x];
+            int &xs_z = fc.srcWidthOffsetZ[x];
+            int &xs_a = fc.srcWidthOffsetA[x];
+
+            int &xs_x_1 = fc.srcWidthOffsetX_1[x];
+            int &xs_y_1 = fc.srcWidthOffsetY_1[x];
+            int &xs_z_1 = fc.srcWidthOffsetZ_1[x];
+            int &xs_a_1 = fc.srcWidthOffsetA_1[x];
+
+            qint64 xyzai[] = {
+                src_line_x[xs_x],
+                src_line_y[xs_y],
+                src_line_z[xs_z],
+                src_line_a[xs_a]
+            };
+            qint64 xyzai_x[] = {
+                src_line_x[xs_x_1],
+                src_line_y[xs_y_1],
+                src_line_z[xs_z_1],
+                src_line_a[xs_a_1]
+            };
+            qint64 xyzai_y[] = {
+                src_line_x_1[xs_x],
+                src_line_y_1[xs_y],
+                src_line_z_1[xs_z],
+                src_line_a_1[xs_a]
+            };
+
+            qint64 xyzaib[4];
+            this->blend4<SCALE_EMULT>(xyzai,
+                                      xyzai_x, xyzai_y,
+                                      fc.kx[x], ky,
+                                      xyzaib);
+
+            *xi = quint8(xyzaib[0]);
+            *yi = quint8(xyzaib[1]);
+            *zi = quint8(xyzaib[2]);
+            *ai = quint8(xyzaib[3]);
+        }
+
         /* Component writing functions */
 
         template <typename OutputType>
@@ -743,7 +1166,6 @@ class AkVideoConverterPrivate
             int &xd_x = fc.dstWidthOffsetX[x];
             auto xo_ = reinterpret_cast<OutputType *>(dst_line_x + xd_x);
             *xo_ = (*xo_ & OutputType(fc.maskXo)) | (OutputType(xo) << fc.xoShift);
-            *xo_ = this->swapBytes(OutputType(*xo_), fc.toEndian);
         }
 
         template <typename OutputType>
@@ -762,12 +1184,6 @@ class AkVideoConverterPrivate
 
             *xo_ = (*xo_ & OutputType(fc.maskXo)) | (OutputType(xo) << fc.xoShift);
             *ao_ = (*ao_ & OutputType(fc.maskAo)) | (OutputType(ao) << fc.aoShift);
-
-            auto xot = this->swapBytes(OutputType(*xo_), fc.toEndian);
-            auto aot = this->swapBytes(OutputType(*ao_), fc.toEndian);
-
-            *xo_ = xot;
-            *ao_ = aot;
         }
 
         template <typename OutputType>
@@ -785,12 +1201,6 @@ class AkVideoConverterPrivate
 
             *xo_ = (*xo_ & OutputType(fc.maskXo)) | (OutputType(xo) << fc.xoShift);
             *ao_ = *ao_ | OutputType(fc.alphaMask);
-
-            auto xot = this->swapBytes(OutputType(*xo_), fc.toEndian);
-            auto aot = this->swapBytes(OutputType(*ao_), fc.toEndian);
-
-            *xo_ = xot;
-            *ao_ = aot;
         }
 
         template <typename OutputType>
@@ -814,14 +1224,6 @@ class AkVideoConverterPrivate
             *xo_ = (*xo_ & OutputType(fc.maskXo)) | (OutputType(xo) << fc.xoShift);
             *yo_ = (*yo_ & OutputType(fc.maskYo)) | (OutputType(yo) << fc.yoShift);
             *zo_ = (*zo_ & OutputType(fc.maskZo)) | (OutputType(zo) << fc.zoShift);
-
-            auto xot = this->swapBytes(OutputType(*xo_), fc.toEndian);
-            auto yot = this->swapBytes(OutputType(*yo_), fc.toEndian);
-            auto zot = this->swapBytes(OutputType(*zo_), fc.toEndian);
-
-            *xo_ = xot;
-            *yo_ = yot;
-            *zo_ = zot;
         }
 
         template <typename OutputType>
@@ -850,16 +1252,6 @@ class AkVideoConverterPrivate
             *yo_ = (*yo_ & OutputType(fc.maskYo)) | (OutputType(yo) << fc.yoShift);
             *zo_ = (*zo_ & OutputType(fc.maskZo)) | (OutputType(zo) << fc.zoShift);
             *ao_ = (*ao_ & OutputType(fc.maskAo)) | (OutputType(ao) << fc.aoShift);
-
-            auto xot = this->swapBytes(OutputType(*xo_), fc.toEndian);
-            auto yot = this->swapBytes(OutputType(*yo_), fc.toEndian);
-            auto zot = this->swapBytes(OutputType(*zo_), fc.toEndian);
-            auto aot = this->swapBytes(OutputType(*ao_), fc.toEndian);
-
-            *xo_ = xot;
-            *yo_ = yot;
-            *zo_ = zot;
-            *ao_ = aot;
         }
 
         template <typename OutputType>
@@ -887,16 +1279,6 @@ class AkVideoConverterPrivate
             *yo_ = (*yo_ & OutputType(fc.maskYo)) | (OutputType(yo) << fc.yoShift);
             *zo_ = (*zo_ & OutputType(fc.maskZo)) | (OutputType(zo) << fc.zoShift);
             *ao_ = *ao_ | OutputType(fc.alphaMask);
-
-            auto xot = this->swapBytes(OutputType(*xo_), fc.toEndian);
-            auto yot = this->swapBytes(OutputType(*yo_), fc.toEndian);
-            auto zot = this->swapBytes(OutputType(*zo_), fc.toEndian);
-            auto aot = this->swapBytes(OutputType(*ao_), fc.toEndian);
-
-            *xo_ = xot;
-            *yo_ = yot;
-            *zo_ = zot;
-            *ao_ = aot;
         }
 
         /* Integral image functions */
@@ -919,9 +1301,12 @@ class AkVideoConverterPrivate
                     int &xs_x = fc.dlSrcWidthOffsetX[x];
                     auto xi = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
 
+                    if (fc.fromEndian != Q_BYTE_ORDER)
+                        xi = AkAlgorithm::swapBytes(InputType(xi));
+
                     // Accumulate pixels in current line.
 
-                    sumX += (this->swapBytes(InputType(xi), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
+                    sumX += (xi >> fc.xiShift) & fc.maxXi;
 
                     // Accumulate current line and previous line.
 
@@ -959,10 +1344,15 @@ class AkVideoConverterPrivate
                     auto xi = *reinterpret_cast<const InputType *>(src_line_x + xs_x);
                     auto ai = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
 
+                    if (fc.fromEndian != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(InputType(xi));
+                        ai = AkAlgorithm::swapBytes(InputType(ai));
+                    }
+
                     // Accumulate pixels in current line.
 
-                    sumX += (this->swapBytes(InputType(xi), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-                    sumA += (this->swapBytes(InputType(ai), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
+                    sumX += (xi >> fc.xiShift) & fc.maxXi;
+                    sumA += (ai >> fc.aiShift) & fc.maxAi;
 
                     // Accumulate current line and previous line.
 
@@ -1009,11 +1399,17 @@ class AkVideoConverterPrivate
                     auto yi = *reinterpret_cast<const InputType *>(src_line_y + xs_y);
                     auto zi = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
 
+                    if (fc.fromEndian != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(InputType(xi));
+                        yi = AkAlgorithm::swapBytes(InputType(yi));
+                        zi = AkAlgorithm::swapBytes(InputType(zi));
+                    }
+
                     // Accumulate pixels in current line.
 
-                    sumX += (this->swapBytes(InputType(xi), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-                    sumY += (this->swapBytes(InputType(yi), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-                    sumZ += (this->swapBytes(InputType(zi), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
+                    sumX += (xi >> fc.xiShift) & fc.maxXi;
+                    sumY += (yi >> fc.yiShift) & fc.maxYi;
+                    sumZ += (zi >> fc.ziShift) & fc.maxZi;
 
                     // Accumulate current line and previous line.
 
@@ -1069,12 +1465,19 @@ class AkVideoConverterPrivate
                     auto zi = *reinterpret_cast<const InputType *>(src_line_z + xs_z);
                     auto ai = *reinterpret_cast<const InputType *>(src_line_a + xs_a);
 
+                    if (fc.fromEndian != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(InputType(xi));
+                        yi = AkAlgorithm::swapBytes(InputType(yi));
+                        zi = AkAlgorithm::swapBytes(InputType(zi));
+                        ai = AkAlgorithm::swapBytes(InputType(ai));
+                    }
+
                     // Accumulate pixels in current line.
 
-                    sumX += (this->swapBytes(InputType(xi), fc.fromEndian) >> fc.xiShift) & fc.maxXi;
-                    sumY += (this->swapBytes(InputType(yi), fc.fromEndian) >> fc.yiShift) & fc.maxYi;
-                    sumZ += (this->swapBytes(InputType(zi), fc.fromEndian) >> fc.ziShift) & fc.maxZi;
-                    sumA += (this->swapBytes(InputType(ai), fc.fromEndian) >> fc.aiShift) & fc.maxAi;
+                    sumX += (xi >> fc.xiShift) & fc.maxXi;
+                    sumY += (yi >> fc.yiShift) & fc.maxYi;
+                    sumZ += (zi >> fc.ziShift) & fc.maxZi;
+                    sumA += (ai >> fc.aiShift) & fc.maxAi;
 
                     // Accumulate current line and previous line.
 
@@ -1105,6 +1508,7 @@ class AkVideoConverterPrivate
                          const AkVideoPacket &src,
                          AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1115,6 +1519,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1145,11 +1550,64 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits3to3(const FrameConvertParameters &fc,
+                                  const AkVideoPacket &src,
+                                  AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits3to3)
+                    fc.convertSIMDFast8bits3to3(fc.simdConvertParameters,
+                                                fc.srcWidthOffsetX,
+                                                fc.srcWidthOffsetY,
+                                                fc.srcWidthOffsetZ,
+                                                fc.dstWidthOffsetX,
+                                                fc.dstWidthOffsetY,
+                                                fc.dstWidthOffsetZ,
+                                                fc.xmax,
+                                                src_line_x,
+                                                src_line_y,
+                                                src_line_z,
+                                                dst_line_x,
+                                                dst_line_y,
+                                                dst_line_z,
+                                                &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    auto zi = src_line_z[fc.srcWidthOffsetZ[i]];
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi, yi, zi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert3to3A(const FrameConvertParameters &fc,
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1161,6 +1619,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1192,11 +1651,68 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits3to3A(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits3to3A)
+                    fc.convertSIMDFast8bits3to3A(fc.simdConvertParameters,
+                                                 fc.srcWidthOffsetX,
+                                                 fc.srcWidthOffsetY,
+                                                 fc.srcWidthOffsetZ,
+                                                 fc.dstWidthOffsetX,
+                                                 fc.dstWidthOffsetY,
+                                                 fc.dstWidthOffsetZ,
+                                                 fc.dstWidthOffsetA,
+                                                 fc.xmax,
+                                                 src_line_x,
+                                                 src_line_y,
+                                                 src_line_z,
+                                                 dst_line_x,
+                                                 dst_line_y,
+                                                 dst_line_z,
+                                                 dst_line_a,
+                                                 &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    auto zi = src_line_z[fc.srcWidthOffsetZ[i]];
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi, yi, zi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[i]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert3Ato3(const FrameConvertParameters &fc,
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1208,6 +1724,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1242,11 +1759,69 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits3Ato3(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits3Ato3)
+                    fc.convertSIMDFast8bits3Ato3(fc.simdConvertParameters,
+                                                 fc.srcWidthOffsetX,
+                                                 fc.srcWidthOffsetY,
+                                                 fc.srcWidthOffsetZ,
+                                                 fc.srcWidthOffsetA,
+                                                 fc.dstWidthOffsetX,
+                                                 fc.dstWidthOffsetY,
+                                                 fc.dstWidthOffsetZ,
+                                                 fc.xmax,
+                                                 src_line_x,
+                                                 src_line_y,
+                                                 src_line_z,
+                                                 src_line_a,
+                                                 dst_line_x,
+                                                 dst_line_y,
+                                                 dst_line_z,
+                                                 &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    auto zi = src_line_z[fc.srcWidthOffsetZ[i]];
+                    auto ai = src_line_a[fc.srcWidthOffsetA[i]];
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi, yi, zi, &xo, &yo, &zo);
+                    fc.colorConvert.applyAlpha(ai, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert3Ato3A(const FrameConvertParameters &fc,
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1259,6 +1834,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1290,6 +1866,66 @@ class AkVideoConverterPrivate
                                   OutputType(yo),
                                   OutputType(zo),
                                   OutputType(ai));
+                }
+            }
+        }
+
+        void convertFast8bits3Ato3A(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits3Ato3A)
+                    fc.convertSIMDFast8bits3Ato3A(fc.simdConvertParameters,
+                                                  fc.srcWidthOffsetX,
+                                                  fc.srcWidthOffsetY,
+                                                  fc.srcWidthOffsetZ,
+                                                  fc.srcWidthOffsetA,
+                                                  fc.dstWidthOffsetX,
+                                                  fc.dstWidthOffsetY,
+                                                  fc.dstWidthOffsetZ,
+                                                  fc.dstWidthOffsetA,
+                                                  fc.xmax,
+                                                  src_line_x,
+                                                  src_line_y,
+                                                  src_line_z,
+                                                  src_line_a,
+                                                  dst_line_x,
+                                                  dst_line_y,
+                                                  dst_line_z,
+                                                  dst_line_a,
+                                                  &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    auto zi = src_line_z[fc.srcWidthOffsetZ[i]];
+                    auto ai = src_line_a[fc.srcWidthOffsetA[i]];
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi, yi, zi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[i]] = ai;
                 }
             }
         }
@@ -1302,6 +1938,7 @@ class AkVideoConverterPrivate
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1312,6 +1949,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1342,11 +1980,36 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsV3to3(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    dst_line_x[fc.dstWidthOffsetX[x]] = src_line_x[fc.srcWidthOffsetX[x]];
+                    dst_line_y[fc.dstWidthOffsetY[x]] = src_line_y[fc.srcWidthOffsetY[x]];
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = src_line_z[fc.srcWidthOffsetZ[x]];
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertV3to3A(const FrameConvertParameters &fc,
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
 
@@ -1359,6 +2022,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1390,11 +2054,38 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsV3to3A(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    dst_line_x[fc.dstWidthOffsetX[x]] = src_line_x[fc.srcWidthOffsetX[x]];
+                    dst_line_y[fc.dstWidthOffsetY[x]] = src_line_y[fc.srcWidthOffsetY[x]];
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = src_line_z[fc.srcWidthOffsetZ[x]];
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertV3Ato3(const FrameConvertParameters &fc,
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1406,6 +2097,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1440,11 +2132,65 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsV3Ato3(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bitsV3Ato3)
+                    fc.convertSIMDFast8bitsV3Ato3(fc.simdConvertParameters,
+                                                  fc.srcWidthOffsetX,
+                                                  fc.srcWidthOffsetY,
+                                                  fc.srcWidthOffsetZ,
+                                                  fc.srcWidthOffsetA,
+                                                  fc.dstWidthOffsetX,
+                                                  fc.dstWidthOffsetY,
+                                                  fc.dstWidthOffsetZ,
+                                                  fc.xmax,
+                                                  src_line_x,
+                                                  src_line_y,
+                                                  src_line_z,
+                                                  src_line_a,
+                                                  dst_line_x,
+                                                  dst_line_y,
+                                                  dst_line_z,
+                                                   &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    qint64 xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    qint64 yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    qint64 zi = src_line_z[fc.srcWidthOffsetZ[i]];
+                    auto &ai = src_line_a[fc.srcWidthOffsetA[i]];
+
+                    fc.colorConvert.applyAlpha(ai, &xi, &yi, &zi);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xi);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yi);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zi);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertV3Ato3A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1457,6 +2203,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1488,6 +2235,33 @@ class AkVideoConverterPrivate
                                   OutputType(yo),
                                   OutputType(zo),
                                   OutputType(ai));
+                }
+            }
+        }
+
+        void convertFast8bitsV3Ato3A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    dst_line_x[fc.dstWidthOffsetX[x]] = src_line_x[fc.srcWidthOffsetX[x]];
+                    dst_line_y[fc.dstWidthOffsetY[x]] = src_line_y[fc.srcWidthOffsetY[x]];
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = src_line_z[fc.srcWidthOffsetZ[x]];
+                    dst_line_a[fc.dstWidthOffsetA[x]] = src_line_a[fc.srcWidthOffsetA[x]];
                 }
             }
         }
@@ -1499,6 +2273,7 @@ class AkVideoConverterPrivate
                          const AkVideoPacket &src,
                          AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1507,6 +2282,7 @@ class AkVideoConverterPrivate
 
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1531,11 +2307,54 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits3to1(const FrameConvertParameters &fc,
+                                  const AkVideoPacket &src,
+                                  AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits3to1)
+                    fc.convertSIMDFast8bits3to1(fc.simdConvertParameters,
+                                                fc.srcWidthOffsetX,
+                                                fc.srcWidthOffsetY,
+                                                fc.srcWidthOffsetZ,
+                                                fc.dstWidthOffsetX,
+                                                fc.xmax,
+                                                src_line_x,
+                                                src_line_y,
+                                                src_line_z,
+                                                dst_line_x,
+                                                &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    auto zi = src_line_z[fc.srcWidthOffsetZ[i]];
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, yi, zi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert3to1A(const FrameConvertParameters &fc,
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1545,6 +2364,7 @@ class AkVideoConverterPrivate
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1570,11 +2390,58 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits3to1A(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits3to1A)
+                    fc.convertSIMDFast8bits3to1A(fc.simdConvertParameters,
+                                                 fc.srcWidthOffsetX,
+                                                 fc.srcWidthOffsetY,
+                                                 fc.srcWidthOffsetZ,
+                                                 fc.dstWidthOffsetX,
+                                                 fc.dstWidthOffsetA,
+                                                 fc.xmax,
+                                                 src_line_x,
+                                                 src_line_y,
+                                                 src_line_z,
+                                                 dst_line_x,
+                                                 dst_line_a,
+                                                 &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    auto zi = src_line_z[fc.srcWidthOffsetZ[i]];
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, yi, zi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[i]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert3Ato1(const FrameConvertParameters &fc,
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1584,6 +2451,7 @@ class AkVideoConverterPrivate
 
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1612,11 +2480,59 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits3Ato1(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits3Ato1)
+                    fc.convertSIMDFast8bits3Ato1(fc.simdConvertParameters,
+                                                 fc.srcWidthOffsetX,
+                                                 fc.srcWidthOffsetY,
+                                                 fc.srcWidthOffsetZ,
+                                                 fc.srcWidthOffsetA,
+                                                 fc.dstWidthOffsetX,
+                                                 fc.xmax,
+                                                 src_line_x,
+                                                 src_line_y,
+                                                 src_line_z,
+                                                 src_line_a,
+                                                 dst_line_x,
+                                                 &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    auto zi = src_line_z[fc.srcWidthOffsetZ[i]];
+                    auto ai = src_line_a[fc.srcWidthOffsetA[i]];
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, yi, zi, &xo);
+                    fc.colorConvert.applyAlpha(ai, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert3Ato1A(const FrameConvertParameters &fc,
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1627,6 +2543,7 @@ class AkVideoConverterPrivate
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -1656,12 +2573,63 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits3Ato1A(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits3Ato1A)
+                    fc.convertSIMDFast8bits3Ato1A(fc.simdConvertParameters,
+                                                  fc.srcWidthOffsetX,
+                                                  fc.srcWidthOffsetY,
+                                                  fc.srcWidthOffsetZ,
+                                                  fc.srcWidthOffsetA,
+                                                  fc.dstWidthOffsetX,
+                                                  fc.dstWidthOffsetA,
+                                                  fc.xmax,
+                                                  src_line_x,
+                                                  src_line_y,
+                                                  src_line_z,
+                                                  src_line_a,
+                                                  dst_line_x,
+                                                  dst_line_a,
+                                                  &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto yi = src_line_y[fc.srcWidthOffsetY[i]];
+                    auto zi = src_line_z[fc.srcWidthOffsetZ[i]];
+                    auto ai = src_line_a[fc.srcWidthOffsetA[i]];
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, yi, zi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[i]] = ai;
+                }
+            }
+        }
+
         // Conversion functions for 1 components to 3 components formats
 
         template <typename InputType, typename OutputType>
         void convert1to3(const FrameConvertParameters &fc,
                          const AkVideoPacket &src, AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1670,6 +2638,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->read1(fc,
@@ -1694,11 +2663,56 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits1to3(const FrameConvertParameters &fc,
+                                  const AkVideoPacket &src,
+                                  AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits1to3)
+                    fc.convertSIMDFast8bits1to3(fc.simdConvertParameters,
+                                                fc.srcWidthOffsetX,
+                                                fc.dstWidthOffsetX,
+                                                fc.dstWidthOffsetY,
+                                                fc.dstWidthOffsetZ,
+                                                fc.xmax,
+                                                src_line_x,
+                                                dst_line_x,
+                                                dst_line_y,
+                                                dst_line_z,
+                                                &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert1to3A(const FrameConvertParameters &fc,
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1708,6 +2722,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->read1(fc,
@@ -1733,11 +2748,60 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits1to3A(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits1to3A)
+                    fc.convertSIMDFast8bits1to3A(fc.simdConvertParameters,
+                                                 fc.srcWidthOffsetX,
+                                                 fc.dstWidthOffsetX,
+                                                 fc.dstWidthOffsetY,
+                                                 fc.dstWidthOffsetZ,
+                                                 fc.dstWidthOffsetA,
+                                                 fc.xmax,
+                                                 src_line_x,
+                                                 dst_line_x,
+                                                 dst_line_y,
+                                                 dst_line_z,
+                                                 dst_line_a,
+                                                 &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[i]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert1Ato3(const FrameConvertParameters &fc,
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1747,6 +2811,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -1775,11 +2840,61 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits1Ato3(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits1Ato3)
+                    fc.convertSIMDFast8bits1Ato3(fc.simdConvertParameters,
+                                                 fc.srcWidthOffsetX,
+                                                 fc.srcWidthOffsetA,
+                                                 fc.dstWidthOffsetX,
+                                                 fc.dstWidthOffsetY,
+                                                 fc.dstWidthOffsetZ,
+                                                 fc.xmax,
+                                                 src_line_x,
+                                                 src_line_a,
+                                                 dst_line_x,
+                                                 dst_line_y,
+                                                 dst_line_z,
+                                                 &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto ai = src_line_a[fc.srcWidthOffsetA[i]];
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+                    fc.colorConvert.applyAlpha(ai, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert1Ato3A(const FrameConvertParameters &fc,
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1790,6 +2905,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -1819,6 +2935,58 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits1Ato3A(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits1Ato3A)
+                    fc.convertSIMDFast8bits1Ato3A(fc.simdConvertParameters,
+                                                  fc.srcWidthOffsetX,
+                                                  fc.srcWidthOffsetA,
+                                                  fc.dstWidthOffsetX,
+                                                  fc.dstWidthOffsetY,
+                                                  fc.dstWidthOffsetZ,
+                                                  fc.dstWidthOffsetA,
+                                                  fc.xmax,
+                                                  src_line_x,
+                                                  src_line_a,
+                                                  dst_line_x,
+                                                  dst_line_y,
+                                                  dst_line_z,
+                                                  dst_line_a,
+                                                  &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    auto xi = src_line_x[fc.srcWidthOffsetX[i]];
+                    auto ai = src_line_a[fc.srcWidthOffsetA[i]];
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[i]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[i]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[i]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[i]] = ai;
+                }
+            }
+        }
+
         // Conversion functions for 1 components to 1 components formats
 
         template <typename InputType, typename OutputType>
@@ -1826,11 +2994,13 @@ class AkVideoConverterPrivate
                          const AkVideoPacket &src,
                          AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->read1(fc,
@@ -1849,11 +3019,29 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits1to1(const FrameConvertParameters &fc,
+                                  const AkVideoPacket &src,
+                                  AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x)
+                    dst_line_x[fc.dstWidthOffsetX[x]] =
+                            src_line_x[fc.srcWidthOffsetX[x]];
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert1to1A(const FrameConvertParameters &fc,
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1861,6 +3049,7 @@ class AkVideoConverterPrivate
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->read1(fc,
@@ -1880,11 +3069,32 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits1to1A(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    dst_line_x[fc.dstWidthOffsetX[x]] = src_line_x[fc.srcWidthOffsetX[x]];
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert1Ato1(const FrameConvertParameters &fc,
                           const AkVideoPacket &src,
                           AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1892,6 +3102,7 @@ class AkVideoConverterPrivate
 
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -1914,11 +3125,47 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bits1Ato1(const FrameConvertParameters &fc,
+                                   const AkVideoPacket &src,
+                                   AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                int x = fc.xmin;
+
+                if (fc.convertSIMDFast8bits1Ato1)
+                    fc.convertSIMDFast8bits1Ato1(fc.simdConvertParameters,
+                                                 fc.srcWidthOffsetX,
+                                                 fc.srcWidthOffsetA,
+                                                 fc.dstWidthOffsetX,
+                                                 fc.xmax,
+                                                 src_line_x,
+                                                 src_line_a,
+                                                 dst_line_x,
+                                                 &x);
+
+                #pragma omp simd if(fc.paralelize)
+                for (int i = x; i < fc.xmax; ++i) {
+                    dst_line_x[fc.dstWidthOffsetX[i]] =
+                            quint8(quint16(src_line_x[fc.srcWidthOffsetX[i]])
+                                   * quint16(src_line_a[fc.srcWidthOffsetA[i]])
+                                   / 255);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convert1Ato1A(const FrameConvertParameters &fc,
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
@@ -1927,6 +3174,7 @@ class AkVideoConverterPrivate
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -1946,6 +3194,27 @@ class AkVideoConverterPrivate
                                   x,
                                   OutputType(xo),
                                   OutputType(ai));
+                }
+            }
+        }
+
+        void convertFast8bits1Ato1A(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    dst_line_x[fc.dstWidthOffsetX[x]] = src_line_x[fc.srcWidthOffsetX[x]];
+                    dst_line_a[fc.dstWidthOffsetA[x]] = src_line_a[fc.srcWidthOffsetA[x]];
                 }
             }
         }
@@ -1959,8 +3228,10 @@ class AkVideoConverterPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -1977,6 +3248,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2018,13 +3290,76 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL3to3(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readDL3(fc,
+                                  src_line_x,
+                                  src_line_y,
+                                  src_line_z,
+                                  src_line_x_1,
+                                  src_line_y_1,
+                                  src_line_z_1,
+                                  x,
+                                  kdl,
+                                  &xi,
+                                  &yi,
+                                  &zi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL3to3A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2042,6 +3377,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2084,13 +3420,78 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL3to3A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readDL3(fc,
+                                  src_line_x,
+                                  src_line_y,
+                                  src_line_z,
+                                  src_line_x_1,
+                                  src_line_y_1,
+                                  src_line_z_1,
+                                  x,
+                                  kdl,
+                                  &xi,
+                                  &yi,
+                                  &zi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL3Ato3(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2109,6 +3510,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2143,6 +3545,7 @@ class AkVideoConverterPrivate
                                                &xo,
                                                &yo,
                                                &zo);
+
                     this->write3(fc,
                                  dst_line_x,
                                  dst_line_y,
@@ -2157,13 +3560,86 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL3Ato3(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readDL3A(fc,
+                                   src_line_x,
+                                   src_line_y,
+                                   src_line_z,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_y_1,
+                                   src_line_z_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &yi,
+                                   &zi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+                    fc.colorConvert.applyAlpha(ai,
+                                               &xo,
+                                               &yo,
+                                               &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL3Ato3A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2183,6 +3659,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2224,6 +3701,75 @@ class AkVideoConverterPrivate
                                   OutputType(yo),
                                   OutputType(zo),
                                   OutputType(ai));
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
+        void convertFast8bitsDL3Ato3A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.zoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readDL3A(fc,
+                                   src_line_x,
+                                   src_line_y,
+                                   src_line_z,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_y_1,
+                                   src_line_z_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &yi,
+                                   &zi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
                 }
 
                 kdl += fc.inputWidth;
@@ -2238,8 +3784,10 @@ class AkVideoConverterPrivate
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2256,6 +3804,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2297,13 +3846,76 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDLV3to3(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readDL3(fc,
+                                  src_line_x,
+                                  src_line_y,
+                                  src_line_z,
+                                  src_line_x_1,
+                                  src_line_y_1,
+                                  src_line_z_1,
+                                  x,
+                                  kdl,
+                                  &xi,
+                                  &yi,
+                                  &zi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyVector(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDLV3to3A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2321,6 +3933,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2363,13 +3976,78 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDLV3to3A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readDL3(fc,
+                                  src_line_x,
+                                  src_line_y,
+                                  src_line_z,
+                                  src_line_x_1,
+                                  src_line_y_1,
+                                  src_line_z_1,
+                                  x,
+                                  kdl,
+                                  &xi,
+                                  &yi,
+                                  &zi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyVector(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDLV3Ato3(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2388,6 +4066,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2437,13 +4116,86 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDLV3Ato3(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readDL3A(fc,
+                                   src_line_x,
+                                   src_line_y,
+                                   src_line_z,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_y_1,
+                                   src_line_z_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &yi,
+                                   &zi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyVector(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+                    fc.colorConvert.applyAlpha(ai,
+                                               &xo,
+                                               &yo,
+                                               &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDLV3Ato3A(const FrameConvertParameters &fc,
                               const AkVideoPacket &src,
                               AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2463,6 +4215,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2510,6 +4263,75 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDLV3Ato3A(const FrameConvertParameters &fc,
+                                       const AkVideoPacket &src,
+                                       AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readDL3A(fc,
+                                   src_line_x,
+                                   src_line_y,
+                                   src_line_z,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_y_1,
+                                   src_line_z_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &yi,
+                                   &zi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyVector(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         // Conversion functions for 3 components to 1 components formats
 
         template <typename InputType, typename OutputType>
@@ -2517,8 +4339,10 @@ class AkVideoConverterPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2533,6 +4357,7 @@ class AkVideoConverterPrivate
 
                 auto dst_line_x = dst.line(fc.planeXo, y);
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2563,13 +4388,65 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL3to1(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readDL3(fc,
+                                  src_line_x,
+                                  src_line_y,
+                                  src_line_z,
+                                  src_line_x_1,
+                                  src_line_y_1,
+                                  src_line_z_1,
+                                  x,
+                                  kdl,
+                                  &xi,
+                                  &yi,
+                                  &zi);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, yi, zi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL3to1A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2585,6 +4462,7 @@ class AkVideoConverterPrivate
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2616,13 +4494,67 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL3to1A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readDL3(fc,
+                                  src_line_x,
+                                  src_line_y,
+                                  src_line_z,
+                                  src_line_x_1,
+                                  src_line_y_1,
+                                  src_line_z_1,
+                                  x,
+                                  kdl,
+                                  &xi,
+                                  &yi,
+                                  &zi);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, yi, zi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL3Ato1(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2639,6 +4571,7 @@ class AkVideoConverterPrivate
 
                 auto dst_line_x = dst.line(fc.planeXo, y);
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2674,13 +4607,72 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL3Ato1(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readDL3A(fc,
+                                   src_line_x,
+                                   src_line_y,
+                                   src_line_z,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_y_1,
+                                   src_line_z_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &yi,
+                                   &zi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, yi, zi, &xo);
+                    fc.colorConvert.applyAlpha(ai, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL3Ato1A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2698,6 +4690,7 @@ class AkVideoConverterPrivate
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -2734,6 +4727,64 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL3Ato1A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_y = fc.integralImageDataY + yOffset;
+                auto src_line_z = fc.integralImageDataZ + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_y_1 = fc.integralImageDataY + y1Offset;
+                auto src_line_z_1 = fc.integralImageDataZ + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readDL3A(fc,
+                                   src_line_x,
+                                   src_line_y,
+                                   src_line_z,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_y_1,
+                                   src_line_z_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &yi,
+                                   &zi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, yi, zi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         // Conversion functions for 1 components to 3 components formats
 
         template <typename InputType, typename OutputType>
@@ -2741,8 +4792,10 @@ class AkVideoConverterPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2754,6 +4807,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->readDL1(fc,
@@ -2782,13 +4836,58 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL1to3(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    this->readDL1(fc,
+                                  src_line_x,
+                                  src_line_x_1,
+                                  x,
+                                  kdl,
+                                  &xi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL1to3A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2801,6 +4900,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->readDL1(fc,
@@ -2830,13 +4930,60 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL1to3A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    this->readDL1(fc,
+                                  src_line_x,
+                                  src_line_x_1,
+                                  x,
+                                  kdl,
+                                  &xi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL1Ato3(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2851,6 +4998,7 @@ class AkVideoConverterPrivate
                 auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -2884,13 +5032,66 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL1Ato3(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 ai;
+                    this->readDL1A(fc,
+                                   src_line_x,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+                    fc.colorConvert.applyAlpha(ai, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL1Ato3A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2906,6 +5107,7 @@ class AkVideoConverterPrivate
                 auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -2940,6 +5142,58 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL1Ato3A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 ai;
+                    this->readDL1A(fc,
+                                   src_line_x,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         // Conversion functions for 1 components to 1 components formats
 
         template <typename InputType, typename OutputType>
@@ -2947,8 +5201,10 @@ class AkVideoConverterPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2958,6 +5214,7 @@ class AkVideoConverterPrivate
 
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->readDL1(fc,
@@ -2980,13 +5237,52 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL1to1(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    this->readDL1(fc,
+                                  src_line_x,
+                                  src_line_x_1,
+                                  x,
+                                  kdl,
+                                  &xi);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL1to1A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -2997,6 +5293,7 @@ class AkVideoConverterPrivate
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->readDL1(fc,
@@ -3020,13 +5317,54 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL1to1A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    this->readDL1(fc,
+                                  src_line_x,
+                                  src_line_x_1,
+                                  x,
+                                  kdl,
+                                  &xi);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL1Ato1(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -3039,6 +5377,7 @@ class AkVideoConverterPrivate
 
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -3066,13 +5405,60 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsDL1Ato1(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 ai;
+                    this->readDL1A(fc,
+                                   src_line_x,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo);
+                    fc.colorConvert.applyAlpha(ai, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertDL1Ato1A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            Q_UNUSED(src)
             auto kdl = fc.kdl;
 
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &yOffset = fc.srcHeightDlOffset[y];
                 auto &y1Offset = fc.srcHeightDlOffset_1[y];
@@ -3086,6 +5472,7 @@ class AkVideoConverterPrivate
                 auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
                 auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -3108,6 +5495,52 @@ class AkVideoConverterPrivate
                                   x,
                                   OutputType(xo),
                                   OutputType(ai));
+                }
+
+                kdl += fc.inputWidth;
+            }
+        }
+
+        void convertFast8bitsDL1Ato1A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            Q_UNUSED(src)
+            auto kdl = fc.kdl;
+
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &yOffset = fc.srcHeightDlOffset[y];
+                auto &y1Offset = fc.srcHeightDlOffset_1[y];
+
+                auto src_line_x = fc.integralImageDataX + yOffset;
+                auto src_line_a = fc.integralImageDataA + yOffset;
+
+                auto src_line_x_1 = fc.integralImageDataX + y1Offset;
+                auto src_line_a_1 = fc.integralImageDataA + y1Offset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 ai;
+                    this->readDL1A(fc,
+                                   src_line_x,
+                                   src_line_a,
+                                   src_line_x_1,
+                                   src_line_a_1,
+                                   x,
+                                   kdl,
+                                   &xi,
+                                   &ai);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
                 }
 
                 kdl += fc.inputWidth;
@@ -3123,6 +5556,7 @@ class AkVideoConverterPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3141,6 +5575,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -3180,11 +5615,70 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL3to3(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readF8UL3(fc,
+                                    src_line_x,
+                                    src_line_y,
+                                    src_line_z,
+                                    src_line_x_1,
+                                    src_line_y_1,
+                                    src_line_z_1,
+                                    x,
+                                    ky,
+                                    &xi,
+                                    &yi,
+                                    &zi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL3to3A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3204,6 +5698,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -3244,11 +5739,72 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL3to3A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readF8UL3(fc,
+                                    src_line_x,
+                                    src_line_y,
+                                    src_line_z,
+                                    src_line_x_1,
+                                    src_line_y_1,
+                                    src_line_z_1,
+                                    x,
+                                    ky,
+                                    &xi,
+                                    &yi,
+                                    &zi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL3Ato3(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3316,11 +5872,80 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL3Ato3(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readF8UL3A(fc,
+                                     src_line_x,
+                                     src_line_y,
+                                     src_line_z,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_y_1,
+                                     src_line_z_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &yi,
+                                     &zi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+                    fc.colorConvert.applyAlpha(ai,
+                                               &xo,
+                                               &yo,
+                                               &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL3Ato3A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3383,6 +6008,72 @@ class AkVideoConverterPrivate
                                   OutputType(yo),
                                   OutputType(zo),
                                   OutputType(ai));
+                }
+            }
+        }
+
+        void convertFast8bitsUL3Ato3A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readF8UL3A(fc,
+                                     src_line_x,
+                                     src_line_y,
+                                     src_line_z,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_y_1,
+                                     src_line_z_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &yi,
+                                     &zi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyMatrix(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
                 }
             }
         }
@@ -3395,6 +6086,7 @@ class AkVideoConverterPrivate
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3413,6 +6105,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -3452,11 +6145,70 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsULV3to3(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readF8UL3(fc,
+                                    src_line_x,
+                                    src_line_y,
+                                    src_line_z,
+                                    src_line_x_1,
+                                    src_line_y_1,
+                                    src_line_z_1,
+                                    x,
+                                    ky,
+                                    &xi,
+                                    &yi,
+                                    &zi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyVector(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertULV3to3A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3476,6 +6228,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -3516,11 +6269,72 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsULV3to3A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readF8UL3(fc,
+                                    src_line_x,
+                                    src_line_y,
+                                    src_line_z,
+                                    src_line_x_1,
+                                    src_line_y_1,
+                                    src_line_z_1,
+                                    x,
+                                    ky,
+                                    &xi,
+                                    &yi,
+                                    &zi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyVector(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertULV3Ato3(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3588,11 +6402,80 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsULV3Ato3(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readF8UL3A(fc,
+                                     src_line_x,
+                                     src_line_y,
+                                     src_line_z,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_y_1,
+                                     src_line_z_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &yi,
+                                     &zi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyVector(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+                    fc.colorConvert.applyAlpha(ai,
+                                               &xo,
+                                               &yo,
+                                               &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertULV3Ato3A(const FrameConvertParameters &fc,
                               const AkVideoPacket &src,
                               AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3659,6 +6542,72 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsULV3Ato3A(const FrameConvertParameters &fc,
+                                       const AkVideoPacket &src,
+                                       AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readF8UL3A(fc,
+                                     src_line_x,
+                                     src_line_y,
+                                     src_line_z,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_y_1,
+                                     src_line_z_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &yi,
+                                     &zi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyVector(xi,
+                                                yi,
+                                                zi,
+                                                &xo,
+                                                &yo,
+                                                &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
+                }
+            }
+        }
+
         // Conversion functions for 3 components to 1 components formats
 
         template <typename InputType, typename OutputType>
@@ -3666,6 +6615,7 @@ class AkVideoConverterPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3682,6 +6632,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -3713,11 +6664,62 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL3to1(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readF8UL3(fc,
+                                    src_line_x,
+                                    src_line_y,
+                                    src_line_z,
+                                    src_line_x_1,
+                                    src_line_y_1,
+                                    src_line_z_1,
+                                    x,
+                                    ky,
+                                    &xi,
+                                    &yi,
+                                    &zi);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi,
+                                               yi,
+                                               zi,
+                                               &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL3to1A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3735,6 +6737,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType yi;
@@ -3767,11 +6770,64 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL3to1A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    this->readF8UL3(fc,
+                                    src_line_x,
+                                    src_line_y,
+                                    src_line_z,
+                                    src_line_x_1,
+                                    src_line_y_1,
+                                    src_line_z_1,
+                                    x,
+                                    ky,
+                                    &xi,
+                                    &yi,
+                                    &zi);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi,
+                                               yi,
+                                               zi,
+                                               &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL3Ato1(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3826,11 +6882,69 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL3Ato1(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readF8UL3A(fc,
+                                     src_line_x,
+                                     src_line_y,
+                                     src_line_z,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_y_1,
+                                     src_line_z_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &yi,
+                                     &zi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi,
+                                               yi,
+                                               zi,
+                                               &xo);
+                    fc.colorConvert.applyAlpha(ai, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL3Ato1A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3887,6 +7001,64 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL3Ato1A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_y = src.constLine(fc.planeYi, ys) + fc.yiOffset;
+                auto src_line_z = src.constLine(fc.planeZi, ys) + fc.ziOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_y_1 = src.constLine(fc.planeYi, ys_1) + fc.yiOffset;
+                auto src_line_z_1 = src.constLine(fc.planeZi, ys_1) + fc.ziOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 yi;
+                    quint8 zi;
+                    quint8 ai;
+                    this->readF8UL3A(fc,
+                                     src_line_x,
+                                     src_line_y,
+                                     src_line_z,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_y_1,
+                                     src_line_z_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &yi,
+                                     &zi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi,
+                                               yi,
+                                               zi,
+                                               &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
+                }
+            }
+        }
+
         // Conversion functions for 1 components to 3 components formats
 
         template <typename InputType, typename OutputType>
@@ -3894,6 +7066,7 @@ class AkVideoConverterPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3907,6 +7080,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->readUL1(fc,
@@ -3933,11 +7107,52 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL1to3(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    this->readF8UL1(fc,
+                                    src_line_x,
+                                    src_line_x_1,
+                                    x,
+                                    ky,
+                                    &xi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL1to3A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3952,6 +7167,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->readUL1(fc,
@@ -3979,11 +7195,54 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL1to3A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    this->readF8UL1(fc,
+                                    src_line_x,
+                                    src_line_x_1,
+                                    x,
+                                    ky,
+                                    &xi);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL1Ato3(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -3999,6 +7258,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -4030,11 +7290,59 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL1Ato3(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 ai;
+                    this->readF8UL1A(fc,
+                                     src_line_x,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+                    fc.colorConvert.applyAlpha(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL1Ato3A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -4051,6 +7359,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -4083,6 +7392,54 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL1Ato3A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_y = dst.line(fc.planeYo, y) + fc.yoOffset;
+                auto dst_line_z = dst.line(fc.planeZo, y) + fc.zoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 ai;
+                    this->readF8UL1A(fc,
+                                     src_line_x,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    qint64 yo = 0;
+                    qint64 zo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo, &yo, &zo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_y[fc.dstWidthOffsetY[x]] = quint8(yo);
+                    dst_line_z[fc.dstWidthOffsetZ[x]] = quint8(zo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
+                }
+            }
+        }
+
         // Conversion functions for 1 components to 1 components formats
 
         template <typename InputType, typename OutputType>
@@ -4090,6 +7447,7 @@ class AkVideoConverterPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -4101,6 +7459,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->readUL1(fc,
@@ -4121,11 +7480,46 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL1to1(const FrameConvertParameters &fc,
+                                    const AkVideoPacket &src,
+                                    AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    this->readF8UL1(fc,
+                                    src_line_x,
+                                    src_line_x_1,
+                                    x,
+                                    ky,
+                                    &xi);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL1to1A(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -4138,6 +7532,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     this->readUL1(fc,
@@ -4159,11 +7554,48 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL1to1A(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    this->readF8UL1(fc,
+                                    src_line_x,
+                                    src_line_x_1,
+                                    x,
+                                    ky,
+                                    &xi);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = 0xff;
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL1Ato1(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
                             AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -4177,6 +7609,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -4202,11 +7635,53 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL1Ato1(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 ai;
+                    this->readF8UL1A(fc,
+                                     src_line_x,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo);
+                    fc.colorConvert.applyAlpha(ai, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                }
+            }
+        }
+
         template <typename InputType, typename OutputType>
         void convertUL1Ato1A(const FrameConvertParameters &fc,
                              const AkVideoPacket &src,
                              AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
             for (int y = fc.ymin; y < fc.ymax; ++y) {
                 auto &ys = fc.srcHeight[y];
                 auto &ys_1 = fc.srcHeight_1[y];
@@ -4221,6 +7696,7 @@ class AkVideoConverterPrivate
 
                 auto &ky = fc.ky[y];
 
+                #pragma omp simd if(fc.paralelize)
                 for (int x = fc.xmin; x < fc.xmax; ++x) {
                     InputType xi;
                     InputType ai;
@@ -4247,6 +7723,48 @@ class AkVideoConverterPrivate
             }
         }
 
+        void convertFast8bitsUL1Ato1A(const FrameConvertParameters &fc,
+                                      const AkVideoPacket &src,
+                                      AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(fc.paralelize)
+            for (int y = fc.ymin; y < fc.ymax; ++y) {
+                auto &ys = fc.srcHeight[y];
+                auto &ys_1 = fc.srcHeight_1[y];
+
+                auto src_line_x = src.constLine(fc.planeXi, ys) + fc.xiOffset;
+                auto src_line_a = src.constLine(fc.planeAi, ys) + fc.aiOffset;
+                auto src_line_x_1 = src.constLine(fc.planeXi, ys_1) + fc.xiOffset;
+                auto src_line_a_1 = src.constLine(fc.planeAi, ys_1) + fc.aiOffset;
+
+                auto dst_line_x = dst.line(fc.planeXo, y) + fc.xoOffset;
+                auto dst_line_a = dst.line(fc.planeAo, y) + fc.aoOffset;
+
+                auto &ky = fc.ky[y];
+
+                #pragma omp simd if(fc.paralelize)
+                for (int x = fc.xmin; x < fc.xmax; ++x) {
+                    quint8 xi;
+                    quint8 ai;
+                    this->readF8UL1A(fc,
+                                     src_line_x,
+                                     src_line_a,
+                                     src_line_x_1,
+                                     src_line_a_1,
+                                     x,
+                                     ky,
+                                     &xi,
+                                     &ai);
+
+                    qint64 xo = 0;
+                    fc.colorConvert.applyPoint(xi, &xo);
+
+                    dst_line_x[fc.dstWidthOffsetX[x]] = quint8(xo);
+                    dst_line_a[fc.dstWidthOffsetA[x]] = ai;
+                }
+            }
+        }
+
 #define CONVERT_FUNC(icomponents, ocomponents) \
         template <typename InputType, typename OutputType> \
         inline void convertFormat##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
@@ -4265,6 +7783,27 @@ class AkVideoConverterPrivate
                 break; \
             case ConvertAlphaMode_I_O: \
                 this->convert##icomponents##to##ocomponents<InputType, OutputType>(fc, src, dst); \
+                break; \
+            }; \
+        }
+
+#define CONVERT_FAST_FUNC(icomponents, ocomponents) \
+        inline void convertFormatFast8bits##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+                                                                         const AkVideoPacket &src, \
+                                                                         AkVideoPacket &dst) const \
+        { \
+            switch (fc.alphaMode) { \
+            case ConvertAlphaMode_AI_AO: \
+                this->convertFast8bits##icomponents##Ato##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_AI_O: \
+                this->convertFast8bits##icomponents##Ato##ocomponents(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_AO: \
+                this->convertFast8bits##icomponents##to##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_O: \
+                this->convertFast8bits##icomponents##to##ocomponents(fc, src, dst); \
                 break; \
             }; \
         }
@@ -4291,9 +7830,30 @@ class AkVideoConverterPrivate
             }; \
         }
 
+#define CONVERT_FASTV_FUNC(icomponents, ocomponents) \
+        inline void convertFormatFast8bitsV##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+                                                                          const AkVideoPacket &src, \
+                                                                          AkVideoPacket &dst) const \
+        { \
+            switch (fc.alphaMode) { \
+            case ConvertAlphaMode_AI_AO: \
+                this->convertFast8bitsV##icomponents##Ato##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_AI_O: \
+                this->convertFast8bitsV##icomponents##Ato##ocomponents(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_AO: \
+                this->convertFast8bitsV##icomponents##to##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_O: \
+                this->convertFast8bitsV##icomponents##to##ocomponents(fc, src, dst); \
+                break; \
+            }; \
+        }
+
 #define CONVERTDL_FUNC(icomponents, ocomponents) \
         template <typename InputType, typename OutputType> \
-        inline void convertDLFormat##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+        inline void convertFormatDL##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
                                                                   const AkVideoPacket &src, \
                                                                   AkVideoPacket &dst) const \
         { \
@@ -4323,9 +7883,40 @@ class AkVideoConverterPrivate
             }; \
         }
 
+#define CONVERT_FASTDL_FUNC(icomponents, ocomponents) \
+        inline void convertFormatFast8bitsDL##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+                                                                           const AkVideoPacket &src, \
+                                                                           AkVideoPacket &dst) const \
+        { \
+            switch (fc.alphaMode) { \
+            case ConvertAlphaMode_AI_AO: \
+            case ConvertAlphaMode_AI_O: \
+                this->integralImage##icomponents##A<quint8>(fc, src); \
+                break; \
+            default: \
+                this->integralImage##icomponents<quint8>(fc, src); \
+                break; \
+            } \
+            \
+            switch (fc.alphaMode) { \
+            case ConvertAlphaMode_AI_AO: \
+                this->convertFast8bitsDL##icomponents##Ato##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_AI_O: \
+                this->convertFast8bitsDL##icomponents##Ato##ocomponents(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_AO: \
+                this->convertFast8bitsDL##icomponents##to##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_O: \
+                this->convertFast8bitsDL##icomponents##to##ocomponents(fc, src, dst); \
+                break; \
+            }; \
+        }
+
 #define CONVERTDLV_FUNC(icomponents, ocomponents) \
         template <typename InputType, typename OutputType> \
-        inline void convertDLVFormat##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+        inline void convertFormatDLV##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
                                                                    const AkVideoPacket &src, \
                                                                    AkVideoPacket &dst) const \
         { \
@@ -4355,9 +7946,40 @@ class AkVideoConverterPrivate
             }; \
         }
 
+#define CONVERT_FASTDLV_FUNC(icomponents, ocomponents) \
+        inline void convertFormatFast8bitsDLV##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+                                                                            const AkVideoPacket &src, \
+                                                                            AkVideoPacket &dst) const \
+        { \
+            switch (fc.alphaMode) { \
+            case ConvertAlphaMode_AI_AO: \
+            case ConvertAlphaMode_AI_O: \
+                this->integralImage##icomponents##A<quint8>(fc, src); \
+                break; \
+            default: \
+                this->integralImage##icomponents<quint8>(fc, src); \
+                break; \
+            } \
+            \
+            switch (fc.alphaMode) { \
+            case ConvertAlphaMode_AI_AO: \
+                this->convertFast8bitsDLV##icomponents##Ato##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_AI_O: \
+                this->convertFast8bitsDLV##icomponents##Ato##ocomponents(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_AO: \
+                this->convertFast8bitsDLV##icomponents##to##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_O: \
+                this->convertFast8bitsDLV##icomponents##to##ocomponents(fc, src, dst); \
+                break; \
+            }; \
+        }
+
 #define CONVERTUL_FUNC(icomponents, ocomponents) \
         template <typename InputType, typename OutputType> \
-        inline void convertULFormat##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+        inline void convertFormatUL##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
                                                                   const AkVideoPacket &src, \
                                                                   AkVideoPacket &dst) const \
         { \
@@ -4377,9 +7999,30 @@ class AkVideoConverterPrivate
             }; \
         }
 
+#define CONVERT_FASTUL_FUNC(icomponents, ocomponents) \
+        inline void convertFormatFast8bitsUL##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+                                                                           const AkVideoPacket &src, \
+                                                                           AkVideoPacket &dst) const \
+        { \
+            switch (fc.alphaMode) { \
+            case ConvertAlphaMode_AI_AO: \
+                this->convertFast8bitsUL##icomponents##Ato##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_AI_O: \
+                this->convertFast8bitsUL##icomponents##Ato##ocomponents(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_AO: \
+                this->convertFast8bitsUL##icomponents##to##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_O: \
+                this->convertFast8bitsUL##icomponents##to##ocomponents(fc, src, dst); \
+                break; \
+            }; \
+        }
+
 #define CONVERTULV_FUNC(icomponents, ocomponents) \
         template <typename InputType, typename OutputType> \
-        inline void convertULVFormat##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+        inline void convertFormatULV##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
                                                                    const AkVideoPacket &src, \
                                                                    AkVideoPacket &dst) const \
         { \
@@ -4395,6 +8038,27 @@ class AkVideoConverterPrivate
                 break; \
             case ConvertAlphaMode_I_O: \
                 this->convertULV##icomponents##to##ocomponents<InputType, OutputType>(fc, src, dst); \
+                break; \
+            }; \
+        }
+
+#define CONVERT_FASTULV_FUNC(icomponents, ocomponents) \
+        inline void convertFormatFast8bitsULV##icomponents##to##ocomponents(const FrameConvertParameters &fc, \
+                                                                            const AkVideoPacket &src, \
+                                                                            AkVideoPacket &dst) const \
+        { \
+            switch (fc.alphaMode) { \
+            case ConvertAlphaMode_AI_AO: \
+                this->convertFast8bitsULV##icomponents##Ato##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_AI_O: \
+                this->convertFast8bitsULV##icomponents##Ato##ocomponents(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_AO: \
+                this->convertFast8bitsULV##icomponents##to##ocomponents##A(fc, src, dst); \
+                break; \
+            case ConvertAlphaMode_I_O: \
+                this->convertFast8bitsULV##icomponents##to##ocomponents(fc, src, dst); \
                 break; \
             }; \
         }
@@ -4415,6 +8079,22 @@ class AkVideoConverterPrivate
         CONVERTUL_FUNC(1, 1)
         CONVERTULV_FUNC(3, 3)
 
+        CONVERT_FAST_FUNC(3, 3)
+        CONVERT_FAST_FUNC(3, 1)
+        CONVERT_FAST_FUNC(1, 3)
+        CONVERT_FAST_FUNC(1, 1)
+        CONVERT_FASTV_FUNC(3, 3)
+        CONVERT_FASTDL_FUNC(3, 3)
+        CONVERT_FASTDL_FUNC(3, 1)
+        CONVERT_FASTDL_FUNC(1, 3)
+        CONVERT_FASTDL_FUNC(1, 1)
+        CONVERT_FASTDLV_FUNC(3, 3)
+        CONVERT_FASTUL_FUNC(3, 3)
+        CONVERT_FASTUL_FUNC(3, 1)
+        CONVERT_FASTUL_FUNC(1, 3)
+        CONVERT_FASTUL_FUNC(1, 1)
+        CONVERT_FASTULV_FUNC(3, 3)
+
         template <typename InputType, typename OutputType>
         inline void convert(const FrameConvertParameters &fc,
                             const AkVideoPacket &src,
@@ -4424,38 +8104,38 @@ class AkVideoConverterPrivate
                 && fc.resizeMode == ResizeMode_Up) {
                 switch (fc.convertType) {
                 case ConvertType_Vector:
-                    this->convertULVFormat3to3<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatULV3to3<InputType, OutputType>(fc, src, dst);
                     break;
                 case ConvertType_3to3:
-                    this->convertULFormat3to3<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatUL3to3<InputType, OutputType>(fc, src, dst);
                     break;
                 case ConvertType_3to1:
-                    this->convertULFormat3to1<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatUL3to1<InputType, OutputType>(fc, src, dst);
                     break;
                 case ConvertType_1to3:
-                    this->convertULFormat1to3<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatUL1to3<InputType, OutputType>(fc, src, dst);
                     break;
                 case ConvertType_1to1:
-                    this->convertULFormat1to1<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatUL1to1<InputType, OutputType>(fc, src, dst);
                     break;
                 }
             } else if (this->m_scalingMode == AkVideoConverter::ScalingMode_Linear
                        && fc.resizeMode == ResizeMode_Down) {
                 switch (fc.convertType) {
                 case ConvertType_Vector:
-                    this->convertDLVFormat3to3<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatDLV3to3<InputType, OutputType>(fc, src, dst);
                     break;
                 case ConvertType_3to3:
-                    this->convertDLFormat3to3<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatDL3to3<InputType, OutputType>(fc, src, dst);
                     break;
                 case ConvertType_3to1:
-                    this->convertDLFormat3to1<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatDL3to1<InputType, OutputType>(fc, src, dst);
                     break;
                 case ConvertType_1to3:
-                    this->convertDLFormat1to3<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatDL1to3<InputType, OutputType>(fc, src, dst);
                     break;
                 case ConvertType_1to1:
-                    this->convertDLFormat1to1<InputType, OutputType>(fc, src, dst);
+                    this->convertFormatDL1to1<InputType, OutputType>(fc, src, dst);
                     break;
                 }
             } else {
@@ -4479,8 +8159,71 @@ class AkVideoConverterPrivate
             }
         }
 
-    inline AkVideoPacket convert(const AkVideoPacket &packet,
-                                 const AkVideoCaps &ocaps);
+        inline void convertFast8bits(const FrameConvertParameters &fc,
+                                     const AkVideoPacket &src,
+                                     AkVideoPacket &dst)
+        {
+            if (this->m_scalingMode == AkVideoConverter::ScalingMode_Linear
+                && fc.resizeMode == ResizeMode_Up) {
+                switch (fc.convertType) {
+                case ConvertType_Vector:
+                    this->convertFormatFast8bitsULV3to3(fc, src, dst);
+                    break;
+                case ConvertType_3to3:
+                    this->convertFormatFast8bitsUL3to3(fc, src, dst);
+                    break;
+                case ConvertType_3to1:
+                    this->convertFormatFast8bitsUL3to1(fc, src, dst);
+                    break;
+                case ConvertType_1to3:
+                    this->convertFormatFast8bitsUL1to3(fc, src, dst);
+                    break;
+                case ConvertType_1to1:
+                    this->convertFormatFast8bitsUL1to1(fc, src, dst);
+                    break;
+                }
+            } else if (this->m_scalingMode == AkVideoConverter::ScalingMode_Linear
+                       && fc.resizeMode == ResizeMode_Down) {
+                switch (fc.convertType) {
+                case ConvertType_Vector:
+                    this->convertFormatFast8bitsDLV3to3(fc, src, dst);
+                    break;
+                case ConvertType_3to3:
+                    this->convertFormatFast8bitsDL3to3(fc, src, dst);
+                    break;
+                case ConvertType_3to1:
+                    this->convertFormatFast8bitsDL3to1(fc, src, dst);
+                    break;
+                case ConvertType_1to3:
+                    this->convertFormatFast8bitsDL1to3(fc, src, dst);
+                    break;
+                case ConvertType_1to1:
+                    this->convertFormatFast8bitsDL1to1(fc, src, dst);
+                    break;
+                }
+            } else {
+                switch (fc.convertType) {
+                case ConvertType_Vector:
+                    this->convertFormatFast8bitsV3to3(fc, src, dst);
+                    break;
+                case ConvertType_3to3:
+                    this->convertFormatFast8bits3to3(fc, src, dst);
+                    break;
+                case ConvertType_3to1:
+                    this->convertFormatFast8bits3to1(fc, src, dst);
+                    break;
+                case ConvertType_1to3:
+                    this->convertFormatFast8bits1to3(fc, src, dst);
+                    break;
+                case ConvertType_1to1:
+                    this->convertFormatFast8bits1to1(fc, src, dst);
+                    break;
+                }
+            }
+        }
+
+        inline AkVideoPacket convert(const AkVideoPacket &packet,
+                                     const AkVideoCaps &ocaps);
 };
 
 AkVideoConverter::AkVideoConverter(QObject *parent):
@@ -4743,6 +8486,10 @@ QDebug operator <<(QDebug debug, AkVideoConverter::AspectRatioMode mode)
         this->convert<quint##isize, quint##osize>(fc, \
                                                   packet, \
                                                   fc.outputFrame); \
+        \
+        if (fc.toEndian != Q_BYTE_ORDER) \
+            AkAlgorithm::swapDataBytes(reinterpret_cast<quint##osize *>(fc.outputFrame.data()), fc.outputFrame.size()); \
+        \
         break;
 
 AkVideoPacket AkVideoConverterPrivate::convert(const AkVideoPacket &packet,
@@ -4802,16 +8549,20 @@ AkVideoPacket AkVideoConverterPrivate::convert(const AkVideoPacket &packet,
         return packet;
     }
 
-    switch (fc.convertDataTypes) {
-    DEFINE_CONVERT_FUNC(8 , 8 )
-    DEFINE_CONVERT_FUNC(8 , 16)
-    DEFINE_CONVERT_FUNC(8 , 32)
-    DEFINE_CONVERT_FUNC(16, 8 )
-    DEFINE_CONVERT_FUNC(16, 16)
-    DEFINE_CONVERT_FUNC(16, 32)
-    DEFINE_CONVERT_FUNC(32, 8 )
-    DEFINE_CONVERT_FUNC(32, 16)
-    DEFINE_CONVERT_FUNC(32, 32)
+    if (fc.fastConvertion) {
+        this->convertFast8bits(fc, packet, fc.outputFrame);
+    } else {
+        switch (fc.convertDataTypes) {
+        DEFINE_CONVERT_FUNC(8 , 8 )
+        DEFINE_CONVERT_FUNC(8 , 16)
+        DEFINE_CONVERT_FUNC(8 , 32)
+        DEFINE_CONVERT_FUNC(16, 8 )
+        DEFINE_CONVERT_FUNC(16, 16)
+        DEFINE_CONVERT_FUNC(16, 32)
+        DEFINE_CONVERT_FUNC(32, 8 )
+        DEFINE_CONVERT_FUNC(32, 16)
+        DEFINE_CONVERT_FUNC(32, 32)
+        }
     }
 
     fc.outputFrame.copyMetadata(packet);
@@ -4835,6 +8586,7 @@ FrameConvertParameters::FrameConvertParameters(const FrameConvertParameters &oth
     convertDataTypes(other.convertDataTypes),
     alphaMode(other.alphaMode),
     resizeMode(other.resizeMode),
+    fastConvertion(other.fastConvertion),
     fromEndian(other.fromEndian),
     toEndian(other.toEndian),
     xmin(other.xmin),
@@ -5055,6 +8807,9 @@ FrameConvertParameters::~FrameConvertParameters()
 {
     this->clearBuffers();
     this->clearDlBuffers();
+
+    if (this->freeSIMDConvertParameters && this->simdConvertParameters)
+        this->freeSIMDConvertParameters(this->simdConvertParameters);
 }
 
 FrameConvertParameters &FrameConvertParameters::operator =(const FrameConvertParameters &other)
@@ -5070,6 +8825,7 @@ FrameConvertParameters &FrameConvertParameters::operator =(const FrameConvertPar
         this->convertDataTypes = other.convertDataTypes;
         this->alphaMode = other.alphaMode;
         this->resizeMode = other.resizeMode;
+        this->fastConvertion = other.fastConvertion;
         this->fromEndian = other.fromEndian;
         this->toEndian = other.toEndian;
         this->xmin = other.xmin;
@@ -5500,7 +9256,7 @@ void FrameConvertParameters::allocateDlBuffers(const AkVideoCaps &icaps,
 }
 
 #define DEFINE_CONVERT_TYPES(isize, osize) \
-    if (ispecs.byteLength() == (isize / 8) && ospecs.byteLength() == (osize / 8)) \
+    if (ispecs.depth() == isize && ospecs.depth() == osize) \
         this->convertDataTypes = ConvertDataTypes_##isize##_##osize;
 
 void FrameConvertParameters::configure(const AkVideoCaps &icaps,
@@ -5661,6 +9417,130 @@ void FrameConvertParameters::configure(const AkVideoCaps &icaps,
         this->alphaMode = ConvertAlphaMode_I_AO;
     else if (!hasAlphaIn && !hasAlphaOut)
         this->alphaMode = ConvertAlphaMode_I_O;
+
+    this->fastConvertion = ispecs.isFast() && ospecs.isFast();
+
+    AkSimd simd("Core");
+
+    this->createSIMDConvertParameters = reinterpret_cast<CreateConvertParametersType>(simd.resolve("createConvertParameters"));
+    this->freeSIMDConvertParameters   = reinterpret_cast<FreeConvertParametersType>  (simd.resolve("freeConvertParameters"));
+    this->convertSIMDFast8bits3to3    = reinterpret_cast<ConvertFast8bits3to3Type>   (simd.resolve("convertFast8bits3to3"));
+    this->convertSIMDFast8bits3to3A   = reinterpret_cast<ConvertFast8bits3to3AType>  (simd.resolve("convertFast8bits3to3A"));
+    this->convertSIMDFast8bits3Ato3   = reinterpret_cast<ConvertFast8bits3Ato3Type>  (simd.resolve("convertFast8bits3Ato3"));
+    this->convertSIMDFast8bits3Ato3A  = reinterpret_cast<ConvertFast8bits3Ato3AType> (simd.resolve("convertFast8bits3Ato3A"));
+    this->convertSIMDFast8bitsV3Ato3  = reinterpret_cast<ConvertFast8bitsV3Ato3Type> (simd.resolve("convertFast8bitsV3Ato3"));
+    this->convertSIMDFast8bits3to1    = reinterpret_cast<ConvertFast8bits3to1Type>   (simd.resolve("convertFast8bits3to1"));
+    this->convertSIMDFast8bits3to1A   = reinterpret_cast<ConvertFast8bits3to1AType>  (simd.resolve("convertFast8bits3to1A"));
+    this->convertSIMDFast8bits3Ato1   = reinterpret_cast<ConvertFast8bits3Ato1Type>  (simd.resolve("convertFast8bits3Ato1"));
+    this->convertSIMDFast8bits3Ato1A  = reinterpret_cast<ConvertFast8bits3Ato1AType> (simd.resolve("convertFast8bits3AtoA"));
+    this->convertSIMDFast8bits1to3    = reinterpret_cast<ConvertFast8bits1to3Type>   (simd.resolve("convertFast8bits1to3"));
+    this->convertSIMDFast8bits1to3A   = reinterpret_cast<ConvertFast8bits1to3AType>  (simd.resolve("convertFast8bits1to3A"));
+    this->convertSIMDFast8bits1Ato3   = reinterpret_cast<ConvertFast8bits1Ato3Type>  (simd.resolve("convertFast8bits1Ato3"));
+    this->convertSIMDFast8bits1Ato3A  = reinterpret_cast<ConvertFast8bits1Ato3AType> (simd.resolve("convertFast8bits1Ato3A"));
+    this->convertSIMDFast8bits1Ato1   = reinterpret_cast<ConvertFast8bits1Ato1Type>  (simd.resolve("convertFast8bits1Ato1"));
+
+    if (this->freeSIMDConvertParameters && this->simdConvertParameters)
+        this->freeSIMDConvertParameters(this->simdConvertParameters);
+
+    if (this->createSIMDConvertParameters) {
+        qint64 colorMatrix[12];
+        qint64 alphaMatrix[9];
+        qint64 minValues[3];
+        qint64 maxValues[3];
+        qint64 colorShift;
+        qint64 alphaShift;
+        this->colorConvert.readMatrix(colorMatrix,
+                                      alphaMatrix,
+                                      minValues,
+                                      maxValues,
+                                      &colorShift,
+                                      &alphaShift);
+        this->simdConvertParameters =
+                this->createSIMDConvertParameters(colorMatrix,
+                                                  alphaMatrix,
+                                                  minValues,
+                                                  maxValues,
+                                                  colorShift,
+                                                  alphaShift);
+    }
+
+    // Configure the minimum threshold for paralellizing the frame convertion.
+
+    int operationsPerByte = 0;
+
+    if (this->scalingMode == AkVideoConverter::ScalingMode_Fast) {
+        if (this->fastConvertion) {
+            switch (this->convertType) {
+            case ConvertType_Vector:
+                operationsPerByte = 1;
+                break;
+            case ConvertType_1to1:
+                operationsPerByte = 2;
+                break;
+            case ConvertType_3to3:
+                operationsPerByte = 4;
+                break;
+            default:
+                operationsPerByte = 3;
+                break;
+            }
+        } else {
+            operationsPerByte = 7;
+        }
+    } else {
+        switch (this->resizeMode) {
+        case ResizeMode_Down:
+            if (this->fastConvertion)
+                operationsPerByte = 7;
+            else
+                operationsPerByte = 9;
+
+            break;
+        case ResizeMode_Up:
+            if (this->fastConvertion) {
+                switch (this->convertType) {
+                case ConvertType_Vector:
+                    operationsPerByte = 9;
+                    break;
+                case ConvertType_1to1:
+                case ConvertType_3to3:
+                    operationsPerByte = 11;
+                    break;
+                case ConvertType_1to3:
+                case ConvertType_3to1:
+                    operationsPerByte = 13;
+                    break;
+                default:
+                    operationsPerByte = 12;
+                    break;
+                }
+            } else {
+                switch (this->convertType) {
+                case ConvertType_Vector:
+                    operationsPerByte = 10;
+                    break;
+                case ConvertType_1to1:
+                case ConvertType_3to3:
+                    operationsPerByte = 12;
+                    break;
+                case ConvertType_1to3:
+                case ConvertType_3to1:
+                    operationsPerByte = 13;
+                    break;
+                default:
+                    operationsPerByte = 12;
+                    break;
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    this->parallelizationThreshold =
+            AkCpuFeatures::paralellizableBytesThreshold(operationsPerByte,
+                                                        simd.loadedInstructionSet());
 }
 
 void FrameConvertParameters::configureScaling(const AkVideoCaps &icaps,
@@ -5853,6 +9733,9 @@ void FrameConvertParameters::configureScaling(const AkVideoCaps &icaps,
 
     if (aspectRatioMode == AkVideoConverter::AspectRatioMode_Fit)
         this->outputFrame.fillRgb(qRgba(0, 0, 0, 0));
+
+    this->paralelize =
+            this->outputConvertCaps.dataSize() > this->parallelizationThreshold;
 }
 
 void FrameConvertParameters::reset()
@@ -5867,6 +9750,7 @@ void FrameConvertParameters::reset()
     this->convertDataTypes = ConvertDataTypes_8_8;
     this->alphaMode = ConvertAlphaMode_AI_AO;
     this->resizeMode = ResizeMode_Keep;
+    this->fastConvertion = false;
 
     this->fromEndian = Q_BYTE_ORDER;
     this->toEndian = Q_BYTE_ORDER;

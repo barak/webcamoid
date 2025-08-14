@@ -17,11 +17,19 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#ifdef OPENMP_ENABLED
+#include <omp.h>
+#endif
+
 #include <QQmlEngine>
 
-#include "akvideomixer.h"
+#include "akalgorithm.h"
+#include "akcpufeatures.h"
+#include "akfrac.h"
+#include "aksimd.h"
 #include "akvideocaps.h"
 #include "akvideoformatspec.h"
+#include "akvideomixer.h"
 #include "akvideopacket.h"
 
 enum DrawType
@@ -37,6 +45,83 @@ enum DrawDataTypes
     DrawDataTypes_32,
 };
 
+// Optimized fumctions for un-packed formats
+
+using CreateDrawParametersType =
+    void *(*)();
+using FreeDrawParametersType =
+    void (*)(void *drawParameters);
+using DrawSIMDFast8bits1AType =
+    void (*)(void *drawParameters,
+             int oWidth,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetA,
+             const quint8 *src_line_x,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_a,
+             int *x);
+using DrawSIMDFast8bits3AType =
+    void (*)(void *drawParameters,
+             int oWidth,
+             const int *srcWidthOffsetX,
+             const int *srcWidthOffsetY,
+             const int *srcWidthOffsetZ,
+             const int *srcWidthOffsetA,
+             const int *dstWidthOffsetX,
+             const int *dstWidthOffsetY,
+             const int *dstWidthOffsetZ,
+             const int *dstWidthOffsetA,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             quint8 *dst_line_a,
+             int *x);
+using DrawSIMDFastLc8bits1AType =
+    void (*)(void *drawParameters,
+             int oWidth,
+             int iDiffX,
+             int oDiffX,
+             int oMultX,
+             size_t xiWidthDiv,
+             size_t aiWidthDiv,
+             size_t xiStep,
+             size_t aiStep,
+             const quint8 *src_line_x,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_a,
+             int *x);
+using DrawSIMDFastLc8bits3AType =
+    void (*)(void *drawParameters,
+             int oWidth,
+             int iDiffX,
+             int oDiffX,
+             int oMultX,
+             size_t xiWidthDiv,
+             size_t yiWidthDiv,
+             size_t ziWidthDiv,
+             size_t aiWidthDiv,
+             size_t xiStep,
+             size_t yiStep,
+             size_t ziStep,
+             size_t aiStep,
+             const quint8 *src_line_x,
+             const quint8 *src_line_y,
+             const quint8 *src_line_z,
+             const quint8 *src_line_a,
+             quint8 *dst_line_x,
+             quint8 *dst_line_y,
+             quint8 *dst_line_z,
+             quint8 *dst_line_a,
+             int *x);
+
 class CommonDrawParameters
 {
     public:
@@ -48,6 +133,7 @@ class CommonDrawParameters
         DrawDataTypes drawDataTypes {DrawDataTypes_8};
         bool fastDraw {false};
         bool optimizedFor8bits {false};
+        bool fastFormat {false};
 
         int endianness {Q_BYTE_ORDER};
 
@@ -92,17 +178,27 @@ class CommonDrawParameters
         quint64 maskZo {0};
         quint64 maskAo {0};
 
-        size_t lengthAi {0};
-        size_t alphaShift {0};
+        size_t depthAi {0};
         qint64 *aiMultTable {nullptr};
         qint64 *aoMultTable {nullptr};
-        qint64 *alphaDivTable {nullptr};
+        qint64 *alphaTable {nullptr};
+
+        void *simdDrawParameters {nullptr};
+
+        CreateDrawParametersType  createSIMDDrawParameters {nullptr};
+        FreeDrawParametersType    freeSIMDDrawParameters   {nullptr};
+        DrawSIMDFast8bits1AType   drawSIMDFast8bits1A      {nullptr};
+        DrawSIMDFast8bits3AType   drawSIMDFast8bits3A      {nullptr};
+        DrawSIMDFastLc8bits1AType drawSIMDFastLc8bits1A    {nullptr};
+        DrawSIMDFastLc8bits3AType drawSIMDFastLc8bits3A    {nullptr};
+
+        size_t parallelizationThreshold {0};
 
         CommonDrawParameters();
         CommonDrawParameters(const CommonDrawParameters &other);
         ~CommonDrawParameters();
         CommonDrawParameters &operator =(const CommonDrawParameters &other);
-        inline void allocateBuffers(size_t alphaLength);
+        inline void allocateBuffers(size_t alphaDepth);
         inline void clearBuffers();
         void configure(const AkVideoCaps &caps);
         void reset();
@@ -147,6 +243,8 @@ class DrawParameters
         int *dstWidthOffsetZ {nullptr};
         int *dstWidthOffsetA {nullptr};
 
+        bool paralelize {false};
+
         DrawParameters();
         DrawParameters(const DrawParameters &other);
         ~DrawParameters();
@@ -169,65 +267,6 @@ class AkVideoMixerPrivate
         size_t m_dpSize {0};
         int m_cacheIndex {0};
 
-        // Endianness conversion functions for color components
-
-        inline quint8 swapBytes(quint8 &&value, int endianness) const
-        {
-            Q_UNUSED(endianness)
-
-            return value;
-        }
-
-        inline quint16 swapBytes(quint16 &&value, int endianness) const
-        {
-            if (endianness == Q_BYTE_ORDER)
-                return value;
-
-            quint16 result;
-            auto pv = reinterpret_cast<quint8 *>(&value);
-            auto pr = reinterpret_cast<quint8 *>(&result);
-            pr[0] = pv[1];
-            pr[1] = pv[0];
-
-            return result;
-        }
-
-        inline quint32 swapBytes(quint32 &&value, int endianness) const
-        {
-            if (endianness == Q_BYTE_ORDER)
-                return value;
-
-            quint32 result;
-            auto pv = reinterpret_cast<quint8 *>(&value);
-            auto pr = reinterpret_cast<quint8 *>(&result);
-            pr[0] = pv[3];
-            pr[1] = pv[2];
-            pr[2] = pv[1];
-            pr[3] = pv[0];
-
-            return result;
-        }
-
-        inline quint64 swapBytes(quint64 &&value, int endianness) const
-        {
-            if (endianness == Q_BYTE_ORDER)
-                return value;
-
-            quint64 result;
-            auto pv = reinterpret_cast<quint8 *>(&value);
-            auto pr = reinterpret_cast<quint8 *>(&result);
-            pr[0] = pv[7];
-            pr[1] = pv[6];
-            pr[2] = pv[5];
-            pr[3] = pv[4];
-            pr[4] = pv[3];
-            pr[5] = pv[2];
-            pr[6] = pv[1];
-            pr[7] = pv[0];
-
-            return result;
-        }
-
         /* Drawing functions */
 
         template <typename DataType>
@@ -235,6 +274,7 @@ class AkVideoMixerPrivate
                          const AkVideoPacket &src,
                          AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
             for (int y = dp.oY; y < dp.oHeight; ++y) {
                 auto &ys = dp.srcHeight[y];
 
@@ -248,6 +288,7 @@ class AkVideoMixerPrivate
                 auto dst_line_z = dst.line(this->m_cdp.planeZi, y) + this->m_cdp.ziOffset;
                 auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
 
+                #pragma omp simd if(dp.paralelize)
                 for (int x = dp.oX; x < dp.oWidth; ++x) {
                     int &xs_x = dp.srcWidthOffsetX[x];
                     int &xs_y = dp.srcWidthOffsetY[x];
@@ -259,10 +300,17 @@ class AkVideoMixerPrivate
                     auto zi = *reinterpret_cast<const DataType *>(src_line_z + xs_z);
                     auto ai = *reinterpret_cast<const DataType *>(src_line_a + xs_a);
 
-                    xi = (this->swapBytes(DataType(xi), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    yi = (this->swapBytes(DataType(yi), this->m_cdp.endianness) >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
-                    zi = (this->swapBytes(DataType(zi), this->m_cdp.endianness) >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
-                    ai = (this->swapBytes(DataType(ai), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(DataType(xi));
+                        yi = AkAlgorithm::swapBytes(DataType(yi));
+                        zi = AkAlgorithm::swapBytes(DataType(zi));
+                        ai = AkAlgorithm::swapBytes(DataType(ai));
+                    }
+
+                    xi = (xi >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    yi = (yi >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
+                    zi = (zi >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
+                    ai = (ai >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     int &xd_x = dp.dstWidthOffsetX[x];
                     int &xd_y = dp.dstWidthOffsetY[x];
@@ -274,31 +322,101 @@ class AkVideoMixerPrivate
                     auto zop = reinterpret_cast<DataType *>(dst_line_z + xd_z);
                     auto aop = reinterpret_cast<DataType *>(dst_line_a + xd_a);
 
-                    auto xo = (this->swapBytes(DataType(*xop), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    auto yo = (this->swapBytes(DataType(*yop), this->m_cdp.endianness) >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
-                    auto zo = (this->swapBytes(DataType(*zop), this->m_cdp.endianness) >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
-                    auto ao = (this->swapBytes(DataType(*aop), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    DataType xo = 0;
+                    DataType yo = 0;
+                    DataType zo = 0;
+                    DataType ao = 0;
 
-                    auto alphaMask = (size_t(ai) << this->m_cdp.lengthAi) | size_t(ao);
-                    qint64 xt = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.alphaShift;
-                    qint64 yt = (qint64(yi) * this->m_cdp.aiMultTable[alphaMask] + qint64(yo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.alphaShift;
-                    qint64 zt = (qint64(zi) * this->m_cdp.aiMultTable[alphaMask] + qint64(zo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.alphaShift;
-                    qint64 &at = this->m_cdp.alphaDivTable[alphaMask];
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xo = AkAlgorithm::swapBytes(DataType(*xop));
+                        yo = AkAlgorithm::swapBytes(DataType(*yop));
+                        zo = AkAlgorithm::swapBytes(DataType(*zop));
+                        ao = AkAlgorithm::swapBytes(DataType(*aop));
+                    } else {
+                        xo = *xop;
+                        yo = *yop;
+                        zo = *zop;
+                        ao = *aop;
+                    }
+
+                    xo = (xo >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    yo = (yo >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
+                    zo = (zo >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
+                    ao = (ao >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+
+                    auto alphaMask = (size_t(ai) << this->m_cdp.depthAi) | size_t(ao);
+                    qint64 xt = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    qint64 yt = (qint64(yi) * this->m_cdp.aiMultTable[alphaMask] + qint64(yo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    qint64 zt = (qint64(zi) * this->m_cdp.aiMultTable[alphaMask] + qint64(zo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    qint64 &at = this->m_cdp.alphaTable[alphaMask];
 
                     *xop = (*xop & DataType(this->m_cdp.maskXo)) | (DataType(xt) << this->m_cdp.xiShift);
                     *yop = (*yop & DataType(this->m_cdp.maskYo)) | (DataType(yt) << this->m_cdp.yiShift);
                     *zop = (*zop & DataType(this->m_cdp.maskZo)) | (DataType(zt) << this->m_cdp.ziShift);
                     *aop = (*aop & DataType(this->m_cdp.maskAo)) | (DataType(at) << this->m_cdp.aiShift);
+                }
+            }
+        }
 
-                    auto xot = this->swapBytes(DataType(*xop), this->m_cdp.endianness);
-                    auto yot = this->swapBytes(DataType(*yop), this->m_cdp.endianness);
-                    auto zot = this->swapBytes(DataType(*zop), this->m_cdp.endianness);
-                    auto aot = this->swapBytes(DataType(*aop), this->m_cdp.endianness);
+        void drawFast8bits3A(const DrawParameters &dp,
+                             const AkVideoPacket &src,
+                             AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
+            for (int y = dp.oY; y < dp.oHeight; ++y) {
+                auto &ys = dp.srcHeight[y];
 
-                    *xop = xot;
-                    *yop = yot;
-                    *zop = zot;
-                    *aop = aot;
+                auto src_line_x = src.constLine(this->m_cdp.planeXi, ys) + this->m_cdp.xiOffset;
+                auto src_line_y = src.constLine(this->m_cdp.planeYi, ys) + this->m_cdp.yiOffset;
+                auto src_line_z = src.constLine(this->m_cdp.planeZi, ys) + this->m_cdp.ziOffset;
+                auto src_line_a = src.constLine(this->m_cdp.planeAi, ys) + this->m_cdp.aiOffset;
+
+                auto dst_line_x = dst.line(this->m_cdp.planeXi, y) + this->m_cdp.xiOffset;
+                auto dst_line_y = dst.line(this->m_cdp.planeYi, y) + this->m_cdp.yiOffset;
+                auto dst_line_z = dst.line(this->m_cdp.planeZi, y) + this->m_cdp.ziOffset;
+                auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
+
+                int x = dp.oX;
+
+                if (this->m_cdp.drawSIMDFast8bits3A) {
+                    this->m_cdp.drawSIMDFast8bits3A(this->m_cdp.simdDrawParameters,
+                                                    dp.oWidth,
+                                                    dp.srcWidthOffsetX,
+                                                    dp.srcWidthOffsetY,
+                                                    dp.srcWidthOffsetZ,
+                                                    dp.srcWidthOffsetA,
+                                                    dp.dstWidthOffsetX,
+                                                    dp.dstWidthOffsetY,
+                                                    dp.dstWidthOffsetZ,
+                                                    dp.dstWidthOffsetA,
+                                                    src_line_x,
+                                                    src_line_y,
+                                                    src_line_z,
+                                                    src_line_a,
+                                                    dst_line_x,
+                                                    dst_line_y,
+                                                    dst_line_z,
+                                                    dst_line_a,
+                                                    &x);
+                }
+
+                #pragma omp simd if(dp.paralelize)
+                for (int i = x; i < dp.oWidth; ++i) {
+                    auto &xi = src_line_x[dp.srcWidthOffsetX[i]];
+                    auto &yi = src_line_y[dp.srcWidthOffsetY[i]];
+                    auto &zi = src_line_z[dp.srcWidthOffsetZ[i]];
+                    auto &ai = src_line_a[dp.srcWidthOffsetA[i]];
+
+                    auto &xo = dst_line_x[dp.dstWidthOffsetX[i]];
+                    auto &yo = dst_line_y[dp.dstWidthOffsetY[i]];
+                    auto &zo = dst_line_z[dp.dstWidthOffsetZ[i]];
+                    auto &ao = dst_line_a[dp.dstWidthOffsetA[i]];
+
+                    auto alphaMask = (size_t(ai) << this->m_cdp.depthAi) | size_t(ao);
+                    xo = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    yo = (qint64(yi) * this->m_cdp.aiMultTable[alphaMask] + qint64(yo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    zo = (qint64(zi) * this->m_cdp.aiMultTable[alphaMask] + qint64(zo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    ao = qint8(this->m_cdp.alphaTable[alphaMask]);
                 }
             }
         }
@@ -308,6 +426,7 @@ class AkVideoMixerPrivate
                     const AkVideoPacket &src,
                     AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
             for (int y = dp.oY; y < dp.oHeight; ++y) {
                 auto &ys = dp.srcHeight[y];
 
@@ -321,6 +440,7 @@ class AkVideoMixerPrivate
                 auto dst_line_z = dst.line(this->m_cdp.planeZi, y) + this->m_cdp.ziOffset;
                 auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
 
+                #pragma omp simd if(dp.paralelize)
                 for (int x = dp.oX; x < dp.oWidth; ++x) {
                     int &xs_x = dp.srcWidthOffsetX[x];
                     int &xs_y = dp.srcWidthOffsetY[x];
@@ -332,10 +452,17 @@ class AkVideoMixerPrivate
                     auto zi = *reinterpret_cast<const DataType *>(src_line_z + xs_z);
                     auto ai = *reinterpret_cast<const DataType *>(src_line_a + xs_a);
 
-                    xi = (this->swapBytes(DataType(xi), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    yi = (this->swapBytes(DataType(yi), this->m_cdp.endianness) >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
-                    zi = (this->swapBytes(DataType(zi), this->m_cdp.endianness) >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
-                    ai = (this->swapBytes(DataType(ai), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(DataType(xi));
+                        yi = AkAlgorithm::swapBytes(DataType(yi));
+                        zi = AkAlgorithm::swapBytes(DataType(zi));
+                        ai = AkAlgorithm::swapBytes(DataType(ai));
+                    }
+
+                    xi = (xi >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    yi = (yi >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
+                    zi = (zi >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
+                    ai = (ai >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     int &xd_x = dp.dstWidthOffsetX[x];
                     int &xd_y = dp.dstWidthOffsetY[x];
@@ -347,10 +474,27 @@ class AkVideoMixerPrivate
                     auto zop = reinterpret_cast<DataType *>(dst_line_z + xd_z);
                     auto aop = reinterpret_cast<DataType *>(dst_line_a + xd_a);
 
-                    auto xo = (this->swapBytes(DataType(*xop), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    auto yo = (this->swapBytes(DataType(*yop), this->m_cdp.endianness) >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
-                    auto zo = (this->swapBytes(DataType(*zop), this->m_cdp.endianness) >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
-                    auto ao = (this->swapBytes(DataType(*aop), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    DataType xo = 0;
+                    DataType yo = 0;
+                    DataType zo = 0;
+                    DataType ao = 0;
+
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xo = AkAlgorithm::swapBytes(DataType(*xop));
+                        yo = AkAlgorithm::swapBytes(DataType(*yop));
+                        zo = AkAlgorithm::swapBytes(DataType(*zop));
+                        ao = AkAlgorithm::swapBytes(DataType(*aop));
+                    } else {
+                        xo = *xop;
+                        yo = *yop;
+                        zo = *zop;
+                        ao = *aop;
+                    }
+
+                    xo = (xo >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    yo = (yo >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
+                    zo = (zo >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
+                    ao = (ao >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     auto diffAi = qint64(this->m_cdp.maxAi) - qint64(ai);
                     auto a = qint64(this->m_cdp.maxAi2) - (qint64(this->m_cdp.maxAi) - qint64(ao)) * diffAi;
@@ -373,16 +517,6 @@ class AkVideoMixerPrivate
                     *yop = (*yop & DataType(this->m_cdp.maskYo)) | (DataType(yt) << this->m_cdp.yiShift);
                     *zop = (*zop & DataType(this->m_cdp.maskZo)) | (DataType(zt) << this->m_cdp.ziShift);
                     *aop = (*aop & DataType(this->m_cdp.maskAo)) | (DataType(at) << this->m_cdp.aiShift);
-
-                    auto xot = this->swapBytes(DataType(*xop), this->m_cdp.endianness);
-                    auto yot = this->swapBytes(DataType(*yop), this->m_cdp.endianness);
-                    auto zot = this->swapBytes(DataType(*zop), this->m_cdp.endianness);
-                    auto aot = this->swapBytes(DataType(*aop), this->m_cdp.endianness);
-
-                    *xop = xot;
-                    *yop = yot;
-                    *zop = zot;
-                    *aop = aot;
                 }
             }
         }
@@ -392,6 +526,7 @@ class AkVideoMixerPrivate
                          const AkVideoPacket &src,
                          AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
             for (int y = dp.oY; y < dp.oHeight; ++y) {
                 auto &ys = dp.srcHeight[y];
 
@@ -401,6 +536,7 @@ class AkVideoMixerPrivate
                 auto dst_line_x = dst.line(this->m_cdp.planeXi, y) + this->m_cdp.xiOffset;
                 auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
 
+                #pragma omp simd if(dp.paralelize)
                 for (int x = dp.oX; x < dp.oWidth; ++x) {
                     int &xs_x = dp.srcWidthOffsetX[x];
                     int &xs_a = dp.srcWidthOffsetA[x];
@@ -408,8 +544,13 @@ class AkVideoMixerPrivate
                     auto xi = *reinterpret_cast<const DataType *>(src_line_x + xs_x);
                     auto ai = *reinterpret_cast<const DataType *>(src_line_a + xs_a);
 
-                    xi = (this->swapBytes(DataType(xi), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    ai = (this->swapBytes(DataType(ai), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(DataType(xi));
+                        ai = AkAlgorithm::swapBytes(DataType(ai));
+                    }
+
+                    xi = (xi >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    ai = (ai >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     int &xd_x = dp.dstWidthOffsetX[x];
                     int &xd_a = dp.dstWidthOffsetA[x];
@@ -417,21 +558,71 @@ class AkVideoMixerPrivate
                     auto xop = reinterpret_cast<DataType *>(dst_line_x + xd_x);
                     auto aop = reinterpret_cast<DataType *>(dst_line_a + xd_a);
 
-                    auto xo = (this->swapBytes(DataType(*xop), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    auto ao = (this->swapBytes(DataType(*aop), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    DataType xo = 0;
+                    DataType ao = 0;
 
-                    auto alphaMask = (size_t(ai) << this->m_cdp.lengthAi) | size_t(ao);
-                    qint64 xt = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.alphaShift;
-                    qint64 &at = this->m_cdp.alphaDivTable[alphaMask];
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xo = AkAlgorithm::swapBytes(DataType(*xop));
+                        ao = AkAlgorithm::swapBytes(DataType(*aop));
+                    } else {
+                        xo = *xop;
+                        ao = *aop;
+                    }
+
+                    xo = (xo >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    ao = (ao >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+
+                    auto alphaMask = (size_t(ai) << this->m_cdp.depthAi) | size_t(ao);
+                    qint64 xt = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    qint64 &at = this->m_cdp.alphaTable[alphaMask];
 
                     *xop = (*xop & DataType(this->m_cdp.maskXo)) | (DataType(xt) << this->m_cdp.xiShift);
                     *aop = (*aop & DataType(this->m_cdp.maskAo)) | (DataType(at) << this->m_cdp.aiShift);
+                }
+            }
+        }
 
-                    auto xot = this->swapBytes(DataType(*xop), this->m_cdp.endianness);
-                    auto aot = this->swapBytes(DataType(*aop), this->m_cdp.endianness);
+        void drawFast8bits1A(const DrawParameters &dp,
+                             const AkVideoPacket &src,
+                             AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
+            for (int y = dp.oY; y < dp.oHeight; ++y) {
+                auto &ys = dp.srcHeight[y];
 
-                    *xop = xot;
-                    *aop = aot;
+                auto src_line_x = src.constLine(this->m_cdp.planeXi, ys) + this->m_cdp.xiOffset;
+                auto src_line_a = src.constLine(this->m_cdp.planeAi, ys) + this->m_cdp.aiOffset;
+
+                auto dst_line_x = dst.line(this->m_cdp.planeXi, y) + this->m_cdp.xiOffset;
+                auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
+
+                int x = dp.oX;
+
+                if (this->m_cdp.drawSIMDFast8bits1A) {
+                    this->m_cdp.drawSIMDFast8bits1A(this->m_cdp.simdDrawParameters,
+                                                    dp.oWidth,
+                                                    dp.srcWidthOffsetX,
+                                                    dp.srcWidthOffsetA,
+                                                    dp.dstWidthOffsetX,
+                                                    dp.dstWidthOffsetA,
+                                                    src_line_x,
+                                                    src_line_a,
+                                                    dst_line_x,
+                                                    dst_line_a,
+                                                    &x);
+                }
+
+                #pragma omp simd if(dp.paralelize)
+                for (int i = x; i < dp.oWidth; ++i) {
+                    auto &xi = src_line_x[dp.srcWidthOffsetX[i]];
+                    auto &ai = src_line_a[dp.srcWidthOffsetA[i]];
+
+                    auto &xo = dst_line_x[dp.dstWidthOffsetX[i]];
+                    auto &ao = dst_line_a[dp.dstWidthOffsetA[i]];
+
+                    auto alphaMask = (size_t(ai) << this->m_cdp.depthAi) | size_t(ao);
+                    xo = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    ao = qint8(this->m_cdp.alphaTable[alphaMask]);
                 }
             }
         }
@@ -441,6 +632,7 @@ class AkVideoMixerPrivate
                     const AkVideoPacket &src,
                     AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
             for (int y = dp.oY; y < dp.oHeight; ++y) {
                 auto &ys = dp.srcHeight[y];
 
@@ -450,6 +642,7 @@ class AkVideoMixerPrivate
                 auto dst_line_x = dst.line(this->m_cdp.planeXi, y) + this->m_cdp.xiOffset;
                 auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
 
+                #pragma omp simd if(dp.paralelize)
                 for (int x = dp.oX; x < dp.oWidth; ++x) {
                     int &xs_x = dp.srcWidthOffsetX[x];
                     int &xs_a = dp.srcWidthOffsetA[x];
@@ -457,8 +650,13 @@ class AkVideoMixerPrivate
                     auto xi = *reinterpret_cast<const DataType *>(src_line_x + xs_x);
                     auto ai = *reinterpret_cast<const DataType *>(src_line_a + xs_a);
 
-                    xi = (this->swapBytes(DataType(xi), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    ai = (this->swapBytes(DataType(ai), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(DataType(xi));
+                        ai = AkAlgorithm::swapBytes(DataType(ai));
+                    }
+
+                    xi = (xi >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    ai = (ai >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     int &xd_x = dp.dstWidthOffsetX[x];
                     int &xd_a = dp.dstWidthOffsetA[x];
@@ -466,8 +664,19 @@ class AkVideoMixerPrivate
                     auto xop = reinterpret_cast<DataType *>(dst_line_x + xd_x);
                     auto aop = reinterpret_cast<DataType *>(dst_line_a + xd_a);
 
-                    auto xo = (this->swapBytes(DataType(*xop), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    auto ao = (this->swapBytes(DataType(*aop), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    DataType xo = 0;
+                    DataType ao = 0;
+
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xo = AkAlgorithm::swapBytes(DataType(*xop));
+                        ao = AkAlgorithm::swapBytes(DataType(*aop));
+                    } else {
+                        xo = *xop;
+                        ao = *aop;
+                    }
+
+                    xo = (xo >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    ao = (ao >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     auto diffAi = qint64(this->m_cdp.maxAi) - qint64(ai);
                     auto a = qint64(this->m_cdp.maxAi2) - (qint64(this->m_cdp.maxAi) - qint64(ao)) * diffAi;
@@ -484,12 +693,6 @@ class AkVideoMixerPrivate
 
                     *xop = (*xop & DataType(this->m_cdp.maskXo)) | (DataType(xt) << this->m_cdp.xiShift);
                     *aop = (*aop & DataType(this->m_cdp.maskAo)) | (DataType(at) << this->m_cdp.aiShift);
-
-                    auto xot = this->swapBytes(DataType(*xop), this->m_cdp.endianness);
-                    auto aot = this->swapBytes(DataType(*aop), this->m_cdp.endianness);
-
-                    *xop = xot;
-                    *aop = aot;
                 }
             }
         }
@@ -501,6 +704,7 @@ class AkVideoMixerPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
             for (int y = dp.oY; y < dp.oHeight; ++y) {
                 auto ys = (y * dp.iDiffY + dp.oMultY) / dp.oDiffY;
 
@@ -514,6 +718,7 @@ class AkVideoMixerPrivate
                 auto dst_line_z = dst.line(this->m_cdp.planeZi, y) + this->m_cdp.ziOffset;
                 auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
 
+                #pragma omp simd if(dp.paralelize)
                 for (int x = dp.oX; x < dp.oWidth; ++x) {
                     auto xs = (x * dp.iDiffX + dp.oMultX) / dp.oDiffX;
 
@@ -527,10 +732,17 @@ class AkVideoMixerPrivate
                     auto zi = *reinterpret_cast<const DataType *>(src_line_z + xs_z);
                     auto ai = *reinterpret_cast<const DataType *>(src_line_a + xs_a);
 
-                    xi = (this->swapBytes(DataType(xi), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    yi = (this->swapBytes(DataType(yi), this->m_cdp.endianness) >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
-                    zi = (this->swapBytes(DataType(zi), this->m_cdp.endianness) >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
-                    ai = (this->swapBytes(DataType(ai), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(DataType(xi));
+                        yi = AkAlgorithm::swapBytes(DataType(yi));
+                        zi = AkAlgorithm::swapBytes(DataType(zi));
+                        ai = AkAlgorithm::swapBytes(DataType(ai));
+                    }
+
+                    xi = (xi >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    yi = (yi >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
+                    zi = (zi >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
+                    ai = (ai >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     int xd_x = (x >> this->m_cdp.xiWidthDiv) * this->m_cdp.xiStep;
                     int xd_y = (x >> this->m_cdp.yiWidthDiv) * this->m_cdp.yiStep;
@@ -542,31 +754,115 @@ class AkVideoMixerPrivate
                     auto zop = reinterpret_cast<DataType *>(dst_line_z + xd_z);
                     auto aop = reinterpret_cast<DataType *>(dst_line_a + xd_a);
 
-                    auto xo = (this->swapBytes(DataType(*xop), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    auto yo = (this->swapBytes(DataType(*yop), this->m_cdp.endianness) >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
-                    auto zo = (this->swapBytes(DataType(*zop), this->m_cdp.endianness) >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
-                    auto ao = (this->swapBytes(DataType(*aop), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    DataType xo = 0;
+                    DataType yo = 0;
+                    DataType zo = 0;
+                    DataType ao = 0;
 
-                    auto alphaMask = (size_t(ai) << this->m_cdp.lengthAi) | size_t(ao);
-                    qint64 xt = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.alphaShift;
-                    qint64 yt = (qint64(yi) * this->m_cdp.aiMultTable[alphaMask] + qint64(yo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.alphaShift;
-                    qint64 zt = (qint64(zi) * this->m_cdp.aiMultTable[alphaMask] + qint64(zo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.alphaShift;
-                    qint64 &at = this->m_cdp.alphaDivTable[alphaMask];
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xo = AkAlgorithm::swapBytes(DataType(*xop));
+                        yo = AkAlgorithm::swapBytes(DataType(*yop));
+                        zo = AkAlgorithm::swapBytes(DataType(*zop));
+                        ao = AkAlgorithm::swapBytes(DataType(*aop));
+                    } else {
+                        xo = *xop;
+                        yo = *yop;
+                        zo = *zop;
+                        ao = *aop;
+                    }
+
+                    xo = (xo >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    yo = (yo >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
+                    zo = (zo >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
+                    ao = (ao >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+
+                    auto alphaMask = (size_t(ai) << this->m_cdp.depthAi) | size_t(ao);
+                    qint64 xt = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    qint64 yt = (qint64(yi) * this->m_cdp.aiMultTable[alphaMask] + qint64(yo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    qint64 zt = (qint64(zi) * this->m_cdp.aiMultTable[alphaMask] + qint64(zo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    qint64 &at = this->m_cdp.alphaTable[alphaMask];
 
                     *xop = (*xop & DataType(this->m_cdp.maskXo)) | (DataType(xt) << this->m_cdp.xiShift);
                     *yop = (*yop & DataType(this->m_cdp.maskYo)) | (DataType(yt) << this->m_cdp.yiShift);
                     *zop = (*zop & DataType(this->m_cdp.maskZo)) | (DataType(zt) << this->m_cdp.ziShift);
                     *aop = (*aop & DataType(this->m_cdp.maskAo)) | (DataType(at) << this->m_cdp.aiShift);
+                }
+            }
+        }
 
-                    auto xot = this->swapBytes(DataType(*xop), this->m_cdp.endianness);
-                    auto yot = this->swapBytes(DataType(*yop), this->m_cdp.endianness);
-                    auto zot = this->swapBytes(DataType(*zop), this->m_cdp.endianness);
-                    auto aot = this->swapBytes(DataType(*aop), this->m_cdp.endianness);
+        void drawFastLc8bits3A(const DrawParameters &dp,
+                               const AkVideoPacket &src,
+                               AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
+            for (int y = dp.oY; y < dp.oHeight; ++y) {
+                auto ys = (y * dp.iDiffY + dp.oMultY) / dp.oDiffY;
 
-                    *xop = xot;
-                    *yop = yot;
-                    *zop = zot;
-                    *aop = aot;
+                auto src_line_x = src.constLine(this->m_cdp.planeXi, ys) + this->m_cdp.xiOffset;
+                auto src_line_y = src.constLine(this->m_cdp.planeYi, ys) + this->m_cdp.yiOffset;
+                auto src_line_z = src.constLine(this->m_cdp.planeZi, ys) + this->m_cdp.ziOffset;
+                auto src_line_a = src.constLine(this->m_cdp.planeAi, ys) + this->m_cdp.aiOffset;
+
+                auto dst_line_x = dst.line(this->m_cdp.planeXi, y) + this->m_cdp.xiOffset;
+                auto dst_line_y = dst.line(this->m_cdp.planeYi, y) + this->m_cdp.yiOffset;
+                auto dst_line_z = dst.line(this->m_cdp.planeZi, y) + this->m_cdp.ziOffset;
+                auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
+
+                int x = dp.oX;
+
+                if (this->m_cdp.drawSIMDFastLc8bits3A)
+                    this->m_cdp.drawSIMDFastLc8bits3A(this->m_cdp.simdDrawParameters,
+                                                      dp.oWidth,
+                                                      dp.iDiffX,
+                                                      dp.oDiffX,
+                                                      dp.oMultX,
+                                                      this->m_cdp.xiWidthDiv,
+                                                      this->m_cdp.yiWidthDiv,
+                                                      this->m_cdp.ziWidthDiv,
+                                                      this->m_cdp.aiWidthDiv,
+                                                      this->m_cdp.xiStep,
+                                                      this->m_cdp.yiStep,
+                                                      this->m_cdp.ziStep,
+                                                      this->m_cdp.aiStep,
+                                                      src_line_x,
+                                                      src_line_y,
+                                                      src_line_z,
+                                                      src_line_a,
+                                                      dst_line_x,
+                                                      dst_line_y,
+                                                      dst_line_z,
+                                                      dst_line_a,
+                                                      &x);
+
+                #pragma omp simd if(dp.paralelize)
+                for (int i = x; i < dp.oWidth; ++i) {
+                    auto xs = (i * dp.iDiffX + dp.oMultX) / dp.oDiffX;
+
+                    int xs_x = (xs >> this->m_cdp.xiWidthDiv) * this->m_cdp.xiStep;
+                    int xs_y = (xs >> this->m_cdp.yiWidthDiv) * this->m_cdp.yiStep;
+                    int xs_z = (xs >> this->m_cdp.ziWidthDiv) * this->m_cdp.ziStep;
+                    int xs_a = (xs >> this->m_cdp.aiWidthDiv) * this->m_cdp.aiStep;
+
+                    auto &xi = src_line_x[xs_x];
+                    auto &yi = src_line_y[xs_y];
+                    auto &zi = src_line_z[xs_z];
+                    auto &ai = src_line_a[xs_a];
+
+                    int xd_x = (i >> this->m_cdp.xiWidthDiv) * this->m_cdp.xiStep;
+                    int xd_y = (i >> this->m_cdp.yiWidthDiv) * this->m_cdp.yiStep;
+                    int xd_z = (i >> this->m_cdp.ziWidthDiv) * this->m_cdp.ziStep;
+                    int xd_a = (i >> this->m_cdp.aiWidthDiv) * this->m_cdp.aiStep;
+
+                    auto &xo = dst_line_x[xd_x];
+                    auto &yo = dst_line_y[xd_y];
+                    auto &zo = dst_line_z[xd_z];
+                    auto &ao = dst_line_a[xd_a];
+
+                    auto alphaMask = (size_t(ai) << this->m_cdp.depthAi) | size_t(ao);
+                    xo = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    yo = (qint64(yi) * this->m_cdp.aiMultTable[alphaMask] + qint64(yo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    zo = (qint64(zi) * this->m_cdp.aiMultTable[alphaMask] + qint64(zo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    ao = qint8(this->m_cdp.alphaTable[alphaMask]);
                 }
             }
         }
@@ -576,6 +872,7 @@ class AkVideoMixerPrivate
                       const AkVideoPacket &src,
                       AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
             for (int y = dp.oY; y < dp.oHeight; ++y) {
                 auto ys = (y * dp.iDiffY + dp.oMultY) / dp.oDiffY;
 
@@ -589,6 +886,7 @@ class AkVideoMixerPrivate
                 auto dst_line_z = dst.line(this->m_cdp.planeZi, y) + this->m_cdp.ziOffset;
                 auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
 
+                #pragma omp simd if(dp.paralelize)
                 for (int x = dp.oX; x < dp.oWidth; ++x) {
                     auto xs = (x * dp.iDiffX + dp.oMultX) / dp.oDiffX;
 
@@ -602,10 +900,17 @@ class AkVideoMixerPrivate
                     auto zi = *reinterpret_cast<const DataType *>(src_line_z + xs_z);
                     auto ai = *reinterpret_cast<const DataType *>(src_line_a + xs_a);
 
-                    xi = (this->swapBytes(DataType(xi), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    yi = (this->swapBytes(DataType(yi), this->m_cdp.endianness) >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
-                    zi = (this->swapBytes(DataType(zi), this->m_cdp.endianness) >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
-                    ai = (this->swapBytes(DataType(ai), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(DataType(xi));
+                        yi = AkAlgorithm::swapBytes(DataType(yi));
+                        zi = AkAlgorithm::swapBytes(DataType(zi));
+                        ai = AkAlgorithm::swapBytes(DataType(ai));
+                    }
+
+                    xi = (xi >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    yi = (yi >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
+                    zi = (zi >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
+                    ai = (ai >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     int xd_x = (x >> this->m_cdp.xiWidthDiv) * this->m_cdp.xiStep;
                     int xd_y = (x >> this->m_cdp.yiWidthDiv) * this->m_cdp.yiStep;
@@ -617,10 +922,27 @@ class AkVideoMixerPrivate
                     auto zop = reinterpret_cast<DataType *>(dst_line_z + xd_z);
                     auto aop = reinterpret_cast<DataType *>(dst_line_a + xd_a);
 
-                    auto xo = (this->swapBytes(DataType(*xop), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    auto yo = (this->swapBytes(DataType(*yop), this->m_cdp.endianness) >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
-                    auto zo = (this->swapBytes(DataType(*zop), this->m_cdp.endianness) >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
-                    auto ao = (this->swapBytes(DataType(*aop), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    DataType xo = 0;
+                    DataType yo = 0;
+                    DataType zo = 0;
+                    DataType ao = 0;
+
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xo = AkAlgorithm::swapBytes(DataType(*xop));
+                        yo = AkAlgorithm::swapBytes(DataType(*yop));
+                        zo = AkAlgorithm::swapBytes(DataType(*zop));
+                        ao = AkAlgorithm::swapBytes(DataType(*aop));
+                    } else {
+                        xo = *xop;
+                        yo = *yop;
+                        zo = *zop;
+                        ao = *aop;
+                    }
+
+                    xo = (xo >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    yo = (yo >> this->m_cdp.yiShift) & this->m_cdp.maxYi;
+                    zo = (zo >> this->m_cdp.ziShift) & this->m_cdp.maxZi;
+                    ao = (ao >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     auto diffAi = qint64(this->m_cdp.maxAi) - qint64(ai);
                     auto a = qint64(this->m_cdp.maxAi2) - (qint64(this->m_cdp.maxAi) - qint64(ao)) * diffAi;
@@ -643,16 +965,6 @@ class AkVideoMixerPrivate
                     *yop = (*yop & DataType(this->m_cdp.maskYo)) | (DataType(yt) << this->m_cdp.yiShift);
                     *zop = (*zop & DataType(this->m_cdp.maskZo)) | (DataType(zt) << this->m_cdp.ziShift);
                     *aop = (*aop & DataType(this->m_cdp.maskAo)) | (DataType(at) << this->m_cdp.aiShift);
-
-                    auto xot = this->swapBytes(DataType(*xop), this->m_cdp.endianness);
-                    auto yot = this->swapBytes(DataType(*yop), this->m_cdp.endianness);
-                    auto zot = this->swapBytes(DataType(*zop), this->m_cdp.endianness);
-                    auto aot = this->swapBytes(DataType(*aop), this->m_cdp.endianness);
-
-                    *xop = xot;
-                    *yop = yot;
-                    *zop = zot;
-                    *aop = aot;
                 }
             }
         }
@@ -662,6 +974,7 @@ class AkVideoMixerPrivate
                            const AkVideoPacket &src,
                            AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
             for (int y = dp.oY; y < dp.oHeight; ++y) {
                 auto ys = (y * dp.iDiffY + dp.oMultY) / dp.oDiffY;
 
@@ -671,6 +984,7 @@ class AkVideoMixerPrivate
                 auto dst_line_x = dst.line(this->m_cdp.planeXi, y) + this->m_cdp.xiOffset;
                 auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
 
+                #pragma omp simd if(dp.paralelize)
                 for (int x = dp.oX; x < dp.oWidth; ++x) {
                     auto xs = (x * dp.iDiffX + dp.oMultX) / dp.oDiffX;
 
@@ -680,8 +994,13 @@ class AkVideoMixerPrivate
                     auto xi = *reinterpret_cast<const DataType *>(src_line_x + xs_x);
                     auto ai = *reinterpret_cast<const DataType *>(src_line_a + xs_a);
 
-                    xi = (this->swapBytes(DataType(xi), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    ai = (this->swapBytes(DataType(ai), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(DataType(xi));
+                        ai = AkAlgorithm::swapBytes(DataType(ai));
+                    }
+
+                    xi = (xi >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    ai = (ai >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     int xd_x = (x >> this->m_cdp.xiWidthDiv) * this->m_cdp.xiStep;
                     int xd_a = (x >> this->m_cdp.aiWidthDiv) * this->m_cdp.aiStep;
@@ -689,21 +1008,81 @@ class AkVideoMixerPrivate
                     auto xop = reinterpret_cast<DataType *>(dst_line_x + xd_x);
                     auto aop = reinterpret_cast<DataType *>(dst_line_a + xd_a);
 
-                    auto xo = (this->swapBytes(DataType(*xop), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    auto ao = (this->swapBytes(DataType(*aop), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    DataType xo = 0;
+                    DataType ao = 0;
 
-                    auto alphaMask = (size_t(ai) << this->m_cdp.lengthAi) | size_t(ao);
-                    qint64 xt = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.alphaShift;
-                    qint64 &at = this->m_cdp.alphaDivTable[alphaMask];
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xo = AkAlgorithm::swapBytes(DataType(*xop));
+                        ao = AkAlgorithm::swapBytes(DataType(*aop));
+                    } else {
+                        xo = *xop;
+                        ao = *aop;
+                    }
+
+                    xo = (xo >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    ao = (ao >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+
+                    auto alphaMask = (size_t(ai) << this->m_cdp.depthAi) | size_t(ao);
+                    qint64 xt = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    qint64 &at = this->m_cdp.alphaTable[alphaMask];
 
                     *xop = (*xop & DataType(this->m_cdp.maskXo)) | (DataType(xt) << this->m_cdp.xiShift);
                     *aop = (*aop & DataType(this->m_cdp.maskAo)) | (DataType(at) << this->m_cdp.aiShift);
+                }
+            }
+        }
 
-                    auto xot = this->swapBytes(DataType(*xop), this->m_cdp.endianness);
-                    auto aot = this->swapBytes(DataType(*aop), this->m_cdp.endianness);
+        void drawFastLc8bits1A(const DrawParameters &dp,
+                               const AkVideoPacket &src,
+                               AkVideoPacket &dst) const
+        {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
+            for (int y = dp.oY; y < dp.oHeight; ++y) {
+                auto ys = (y * dp.iDiffY + dp.oMultY) / dp.oDiffY;
 
-                    *xop = xot;
-                    *aop = aot;
+                auto src_line_x = src.constLine(this->m_cdp.planeXi, ys) + this->m_cdp.xiOffset;
+                auto src_line_a = src.constLine(this->m_cdp.planeAi, ys) + this->m_cdp.aiOffset;
+
+                auto dst_line_x = dst.line(this->m_cdp.planeXi, y) + this->m_cdp.xiOffset;
+                auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
+
+                int x = dp.oX;
+
+                if (this->m_cdp.drawSIMDFastLc8bits1A)
+                    this->m_cdp.drawSIMDFastLc8bits1A(this->m_cdp.simdDrawParameters,
+                                                      dp.oWidth,
+                                                      dp.iDiffX,
+                                                      dp.oDiffX,
+                                                      dp.oMultX,
+                                                      this->m_cdp.xiWidthDiv,
+                                                      this->m_cdp.aiWidthDiv,
+                                                      this->m_cdp.xiStep,
+                                                      this->m_cdp.aiStep,
+                                                      src_line_x,
+                                                      src_line_a,
+                                                      dst_line_x,
+                                                      dst_line_a,
+                                                      &x);
+
+                #pragma omp simd if(dp.paralelize)
+                for (int i = x; i < dp.oWidth; ++i) {
+                    auto xs = (i * dp.iDiffX + dp.oMultX) / dp.oDiffX;
+
+                    int xs_x = (xs >> this->m_cdp.xiWidthDiv) * this->m_cdp.xiStep;
+                    int xs_a = (xs >> this->m_cdp.aiWidthDiv) * this->m_cdp.aiStep;
+
+                    auto &xi = src_line_x[xs_x];
+                    auto &ai = src_line_a[xs_a];
+
+                    int xd_x = (i >> this->m_cdp.xiWidthDiv) * this->m_cdp.xiStep;
+                    int xd_a = (i >> this->m_cdp.aiWidthDiv) * this->m_cdp.aiStep;
+
+                    auto &xo = dst_line_x[xd_x];
+                    auto &ao = dst_line_a[xd_a];
+
+                    auto alphaMask = (size_t(ai) << this->m_cdp.depthAi) | size_t(xo);
+                    xo = (qint64(xi) * this->m_cdp.aiMultTable[alphaMask] + qint64(xo) * this->m_cdp.aoMultTable[alphaMask]) >> this->m_cdp.depthAi;
+                    ao = qint8(this->m_cdp.alphaTable[alphaMask]);
                 }
             }
         }
@@ -713,6 +1092,7 @@ class AkVideoMixerPrivate
                       const AkVideoPacket &src,
                       AkVideoPacket &dst) const
         {
+            #pragma omp parallel for schedule(static) if(dp.paralelize)
             for (int y = dp.oY; y < dp.oHeight; ++y) {
                 auto ys = (y * dp.iDiffY + dp.oMultY) / dp.oDiffY;
 
@@ -722,6 +1102,7 @@ class AkVideoMixerPrivate
                 auto dst_line_x = dst.line(this->m_cdp.planeXi, y) + this->m_cdp.xiOffset;
                 auto dst_line_a = dst.line(this->m_cdp.planeAi, y) + this->m_cdp.aiOffset;
 
+                #pragma omp simd if(dp.paralelize)
                 for (int x = dp.oX; x < dp.oWidth; ++x) {
                     auto xs = (x * dp.iDiffX + dp.oMultX) / dp.oDiffX;
 
@@ -731,8 +1112,13 @@ class AkVideoMixerPrivate
                     auto xi = *reinterpret_cast<const DataType *>(src_line_x + xs_x);
                     auto ai = *reinterpret_cast<const DataType *>(src_line_a + xs_a);
 
-                    xi = (this->swapBytes(DataType(xi), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    ai = (this->swapBytes(DataType(ai), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xi = AkAlgorithm::swapBytes(DataType(xi));
+                        ai = AkAlgorithm::swapBytes(DataType(ai));
+                    }
+
+                    xi = (xi >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    ai = (ai >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     int xd_x = (x >> this->m_cdp.xiWidthDiv) * this->m_cdp.xiStep;
                     int xd_a = (x >> this->m_cdp.aiWidthDiv) * this->m_cdp.aiStep;
@@ -740,8 +1126,19 @@ class AkVideoMixerPrivate
                     auto xop = reinterpret_cast<DataType *>(dst_line_x + xd_x);
                     auto aop = reinterpret_cast<DataType *>(dst_line_a + xd_a);
 
-                    auto xo = (this->swapBytes(DataType(*xop), this->m_cdp.endianness) >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
-                    auto ao = (this->swapBytes(DataType(*aop), this->m_cdp.endianness) >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
+                    DataType xo = 0;
+                    DataType ao = 0;
+
+                    if (this->m_cdp.endianness != Q_BYTE_ORDER) {
+                        xo = AkAlgorithm::swapBytes(DataType(*xop));
+                        ao = AkAlgorithm::swapBytes(DataType(*aop));
+                    } else {
+                        xo = *xop;
+                        ao = *aop;
+                    }
+
+                    xo = (xo >> this->m_cdp.xiShift) & this->m_cdp.maxXi;
+                    ao = (ao >> this->m_cdp.aiShift) & this->m_cdp.maxAi;
 
                     auto diffAi = qint64(this->m_cdp.maxAi) - qint64(ai);
                     auto a = qint64(this->m_cdp.maxAi2) - (qint64(this->m_cdp.maxAi) - qint64(ao)) * diffAi;
@@ -758,12 +1155,6 @@ class AkVideoMixerPrivate
 
                     *xop = (*xop & DataType(this->m_cdp.maskXo)) | (DataType(xt) << this->m_cdp.xiShift);
                     *aop = (*aop & DataType(this->m_cdp.maskAo)) | (DataType(at) << this->m_cdp.aiShift);
-
-                    auto xot = this->swapBytes(DataType(*xop), this->m_cdp.endianness);
-                    auto aot = this->swapBytes(DataType(*aop), this->m_cdp.endianness);
-
-                    *xop = xot;
-                    *aop = aot;
                 }
             }
         }
@@ -775,7 +1166,7 @@ class AkVideoMixerPrivate
             auto diffX = dp.oWidth - dp.oX;
             auto diffY = dp.oHeight - dp.oY;
 
-            for (int plane = 0; plane < src.planes(); plane++) {
+            for (int plane = 0; plane < src.planes(); ++plane) {
                 auto bytesUsed = src.bytesUsed(plane);
                 auto srcOffset = dp.iX * bytesUsed / src.caps().width();
                 auto dstOffset = dp.oX * bytesUsed / src.caps().width();
@@ -786,7 +1177,7 @@ class AkVideoMixerPrivate
                 auto dstLine = dst.line(plane, dp.oY) + dstOffset;
                 auto maxY = diffY >> src.heightDiv(plane);
 
-                for (int y = 0; y < maxY; y++) {
+                for (int y = 0; y < maxY; ++y) {
                     memcpy(dstLine, srcLine, copyBytes);
                     srcLine += srcLineOffset;
                     dstLine += dstLineOffset;
@@ -827,6 +1218,8 @@ class AkVideoMixerPrivate
                 break;
             case DrawType_1_component:
                 this->drawFrame1<DataType>(dp, src, dst);
+                break;
+            default:
                 break;
             }
         }
@@ -963,9 +1356,13 @@ void AkVideoMixer::registerTypes()
     });
 }
 
-#define DEFINE_DRAW_FUNC(size) \
-    case DrawDataTypes_##size: \
-        this->draw<quint##size>(dp, packet, *this->m_baseFrame); \
+#define DEFINE_DRAW_FUNC(bitsSize) \
+    case DrawDataTypes_##bitsSize: \
+        this->draw<quint##bitsSize>(dp, packet, *this->m_baseFrame); \
+        \
+        if (this->m_cdp.endianness != Q_BYTE_ORDER) \
+            AkAlgorithm::swapDataBytes(reinterpret_cast<quint##bitsSize *>(this->m_baseFrame->data()), this->m_baseFrame->size()); \
+        \
         break;
 
 void AkVideoMixerPrivate::draw(int x, int y, const AkVideoPacket &packet)
@@ -1026,6 +1423,18 @@ void AkVideoMixerPrivate::draw(int x, int y, const AkVideoPacket &packet)
     if (dp.canDraw) {
         if (this->m_cdp.fastDraw) {
             this->drawBlit(dp, packet, *this->m_baseFrame);
+        } else if (this->m_cdp.fastFormat && this->m_cdp.depthAi == 8) {
+            if (this->m_cdp.lightweightCache) {
+                if (this->m_cdp.drawType == DrawType_3_components)
+                    this->drawFastLc8bits3A(dp, packet, *this->m_baseFrame);
+                else
+                    this->drawFastLc8bits1A(dp, packet, *this->m_baseFrame);
+            } else {
+                if (this->m_cdp.drawType == DrawType_3_components)
+                    this->drawFast8bits3A(dp, packet, *this->m_baseFrame);
+                else
+                    this->drawFast8bits1A(dp, packet, *this->m_baseFrame);
+            }
         } else {
             switch (this->m_cdp.drawDataTypes) {
             DEFINE_DRAW_FUNC(8)
@@ -1051,6 +1460,7 @@ CommonDrawParameters::CommonDrawParameters(const CommonDrawParameters &other):
     drawDataTypes(other.drawDataTypes),
     fastDraw(other.fastDraw),
     optimizedFor8bits(other.optimizedFor8bits),
+    fastFormat(other.fastFormat),
     endianness(other.endianness),
     planeXi(other.planeXi),
     planeYi(other.planeYi),
@@ -1085,31 +1495,37 @@ CommonDrawParameters::CommonDrawParameters(const CommonDrawParameters &other):
     maskYo(other.maskYo),
     maskZo(other.maskZo),
     maskAo(other.maskAo),
-    lengthAi(other.lengthAi),
-    alphaShift(other.alphaShift)
+    depthAi(other.depthAi),
+    drawSIMDFast8bits1A(other.drawSIMDFast8bits1A),
+    drawSIMDFast8bits3A(other.drawSIMDFast8bits3A),
+    drawSIMDFastLc8bits1A(other.drawSIMDFastLc8bits1A),
+    drawSIMDFastLc8bits3A(other.drawSIMDFastLc8bits3A)
 {
-    auto alphaMult = 1 << (2 * this->lengthAi);
+    auto alphaMult = 1 << (2 * this->depthAi);
     size_t alphaMultSize = sizeof(qint64) * alphaMult;
 
     if (other.aiMultTable) {
-        this->aiMultTable = new qint64 [alphaMult];
+        this->aiMultTable = AkSimd::amallocT<qint64>(alphaMult);
         memcpy(this->aiMultTable, other.aiMultTable, alphaMultSize);
     }
 
     if (other.aoMultTable) {
-        this->aoMultTable = new qint64 [alphaMult];
+        this->aoMultTable = AkSimd::amallocT<qint64>(alphaMult);
         memcpy(this->aoMultTable, other.aoMultTable, alphaMultSize);
     }
 
-    if (other.alphaDivTable) {
-        this->alphaDivTable = new qint64 [alphaMult];
-        memcpy(this->alphaDivTable, other.alphaDivTable, alphaMultSize);
+    if (other.alphaTable) {
+        this->alphaTable = AkSimd::amallocT<qint64>(alphaMult);
+        memcpy(this->alphaTable, other.alphaTable, alphaMultSize);
     }
 }
 
 CommonDrawParameters::~CommonDrawParameters()
 {
     this->clearBuffers();
+
+    if (this->freeSIMDDrawParameters && this->simdDrawParameters)
+        this->freeSIMDDrawParameters(this->simdDrawParameters);
 }
 
 CommonDrawParameters &CommonDrawParameters::operator =(const CommonDrawParameters &other)
@@ -1121,6 +1537,7 @@ CommonDrawParameters &CommonDrawParameters::operator =(const CommonDrawParameter
         this->drawDataTypes = other.drawDataTypes;
         this->fastDraw = other.fastDraw;
         this->optimizedFor8bits = other.optimizedFor8bits;
+        this->fastFormat = other.fastFormat;
         this->endianness = other.endianness;
         this->planeXi = other.planeXi;
         this->planeYi = other.planeYi;
@@ -1155,63 +1572,66 @@ CommonDrawParameters &CommonDrawParameters::operator =(const CommonDrawParameter
         this->maskYo = other.maskYo;
         this->maskZo = other.maskZo;
         this->maskAo = other.maskAo;
-        this->lengthAi = other.lengthAi;
-        this->alphaShift = other.alphaShift;
+        this->depthAi = other.depthAi;
+        this->drawSIMDFast8bits1A = other.drawSIMDFast8bits1A;
+        this->drawSIMDFast8bits3A = other.drawSIMDFast8bits3A;
+        this->drawSIMDFastLc8bits1A = other.drawSIMDFastLc8bits1A;
+        this->drawSIMDFastLc8bits3A = other.drawSIMDFastLc8bits3A;
 
         this->clearBuffers();
 
-        auto alphaMult = 1 << (2 * this->lengthAi);
+        auto alphaMult = 1 << (2 * this->depthAi);
         size_t alphaMultSize = sizeof(qint64) * alphaMult;
 
         if (other.aiMultTable) {
-            this->aiMultTable = new qint64 [alphaMult];
+            this->aiMultTable = AkSimd::amallocT<qint64>(alphaMult);
             memcpy(this->aiMultTable, other.aiMultTable, alphaMultSize);
         }
 
         if (other.aoMultTable) {
-            this->aoMultTable = new qint64 [alphaMult];
+            this->aoMultTable = AkSimd::amallocT<qint64>(alphaMult);
             memcpy(this->aoMultTable, other.aoMultTable, alphaMultSize);
         }
 
-        if (other.alphaDivTable) {
-            this->alphaDivTable = new qint64 [alphaMult];
-            memcpy(this->alphaDivTable, other.alphaDivTable, alphaMultSize);
+        if (other.alphaTable) {
+            this->alphaTable = AkSimd::amallocT<qint64>(alphaMult);
+            memcpy(this->alphaTable, other.alphaTable, alphaMultSize);
         }
     }
 
     return *this;
 }
 
-void CommonDrawParameters::allocateBuffers(size_t alphaLength)
+void CommonDrawParameters::allocateBuffers(size_t alphaDepth)
 {
     this->clearBuffers();
 
-    auto alphaMult = 1 << (2 * alphaLength);
-    this->aiMultTable = new qint64 [alphaMult];
-    this->aoMultTable = new qint64 [alphaMult];
-    this->alphaDivTable = new qint64 [alphaMult];
+    auto alphaMult = 1 << (2 * alphaDepth);
+    this->aiMultTable = AkSimd::amallocT<qint64>(alphaMult);
+    this->aoMultTable = AkSimd::amallocT<qint64>(alphaMult);
+    this->alphaTable = AkSimd::amallocT<qint64>(alphaMult);
 }
 
 void CommonDrawParameters::clearBuffers()
 {
     if (this->aiMultTable) {
-        delete [] this->aiMultTable;
+        AkSimd::afree(this->aiMultTable);
         this->aiMultTable = nullptr;
     }
 
     if (this->aoMultTable) {
-        delete [] this->aoMultTable;
+        AkSimd::afree(this->aoMultTable);
         this->aoMultTable = nullptr;
     }
 
-    if (this->alphaDivTable) {
-        delete [] this->alphaDivTable;
-        this->alphaDivTable = nullptr;
+    if (this->alphaTable) {
+        AkSimd::afree(this->alphaTable);
+        this->alphaTable = nullptr;
     }
 }
 
 #define DEFINE_DRAW_TYPES(size) \
-    if (ispecs.byteLength() == (size / 8)) \
+    if (ispecs.depth() == size) \
         this->drawDataTypes = DrawDataTypes_##size;
 
 void CommonDrawParameters::configure(const AkVideoCaps &caps)
@@ -1298,28 +1718,71 @@ void CommonDrawParameters::configure(const AkVideoCaps &caps)
     this->maskZo = ~(this->compZi.max<quint64>() << this->compZi.shift());
     this->maskAo = ~(this->compAi.max<quint64>() << this->compAi.shift());
 
-    this->lengthAi = this->compAi.length();
-    this->alphaShift = 2 * this->lengthAi;
+    this->depthAi = this->compAi.depth();
     this->fastDraw = (this->flags & AkVideoMixer::MixerFlagForceBlit)
                      || !ispecs.contains(AkColorComponent::CT_A);
     this->lightweightCache =
             this->flags & AkVideoMixer::MixerFlagLightweightCache;
-    this->optimizedFor8bits = this->compAi.length() <= 8;
+    this->optimizedFor8bits =  this->compXi.depth() == 8
+                               && this->compYi.depth() == 8
+                               && this->compZi.depth() == 8
+                               && this->compAi.depth() == 8;
+    this->fastFormat = ispecs.isFast();
 
     if (!this->fastDraw) {
-        this->allocateBuffers(this->lengthAi);
-        auto alphaMult = 1 << (2 * this->lengthAi);
-        auto aBitLen = 1 << this->lengthAi;
+        this->allocateBuffers(this->depthAi);
+        auto aBitLen = 1 << this->depthAi;
 
         for (int ai = 0; ai < aBitLen; ai++)
             for (int ao = 0; ao < aBitLen; ao++) {
-                auto alphaMask = (size_t(ai) << this->lengthAi) | size_t(ao);
-                auto a = this->maxAi2 - (this->maxAi - ai) * (this->maxAi - ao);
-                this->aiMultTable[alphaMask] = a? alphaMult * qint64(ai) * qint64(this->maxAi) / a: 0;
-                this->aoMultTable[alphaMask] = a? alphaMult * qint64(ao) * (qint64(this->maxAi) - qint64(ai)) / a: 0;
-                this->alphaDivTable[alphaMask] = a / this->maxAi;
+                auto alphaMask = (size_t(ai) << this->depthAi) | size_t(ao);
+                auto aiMult = qint64(ai) * qint64(this->maxAi);
+                auto aoMult = qint64(ao) * (qint64(this->maxAi) - qint64(ai));
+                auto a = aiMult + aoMult;
+                this->aiMultTable[alphaMask] = a? aBitLen * aiMult / a: 0;
+                this->aoMultTable[alphaMask] = a? aBitLen * aoMult / a: 0;
+                this->alphaTable[alphaMask] = a / this->maxAi;
             }
     }
+
+    AkSimd simd("Core");
+
+    this->createSIMDDrawParameters = reinterpret_cast<CreateDrawParametersType>(simd.resolve("createDrawParameters"));
+    this->freeSIMDDrawParameters = reinterpret_cast<FreeDrawParametersType>(simd.resolve("freeDrawParameters"));
+    this->drawSIMDFast8bits1A = reinterpret_cast<DrawSIMDFast8bits1AType>(simd.resolve("drawFast8bits1A"));
+    this->drawSIMDFast8bits3A = reinterpret_cast<DrawSIMDFast8bits3AType>(simd.resolve("drawFast8bits3A"));
+    this->drawSIMDFastLc8bits1A = reinterpret_cast<DrawSIMDFastLc8bits1AType>(simd.resolve("drawFastLc8bits1A"));
+    this->drawSIMDFastLc8bits3A = reinterpret_cast<DrawSIMDFastLc8bits3AType>(simd.resolve("drawFastLc8bits3A"));
+
+    if (this->freeSIMDDrawParameters && this->simdDrawParameters)
+        this->freeSIMDDrawParameters(this->simdDrawParameters);
+
+    if (this->createSIMDDrawParameters) {
+        this->simdDrawParameters =
+                this->createSIMDDrawParameters();
+    }
+
+    // Configure the minimum threshold for paralellizing the frame convertion.
+
+    int operationsPerByte = 0;
+
+    if (this->fastDraw) {
+        operationsPerByte = 2;
+    } else if (this->optimizedFor8bits) {
+        if (ispecs.mainComponents() == 3)
+            operationsPerByte = 20;
+        else
+            operationsPerByte = 12;
+    } else {
+        if (ispecs.mainComponents() == 3)
+            operationsPerByte = 28;
+        else
+            operationsPerByte = 16;
+    }
+
+    this->parallelizationThreshold =
+            AkCpuFeatures::paralellizableBytesThreshold(operationsPerByte,
+                                                        simd.loadedInstructionSet());
 }
 
 void CommonDrawParameters::reset()
@@ -1331,6 +1794,8 @@ void CommonDrawParameters::reset()
     this->drawType = DrawType_1_component;
     this->drawDataTypes = DrawDataTypes_8;
     this->fastDraw = false;
+    this->optimizedFor8bits = false;
+    this->fastFormat = false;
 
     this->endianness = Q_BYTE_ORDER;
 
@@ -1377,9 +1842,18 @@ void CommonDrawParameters::reset()
     this->maskZo = 0;
     this->maskAo = 0;
 
-    this->lengthAi = 0;
-    this->alphaShift = 0;
+    this->depthAi = 0;
     this->optimizedFor8bits = false;
+
+    this->simdDrawParameters = nullptr;
+    this->createSIMDDrawParameters = nullptr;
+    this->freeSIMDDrawParameters = nullptr;
+    this->drawSIMDFast8bits1A = nullptr;
+    this->drawSIMDFast8bits3A = nullptr;
+    this->drawSIMDFastLc8bits1A = nullptr;
+    this->drawSIMDFastLc8bits3A = nullptr;
+
+    this->parallelizationThreshold = 0;
 }
 
 DrawParameters::DrawParameters()
@@ -1534,7 +2008,6 @@ DrawParameters &DrawParameters::operator =(const DrawParameters &other)
             this->dstWidthOffsetA = new int [width];
             memcpy(this->dstWidthOffsetA, other.dstWidthOffsetA, widthDataSize);
         }
-
     }
 
     return *this;
@@ -1688,6 +2161,12 @@ void DrawParameters::configure(int x, int y,
             this->srcHeight[y] = ys;
         }
     }
+
+    this->paralelize =
+            AkVideoCaps(ocaps.format(),
+                        this->oWidth - this->oX,
+                        this->oHeight - this->oY,
+                        {}).dataSize() > cdp.parallelizationThreshold;
 }
 
 void DrawParameters::reset()

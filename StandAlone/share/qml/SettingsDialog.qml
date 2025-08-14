@@ -81,6 +81,9 @@ Dialog {
                         text: qsTr("Video Recording")
                     }
                     ItemDelegate {
+                        text: qsTr("Customize Colors")
+                    }
+                    ItemDelegate {
                         text: qsTr("General Options")
                     }
                     ItemDelegate {
@@ -88,6 +91,8 @@ Dialog {
                     }
                     ItemDelegate {
                         text: qsTr("Updates")
+                        height: updates.isEnabled? undefined: 0
+                        visible: updates.isEnabled
                     }
                     ItemDelegate {
                         text: qsTr("Debug Log")
@@ -129,6 +134,7 @@ Dialog {
 
             ImageCapture { }
             VideoRecording { }
+            ColorSchemes { }
             GeneralConfig { }
             PluginConfig { }
             UpdatesConfig { }

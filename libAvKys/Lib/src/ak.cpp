@@ -36,13 +36,16 @@
 #include "akcolorcomponent.h"
 #include "akcolorconvert.h"
 #include "akcolorplane.h"
+#include "akcompressedaudiocaps.h"
+#include "akcompressedaudiopacket.h"
 #include "akcompressedvideocaps.h"
 #include "akcompressedvideopacket.h"
-#include "akelement.h"
 #include "akfrac.h"
+#include "akmenuoption.h"
 #include "akpacket.h"
 #include "akplugininfo.h"
 #include "akpluginmanager.h"
+#include "akpropertyoption.h"
 #include "aksubtitlecaps.h"
 #include "aksubtitlepacket.h"
 #include "akunit.h"
@@ -51,12 +54,13 @@
 #include "akvideoformatspec.h"
 #include "akvideomixer.h"
 #include "akvideopacket.h"
+#include "iak/akelement.h"
 #include "qml/akcolorizedimage.h"
 #include "qml/akfontsettings.h"
-#include "qml/akutils.h"
 #include "qml/akpalette.h"
 #include "qml/akpalettegroup.h"
 #include "qml/aktheme.h"
+#include "qml/akutils.h"
 
 class AkPrivate
 {
@@ -111,16 +115,20 @@ void Ak::registerTypes()
     AkColorConvert::registerTypes();
     AkColorPlane::registerTypes();
     AkColorizedImage::registerTypes();
+    AkCompressedAudioCaps::registerTypes();
+    AkCompressedAudioPacket::registerTypes();
     AkCompressedVideoCaps::registerTypes();
     AkCompressedVideoPacket::registerTypes();
     AkElement::registerTypes();
     AkFontSettings::registerTypes();
     AkFrac::registerTypes();
+    AkMenuOption::registerTypes();
     AkPacket::registerTypes();
     AkPalette::registerTypes();
     AkPaletteGroup::registerTypes();
     AkPluginInfo::registerTypes();
     AkPluginManager::registerTypes();
+    AkPropertyOption::registerTypes();
     AkSubtitleCaps::registerTypes();
     AkSubtitlePacket::registerTypes();
     AkTheme::registerTypes();
@@ -144,7 +152,7 @@ QString Ak::platform()
 {
 #ifdef Q_OS_WIN32
     return {"windows"};
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS) || defined(FAKE_APPLE)
     return {"macos"};
 #elif defined(Q_OS_ANDROID)
     return {"android"};
@@ -193,11 +201,13 @@ void Ak::registerJniLogFunc(const QString &className)
     QJniEnvironment jenv;
 
     if (auto jclass = jenv.findClass(className.toStdString().c_str())) {
-        static const QVector<JNINativeMethod> methods {
+        static const QVector<JNINativeMethod> akMethods {
             {"akLog", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(AkPrivate::jniLog)},
         };
 
-        jenv->RegisterNatives(jclass, methods.data(), methods.size());
+        jenv->RegisterNatives(jclass,
+                              akMethods.data(),
+                              akMethods.size());
     }
 
     jniLogFuncReady = true;

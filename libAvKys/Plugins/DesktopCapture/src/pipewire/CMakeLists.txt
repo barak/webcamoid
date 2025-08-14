@@ -53,11 +53,8 @@ set(SOURCES
     pspec.json)
 
 pkg_check_modules(PIPEWIRE libpipewire-0.3)
-add_definitions(-DBINDIR="${BINDIR}"
-                -DPIPEWIRE_MODULES_PATH="${PIPEWIRE_MODULES_PATH}"
-                -DPIPEWIRE_SPA_PLUGINS_PATH="${PIPEWIRE_SPA_PLUGINS_PATH}")
 
-if (PIPEWIRE_FOUND AND NOT ANDROID AND NOT NOPIPEWIRE AND NOT NOSCREENCAPTURE)
+if (PIPEWIRE_FOUND AND NOT ANDROID AND NOT (APPLE OR FAKE_APPLE) AND NOT WIN32 AND NOT NOPIPEWIRE AND NOT NOSCREENCAPTURE)
     qt_add_plugin(DesktopCapture_pipewire
                   SHARED
                   CLASS_NAME Plugin)
@@ -90,10 +87,16 @@ target_link_directories(DesktopCapture_pipewire
                         ${PIPEWIRE_LIBRARY_DIRS})
 target_link_libraries(DesktopCapture_pipewire
                       ${QT_LIBS}
-                      ${PIPEWIRE_LIBRARIES}
                       avkys)
 
-if (PIPEWIRE_FOUND AND NOT ANDROID AND NOT NOPIPEWIRE AND NOT NOSCREENCAPTURE)
+if (PIPEWIRE_DYNLOAD)
+    add_definitions(-DUSE_PIPEWIRE_DYNLOAD)
+else ()
+    target_link_libraries(AudioDevice_pipewire
+                          ${PIPEWIRE_LIBRARIES})
+endif ()
+
+if (PIPEWIRE_FOUND AND NOT ANDROID AND NOT (APPLE OR FAKE_APPLE) AND NOT WIN32 AND NOT NOPIPEWIRE AND NOT NOSCREENCAPTURE)
     install(TARGETS DesktopCapture_pipewire
             LIBRARY DESTINATION ${AKPLUGINSDIR}
             RUNTIME DESTINATION ${AKPLUGINSDIR})

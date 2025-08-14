@@ -17,20 +17,23 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
+#include <QLibrary>
+
 #include "plugin.h"
 #include "capturepipewire.h"
 
-QObject *Plugin::create(const QString &key, const QString &specification)
+bool Plugin::canLoad()
 {
-    Q_UNUSED(key)
-    Q_UNUSED(specification)
-
-    return new CapturePipeWire();
+#ifdef USE_PIPEWIRE_DYNLOAD
+    return QLibrary("pipewire-0.3").load();
+#else
+    return true;
+#endif
 }
 
-QStringList Plugin::keys() const
+QObject *Plugin::create()
 {
-    return {};
+    return new CapturePipeWire();
 }
 
 #include "moc_plugin.cpp"

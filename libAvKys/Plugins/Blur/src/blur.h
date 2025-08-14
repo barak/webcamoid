@@ -20,7 +20,7 @@
 #ifndef BLUR_H
 #define BLUR_H
 
-#include <akplugin.h>
+#include <iak/akplugin.h>
 
 class Blur: public QObject, public AkPlugin
 {
@@ -29,8 +29,7 @@ class Blur: public QObject, public AkPlugin
     Q_PLUGIN_METADATA(IID AkPlugin_IID FILE "pspec.json")
 
     public:
-        QObject *create(const QString &key, const QString &specification);
-        QStringList keys() const;
+        QObject *create() override;
 };
 
 #endif // BLUR_H

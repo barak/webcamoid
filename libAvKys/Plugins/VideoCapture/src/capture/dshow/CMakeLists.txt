@@ -28,8 +28,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(QT_COMPONENTS
+    Core
     Concurrent
-    Core)
+    Gui)
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
@@ -40,6 +41,8 @@ find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
 set(SOURCES
     ../../capture.cpp
     ../../capture.h
+    ../mediafoundation/src/uvcextendedcontrols.cpp
+    ../mediafoundation/src/uvcextendedcontrols.h
     src/capturedshow.cpp
     src/capturedshow.h
     src/framegrabber.cpp
@@ -78,10 +81,10 @@ list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_
 target_link_libraries(VideoCapture_dshow
                       ${QT_LIBS}
                       avkys
-                      strmiids
-                      uuid
                       ole32
-                      oleaut32)
+                      oleaut32
+                      strmiids
+                      uuid)
 
 if (NOT NODSHOW AND WIN32)
     install(TARGETS VideoCapture_dshow

@@ -19,7 +19,7 @@
 # Web-Site: http://webcamoid.github.io/
 
 import sys
-from PyQt6 import QtWidgets, QtQml
+from PyQt6 import QtCore, QtWidgets, QtQml
 
 
 if __name__ =='__main__':
@@ -29,11 +29,11 @@ if __name__ =='__main__':
 
     def capture():
         for obj in engine.rootObjects():
-            image = obj.grabWindow()
+            image = obj.screen().grabWindow(obj.winId())
             image.save("TestFrame.bmp")
-            obj.close()
+            QtCore.QTimer.singleShot(1000, obj.close)
 
     for obj in engine.rootObjects():
         obj.sceneGraphInitialized.connect(capture)
 
-    app.exec_()
+    app.exec()

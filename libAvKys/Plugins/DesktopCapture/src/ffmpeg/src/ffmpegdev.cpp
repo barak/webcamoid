@@ -26,7 +26,6 @@
 #include <QMutex>
 #include <ak.h>
 #include <akcaps.h>
-#include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
 #include <akpluginmanager.h>
@@ -235,7 +234,7 @@ void FFmpegDev::resetMedia()
 
     if (!screenSize.isEmpty())
         defaultMedia = "screen://desktop";
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS)
     auto devices = this->d->listAVFoundationDevices();
 
     if (!devices.isEmpty())
@@ -279,7 +278,7 @@ bool FFmpegDev::init()
 
 #ifdef Q_OS_WIN32
     auto inputFormat = av_find_input_format("gdigrab");
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS)
     auto inputFormat = av_find_input_format("avfoundation");
 #elif defined(Q_OS_UNIX)
     auto inputFormat = av_find_input_format("x11grab");
@@ -306,7 +305,7 @@ bool FFmpegDev::init()
 
 #ifdef Q_OS_WIN32
     av_dict_set(&inputOptions, "draw_mouse", showCursorStr, 0);
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS)
     av_dict_set(&inputOptions, "capture_cursor", showCursorStr, 0);
 #elif defined(Q_OS_UNIX)
     av_dict_set(&inputOptions, "draw_mouse", showCursorStr, 0);
@@ -599,6 +598,13 @@ AkVideoPacket FFmpegDevPrivate::convert(AVFrame *iFrame)
 
     oPacket.setId(this->m_id);
     oPacket.setPts(iFrame->pts);
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 30, 100)
+    oPacket.setDuration(iFrame->duration);
+#else
+    oPacket.setDuration(iFrame->pkt_duration);
+#endif
+
     oPacket.setTimeBase(this->timeBase());
     oPacket.setIndex(0);
     av_freep(&oFrame.data[0]);
@@ -677,7 +683,7 @@ void FFmpegDevPrivate::updateDevices()
                                             screenSize.height(),
                                             this->m_fps);
     }
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS)
     int i = 0;
 
     for (auto &dev: this->listAVFoundationDevices()) {

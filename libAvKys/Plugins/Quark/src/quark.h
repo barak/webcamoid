@@ -20,7 +20,7 @@
 #ifndef QUARK_H
 #define QUARK_H
 
-#include <akplugin.h>
+#include <iak/akplugin.h>
 
 class Quark: public QObject, public AkPlugin
 {
@@ -29,8 +29,7 @@ class Quark: public QObject, public AkPlugin
     Q_PLUGIN_METADATA(IID AkPlugin_IID FILE "pspec.json")
 
     public:
-        QObject *create(const QString &key, const QString &specification) override;
-        QStringList keys() const override;
+        QObject *create() override;
 };
 
 #endif // QUARK_H

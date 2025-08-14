@@ -144,7 +144,7 @@ QString VirtualCameraElement::media() const
 
 QList<int> VirtualCameraElement::streams() const
 {
-    return QList<int> {0};
+    return {0};
 }
 
 int VirtualCameraElement::maxCameras() const
@@ -526,6 +526,18 @@ bool VirtualCameraElement::canEditVCamDescription() const
 
     if (vcam)
         return vcam->canEditVCamDescription();
+
+    return false;
+}
+
+bool VirtualCameraElement::isPassThrough() const
+{
+    this->d->m_mutex.lock();
+    auto vcam = this->d->m_vcam;
+    this->d->m_mutex.unlock();
+
+    if (vcam)
+        return vcam->isPassThrough();
 
     return false;
 }

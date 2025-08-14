@@ -26,281 +26,147 @@ GridLayout {
     id: recCameraControls
     columns: 3
 
-    function filterBy(caps, prop, filters)
+    property int streamIndex: VideoCapture.streams.length < 1?
+                                0: VideoCapture.streams[0]
+    property var cachedComponent: null
+
+    function createControlsInBatches(controls, where, doneCallback)
     {
-        let vals = []
+        for (const child of where.children)
+            child.destroy()
 
-        for (let i in caps) {
-            let videoCaps = caps[i]
-            let filterCaps = {format: videoCaps.format,
-                              size: Qt.size(videoCaps.width, videoCaps.height),
-                              fps: AkFrac.create(videoCaps.fps).string}
-            let pass = false
+        where.children = []
 
-            for (let filterProp in filters)
-                if (filterCaps[filterProp] != filters[filterProp]) {
-                    pass = true
+        if (!cachedComponent)
+            cachedComponent = Qt.createComponent("CameraControl.qml")
 
-                    break
-                }
+        if (cachedComponent.status !== Component.Ready) {
+            console.warn("Component not ready:", cachedComponent.errorString())
+            doneCallback([0, 0])
 
-            if (pass)
-                continue
-
-            let val = filterCaps[prop]
-
-            if (vals.indexOf(val) < 0)
-                vals.push(val)
-        }
-
-        return vals
-    }
-
-    function filterCaps(caps, filters)
-    {
-        for (let i in caps) {
-            let videoCaps = caps[i]
-            let filterCaps = {format: videoCaps.format,
-                              size: Qt.size(videoCaps.width, videoCaps.height),
-                              fps: AkFrac.create(videoCaps.fps).string}
-            let pass = false
-
-            for (let filterProp in filters)
-                if (filterCaps[filterProp] != filters[filterProp]) {
-                    pass = true
-
-                    break
-                }
-
-            if (pass)
-                continue
-
-            return i
-        }
-
-        return -1
-    }
-
-    function indexOf(capsList, caps)
-    {
-        for (let i in capsList) {
-            let videoCaps = capsList[i]
-            let size = Qt.size(videoCaps.width, videoCaps.height)
-            let fps = AkFrac.create(caps.fps).string
-
-            if (videoCaps.format == caps.format
-                && size == caps.size
-                && videoCaps.fps == caps.fps)
-                return i
-        }
-
-        return -1
-    }
-
-    function indexBy(model, value)
-    {
-        return model.map(function (obj) {
-                            return obj.value
-                         }).indexOf(value)
-    }
-
-    function createModel(list, prop)
-    {
-        let maps = {
-            format: function (value) {
-                return {description: typeof value === 'number'?
-                                         AkVideoCaps.pixelFormatToString(value).toUpperCase():
-                                         value.toUpperCase(),
-                        value: value}
-            },
-            size: function (value) {
-                return {description: value.width + "x" + value.height,
-                        value: value}
-            },
-            fps: function (value) {
-                return {description: Number(AkFrac.create(value).value.toFixed(2)),
-                        value: AkFrac.create(value).string}
-            }
-        }
-
-        return list.map(maps[prop])
-    }
-
-    function updateFormatControls(mediaChanged)
-    {
-        cbxFormat.onCurrentIndexChanged.disconnect(cbxFormat.update)
-        cbxResolution.onCurrentIndexChanged.disconnect(cbxResolution.update)
-        cbxFps.onCurrentIndexChanged.disconnect(cbxFps.update)
-
-        let ncaps = VideoCapture.listTracks().length
-        let rawCaps = []
-
-        for (let i = 0; i < ncaps; i++) {
-            let caps = VideoCapture.rawCaps(i)
-
-            switch (AkCaps.create(caps).type) {
-            case AkCaps.CapsVideo:
-                rawCaps.push(AkVideoCaps.create(caps))
-                break
-            case AkCaps.CapsVideoCompressed:
-                rawCaps.push(AkCompressedVideoCaps.create(caps))
-                break
-            default:
-                break
-            }
-        }
-
-        let index = mediaChanged || VideoCapture.streams.length < 1?
-                    0: VideoCapture.streams[0]
-
-        if (index >= ncaps)
-            index = 0;
-
-        let caps = VideoCapture.rawCaps(index)
-        let currentCaps = AkCaps.create(caps).type == AkCaps.CapsVideo?
-                            AkVideoCaps.create(caps):
-                            AkCompressedVideoCaps.create(caps)
-
-        let filters = {}
-        cbxFormat.model = createModel(filterBy(rawCaps, "format", filters),
-                                      "format")
-        filters.format = currentCaps.format
-        cbxResolution.model = createModel(filterBy(rawCaps, "size", filters),
-                                          "size")
-        filters.size = Qt.size(currentCaps.width, currentCaps.height)
-        cbxFps.model = createModel(filterBy(rawCaps, "fps", filters), "fps")
-
-        cbxFormat.currentIndex = indexBy(cbxFormat.model, currentCaps.format)
-        cbxResolution.currentIndex = indexBy(cbxResolution.model,
-                                             Qt.size(currentCaps.width,
-                                                     currentCaps.height))
-        cbxFps.currentIndex = indexBy(cbxFps.model, currentCaps.fps)
-
-        cbxFormat.currentIndex = indexBy(cbxFormat.model, currentCaps.format)
-        cbxResolution.currentIndex = indexBy(cbxResolution.model,
-                                             Qt.size(currentCaps.width,
-                                                     currentCaps.height))
-        cbxFps.currentIndex = indexBy(cbxFps.model,
-                                      AkFrac.create(currentCaps.fps).string)
-
-        cbxFormat.onCurrentIndexChanged.connect(cbxFormat.update)
-        cbxResolution.onCurrentIndexChanged.connect(cbxResolution.update)
-        cbxFps.onCurrentIndexChanged.connect(cbxFps.update)
-    }
-
-    function updateStreams(filters)
-    {
-        let ncaps = VideoCapture.listTracks().length
-        let rawCaps = []
-
-        for (let i = 0; i < ncaps; i++) {
-            let caps = VideoCapture.rawCaps(i)
-
-            switch (AkCaps.create(caps).type) {
-            case AkCaps.CapsVideo:
-                rawCaps.push(AkVideoCaps.create(caps))
-                break
-            case AkCaps.CapsVideoCompressed:
-                rawCaps.push(AkCompressedVideoCaps.create(caps))
-                break
-            default:
-                break
-            }
-        }
-
-        let maps = {
-            format: cbxFormat.model[cbxFormat.currentIndex]?
-                    cbxFormat.model[cbxFormat.currentIndex].value:
-                    cbxFormat.model[0].value,
-            size: cbxResolution.model[cbxResolution.currentIndex]?
-                    cbxResolution.model[cbxResolution.currentIndex].value:
-                    cbxResolution.model[0].value,
-            fps: cbxFps.model[cbxFps.currentIndex]?
-                    cbxFps.model[cbxFps.currentIndex].value:
-                    cbxFps.model[0].value
-        }
-
-        let capsFilters = {}
-
-        for (let i in filters)
-            capsFilters[filters[i]] = maps[filters[i]]
-
-        let index = filterCaps(rawCaps, capsFilters);
-
-        if (index < 0)
             return
+        }
 
-        VideoCapture.streams = [index]
-        updateFormatControls(false)
-    }
-
-    function createControls(controls, where)
-    {
-        // Remove old controls.
-        for(let i = where.children.length - 1; i >= 0 ; i--)
-            where.children[i].destroy()
-
+        let index = 0
+        const batchSize = 3
+        const leftWidths = []
+        const spinBoxWidths = []
         let minimumLeftWidth = lblFormat.width
         let minimumRightWidth = btnReset.width
 
-        // Create new ones.
-        for (let control in controls) {
-            let component = Qt.createComponent("CameraControl.qml")
+        const supportedTypes = ["integer",
+                                "integer64",
+                                "float",
+                                "boolean",
+                                "menu"]
 
-            if (component.status !== Component.Ready)
-                continue
+        function createBatch() {
+            const limit = Math.min(index + batchSize, controls.length)
 
-            let obj = component.createObject(where)
-            obj.controlParams = controls[control]
+            while (index < limit) {
+                const controlParams = controls[index]
 
-            obj.onControlChanged.connect(function (controlName, value)
-            {
-                let ctrl = {}
-                ctrl[controlName] = value
-                VideoCapture.setImageControls(ctrl)
-                VideoCapture.setCameraControls(ctrl)
-            })
+                if (!controlParams
+                    || controlParams.length < 2
+                    || !controlParams[1]) {
+                    index++
 
-            if (obj.leftWidth > minimumLeftWidth)
-                minimumLeftWidth = obj.leftWidth
+                    continue
+                }
 
-            if (obj.rightWidth > minimumRightWidth)
-                minimumRightWidth = obj.rightWidth
+                const type = controlParams[1]
+
+                if (!supportedTypes.includes(controlParams[1])) {
+                    index++
+
+                    continue
+                }
+
+                const obj = cachedComponent.createObject(where, { controlParams: controlParams })
+
+                if (!obj) {
+                    index++
+
+                    continue
+                }
+
+                obj.onControlChanged.connect(function(controlName, value) {
+                    const ctrl = {}
+                    ctrl[controlName] = value
+                    VideoCapture.setImageControls(ctrl)
+                    VideoCapture.setCameraControls(ctrl)
+                })
+
+                leftWidths.push(obj.leftWidth)
+
+                if (type === "integer"
+                    || type === "integer64"
+                    || type === "float") {
+                    spinBoxWidths.push(obj.spinBoxWidth)
+                }
+
+                index++
+            }
+
+            if (leftWidths.length > 0) {
+                minimumLeftWidth = Math.max(minimumLeftWidth, ...leftWidths)
+                minimumRightWidth = spinBoxWidths.length > 0? Math.max(...spinBoxWidths): btnReset.width
+            }
+
+            if (index < controls.length)
+                Qt.callLater(createBatch)
+            else
+                doneCallback([minimumLeftWidth, minimumRightWidth, spinBoxWidths])
         }
 
-        return [minimumLeftWidth, minimumRightWidth]
+        createBatch()
     }
 
     function createCameraControls()
     {
-        let minimumImageWidth =
-                recCameraControls.createControls(VideoCapture.imageControls(),
-                                                 clyImageControls)
-        let minimumCameraWidth =
-                recCameraControls.createControls(VideoCapture.cameraControls(),
-                                                 clyCameraControls)
+        let completed = 0
+        let minimumImageWidth, minimumCameraWidth
+        let imageSpinBoxWidths = [], cameraSpinBoxWidths = []
 
-        let minimumLeftWidth = Math.max(minimumImageWidth[0],
-                                        minimumCameraWidth[0])
-        let minimumRightWidth = Math.max(minimumImageWidth[1],
-                                         minimumCameraWidth[1])
+        function checkCompletion()
+        {
+            if (++completed < 2)
+                return
 
-        let controls = [clyImageControls, clyCameraControls]
+            const minimumLeftWidth = Math.max(minimumImageWidth[0], minimumCameraWidth[0])
+            const minimumRightWidth = Math.max(minimumImageWidth[1], minimumCameraWidth[1])
+            const allSpinBoxWidths = [...imageSpinBoxWidths, ...cameraSpinBoxWidths]
+            const maxSpinBoxWidth = allSpinBoxWidths.length > 0? Math.max(...allSpinBoxWidths): btnReset.width
+            const controls = [clyImageControls, clyCameraControls]
 
-        for (let where in controls)
-            for (let child in controls[where].children) {
-                let ctrl = controls[where].children[child];
-                ctrl.minimumLeftWidth = minimumLeftWidth
-                ctrl.minimumRightWidth = minimumRightWidth
-            }
+            for (const where of controls)
+                for (const child of where.children) {
+                    child.minimumLeftWidth = minimumLeftWidth
+                    child.minimumRightWidth = minimumRightWidth
+                }
 
-        lblFormat.minimumWidth = minimumLeftWidth
-        btnReset.minimumWidth = minimumRightWidth
+            lblFormat.minimumWidth = minimumLeftWidth
+            btnReset.minimumWidth = maxSpinBoxWidth
+        }
+
+        createControlsInBatches(VideoCapture.imageControls(),
+                                clyImageControls,
+                                function(widths) {
+            minimumImageWidth = widths
+            imageSpinBoxWidths = widths[2]
+            checkCompletion()
+        })
+        createControlsInBatches(VideoCapture.cameraControls(),
+                                clyCameraControls,
+                                function(widths) {
+            minimumCameraWidth = widths
+            cameraSpinBoxWidths = widths[2]
+            checkCompletion()
+        })
     }
 
     Component.onCompleted: {
         createCameraControls()
-        updateFormatControls(false)
     }
 
     Connections {
@@ -309,7 +175,6 @@ GridLayout {
         function onMediaChanged()
         {
             recCameraControls.createCameraControls()
-            recCameraControls.updateFormatControls(true)
         }
     }
 
@@ -322,15 +187,19 @@ GridLayout {
     }
     ComboBox {
         id: cbxFormat
-        model: []
-        textRole: "description"
         Layout.fillWidth: true
         Layout.columnSpan: 2
         Accessible.description: lblFormat.text
+        model: VideoCapture.listFormats(VideoCapture.media)
+        currentIndex: VideoCapture.formatIndex(VideoCapture.media,
+                                               recCameraControls.streamIndex)
 
-        function update()
-        {
-            recCameraControls.updateStreams(["format"])
+        onCurrentIndexChanged: {
+            VideoCapture.streams =
+                [VideoCapture.streamIndex(VideoCapture.media,
+                                          cbxFormat.currentIndex,
+                                          cbxResolution.currentIndex,
+                                          cbxFps.currentIndex)]
         }
     }
     Label {
@@ -342,15 +211,20 @@ GridLayout {
     }
     ComboBox {
         id: cbxResolution
-        model: []
-        textRole: "description"
         Layout.fillWidth: true
         Layout.columnSpan: 2
         Accessible.description: lblResolution.text
+        model: VideoCapture.listResolutions(VideoCapture.media,
+                                            cbxFormat.currentIndex)
+        currentIndex: VideoCapture.resolutionIndex(VideoCapture.media,
+                                                   recCameraControls.streamIndex)
 
-        function update()
-        {
-            recCameraControls.updateStreams(["format", "size"])
+        onCurrentIndexChanged: {
+            VideoCapture.streams =
+                [VideoCapture.streamIndex(VideoCapture.media,
+                                          cbxFormat.currentIndex,
+                                          cbxResolution.currentIndex,
+                                          cbxFps.currentIndex)]
         }
     }
     Label {
@@ -362,15 +236,21 @@ GridLayout {
     }
     ComboBox {
         id: cbxFps
-        model: []
-        textRole: "description"
         Layout.fillWidth: true
         Layout.columnSpan: 2
         Accessible.description: lblFps.text
+        model: VideoCapture.listFps(VideoCapture.media,
+                                    cbxFormat.currentIndex,
+                                    cbxResolution.currentIndex)
+        currentIndex: VideoCapture.fpsIndex(VideoCapture.media,
+                                            recCameraControls.streamIndex)
 
-        function update()
-        {
-            recCameraControls.updateStreams(["format", "size", "fps"])
+        onCurrentIndexChanged: {
+            VideoCapture.streams =
+                [VideoCapture.streamIndex(VideoCapture.media,
+                                          cbxFormat.currentIndex,
+                                          cbxResolution.currentIndex,
+                                          cbxFps.currentIndex)]
         }
     }
     Label {
@@ -389,7 +269,12 @@ GridLayout {
         onClicked: {
             VideoCapture.reset()
             createCameraControls()
-            updateFormatControls(false)
+            cbxFormat.currentIndex =
+                VideoCapture.formatIndex(VideoCapture.media, 0)
+            cbxResolution.currentIndex =
+                VideoCapture.resolutionIndex(VideoCapture.media, 0)
+            cbxFps.currentIndex =
+                VideoCapture.fpsIndex(VideoCapture.media, 0)
         }
     }
 

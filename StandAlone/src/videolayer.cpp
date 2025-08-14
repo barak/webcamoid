@@ -40,10 +40,10 @@
 #include <akaudiocaps.h>
 #include <akcaps.h>
 #include <akpacket.h>
-#include <akplugin.h>
 #include <akvideocaps.h>
 #include <akplugininfo.h>
 #include <akpluginmanager.h>
+#include <iak/akelement.h>
 
 #ifdef Q_OS_WIN32
 #include <windows.h>
@@ -56,7 +56,7 @@
 
 #ifdef Q_OS_WIN32
     #define DEFAULT_VCAM_DRIVER "VideoSink/VirtualCamera/Impl/AkVirtualCameraDShow"
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS)
     #define DEFAULT_VCAM_DRIVER "VideoSink/VirtualCamera/Impl/AkVirtualCameraCMIO"
 #elif defined(Q_OS_LINUX)
     #define DEFAULT_VCAM_DRIVER "VideoSink/VirtualCamera/Impl/AkVCam"
@@ -92,7 +92,8 @@ class VideoLayerPrivate
         QString m_latestVersion;
         bool m_playOnStart {true};
         bool m_outputsAsInputs {false};
-        bool m_currentVCamInstalled;
+        bool m_currentVCamInstalled {false};
+        bool m_isPassThroughVCam {false};
 
         explicit VideoLayerPrivate(VideoLayer *self);
         static bool canAccessStorage();
@@ -110,8 +111,11 @@ class VideoLayerPrivate
         void setInputAudioCaps(const AkAudioCaps &audioCaps);
         void setInputVideoCaps(const AkVideoCaps &videoCaps);
         void loadProperties();
+        void loadVideoOutputControls();
+        static QString sanitizeKey(const QString &key);
         void saveVideoInput(const QString &videoInput);
         void saveVideoOutput(const QString &videoOutput);
+        void saveVideoOutputControls();
         void saveStreams(const QMap<QString, QString> &streams);
         void savePlayOnStart(bool playOnStart);
         void saveOutputsAsInputs(bool outputsAsInputs);
@@ -139,7 +143,8 @@ VideoLayer::VideoLayer(QQmlApplicationEngine *engine, QObject *parent):
             emit this->vcamDriverChanged(this->d->m_vcamDriver);
 
             if (this->d->m_cameraOutput) {
-                auto version = this->d->m_cameraOutput->property("driverVersion").toString();
+                auto version =
+                        this->d->m_cameraOutput->property("driverVersion").toString();
                 emit this->currentVCamVersionChanged(version);
                 auto installed =
                     this->d->m_cameraOutput->property("driverInstalled").toBool();
@@ -147,6 +152,19 @@ VideoLayer::VideoLayer(QQmlApplicationEngine *engine, QObject *parent):
                 if (this->d->m_currentVCamInstalled != installed) {
                     this->d->m_currentVCamInstalled = installed;
                     emit this->currentVCamInstalledChanged(installed);
+                }
+
+                bool isPassThrough =
+                        this->d->m_cameraOutput->property("isPassThrough").toBool();
+
+                if (isPassThrough != this->d->m_isPassThroughVCam) {
+                    this->d->m_isPassThroughVCam = isPassThrough;
+                    emit this->isPassThroughVCamChanged(isPassThrough);
+                }
+            } else {
+                if (this->d->m_isPassThroughVCam) {
+                    this->d->m_isPassThroughVCam = false;
+                    emit this->isPassThroughVCamChanged(false);
                 }
             }
         }
@@ -158,9 +176,10 @@ VideoLayer::VideoLayer(QQmlApplicationEngine *engine, QObject *parent):
 
         if (!this->d->m_currentVCamInstalled) {
             QString pluginId;
-            auto plugins = akPluginManager->listPlugins("VideoSink/VirtualCamera/Impl/*",
-                                                        {"VirtualCameraImpl"},
-                                                        AkPluginManager::FilterEnabled);
+            auto plugins =
+                    akPluginManager->listPlugins("VideoSink/VirtualCamera/Impl/*",
+                                                 {"VirtualCameraImpl"},
+                                                 AkPluginManager::FilterEnabled);
             for (auto &plugin: plugins) {
                 auto pluginInstance = akPluginManager->create<QObject>(plugin);
 
@@ -181,12 +200,16 @@ VideoLayer::VideoLayer(QQmlApplicationEngine *engine, QObject *parent):
 
             akPluginManager->link("VideoSink/VirtualCamera/Impl/*", pluginId);
         }
+
+        this->d->m_isPassThroughVCam =
+                this->d->m_cameraOutput->property("isPassThrough").toBool();
     }
 }
 
 VideoLayer::~VideoLayer()
 {
     this->setState(AkElement::ElementStateNull);
+    this->d->saveVideoOutputControls();
     delete this->d;
 }
 
@@ -199,7 +222,7 @@ QStringList VideoLayer::videoSourceFileFilters() const
      */
 #ifndef Q_OS_ANDROID
     //  Alternative extension names
-    static const QMap<QString, QString> formatsMapping {
+    static const QMap<QString, QString> videoLayerFormatsMapping {
         {"jp2" , "jpg" },
         {"jpeg", "jpg" },
         {"svgz", "svg" },
@@ -219,8 +242,8 @@ QStringList VideoLayer::videoSourceFileFilters() const
     for (auto &format: this->d->m_supportedFileFormats) {
         QString fmt;
 
-        if (formatsMapping.contains(format))
-            fmt = formatsMapping[format];
+        if (videoLayerFormatsMapping.contains(format))
+            fmt = videoLayerFormatsMapping[format];
         else
             fmt = format;
 
@@ -233,7 +256,7 @@ QStringList VideoLayer::videoSourceFileFilters() const
     for (auto &format: formats) {
         QString filter;
         QStringList extensions = QStringList {format}
-                                 + formatsMapping.keys(format);
+                                 + videoLayerFormatsMapping.keys(format);
         QString extensionsFilter = "*." + extensions.join(" *.");
 
         if (this->d->m_formatsDescription.contains(format))
@@ -661,7 +684,8 @@ QStringList VideoLayer::availableRootMethods() const
 bool VideoLayer::isVCamSupported() const
 {
 #if defined(Q_OS_WIN32) \
-    || defined(Q_OS_OSX) \
+    || defined(Q_OS_MACOS) \
+    || defined(FAKE_APPLE) \
     || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID) \
     || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN)))
     return true;
@@ -729,7 +753,7 @@ bool VideoLayer::canEditVCamDescription() const
 
 QString VideoLayer::vcamUpdateUrl() const
 {
-#if defined(Q_OS_WIN32) || defined(Q_OS_OSX)
+#if defined(Q_OS_WIN32) || defined(Q_OS_MACOS) || defined(FAKE_APPLE)
     return {"https://api.github.com/repos/webcamoid/akvirtualcamera/releases/latest"};
 #elif defined(Q_OS_LINUX)
     return {"https://api.github.com/repos/webcamoid/akvcam/releases/latest"};
@@ -740,7 +764,7 @@ QString VideoLayer::vcamUpdateUrl() const
 
 QString VideoLayer::vcamDownloadUrl() const
 {
-#if defined(Q_OS_WIN32) || defined(Q_OS_OSX)
+#if defined(Q_OS_WIN32) || defined(Q_OS_MACOS) || defined(FAKE_APPLE)
     return {"https://github.com/webcamoid/akvirtualcamera/releases/latest"};
 #elif defined(Q_OS_LINUX)
     return {"https://github.com/webcamoid/akvcam/releases/latest"};
@@ -752,6 +776,11 @@ QString VideoLayer::vcamDownloadUrl() const
 QString VideoLayer::defaultVCamDriver() const
 {
     return {DEFAULT_VCAM_DRIVER};
+}
+
+bool VideoLayer::isPassThroughVCam() const
+{
+    return this->d->m_isPassThroughVCam;
 }
 
 bool VideoLayer::applyPicture()
@@ -782,13 +811,13 @@ bool VideoLayer::downloadVCam()
     if (installerUrl.isEmpty())
         return false;
 
-    auto locations =
-        QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
+    auto cacheLocation =
+        QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
 
-    if (locations.isEmpty())
+    if (cacheLocation.isEmpty())
         return false;
 
-    auto outFile = QDir(locations[0]).filePath(QUrl(installerUrl).fileName());
+    auto outFile = QDir(cacheLocation).filePath(QUrl(installerUrl).fileName());
 
     emit this->startVCamDownload(tr("Virtual Camera"),
                                     installerUrl,
@@ -847,7 +876,7 @@ bool VideoLayer::executeVCamInstaller(const QString &installer)
 
             exitCode = int(dExitCode);
         }
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS)
         QProcess proc;
         proc.start("open", QStringList {"-W", installer});
         proc.waitForFinished(-1);
@@ -990,6 +1019,11 @@ void VideoLayer::removeInputStream(const QString &stream)
     auto streams = this->d->m_streams;
     streams.insert(this->d->m_images);
     this->d->saveStreams(streams);
+
+#ifdef Q_OS_ANDROID
+    if (QFile::exists(stream))
+        QFile::remove(stream);
+#endif
 }
 
 void VideoLayer::setVideoInput(const QString &videoInput)
@@ -1012,11 +1046,13 @@ void VideoLayer::setVideoOutput(const QStringList &videoOutput)
 
     if (this->d->m_cameraOutput) {
         this->d->m_cameraOutput->setState(AkElement::ElementStateNull);
+        this->d->saveVideoOutputControls();
 
         if (videoOutput.contains(DUMMY_OUTPUT_DEVICE)) {
             this->d->m_cameraOutput->setProperty("media", QString());
         } else {
             this->d->m_cameraOutput->setProperty("media", output);
+            this->d->loadVideoOutputControls();
 
             if (!output.isEmpty())
                 this->d->m_cameraOutput->setState(this->d->m_state);
@@ -1256,7 +1292,7 @@ void VideoLayer::updateCaps()
                                           Q_RETURN_ARG(AkCaps, videoCaps),
                                           Q_ARG(int, videoStream));
         } else {
-            for (const int &stream: streams) {
+            for (auto &stream: streams) {
                 AkCaps caps;
                 QMetaObject::invokeMethod(source.data(),
                                           "caps",
@@ -1428,9 +1464,15 @@ bool VideoLayerPrivate::canAccessStorage()
         return result;
     }
 
-    QStringList permissions {
-        "android.permission.READ_EXTERNAL_STORAGE"
-    };
+    QStringList permissions;
+
+    if (android_get_device_api_level() >= 33) {
+        permissions << "android.permission.READ_MEDIA_IMAGES";
+        permissions << "android.permission.READ_MEDIA_VIDEO";
+    } else {
+        permissions << "android.permission.READ_EXTERNAL_STORAGE";
+    }
+
     QStringList neededPermissions;
 
     for (auto &permission: permissions) {
@@ -1817,8 +1859,45 @@ void VideoLayerPrivate::loadProperties()
 
     config.endGroup();
 
+    this->loadVideoOutputControls();
     self->updateInputs();
     self->updateCaps();
+}
+
+void VideoLayerPrivate::loadVideoOutputControls()
+{
+    if (!this->m_cameraOutput)
+        return;
+
+    auto output = this->m_cameraOutput->property("media").toString();
+
+    if (output.isEmpty())
+        return;
+
+    QSettings config;
+
+    config.beginGroup("VirtualCamera_" + sanitizeKey(output));
+    auto controlKeys = config.allKeys();
+    QVariantMap controls;
+
+    for (const auto &key: controlKeys)
+        controls[key] = config.value(key);
+
+    config.endGroup();
+
+    if (!controls.isEmpty())
+        QMetaObject::invokeMethod(this->m_cameraOutput.data(),
+                                  "setControls",
+                                  Q_ARG(QVariantMap, controls));
+}
+
+QString VideoLayerPrivate::sanitizeKey(const QString &key)
+{
+    QString sanitized(key);
+
+    return sanitized.replace(" ", "_")
+                    .replace(".", "_")
+                    .replace(",", "_");
 }
 
 void VideoLayerPrivate::saveVideoInput(const QString &videoInput)
@@ -1834,6 +1913,32 @@ void VideoLayerPrivate::saveVideoOutput(const QString &videoOutput)
     QSettings config;
     config.beginGroup("VirtualCamera");
     config.setValue("stream", videoOutput);
+    config.endGroup();
+}
+
+void VideoLayerPrivate::saveVideoOutputControls()
+{
+    if (!this->m_cameraOutput)
+        return;
+
+    auto output = this->m_cameraOutput->property("media").toString();
+
+    if (output.isEmpty())
+        return;
+
+    QSettings config;
+
+    config.beginGroup("VirtualCamera_" + sanitizeKey(output));
+    QVariantList controls;
+    QMetaObject::invokeMethod(this->m_cameraOutput.data(),
+                              "controls",
+                              Q_RETURN_ARG(QVariantList, controls));
+
+    for (const auto &control: controls) {
+        auto controlValues = control.toList();
+        config.setValue(sanitizeKey(controlValues[0].toString()), controlValues[7]);
+    }
+
     config.endGroup();
 }
 
@@ -1880,7 +1985,7 @@ QString VideoLayerPrivate::vcamDownloadUrl() const
 #if defined(Q_OS_WIN32)
     return QString("https://github.com/webcamoid/akvirtualcamera/releases/download/%1/akvirtualcamera-windows-%1.exe")
            .arg(this->m_latestVersion);
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS)
     return QString("https://github.com/webcamoid/akvirtualcamera/releases/download/%1/akvirtualcamera-mac-%1-%2.pkg")
            .arg(this->m_latestVersion)
            .arg(TARGET_ARCH);

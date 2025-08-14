@@ -28,9 +28,12 @@ class AkPacketBasePrivate
 {
     public:
         qint64 m_pts {0};
+        qint64 m_dts {0};
+        quint64 m_duration {0};
         AkFrac m_timeBase;
         qint64 m_id {-1};
         int m_index {-1};
+        QByteArray m_extraData;
 };
 
 AkPacketBase::AkPacketBase(QObject *parent):
@@ -44,9 +47,12 @@ AkPacketBase::AkPacketBase(const AkPacketBase &other):
 {
     this->d = new AkPacketBasePrivate();
     this->d->m_pts = other.d->m_pts;
+    this->d->m_dts = other.d->m_dts;
+    this->d->m_duration = other.d->m_duration;
     this->d->m_timeBase = other.d->m_timeBase;
     this->d->m_id = other.d->m_id;
     this->d->m_index = other.d->m_index;
+    this->d->m_extraData = other.d->m_extraData;
 }
 
 AkPacketBase::~AkPacketBase()
@@ -64,6 +70,16 @@ qint64 AkPacketBase::pts() const
     return this->d->m_pts;
 }
 
+qint64 AkPacketBase::dts() const
+{
+    return this->d->m_dts;
+}
+
+quint64 AkPacketBase::duration() const
+{
+    return this->d->m_duration;
+}
+
 AkFrac AkPacketBase::timeBase() const
 {
     return this->d->m_timeBase;
@@ -74,12 +90,20 @@ int AkPacketBase::index() const
     return this->d->m_index;
 }
 
+QByteArray AkPacketBase::extraData() const
+{
+    return this->d->m_extraData;
+}
+
 void AkPacketBase::copyMetadata(const AkPacketBase &other)
 {
     this->d->m_pts = other.d->m_pts;
+    this->d->m_dts = other.d->m_dts;
+    this->d->m_duration = other.d->m_duration;
     this->d->m_timeBase = other.d->m_timeBase;
     this->d->m_index = other.d->m_index;
     this->d->m_id = other.d->m_id;
+    this->d->m_extraData = other.d->m_extraData;
 }
 
 void AkPacketBase::setId(qint64 id)
@@ -100,6 +124,24 @@ void AkPacketBase::setPts(qint64 pts)
     emit this->ptsChanged(pts);
 }
 
+void AkPacketBase::setDts(qint64 dts)
+{
+    if (this->d->m_dts == dts)
+        return;
+
+    this->d->m_dts = dts;
+    emit this->dtsChanged(dts);
+}
+
+void AkPacketBase::setDuration(quint64 duration)
+{
+    if (this->d->m_duration == duration)
+        return;
+
+    this->d->m_duration = duration;
+    emit this->durationChanged(duration);
+}
+
 void AkPacketBase::setTimeBase(const AkFrac &timeBase)
 {
     if (this->d->m_timeBase == timeBase)
@@ -118,6 +160,15 @@ void AkPacketBase::setIndex(int index)
     emit this->indexChanged(index);
 }
 
+void AkPacketBase::setExtraData(const QByteArray &extraData)
+{
+    if (this->d->m_extraData == extraData)
+        return;
+
+    this->d->m_extraData = extraData;
+    emit this->extraDataChanged(extraData);
+}
+
 void AkPacketBase::resetId()
 {
     this->setId(-1);
@@ -128,6 +179,16 @@ void AkPacketBase::resetPts()
     this->setPts(0);
 }
 
+void AkPacketBase::resetDts()
+{
+    this->setDts(0);
+}
+
+void AkPacketBase::resetDuration()
+{
+    this->setDuration(0);
+}
+
 void AkPacketBase::resetTimeBase()
 {
     this->setTimeBase({});
@@ -136,6 +197,11 @@ void AkPacketBase::resetTimeBase()
 void AkPacketBase::resetIndex()
 {
     this->setIndex(-1);
+}
+
+void AkPacketBase::resetExtraData()
+{
+    this->setExtraData({});
 }
 
 #include "moc_akpacketbase.cpp"

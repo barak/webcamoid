@@ -43,6 +43,7 @@
 #include <wmcodecdsp.h>
 
 #include "capturemmf.h"
+#include "uvcextendedcontrols.h"
 
 #define TIME_BASE 1.0e7
 
@@ -134,33 +135,22 @@ inline RawFmtToAkFmtMap initRawFmtToAkFmt()
 
 Q_GLOBAL_STATIC_WITH_ARGS(RawFmtToAkFmtMap, rawFmtToAkFmt, (initRawFmtToAkFmt()))
 
-using CompressedFormatToStrMap = QMap<GUID, QString>;
+using CompressedFormatToStrMap = QMap<GUID, AkCompressedVideoCaps::VideoCodecID>;
 
 inline CompressedFormatToStrMap initCompressedFormatToStr()
 {
     CompressedFormatToStrMap compressedFormatToStr {
-        {MEDIASUBTYPE_CFCC   , "mjpg"  },
-        {MEDIASUBTYPE_IJPG   , "jpeg"  },
-        {MEDIASUBTYPE_MDVF   , "dv"    },
-        {MEDIASUBTYPE_MJPG   , "mjpg"  },
-        {MEDIASUBTYPE_Plum   , "mjpg"  },
-        {MEDIASUBTYPE_QTJpeg , "jpeg"  },
-        {MEDIASUBTYPE_QTRle  , "qtrle" },
-        {MEDIASUBTYPE_QTRpza , "qtrpza"},
-        {MEDIASUBTYPE_QTSmc  , "qtsmc" },
-        {MEDIASUBTYPE_TVMJ   , "mjpg"  },
-        {MEDIASUBTYPE_WAKE   , "mjpg"  },
-        {MEDIASUBTYPE_dv25   , "dv25"  },
-        {MEDIASUBTYPE_dv50   , "dv50"  },
-        {MEDIASUBTYPE_dvh1   , "dvh1"  },
-        {MEDIASUBTYPE_dvhd   , "dvhd"  },
-        {MEDIASUBTYPE_dvsd   , "dvsd"  },
-        {MEDIASUBTYPE_dvsl   , "dvsl"  },
-        {AK_MEDIASUBTYPE_AVC1, "h264"  },
-        {AK_MEDIASUBTYPE_H264, "h264"  },
-        {AK_MEDIASUBTYPE_h264, "h264"  },
-        {AK_MEDIASUBTYPE_X264, "h264"  },
-        {AK_MEDIASUBTYPE_x264, "h264"  },
+        {MEDIASUBTYPE_CFCC   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_IJPG   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_MJPG   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_Plum   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_TVMJ   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_WAKE   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {AK_MEDIASUBTYPE_AVC1, AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AK_MEDIASUBTYPE_H264, AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AK_MEDIASUBTYPE_h264, AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AK_MEDIASUBTYPE_X264, AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AK_MEDIASUBTYPE_x264, AkCompressedVideoCaps::VideoCodecID_h264 },
     };
 
     return compressedFormatToStr;
@@ -198,7 +188,7 @@ class CaptureMMFPrivate
         QList<int> m_streams;
         QStringList m_devices;
         QMap<QString, QString> m_descriptions;
-        QMap<QString, CaptureVideoCaps> m_devicesCaps;
+        QMap<QString, AkCapsList> m_devicesCaps;
         qint64 m_id {-1};
         bool m_hasMediaFoundation {false};
         DWORD m_streamIndex {DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM)};
@@ -324,7 +314,7 @@ QString CaptureMMF::description(const QString &webcam) const
     return this->d->m_descriptions.value(webcam);
 }
 
-CaptureVideoCaps CaptureMMF::caps(const QString &webcam) const
+AkCapsList CaptureMMF::caps(const QString &webcam) const
 {
     return this->d->m_devicesCaps.value(webcam);
 }
@@ -450,6 +440,7 @@ AkPacket CaptureMMF::readFrame()
         auto controls = this->d->mapDiff(this->d->m_localCameraControls,
                                          cameraControls);
         this->d->setCameraControls(this->d->m_mediaSource.data(), controls);
+        UvcExtendedControls::setControls(this->d->m_mediaSource.data(), controls);
         this->d->m_localCameraControls = cameraControls;
     }
 
@@ -500,19 +491,29 @@ AkPacket CaptureMMF::readFrame()
     DWORD bufferLength = 0;
     buffer->GetMaxLength(&bufferLength);
 
+    AkFrac timeBase(1, TIME_BASE);
+
     // Read pts.
     LONGLONG sampleTime = 0;
     sample->GetSampleTime(&sampleTime);
-    AkFrac timeBase(1, TIME_BASE);
 
     if (sampleTime < 1) {
         AkVideoCaps videoCaps(caps);
         auto timestamp = QDateTime::currentMSecsSinceEpoch();
-        sampleTime =
-            LONGLONG(qreal(timestamp)
-                     * videoCaps.fps().value()
-                     / 1e3);
+        sampleTime = LONGLONG(qreal(timestamp)
+                              * videoCaps.fps().value()
+                              / 1e3);
         timeBase = videoCaps.fps().invert();
+    }
+
+    // Read duration
+    LONGLONG duration = 0;
+    sample->GetSampleDuration(&duration);
+
+    if (duration < 1) {
+        AkVideoCaps videoCaps(caps);
+        duration = LONGLONG(videoCaps.fps().den() * timeBase.den()
+                            / (videoCaps.fps().num() * timeBase.num()));
     }
 
     if (isRaw) {
@@ -558,6 +559,7 @@ AkPacket CaptureMMF::readFrame()
             d2Buffer->Unlock2D();
 
             packet.setPts(sampleTime);
+            packet.setDuration(duration);
             packet.setTimeBase(timeBase);
             packet.setIndex(0);
             packet.setId(this->d->m_id);
@@ -607,6 +609,7 @@ AkPacket CaptureMMF::readFrame()
         buffer->Unlock();
 
         packet.setPts(sampleTime);
+        packet.setDuration(duration);
         packet.setTimeBase(timeBase);
         packet.setIndex(0);
         packet.setId(this->d->m_id);
@@ -629,6 +632,7 @@ AkPacket CaptureMMF::readFrame()
     buffer->Unlock();
 
     packet.setPts(sampleTime);
+    packet.setDuration(duration);
     packet.setTimeBase(timeBase);
     packet.setIndex(0);
     packet.setId(this->d->m_id);
@@ -816,7 +820,8 @@ void CaptureMMF::setDevice(const QString &device)
             this->d->m_globalImageControls =
                     this->d->imageControls(mediaSource.data());
             this->d->m_globalCameraControls =
-                    this->d->cameraControls(mediaSource.data());
+                    this->d->cameraControls(mediaSource.data())
+                    + UvcExtendedControls::controls(mediaSource.data());
         }
 
         this->d->m_controlsMutex.unlock();
@@ -837,7 +842,7 @@ void CaptureMMF::setStreams(const QList<int> &streams)
     if (streams.isEmpty())
         return;
 
-    int stream = streams[0];
+    auto stream = streams[0];
 
     if (stream < 0)
         return;
@@ -1256,9 +1261,10 @@ AkCaps CaptureMMFPrivate::capsFromMediaType(IMFMediaType *mediaType,
                            fps);
     } else if (isCompressed && compressedFormatToStr->contains(subtype)) {
         return AkCompressedVideoCaps(compressedFormatToStr->value(subtype),
-                                     width,
-                                     height,
-                                     fps);
+                                     {AkVideoCaps::Format_yuv420p,
+                                      int(width),
+                                      int(height),
+                                      fps});
     }
 
     return {};
@@ -1546,8 +1552,8 @@ void CaptureMMFPrivate::updateDevices()
             WCHAR *sourceLink = nullptr;
 
             if (FAILED(source->GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                                &sourceLink,
-                                                nullptr))) {
+                                                  &sourceLink,
+                                                  nullptr))) {
                 continue;
             }
 
@@ -1558,23 +1564,45 @@ void CaptureMMFPrivate::updateDevices()
             WCHAR *friendlyName = nullptr;
 
             if (SUCCEEDED(source->GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
-                                                    &friendlyName,
-                                                    nullptr))) {
+                                                     &friendlyName,
+                                                     nullptr))) {
                 description = QString::fromWCharArray(friendlyName);
                 CoTaskMemFree(friendlyName);
             }
 
-            CaptureVideoCaps caps;
+            QVector<AkVideoCaps> rawFormats;
+            QVector<AkCompressedVideoCaps> compressedFormats;
 
             for (auto &stream: this->streams(source))
                 for (auto &mediaType: this->mediaTypes(stream.data())) {
                     auto videoCaps = this->capsFromMediaType(mediaType.data());
 
-                    if (videoCaps)
-                        caps << videoCaps;
+                    if (videoCaps.type() == AkCaps::CapsVideo)
+                        rawFormats << videoCaps;
+                    else if (videoCaps.type() == AkCaps::CapsVideoCompressed)
+                        compressedFormats << videoCaps;
                 }
 
+            std::sort(rawFormats.begin(), rawFormats.begin());
+            std::sort(compressedFormats.begin(), compressedFormats.begin());
+            AkCapsList caps;
+
+            for (auto &format: compressedFormats)
+                caps << format;
+
+            for (auto &format: rawFormats)
+                caps << format;
+
             if (!caps.isEmpty()) {
+                auto index =
+                        Capture::nearestResolution({DEFAULT_FRAME_WIDTH,
+                                                    DEFAULT_FRAME_HEIGHT},
+                                                    DEFAULT_FRAME_FPS,
+                                                    caps);
+
+                if (index > 0)
+                    caps.move(index, 0);
+
                 devices << deviceId;
                 descriptions[deviceId] = description;
                 devicesCaps[deviceId] = caps;

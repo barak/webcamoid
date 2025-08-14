@@ -24,12 +24,16 @@
 
 #include "akcommons.h"
 
+class AkCaps;
 class AkCapsPrivate;
 class AkAudioCaps;
+class AkCompressedAudioCaps;
 class AkCompressedVideoCaps;
 class AkSubtitleCaps;
 class AkVideoCaps;
 class QDataStream;
+
+using AkCapsList = QList<AkCaps>;
 
 class AKCOMMONS_EXPORT AkCaps: public QObject
 {
@@ -67,8 +71,8 @@ class AKCOMMONS_EXPORT AkCaps: public QObject
     private:
         AkCapsPrivate *d;
 
-        using DataCopy = std::function<void *(void *data)>;
-        using DataDeleter = std::function<void (void *data)>;
+        using DataCopy = void *(*)(void *data);
+        using DataDeleter = void (*)(void *data);
         void *privateData() const;
         void setPrivateData(void *data,
                             DataCopy copyFunc,
@@ -83,6 +87,7 @@ class AKCOMMONS_EXPORT AkCaps: public QObject
     friend QDataStream &operator <<(QDataStream &ostream, const AkCaps &caps);
     friend class AkAudioCaps;
     friend class AkCapsPrivate;
+    friend class AkCompressedAudioCaps;
     friend class AkCompressedVideoCaps;
     friend class AkSubtitleCaps;
     friend class AkVideoCaps;
@@ -93,6 +98,7 @@ AKCOMMONS_EXPORT QDataStream &operator >>(QDataStream &istream, AkCaps &caps);
 AKCOMMONS_EXPORT QDataStream &operator <<(QDataStream &ostream, const AkCaps &caps);
 
 Q_DECLARE_METATYPE(AkCaps)
+Q_DECLARE_METATYPE(AkCapsList)
 Q_DECLARE_METATYPE(AkCaps::CapsType)
 
 #endif // AKCAPS_H

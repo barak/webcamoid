@@ -293,9 +293,11 @@ void AudioDeviceElementPrivate::readFramesLoop()
     QString device = this->m_device;
     AkAudioCaps caps(this->m_caps);
     qint64 streamId = Ak::id();
-    AkFrac timeBase(1, caps.rate());
 
     if (audioDevice->init(device, caps)) {
+        QElapsedTimer et;
+        et.start();
+
         while (this->m_readFramesLoop) {
             if (this->m_pause) {
                 QThread::msleep(PAUSE_TIMEOUT);
@@ -306,17 +308,16 @@ void AudioDeviceElementPrivate::readFramesLoop()
             auto buffer = audioDevice->read();
 
             if (buffer.isEmpty())
-                return;
+                continue;
 
             size_t samples = 8 * buffer.size() / (caps.channels() * caps.bps());
             AkAudioPacket packet(caps, samples);
             memcpy(packet.data(),
                    buffer.constData(),
                    qMin<size_t>(packet.size(), buffer.size()));
-            auto pts = qint64(QTime::currentTime().msecsSinceStartOfDay()
-                              / timeBase.value() / 1e3);
-            packet.setPts(pts);
-            packet.setTimeBase(timeBase);
+            packet.setPts(et.elapsed() * caps.rate() / 1000);
+            packet.setDuration(samples);
+            packet.setTimeBase({1, caps.rate()});
             packet.setIndex(0);
             packet.setId(streamId);
 

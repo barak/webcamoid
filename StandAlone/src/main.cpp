@@ -17,18 +17,36 @@
  * Web-Site: http://webcamoid.github.io/
  */
 
-#include <QDebug>
 #include <QApplication>
+#include <QDebug>
 #include <QDirIterator>
 #include <QFontDatabase>
 #include <QMutex>
+#include <QSysInfo>
 #include <QTranslator>
+#include <aksimd.h>
+
+#ifdef OPENMP_ENABLED
+#include <omp.h>
+#endif
+
+#if defined(Q_OS_WIN32) && defined(QT_DEBUG)
+#include <windows.h>
+#endif
 
 #include "clioptions.h"
 #include "mediatools.h"
 
 int main(int argc, char *argv[])
 {
+    // Allow loging messages to the Windows console when compiling in debug
+    // mode.
+#if defined(Q_OS_WIN32) && defined(QT_DEBUG)
+    AllocConsole();
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+#endif
+
     QApplication::setApplicationName(COMMONS_APPNAME);
     QApplication::setApplicationVersion(COMMONS_VERSION);
     QApplication::setOrganizationName(COMMONS_APPNAME);
@@ -78,7 +96,7 @@ int main(int argc, char *argv[])
     while (fontsDirIterator.hasNext())
         QFontDatabase::addApplicationFont(fontsDirIterator.next());
 
-#if defined(Q_OS_WIN32) || defined(Q_OS_OSX)
+#if defined(Q_OS_WIN32) || defined(Q_OS_MACOS)
     // NOTE: OpenGL detection in Qt is quite buggy, so use software render by default.
     auto quickBackend = qgetenv("QT_QUICK_BACKEND");
 
@@ -94,6 +112,12 @@ int main(int argc, char *argv[])
         qputenv("QT_LOGGING_RULES", "*.debug=true");
     #endif
 #elif defined(Q_OS_UNIX)
+    // NOTE: OpenGL detection in Qt is quite buggy, so use software render by default.
+    auto quickBackend = qgetenv("QT_QUICK_BACKEND");
+
+    if (quickBackend.isEmpty())
+        qputenv("QT_QUICK_BACKEND", "software");
+
     // NOTE: Text is not rendered with QQC2, use native rendering.
     auto distanceField = qgetenv("QML_DISABLE_DISTANCEFIELD");
 
@@ -101,11 +125,35 @@ int main(int argc, char *argv[])
         qputenv("QML_DISABLE_DISTANCEFIELD", "1");
 #endif
 
-    qDebug() << "Starting " COMMONS_APPNAME;
+    qInfo() << "Starting " COMMONS_APPNAME;
     MediaTools mediaTools;
 
     if (!mediaTools.init(cliOptions))
         return -1;
+
+    qInfo() << "Pretty product name:" << QSysInfo::prettyProductName();
+    qInfo() << "Product type:" << QSysInfo::productType();
+    qInfo() << "Product version:" << QSysInfo::productVersion();
+    qInfo() << "Kernel type:" << QSysInfo::kernelType();
+    qInfo() << "Kernel version:" << QSysInfo::kernelVersion();
+    qInfo() << "Build ABI:" << QSysInfo::buildAbi();
+    qInfo() << "Build CPU architecture:" << QSysInfo::buildCpuArchitecture();
+    qInfo() << "Current CPU architecture:" << QSysInfo::currentCpuArchitecture();
+    qInfo() << "Supported SIMD optimizations:" << AkSimd::supportedInstructions();
+    qInfo() << "Current SIMD optimization:" << AkSimd::preferredInstructionSet();
+
+#ifdef OPENMP_ENABLED
+    #pragma omp parallel
+    {
+        #pragma omp master
+        {
+            auto threads = omp_get_num_threads();
+
+            if (threads > 0)
+                qInfo() << "OpenMP support enabled with" << threads << "threads";
+        }
+    }
+#endif
 
     mediaTools.printLog();
     mediaTools.show();

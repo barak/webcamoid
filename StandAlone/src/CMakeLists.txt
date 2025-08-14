@@ -68,6 +68,7 @@ set(PROJECT_SOURCES
     videolayer.cpp
     videolayer.h
     ../DefaultTheme.qrc
+    ../colors.qrc
     ../icons.qrc
     ../Webcamoid.qrc)
 
@@ -81,8 +82,12 @@ elseif (WIN32)
 endif ()
 
 qt_add_executable(StandAlone ${PROJECT_SOURCES})
+enable_openmp(StandAlone)
 
-if (APPLE)
+if (FAKE_APPLE)
+    set_target_properties(StandAlone PROPERTIES
+                          OUTPUT_NAME Webcamoid)
+elseif (APPLE)
     string(TIMESTAMP YEAR "%Y")
     set_target_properties(StandAlone PROPERTIES
                           OUTPUT_NAME Webcamoid
@@ -109,7 +114,10 @@ if (WIN32)
                           WIN32_EXECUTABLE TRUE)
 endif ()
 
-if (APPLE)
+if (FAKE_APPLE)
+    set_target_properties(StandAlone PROPERTIES
+                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${BINDIR})
+elseif (APPLE)
     set_target_properties(StandAlone PROPERTIES
                           RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR})
 else ()
@@ -162,9 +170,17 @@ add_definitions(-DCOMMONS_TARGET="webcamoid"
                 -DTARGET_ARCH="${TARGET_ARCH}"
                 -DANDROID_OPENSSL_SUFFIX="${ANDROID_OPENSSL_SUFFIX}")
 
+if (NOCHECKUPDATES)
+    add_definitions(-DDISABLE_UPDATES_CHECK)
+endif ()
+
 if (ANDROID)
     if (ENABLE_ANDROID_DEBUGGING)
         add_definitions(-DENABLE_ANDROID_DEBUGGING)
+    endif ()
+
+    if (ENABLE_ANDROID_LOG_FILE)
+        add_definitions(-DENABLE_ANDROID_LOG_FILE)
     endif ()
 
     if (ENABLE_ANDROID_ADS AND MVN_BIN AND (ANDROID_TARGET_SDK_VERSION GREATER_EQUAL 31))
@@ -181,8 +197,14 @@ if (ANDROID)
                    "${CMAKE_BINARY_DIR}/${BUILDDIR}/res/values/appid.xml")
 endif ()
 
-if (APPLE)
-    install(TARGETS StandAlone DESTINATION ${CMAKE_INSTALL_PREFIX})
+if (ENABLE_SINGLE_INSTANCE AND NOT ANDROID)
+    add_definitions(-DENABLE_SINGLE_INSTANCE)
+endif ()
+
+if (FAKE_APPLE)
+    install(TARGETS StandAlone DESTINATION ${BINDIR})
+elseif (APPLE)
+        install(TARGETS StandAlone DESTINATION ${CMAKE_INSTALL_PREFIX})
 elseif (NOT ANDROID)
     install(TARGETS StandAlone DESTINATION ${BINDIR})
 endif ()
@@ -190,7 +212,7 @@ endif ()
 if (WIN32)
     install(FILES ../share/themes/WebcamoidTheme/icons/hicolor/256x256/webcamoid.ico
             DESTINATION ${CMAKE_INSTALL_PREFIX})
-elseif (UNIX AND NOT APPLE AND NOT ANDROID)
+elseif (UNIX AND NOT (APPLE OR FAKE_APPLE) AND NOT ANDROID)
     file(GLOB_RECURSE ICONS
          ../share/themes/WebcamoidTheme/*/webcamoid.png
          ../share/themes/WebcamoidTheme/*/webcamoid.svg)

@@ -20,7 +20,7 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
-#include <akplugin.h>
+#include <iak/akplugin.h>
 
 class Plugin: public QObject, public AkPlugin
 {
@@ -29,8 +29,7 @@ class Plugin: public QObject, public AkPlugin
     Q_PLUGIN_METADATA(IID AkPlugin_IID FILE "pspec.json")
 
     public:
-        QObject *create(const QString &key, const QString &specification);
-        QStringList keys() const;
+        QObject *create() override;
 };
 
 #endif // PLUGIN_H

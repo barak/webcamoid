@@ -20,7 +20,7 @@
 #ifndef VIRTUALCAMERA_H
 #define VIRTUALCAMERA_H
 
-#include <akplugin.h>
+#include <iak/akplugin.h>
 
 class VirtualCamera: public QObject, public AkPlugin
 {
@@ -30,8 +30,7 @@ class VirtualCamera: public QObject, public AkPlugin
 
     public:
         VirtualCamera();
-        QObject *create(const QString &key, const QString &specification) override;
-        QStringList keys() const override;
+        QObject *create() override;
 };
 
 #endif // VIRTUALCAMERA_H

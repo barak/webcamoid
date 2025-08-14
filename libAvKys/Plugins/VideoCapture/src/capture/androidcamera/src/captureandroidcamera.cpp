@@ -24,18 +24,17 @@
 #include <QReadWriteLock>
 #include <QSet>
 #include <QThread>
-#include <QtConcurrent>
 #include <QVariant>
 #include <QWaitCondition>
 #include <QtConcurrent>
 #include <ak.h>
 #include <akcaps.h>
-#include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
 #include <akpluginmanager.h>
 #include <akvideoformatspec.h>
 #include <akvideopacket.h>
+#include <iak/akelement.h>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
 #include <QPermissions>
@@ -409,7 +408,7 @@ class CaptureAndroidCameraPrivate
         QList<int> m_streams;
         QStringList m_devices;
         QMap<QString, QString> m_descriptions;
-        QMap<QString, CaptureVideoCaps> m_devicesCaps;
+        QMap<QString, AkCapsList> m_devicesCaps;
         QMap<QString, FpsRanges> m_availableFpsRanges;
         QMap<QString, bool> m_isTorchSupported;
         QReadWriteLock m_controlsMutex;
@@ -450,12 +449,10 @@ class CaptureAndroidCameraPrivate
 
         explicit CaptureAndroidCameraPrivate(CaptureAndroidCamera *self);
         void registerNatives();
-        CaptureVideoCaps caps(const QString &deviceId);
-        CaptureVideoCaps caps(const QJniObject &characteristics,
+        AkCapsList caps(const QString &deviceId);
+        AkCapsList caps(const QJniObject &characteristics,
                               const FpsRanges &fpsRanges);
         QString deviceId(const QString &device) const;
-        int nearestResolution(const QSize &resolution,
-                              const CaptureVideoCaps &caps) const;
         bool nearestFpsRangue(const AkFrac &fps,
                               jint &min,
                               jint &max);
@@ -519,11 +516,6 @@ class CaptureAndroidCameraPrivate
         void setTorchMode(Capture::TorchMode mode);
         jint cameraFacing(const QJniObject &cameraCharacteristics) const;
         void updateDevices();
-        template<typename T>
-        static inline T alignUp(const T &value, const T &align)
-        {
-            return (value + align - 1) & ~(align - 1);
-        }
 };
 
 CaptureAndroidCamera::CaptureAndroidCamera(QObject *parent):
@@ -534,7 +526,9 @@ CaptureAndroidCamera::CaptureAndroidCamera(QObject *parent):
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     auto permissionStatus = qApp->checkPermission(this->d->m_cameraPermission);
 
-    if (permissionStatus != Qt::PermissionStatus::Granted) {
+    if (permissionStatus == Qt::PermissionStatus::Granted) {
+        qInfo() << "Permission granted for camera capture with Android JNI API";
+    } else {
         this->d->m_permissionResultReady = false;
         qApp->requestPermission(this->d->m_cameraPermission,
                                 this,
@@ -544,15 +538,20 @@ CaptureAndroidCamera::CaptureAndroidCamera(QObject *parent):
 
                                         switch (permission.status()) {
                                         case Qt::PermissionStatus::Undetermined:
+                                            qInfo() << "Permission undetermined for camera capture with Android JNI API";
                                             curStatus = PermissionStatus_Undetermined;
                                             break;
 
                                         case Qt::PermissionStatus::Granted:
+                                            qInfo() << "Permission granted for camera capture with Android JNI API";
                                             curStatus = PermissionStatus_Granted;
+
                                             break;
 
                                         case Qt::PermissionStatus::Denied:
+                                            qInfo() << "Permission denied for camera capture with Android JNI API";
                                             curStatus = PermissionStatus_Denied;
+
                                             break;
 
                                         default:
@@ -634,7 +633,7 @@ QString CaptureAndroidCamera::description(const QString &webcam) const
     return this->d->m_descriptions.value(webcam);
 }
 
-CaptureVideoCaps CaptureAndroidCamera::caps(const QString &webcam) const
+AkCapsList CaptureAndroidCamera::caps(const QString &webcam) const
 {
     return this->d->m_devicesCaps.value(webcam);
 }
@@ -979,7 +978,7 @@ void CaptureAndroidCamera::setStreams(const QList<int> &streams)
     if (streams.isEmpty())
         return;
 
-    int stream = streams[0];
+    auto stream = streams[0];
 
     if (stream < 0)
         return;
@@ -1076,7 +1075,7 @@ void CaptureAndroidCameraPrivate::registerNatives()
         return;
 
     if (auto jclass = this->m_jenv.findClass(JCLASS(AkAndroidCameraCallbacks))) {
-        static const QVector<JNINativeMethod> methods {
+        static const QVector<JNINativeMethod> androidCameraMethods {
             {"sessionConfigured"     , "(JLandroid/hardware/camera2/CameraCaptureSession;)V", reinterpret_cast<void *>(CaptureAndroidCameraPrivate::sessionConfigured)     },
             {"sessionConfigureFailed", "(JLandroid/hardware/camera2/CameraCaptureSession;)V", reinterpret_cast<void *>(CaptureAndroidCameraPrivate::sessionConfigureFailed)},
             {"cameraOpened"          , "(JLandroid/hardware/camera2/CameraDevice;)V"        , reinterpret_cast<void *>(CaptureAndroidCameraPrivate::cameraOpened)          },
@@ -1085,13 +1084,15 @@ void CaptureAndroidCameraPrivate::registerNatives()
             {"imageAvailable"        , "(JLandroid/media/Image;)V"                          , reinterpret_cast<void *>(CaptureAndroidCameraPrivate::imageAvailable)        },
         };
 
-        this->m_jenv->RegisterNatives(jclass, methods.data(), methods.size());
+        this->m_jenv->RegisterNatives(jclass,
+                                      androidCameraMethods.data(),
+                                      androidCameraMethods.size());
     }
 
     ready = true;
 }
 
-CaptureVideoCaps CaptureAndroidCameraPrivate::caps(const QString &deviceId)
+AkCapsList CaptureAndroidCameraPrivate::caps(const QString &deviceId)
 {
     if (!this->m_cameraManager.isValid())
         return {};
@@ -1106,10 +1107,9 @@ CaptureVideoCaps CaptureAndroidCameraPrivate::caps(const QString &deviceId)
     return this->caps(characteristics, fpsRanges);
 }
 
-CaptureVideoCaps CaptureAndroidCameraPrivate::caps(const QJniObject &characteristics,
+AkCapsList CaptureAndroidCameraPrivate::caps(const QJniObject &characteristics,
                                                    const FpsRanges &fpsRanges)
 {
-    CaptureVideoCaps caps;
     auto configMapKey =
         QJniObject::getStaticObjectField("android/hardware/camera2/CameraCharacteristics",
                                          "SCALER_STREAM_CONFIGURATION_MAP",
@@ -1148,6 +1148,8 @@ CaptureVideoCaps CaptureAndroidCameraPrivate::caps(const QJniObject &characteris
                                     numFormats,
                                     formatsList.data());
 
+    QVector<AkVideoCaps> rawCaps;
+
     for (auto &format: formatsList) {
         if (!androidFmtToAkFmt->contains(ImageFormat(format)))
             continue;
@@ -1176,10 +1178,16 @@ CaptureVideoCaps CaptureAndroidCameraPrivate::caps(const QJniObject &characteris
                                                  AkVideoCaps::Format_none);
 
                 if (akFormat != AkVideoCaps::Format_none)
-                    caps << AkVideoCaps({akFormat, width, height, fps});
+                    rawCaps << AkVideoCaps(akFormat, width, height, fps);
             }
         }
     }
+
+    std::sort(rawCaps.begin(), rawCaps.end());
+    AkCapsList caps;
+
+    for (auto &rcaps: rawCaps)
+        caps << rcaps;
 
     return caps;
 }
@@ -1189,33 +1197,6 @@ QString CaptureAndroidCameraPrivate::deviceId(const QString &device) const
     auto idStr = device;
 
     return idStr.remove("JniCamera:");
-}
-
-int CaptureAndroidCameraPrivate::nearestResolution(const QSize &resolution,
-                                                   const CaptureVideoCaps &caps) const
-{
-    if (caps.isEmpty())
-        return -1;
-
-    int index = -1;
-    qreal q = std::numeric_limits<qreal>::max();
-
-    for (int i = 0; i < caps.size(); ++i) {
-        AkVideoCaps videoCaps = caps.value(i);
-        qreal dw = videoCaps.width() - resolution.width();
-        qreal dh = videoCaps.height() - resolution.height();
-        qreal k = dw * dw + dh * dh;
-
-        if (k < q) {
-            index = i;
-            q = k;
-
-            if (k == 0.)
-                break;
-        }
-    }
-
-    return index;
 }
 
 bool CaptureAndroidCameraPrivate::nearestFpsRangue(const AkFrac &fps,
@@ -1976,10 +1957,16 @@ void CaptureAndroidCameraPrivate::imageAvailable(JNIEnv *env,
             }
     }
 
+#if 1
+    auto pts = qRound64(QTime::currentTime().msecsSinceStartOfDay()
+                        * self->m_fps.value() / 1e3);
+#else
     jlong timestampNs = src.callMethod<jlong>("getTimestamp", "()J");
-
     auto pts = qint64(timestampNs * self->m_fps.value() / 1e9);
+#endif
+
     packet.setPts(pts);
+    packet.setDuration(1);
     packet.setTimeBase(self->m_fps.invert());
     packet.setIndex(0);
     packet.setId(self->m_id);
@@ -2218,7 +2205,11 @@ void CaptureAndroidCameraPrivate::updateDevices()
                     auto caps = this->caps(characteristics, fpsRanges);
 
                     if (!caps.empty()) {
-                        auto index = this->nearestResolution({640, 480}, caps);
+                        auto index =
+                                Capture::nearestResolution({DEFAULT_FRAME_WIDTH,
+                                                            DEFAULT_FRAME_HEIGHT},
+                                                           DEFAULT_FRAME_FPS,
+                                                           caps);
 
                         if (index > 0)
                             caps.move(index, 0);

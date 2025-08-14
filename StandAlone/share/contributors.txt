@@ -15,6 +15,7 @@ Axel Lainerdo <z6postarwars88@free.fr>
 Axus Wizix <axus.wizix@mail.ru>
 Barak A. Pearlmutter <barak+git@pearlmutter.net>
 CE4 <chregger@gmail.com>
+Champ0999 <champ0999@users.noreply.hosted.weblate.org>
 Chris Barth <chrisjbarth@hotmail.com>
 Continuity <continuity@gmx.net>
 Daeun Jung <sarahkorea1@ajou.ac.kr>
@@ -68,6 +69,7 @@ paperspaceBen <benjamin@paperspace.io>
 pCsOrI <pcsori@gmail.com>
 Peppernrino <pepperandrino@gmail.com>
 poi <erbaotao@outlook.com>
+polarwood <polarwood@users.noreply.hosted.weblate.org>
 Priit Jõerüüt <hwlate@joeruut.com>
 Quentin PAGÈS <quentinantonin@free.fr>
 Raúl González García <rgonzalez5@ucam.edu>
@@ -80,8 +82,10 @@ Stepan <36489863+Stepan881@users.noreply.github.com>
 Swann Martinet <swann.ranskassa@laposte.net>
 Szylu <chipolade@gmail.com>
 Takuya Ohe <hi@tohe.xyz>
+Theelx <43764914+Theelx@users.noreply.github.com>
 TheSimplyOwl <thesimplyowl@gmail.com>
 Till Riedel <riedel@teco.edu>
+Tim W. <https://github.com/tweber2665>
 Tj <hacker@iam.tj>
 trungnt2910 <trungnt282910@gmail.com>
 Tymofij Lytvynenko <till.svit@gmail.com>
@@ -90,6 +94,7 @@ XiaoPanPanKevinPan <sn00151200@gmail.com>
 Yaron Shahrabani <sh.yaron@gmail.com>
 YFdyh000 <yfdyh000@gmail.com>
 Yuqi Wang <claywang@live.com>
+Yurt Page <yurtpage@gmail.com>
 zhcjsjz <zhcj@yeah.net>
 Étienne Gilli <etienne.gilli@gmail.com>
 Володимир Бриняк <bardvv@gmail.com>

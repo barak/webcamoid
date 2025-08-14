@@ -39,6 +39,7 @@ find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
 qt_add_library(avkys
                src/ak.cpp
                src/ak.h
+               src/akalgorithm.h
                src/akaudiocaps.cpp
                src/akaudiocaps.h
                src/akaudioconverter.cpp
@@ -49,30 +50,41 @@ qt_add_library(avkys
                src/akcaps.h
                src/akcolorcomponent.cpp
                src/akcolorcomponent.h
-               src/akcolorconvert.h
                src/akcolorconvert.cpp
+               src/akcolorconvert.h
                src/akcolorplane.cpp
                src/akcolorplane.h
                src/akcommons.h
+               src/akcompressedaudiocaps.cpp
+               src/akcompressedaudiocaps.h
+               src/akcompressedaudiopacket.cpp
+               src/akcompressedaudiopacket.h
+               src/akcompressedcaps.cpp
+               src/akcompressedcaps.h
+               src/akcompressedpacket.cpp
+               src/akcompressedpacket.h
                src/akcompressedvideocaps.cpp
                src/akcompressedvideocaps.h
                src/akcompressedvideopacket.cpp
                src/akcompressedvideopacket.h
-               src/akelement.cpp
-               src/akelement.h
+               src/akcpufeatures.cpp
+               src/akcpufeatures.h
                src/akfrac.cpp
                src/akfrac.h
-               src/akmultimediasourceelement.cpp
-               src/akmultimediasourceelement.h
+               src/akmenuoption.cpp
+               src/akmenuoption.h
                src/akpacket.cpp
                src/akpacket.h
                src/akpacketbase.cpp
                src/akpacketbase.h
-               src/akplugin.h
                src/akplugininfo.cpp
                src/akplugininfo.h
                src/akpluginmanager.cpp
                src/akpluginmanager.h
+               src/akpropertyoption.cpp
+               src/akpropertyoption.h
+               src/aksimd.h
+               src/aksimd.cpp
                src/aksubtitlecaps.cpp
                src/aksubtitlecaps.h
                src/aksubtitlepacket.cpp
@@ -89,6 +101,18 @@ qt_add_library(avkys
                src/akvideomixer.h
                src/akvideopacket.cpp
                src/akvideopacket.h
+               src/iak/akaudioencoder.cpp
+               src/iak/akaudioencoder.h
+               src/iak/akelement.cpp
+               src/iak/akelement.h
+               src/iak/akmultimediasourceelement.cpp
+               src/iak/akmultimediasourceelement.h
+               src/iak/akplugin.h
+               src/iak/aksimdoptimizations.h
+               src/iak/akvideoencoder.cpp
+               src/iak/akvideoencoder.h
+               src/iak/akvideomuxer.cpp
+               src/iak/akvideomuxer.h
                src/qml/akcolorizedimage.cpp
                src/qml/akcolorizedimage.h
                src/qml/akfontsettings.cpp
@@ -101,9 +125,21 @@ qt_add_library(avkys
                src/qml/aktheme.h
                src/qml/akutils.cpp
                src/qml/akutils.h
+               src/simd/akavx.h
+               src/simd/akavx2.h
+               src/simd/akmmx.h
+               src/simd/akneon.h
+               src/simd/akrvv.h
+               src/simd/akscalar.h
+               src/simd/aksse.h
+               src/simd/aksse2.h
+               src/simd/aksse4_1.h
+               src/simd/aksve.h
                AvKys.qrc)
 
-if (UNIX AND NOT ANDROID AND NOT APPLE)
+enable_openmp(avkys)
+
+if (UNIX AND NOT ANDROID AND NOT (APPLE OR FAKE_APPLE))
     set_target_properties(avkys
                           PROPERTIES
                           VERSION ${VERSION}
@@ -121,7 +157,7 @@ endif ()
 
 target_compile_definitions(avkys PRIVATE AVKYS_LIBRARY)
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
-target_link_libraries(avkys ${QT_LIBS})
+target_link_libraries(avkys PRIVATE ${QT_LIBS})
 add_definitions(-DAKCOMMONS_LIBRARY
                 -DBINDIR="${BINDIR}"
                 -DAKPLUGINSDIR="${AKPLUGINSDIR}"

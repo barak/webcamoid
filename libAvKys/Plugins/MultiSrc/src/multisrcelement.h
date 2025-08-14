@@ -20,8 +20,8 @@
 #ifndef MULTISRCELEMENT_H
 #define MULTISRCELEMENT_H
 
-#include "akcaps.h"
-#include <akmultimediasourceelement.h>
+#include <akcaps.h>
+#include <iak/akmultimediasourceelement.h>
 
 class MultiSrcElementPrivate;
 

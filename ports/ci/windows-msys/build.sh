@@ -42,15 +42,11 @@ if [ "${UPLOAD}" == 1 ]; then
     EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON"
 fi
 
-# Some anti-virus software seems to be detecting libVLC load as it were
-# malware:
-#
-# https://hijacklibs.net/entries/3rd_party/vlc/libvlc.html
-#
-# so disable it in all cases, even though its a legitimate usage in the case of
-# Webcamoid
-
+# Disable VLC libary as it cause inestabilities
 EXTRA_PARAMS="${EXTRA_PARAMS} -DNOVLC=ON"
+
+# librav1e makes Webcamoid crash in Windows
+EXTRA_PARAMS="${EXTRA_PARAMS} -DFFMPEG_DISABLED_VIDEO_ENCODERS=librav1e"
 
 if [ "${TARGET_ARCH}" = i686 ]; then
     export PATH=/mingw32/bin:$PATH

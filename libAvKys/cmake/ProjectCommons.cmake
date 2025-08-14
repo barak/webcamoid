@@ -29,8 +29,8 @@ endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(VER_MAJ 9)
-set(VER_MIN 2)
-set(VER_PAT 3)
+set(VER_MIN 3)
+set(VER_PAT 0)
 set(VERSION ${VER_MAJ}.${VER_MIN}.${VER_PAT})
 
 set(DAILY_BUILD OFF CACHE BOOL "Mark this as a daily build")
@@ -41,7 +41,11 @@ set(APP_IDENTIFIER "${ORGANIZATION_IDENTIFIER}.Webcamoid" CACHE STRING "Applicat
 set(WITH_FLATPAK_VCAM ON CACHE BOOL "Enable support for the virtual camera in Flatpak")
 set(ANDROID_OPENSSL_SUFFIX "_3" CACHE STRING "Set OpenSSL libraries suffix")
 set(ENABLE_ANDROID_DEBUGGING OFF CACHE BOOL "Enable debugging logs in Android")
+set(ENABLE_ANDROID_LOG_FILE OFF CACHE BOOL "Enable debugging logs in Android")
 set(ENABLE_IPO OFF CACHE BOOL "Enable interprocedural optimization")
+set(ENABLE_SINGLE_INSTANCE OFF CACHE BOOL "Enable single instance mode (Buggy)")
+set(NOCHECKUPDATES OFF CACHE BOOL "Disable updates check")
+set(NOOPENMP OFF CACHE BOOL "Disable OpenMP support")
 set(NOALSA OFF CACHE BOOL "Disable ALSA support")
 set(NODSHOW OFF CACHE BOOL "Disable DirectShow support")
 set(NOFFMPEG OFF CACHE BOOL "Disable FFmpeg support")
@@ -67,6 +71,45 @@ set(NOVLC OFF CACHE BOOL "Disable VLC support")
 set(NOWASAPI OFF CACHE BOOL "Disable WASAPI support")
 set(NOXLIBSCREENCAP OFF CACHE BOOL "Disable screen capture using Xlib")
 
+# SIMD optimizations
+
+set(NOSIMDMMX OFF CACHE BOOL "Disable MMX SIMD optimizations")
+set(NOSIMDSSE OFF CACHE BOOL "Disable SSE SIMD optimizations")
+set(NOSIMDSSE2 OFF CACHE BOOL "Disable SSE2 SIMD optimizations")
+set(NOSIMDSSE4_1 OFF CACHE BOOL "Disable SSE4.1 SIMD optimizations")
+set(NOSIMDAVX OFF CACHE BOOL "Disable AVX SIMD optimizations")
+set(NOSIMDAVX2 OFF CACHE BOOL "Disable AVX2 SIMD optimizations")
+set(NOSIMDNEON OFF CACHE BOOL "Disable NEON SIMD optimizations")
+set(NOSIMDSVE OFF CACHE BOOL "Disable SVE SIMD optimizations")
+set(NOSIMDRVV OFF CACHE BOOL "Disable RVV SIMD optimizations")
+
+# Dynamic libraries load
+
+set(PIPEWIRE_DYNLOAD OFF CACHE BOOL "Load PipeWire libraries on runtime instead of linking")
+
+# Video formats support
+
+set(NOLSMASH OFF CACHE BOOL "Disable MP4 format support using L-SMASH")
+set(NOLIBMP4V2 OFF CACHE BOOL "Disable MP4 format support using libmp4v2")
+set(NOLIBWEBM OFF CACHE BOOL "Disable Webm format support")
+
+# Video codecs support
+
+set(NOLIBVPX OFF CACHE BOOL "Disable VPX codec support")
+set(NOSVTVP9 OFF CACHE BOOL "Disable SVT-VP9 codec support")
+set(NOAOMAV1 OFF CACHE BOOL "Disable AV1 AOMedia codec support")
+set(NOSVTAV1 OFF CACHE BOOL "Disable SVT-AV1 codec support")
+set(NORAVIE OFF CACHE BOOL "Disable rav1e codec support")
+set(NOLIBX264 OFF CACHE BOOL "Disable libx264 codec support")
+
+# Audio codecs support
+
+set(NOLIBOPUS OFF CACHE BOOL "Disable Opus codec support")
+set(NOLIBVORBIS OFF CACHE BOOL "Disable Vorbis codec support")
+set(NOFDKAAC OFF CACHE BOOL "Disable FDK-AAC codec support")
+set(NOFAAC OFF CACHE BOOL "Disable faac codec support")
+set(NOLAME OFF CACHE BOOL "Disable faac codec support")
+
 # Ads configurations
 
 set(ENABLE_ANDROID_ADS OFF CACHE BOOL "Enable Android AdMob")
@@ -81,25 +124,23 @@ set(ANDROID_AD_UNIT_ID_ADAPTIVE_INTERSTITIAL "ca-app-pub-3940256099942544/103317
 set(ANDROID_AD_UNIT_ID_ADAPTIVE_REWARDED "ca-app-pub-3940256099942544/5224354917" CACHE STRING "Android adaptive rewarded unit ID")
 set(ANDROID_AD_UNIT_ID_ADAPTIVE_REWARDED_INTERSTITIAL "ca-app-pub-3940256099942544/5354046379" CACHE STRING "Android adaptive rewarded interstitial unit ID")
 
-set(GOOGLE_PLAY_SERVICES_ADS_VERSION "23.3.0" CACHE STRING "com.google.android.gms:play-services-ads-lite version")
+set(ANDROIDX_CORE_VERSION "1.16.0" CACHE STRING "androidx.core:core version")
+set(ANDROIDX_ANNOTATION_VERSION "1.9.1" CACHE STRING "androidx.annotation:annotation version")
+set(GOOGLE_PLAY_SERVICES_ADS_VERSION "24.0.0" CACHE STRING "com.google.android.gms:play-services-ads-lite version")
 
-find_program(MVN_BIN mvn)
 
-if (ENABLE_ANDROID_ADS)
-    if (MVN_BIN AND (ANDROID_TARGET_SDK_VERSION GREATER_EQUAL 31))
-        set(ANDROID_IMPLEMENTATIONS "com.google.android.gms:play-services-ads-lite:${GOOGLE_PLAY_SERVICES_ADS_VERSION}" CACHE INTERNAL "")
-    else ()
-        if (NOT MVN_BIN)
-            message("Warning: You must install maven for enabling ads.")
-        endif ()
+# Allow to build Webcamoid in Linux and other POSIX systems as if you were
+# building it for APPLE
+# NOTE: No, this option isn't for cross compile, the resulting binaries are not
+# compatible with Mac, this option allows to test certain portions of Webcamoid
+# as if you were in a Mac.
+set(FAKE_APPLE OFF CACHE BOOL "Build the virtual camera plugin for MacOs in Linux and other POSIX systems as if you were building it for APPLE")
 
-        if (ANDROID_TARGET_SDK_VERSION LESS 31)
-            message("Warning: The target API must be 31 or higher for enabling ads.")
-        endif ()
-    endif ()
+if (FAKE_APPLE)
+    add_definitions(-DFAKE_APPLE)
 endif ()
 
-if (APPLE)
+if (APPLE OR FAKE_APPLE)
     set(BUILDDIR build)
     set(EXECPREFIX Webcamoid.app/Contents)
     set(BINDIR ${EXECPREFIX}/MacOS)
@@ -147,6 +188,17 @@ else ()
     set(OUTPUT_PIPEWIRE_SPA_PLUGINS_DIR ${LIBDIR}/pipewire-spa)
     set(JARDIR ${DATAROOTDIR}/java)
 endif ()
+
+if (NOT NOLIBWEBM)
+    find_file(WEBMIDS_H webm/common/webmids.h)
+
+    if (WEBMIDS_H)
+        string(REPLACE /common/webmids.h "" LIBWEBM_INCLUDE_DIRS_DEFAULT "${WEBMIDS_H}")
+    endif ()
+endif ()
+
+set(LIBWEBM_INCLUDE_DIRS "${LIBWEBM_INCLUDE_DIRS_DEFAULT}" CACHE PATH "libwebm headers files search directory")
+set(LIBWEBM_LIBRARY_DIRS "" CACHE PATH "libwebm library files search directory")
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -227,6 +279,22 @@ set(ANDROID_TARGET_SDK_VERSION "${DEFAULT_ANDROID_TARGET_PLATFORM}" CACHE STRING
 set(ANDROID_JAVA_VERSION 1.7 CACHE STRING "Mimimum Java version to use in Android")
 set(ANDROID_JAR_DIRECTORY ${ANDROID_SDK_ROOT}/platforms/android-${ANDROID_TARGET_SDK_VERSION} CACHE INTERNAL "")
 set(MAVEN_LOCAL_REPOSITORY "${CMAKE_BINARY_DIR}/maven/repository" CACHE INTERNAL "")
+
+find_program(MVN_BIN mvn)
+
+if (ENABLE_ANDROID_ADS)
+    if (MVN_BIN AND (ANDROID_TARGET_SDK_VERSION GREATER_EQUAL 31))
+        set(ANDROID_IMPLEMENTATIONS "com.google.android.gms:play-services-ads-lite:${GOOGLE_PLAY_SERVICES_ADS_VERSION}" CACHE INTERNAL "")
+    else ()
+        if (NOT MVN_BIN)
+            message("Warning: You must install maven for enabling ads.")
+        endif ()
+
+        if (ANDROID_TARGET_SDK_VERSION LESS 31)
+            message("Warning: The target API must be 31 or higher for enabling ads.")
+        endif ()
+    endif ()
+endif ()
 
 # Force prefix and suffix. This fix broken MinGW builds in CI environments.
 if (WIN32 AND NOT MSVC)
@@ -344,18 +412,34 @@ if (WIN32)
 
     if (IS_WIN64_TARGET)
         set(TARGET_ARCH win64)
+        set(BUILD_PROCESSOR_X86 TRUE CACHE INTERNAL "")
     elseif (IS_WIN64_ARM_TARGET)
         set(TARGET_ARCH win64_arm)
+        set(BUILD_PROCESSOR_ARM TRUE CACHE INTERNAL "")
     elseif (IS_WIN32_TARGET)
         set(TARGET_ARCH win32)
+        set(BUILD_PROCESSOR_X86 TRUE CACHE INTERNAL "")
     elseif (IS_WIN32_ARM_TARGET)
         set(TARGET_ARCH win32_arm)
+        set(BUILD_PROCESSOR_ARM TRUE CACHE INTERNAL "")
     else ()
         set(TARGET_ARCH unknown)
     endif()
 elseif (UNIX)
     if (ANDROID)
         set(TARGET_ARCH ${CMAKE_ANDROID_ARCH_ABI})
+
+        if (CMAKE_ANDROID_ARCH_ABI STREQUAL "x86"
+            OR CMAKE_ANDROID_ARCH_ABI STREQUAL "x86_64")
+            set(BUILD_PROCESSOR_X86 TRUE CACHE INTERNAL "")
+        elseif (CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a"
+                OR CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v7a"
+                OR CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v6"
+                OR CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi")
+            set(BUILD_PROCESSOR_ARM TRUE CACHE INTERNAL "")
+        elseif (CMAKE_ANDROID_ARCH_ABI STREQUAL "riscv64")
+            set(BUILD_PROCESSOR_RISCV TRUE CACHE INTERNAL "")
+        endif ()
     else ()
         include(CheckCXXSourceCompiles)
         check_cxx_source_compiles("
@@ -410,16 +494,21 @@ elseif (UNIX)
 
         if (IS_X86_64_TARGET)
             set(TARGET_ARCH x64)
+            set(BUILD_PROCESSOR_X86 TRUE CACHE INTERNAL "")
         elseif (IS_I386_TARGET)
             set(TARGET_ARCH x86)
+            set(BUILD_PROCESSOR_X86 TRUE CACHE INTERNAL "")
         elseif (IS_ARM64_TARGET)
             set(TARGET_ARCH arm64)
+            set(BUILD_PROCESSOR_ARM TRUE CACHE INTERNAL "")
         elseif (IS_ARM_TARGET)
             set(TARGET_ARCH arm32)
+            set(BUILD_PROCESSOR_ARM TRUE CACHE INTERNAL "")
         elseif (IS_RISCV_TARGET)
             set(TARGET_ARCH riscv)
         else ()
             set(TARGET_ARCH unknown)
+            set(BUILD_PROCESSOR_RISCV TRUE CACHE INTERNAL "")
         endif ()
     endif ()
 endif ()
@@ -438,3 +527,121 @@ if (ENABLE_IPO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT IPO_IS_SUPPORTED OUTPUT IPO_SUPPORTED_OUTPUT)
 endif ()
+
+# resolve_maven_dependencies
+# --------------------------
+#
+# Downloads Maven dependencies (JAR or AAR), extracts classes.jar if needed,
+# and returns the list of resulting JAR files.
+#
+# Arguments:
+#
+#     TARGET_NAME  -> Base name for all generated targets.
+#     REPOSITORIES -> List of Maven repository URLs.
+#     DEPENDENCIES -> List of dependencies in format group:artifact:version:ext.
+#     OUT_JARS     -> Variable name that will receive the resulting list of .jar files.
+#
+# Required global variables:
+#
+#     MVN_BIN                -> Path to Maven executable.
+#     MAVEN_LOCAL_REPOSITORY -> Path to local Maven repository.
+function(resolve_maven_dependencies TARGET_NAME)
+    set(options)
+    set(oneValueArgs OUT_JARS)
+    set(multiValueArgs DEPENDENCIES REPOSITORIES)
+    cmake_parse_arguments(MAVEN "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Validate required arguments
+    if (NOT MAVEN_REPOSITORIES OR NOT MAVEN_DEPENDENCIES)
+        message(FATAL_ERROR "resolve_maven_dependencies: REPOSITORIES and DEPENDENCIES are required.")
+    endif ()
+
+    if (NOT MVN_BIN OR NOT MAVEN_LOCAL_REPOSITORY)
+        message(FATAL_ERROR "resolve_maven_dependencies: MVN_BIN and MAVEN_LOCAL_REPOSITORY must be globally defined.")
+    endif ()
+
+    # Create the main umbrella target
+    add_custom_target(${TARGET_NAME})
+
+    # Convert list of repositories to comma-separated string for Maven
+    string(JOIN "," REPO_LIST_STRING ${MAVEN_REPOSITORIES})
+
+    set(JAR_LIST "")
+
+    # Process each Maven dependency
+    foreach (DEPENDENCY IN LISTS MAVEN_DEPENDENCIES)
+        string(REPLACE ":" ";" PARTS "${DEPENDENCY}")
+        list(GET PARTS 0 GROUP)
+        list(GET PARTS 1 ARTIFACT)
+        list(GET PARTS 2 VERSION)
+        list(GET PARTS 3 EXT)
+
+        # Normalize target name
+        string(REPLACE "." "_" TGNAME "${GROUP}_${ARTIFACT}_${EXT}")
+        string(REPLACE "-" "_" TGNAME "${TGNAME}")
+        string(REPLACE "." "/" GROUP_PATH "${GROUP}")
+
+        # Compute file path in local Maven repository
+        set(FILE_PATH "${MAVEN_LOCAL_REPOSITORY}/${GROUP_PATH}/${ARTIFACT}/${VERSION}/${ARTIFACT}-${VERSION}.${EXT}")
+        get_filename_component(FILE_DIR "${FILE_PATH}" DIRECTORY)
+
+        # Command to download dependency with Maven
+        add_custom_command(OUTPUT "${FILE_PATH}"
+                           COMMAND ${MVN_BIN}
+                               -Dmaven.repo.local=${MAVEN_LOCAL_REPOSITORY}
+                               dependency:get
+                               -Dartifact=${DEPENDENCY}
+                               -DremoteRepositories=${REPO_LIST_STRING}
+                               -Dtransitive=false
+                           VERBATIM)
+
+        if ("${EXT}" STREQUAL "aar")
+            # For AAR, extract classes.jar
+            set(CLASSES_JAR "${FILE_DIR}/classes.jar")
+
+            add_custom_command(OUTPUT "${CLASSES_JAR}"
+                               COMMAND ${CMAKE_COMMAND} -E tar xzf "${FILE_PATH}"
+                               WORKING_DIRECTORY "${FILE_DIR}"
+                               DEPENDS "${FILE_PATH}"
+                               VERBATIM)
+            add_custom_target(${TARGET_NAME}_${TGNAME} ALL
+                              DEPENDS "${CLASSES_JAR}")
+            list(APPEND JAR_LIST "${CLASSES_JAR}")
+        else ()
+            # For JAR, use as-is
+            add_custom_target(${TARGET_NAME}_${TGNAME} ALL
+                              DEPENDS "${FILE_PATH}")
+            list(APPEND JAR_LIST "${FILE_PATH}")
+        endif ()
+
+        # Add to umbrella target
+        add_dependencies(${TARGET_NAME} ${TARGET_NAME}_${TGNAME})
+    endforeach()
+
+    # Export list of .jar files to caller
+    set(${MAVEN_OUT_JARS} "${JAR_LIST}" PARENT_SCOPE)
+endfunction()
+
+# Helper function for enabling OenMP support for a target
+
+function(enable_openmp TARGET)
+    if (NOT DEFINED TARGET OR NOOPENMP)
+        return ()
+    endif ()
+
+    find_package(OpenMP)
+
+    if (NOT OpenMP_CXX_FOUND)
+        return ()
+    endif()
+
+    message(STATUS "Enabling OpenMP support for ${TARGET}")
+    target_link_libraries(${TARGET} PRIVATE OpenMP::OpenMP_CXX)
+    target_compile_definitions(${TARGET} PRIVATE OPENMP_ENABLED)
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${TARGET} PRIVATE -fopenmp)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        target_compile_options(${TARGET} PRIVATE /openmp)
+    endif ()
+endfunction()

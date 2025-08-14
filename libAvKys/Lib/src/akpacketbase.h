@@ -47,6 +47,16 @@ class AKCOMMONS_EXPORT AkPacketBase: public QObject
                WRITE setPts
                RESET resetPts
                NOTIFY ptsChanged)
+    Q_PROPERTY(qint64 dts
+               READ dts
+               WRITE setDts
+               RESET resetDts
+               NOTIFY dtsChanged)
+    Q_PROPERTY(quint64 duration
+               READ duration
+               WRITE setDuration
+               RESET resetDuration
+               NOTIFY durationChanged)
     Q_PROPERTY(AkFrac timeBase
                READ timeBase
                WRITE setTimeBase
@@ -57,6 +67,11 @@ class AKCOMMONS_EXPORT AkPacketBase: public QObject
                WRITE setIndex
                RESET resetIndex
                NOTIFY indexChanged)
+    Q_PROPERTY(QByteArray extraData
+               READ extraData
+               WRITE setExtraData
+               RESET resetExtraData
+               NOTIFY extraDataChanged)
 
     public:
         AkPacketBase(QObject *parent=nullptr);
@@ -65,8 +80,11 @@ class AKCOMMONS_EXPORT AkPacketBase: public QObject
 
         Q_INVOKABLE qint64 id() const;
         Q_INVOKABLE qint64 pts() const;
+        Q_INVOKABLE qint64 dts() const;
+        Q_INVOKABLE quint64 duration() const;
         Q_INVOKABLE AkFrac timeBase() const;
         Q_INVOKABLE int index() const;
+        Q_INVOKABLE QByteArray extraData() const;
         Q_INVOKABLE void copyMetadata(const AkPacketBase &other);
 
     private:
@@ -75,18 +93,27 @@ class AKCOMMONS_EXPORT AkPacketBase: public QObject
     Q_SIGNALS:
         void idChanged(qint64 id);
         void ptsChanged(qint64 pts);
+        void dtsChanged(qint64 dts);
+        void durationChanged(quint64 duration);
         void timeBaseChanged(const AkFrac &timeBase);
         void indexChanged(int index);
+        void extraDataChanged(const QByteArray &extraData);
 
     public Q_SLOTS:
         void setId(qint64 id);
         void setPts(qint64 pts);
+        void setDts(qint64 dts);
+        void setDuration(quint64 duration);
         void setTimeBase(const AkFrac &timeBase);
         void setIndex(int index);
+        void setExtraData(const QByteArray &extraData);
         void resetId();
         void resetPts();
+        void resetDts();
+        void resetDuration();
         void resetTimeBase();
         void resetIndex();
+        void resetExtraData();
 };
 
 #endif // AKPACKETBASE_H

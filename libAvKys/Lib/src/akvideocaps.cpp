@@ -26,8 +26,10 @@
 #include <QtMath>
 
 #include "akvideocaps.h"
-#include "akfrac.h"
+#include "akalgorithm.h"
 #include "akcaps.h"
+#include "akfrac.h"
+#include "aksimd.h"
 #include "akvideoformatspec.h"
 
 #define VFT_Unknown AkVideoFormatSpec::VFT_Unknown
@@ -53,8 +55,8 @@ struct Component
     size_t step;
     size_t offset;
     size_t shift;
-    size_t byteLength;
-    size_t length;
+    size_t byteDepth;
+    size_t depth;
     size_t widthDiv;
     size_t heightDiv;
 };
@@ -1652,6 +1654,38 @@ struct VideoFormat
               {1, {{CT_U, 2, 0, 0, 2, 12, 0, 1}}, 16},
               {1, {{CT_V, 2, 0, 0, 2, 12, 0, 1}}, 16}
              }},
+            {AkVideoCaps::Format_yuv440p14be,
+             VFT_YUV,
+             Q_BIG_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 14, 0, 0}}, 16},
+              {1, {{CT_U, 2, 0, 0, 2, 14, 0, 1}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 14, 0, 1}}, 16}
+             }},
+            {AkVideoCaps::Format_yuv440p14le,
+             VFT_YUV,
+             Q_LITTLE_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 14, 0, 0}}, 16},
+              {1, {{CT_U, 2, 0, 0, 2, 14, 0, 1}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 14, 0, 1}}, 16}
+             }},
+            {AkVideoCaps::Format_yuv440p16be,
+             VFT_YUV,
+             Q_BIG_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 16, 0, 0}}, 16},
+              {1, {{CT_U, 2, 0, 0, 2, 16, 0, 1}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 16, 0, 1}}, 16}
+             }},
+            {AkVideoCaps::Format_yuv440p16le,
+             VFT_YUV,
+             Q_LITTLE_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 16, 0, 0}}, 16},
+              {1, {{CT_U, 2, 0, 0, 2, 16, 0, 1}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 16, 0, 1}}, 16}
+             }},
             {AkVideoCaps::Format_yuv444,
              VFT_YUV,
              Q_BYTE_ORDER,
@@ -1810,8 +1844,8 @@ struct VideoFormat
              Q_BIG_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 10, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 1}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 1}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 1}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 1}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 10, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva420p10le,
@@ -1819,8 +1853,8 @@ struct VideoFormat
              Q_LITTLE_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 10, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 1}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 1}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 1}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 1}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 10, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva420p16be,
@@ -1828,8 +1862,8 @@ struct VideoFormat
              Q_BIG_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 16, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 1}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 1}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 1}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 1}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 16, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva420p16le,
@@ -1837,8 +1871,8 @@ struct VideoFormat
              Q_LITTLE_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 16, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 1}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 1}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 1}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 1}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 16, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva420p9be,
@@ -1846,8 +1880,8 @@ struct VideoFormat
              Q_BIG_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 9, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 9, 1, 1}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 9, 1, 1}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 9, 1, 1}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 9, 1, 1}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 9, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva420p9le,
@@ -1855,8 +1889,8 @@ struct VideoFormat
              Q_LITTLE_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 9, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 9, 1, 1}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 9, 1, 1}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 9, 1, 1}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 9, 1, 1}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 9, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva422p,
@@ -1873,8 +1907,8 @@ struct VideoFormat
              Q_BIG_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 10, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 0}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 0}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 0}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 0}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 10, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva422p10le,
@@ -1882,8 +1916,8 @@ struct VideoFormat
              Q_LITTLE_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 10, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 0}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 0}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 0}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 0}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 10, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva422p12be,
@@ -1891,8 +1925,8 @@ struct VideoFormat
              Q_BIG_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 12, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 12, 1, 0}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 12, 1, 0}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 12, 1, 0}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 12, 1, 0}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 12, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva422p12le,
@@ -1900,8 +1934,8 @@ struct VideoFormat
              Q_LITTLE_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 12, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 12, 1, 0}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 12, 1, 0}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 12, 1, 0}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 12, 1, 0}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 12, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva422p16be,
@@ -1909,8 +1943,8 @@ struct VideoFormat
              Q_BIG_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 16, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 0}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 0}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 0}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 0}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 16, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva422p16le,
@@ -1918,8 +1952,8 @@ struct VideoFormat
              Q_LITTLE_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 16, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 0}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 0}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 0}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 0}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 16, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva422p9be,
@@ -1927,8 +1961,8 @@ struct VideoFormat
              Q_BIG_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 9, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 9, 1, 0}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 9, 1, 0}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 9, 1, 0}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 9, 1, 0}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 9, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva422p9le,
@@ -1936,8 +1970,8 @@ struct VideoFormat
              Q_LITTLE_ENDIAN,
              4,
              {{1, {{CT_Y, 2, 0, 0, 2, 9, 0, 0}}, 16},
-              {1, {{CT_U, 2, 0, 0, 2, 9, 1, 0}}, 8},
-              {1, {{CT_V, 2, 0, 0, 2, 9, 1, 0}}, 8},
+              {1, {{CT_U, 2, 0, 0, 2, 9, 1, 0}}, 8 },
+              {1, {{CT_V, 2, 0, 0, 2, 9, 1, 0}}, 8 },
               {1, {{CT_A, 2, 0, 0, 2, 9, 0, 0}}, 16}
              }},
             {AkVideoCaps::Format_yuva444p,
@@ -2085,6 +2119,54 @@ struct VideoFormat
               {1, {{CT_V, 1, 0, 0, 1, 8, 1, 1}}, 4},
               {1, {{CT_U, 1, 0, 0, 1, 8, 1, 1}}, 4}
              }},
+            {AkVideoCaps::Format_yvu420p10be,
+             VFT_YUV,
+             Q_BIG_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 10, 0, 0}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 1}}, 8 },
+              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 1}}, 8 }
+             }},
+            {AkVideoCaps::Format_yvu420p10le,
+             VFT_YUV,
+             Q_LITTLE_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 10, 0, 0}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 10, 1, 1}}, 8 },
+              {1, {{CT_U, 2, 0, 0, 2, 10, 1, 1}}, 8 }
+             }},
+            {AkVideoCaps::Format_yvu420p12be,
+             VFT_YUV,
+             Q_BIG_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 12, 0, 0}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 12, 1, 1}}, 8 },
+              {1, {{CT_U, 2, 0, 0, 2, 12, 1, 1}}, 8 }
+             }},
+            {AkVideoCaps::Format_yvu420p12le,
+             VFT_YUV,
+             Q_LITTLE_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 12, 0, 0}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 12, 1, 1}}, 8 },
+              {1, {{CT_U, 2, 0, 0, 2, 12, 1, 1}}, 8 }
+             }},
+            {AkVideoCaps::Format_yvu420p16be,
+             VFT_YUV,
+             Q_BIG_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 16, 0, 0}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 1}}, 8 },
+              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 1}}, 8 }
+             }},
+            {AkVideoCaps::Format_yvu420p16le,
+             VFT_YUV,
+             Q_LITTLE_ENDIAN,
+             3,
+             {{1, {{CT_Y, 2, 0, 0, 2, 16, 0, 0}}, 16},
+              {1, {{CT_V, 2, 0, 0, 2, 16, 1, 1}}, 8 },
+              {1, {{CT_U, 2, 0, 0, 2, 16, 1, 1}}, 8 }
+             }},
             {AkVideoCaps::Format_yvu422p,
              VFT_YUV,
              Q_BYTE_ORDER,
@@ -2137,8 +2219,8 @@ struct VideoFormat
                                                        component.step,
                                                        component.offset,
                                                        component.shift,
-                                                       component.byteLength,
-                                                       component.length,
+                                                       component.byteDepth,
+                                                       component.depth,
                                                        component.widthDiv,
                                                        component.heightDiv);
                     }
@@ -2379,14 +2461,14 @@ AkVideoCaps AkVideoCaps::nearest(const AkVideoCapsList &caps) const
                 auto &plane = specs.plane(j);
 
                 for (size_t i = 0; i < plane.components(); ++i)
-                    diffPlanesBits += plane.component(i).length();
+                    diffPlanesBits += plane.component(i).depth();
             }
 
             for (size_t j = 0; j < sspecs.planes(); ++j) {
                 auto &plane = sspecs.plane(j);
 
                 for (size_t i = 0; i < plane.components(); ++i)
-                    diffPlanesBits -= plane.component(i).length();
+                    diffPlanesBits -= plane.component(i).depth();
             }
         }
 
@@ -2411,6 +2493,36 @@ bool AkVideoCaps::isSameFormat(const AkVideoCaps &other) const
     return this->d->m_format == other.d->m_format
             && this->d->m_width == other.d->m_width
             && this->d->m_height == other.d->m_height;
+}
+
+size_t AkVideoCaps::dataSize() const
+{
+    size_t dataSize = 0;
+    auto align = AkSimd::preferredAlign();
+    auto specs = VideoFormat::formatSpecs(this->d->m_format);
+
+    // Calculate parameters for each plane
+    for (size_t i = 0; i < specs.planes(); ++i) {
+        auto &plane = specs.plane(i);
+
+        // Calculate bytes used per line (bits per pixel * width / 8)
+        size_t bytesUsed = plane.bitsSize() * this->d->m_width / 8;
+
+        // Align line size for SIMD compatibility
+        size_t lineSize =
+                AkAlgorithm::alignUp(bytesUsed, size_t(align));
+
+        // Calculate plane size, considering sub-sampling
+        size_t planeSize = (lineSize * this->d->m_height) >> plane.heightDiv();
+
+        // Align plane size to ensure next plane starts aligned and update
+        // total data size
+        dataSize += AkAlgorithm::alignUp(planeSize, size_t(align));
+    }
+
+    // Align total data size for buffer allocation
+
+    return AkAlgorithm::alignUp(dataSize, size_t(align));
 }
 
 int AkVideoCaps::bitsPerPixel(AkVideoCaps::PixelFormat pixelFormat)
@@ -2574,6 +2686,26 @@ QDataStream &operator <<(QDataStream &ostream, const AkVideoCaps &caps)
     ostream << caps.fps();
 
     return ostream;
+}
+
+bool operator <(const AkVideoCaps &caps1, const AkVideoCaps &caps2)
+{
+    if (caps1.d->m_format < caps2.d->m_format)
+        return true;
+    else if (caps1.d->m_format > caps2.d->m_format)
+          return false;
+
+    if (caps1.d->m_width < caps2.d->m_width)
+        return true;
+    else if (caps1.d->m_width > caps2.d->m_width)
+        return false;
+
+    if (caps1.d->m_height < caps2.d->m_height)
+        return true;
+    else if (caps1.d->m_height > caps2.d->m_height)
+        return false;
+
+    return caps1.d->m_fps < caps2.d->m_fps;
 }
 
 #include "moc_akvideocaps.cpp"

@@ -38,11 +38,11 @@ class UvcExtendedControls: public QObject
         QVariantList controls(int fd) const;
         QVariantList controls(const QString &devicePath) const;
         bool setControls(int fd, const QVariantMap &controls) const;
-        bool setControls(const QString &devicePath, const QVariantMap &controls) const;
+        bool setControls(const QString &devicePath,
+                         const QVariantMap &controls) const;
 
     private:
         UvcExtendedControlsPrivate *d;
-
 };
 
 #endif // UVCEXTENDEDCONTROLS_H

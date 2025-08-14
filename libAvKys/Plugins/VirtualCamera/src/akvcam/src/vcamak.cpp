@@ -44,8 +44,8 @@
 #endif
 
 #include <ak.h>
+#include <akalgorithm.h>
 #include <akcaps.h>
-#include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
 #include <akvideoconverter.h>
@@ -184,11 +184,6 @@ class VCamAkPrivate
         inline QStringList v4l2Devices() const;
         QList<DeviceInfo> devicesInfo() const;
         inline QString stringFromIoctl(ulong cmd) const;
-        template<typename T>
-        static inline T alignUp(const T &value, const T &align)
-        {
-            return (value + align - 1) & ~(align - 1);
-        }
 };
 
 VCamAk::VCamAk(QObject *parent):
@@ -361,8 +356,6 @@ QList<AkVideoCaps::PixelFormat> VCamAk::supportedOutputPixelFormats() const
 {
     return {
         AkVideoCaps::Format_rgb24,
-        AkVideoCaps::Format_rgb565le,
-        AkVideoCaps::Format_rgb555le,
         AkVideoCaps::Format_xbgr,
         AkVideoCaps::Format_bgr24,
         AkVideoCaps::Format_uyvy422,
@@ -588,10 +581,10 @@ QString VCamAk::deviceCreate(const QString &description,
         return {};
     }
 
-    static const int nDevices = 2;
-    auto deviceNR = this->d->requestDeviceNR(nDevices);
+    static const int vcamAkNDevices = 2;
+    auto deviceNR = this->d->requestDeviceNR(vcamAkNDevices);
 
-    if (deviceNR.count() < nDevices) {
+    if (deviceNR.count() < vcamAkNDevices) {
         this->d->m_error = "No available devices to create a virtual camera";
 
         return {};
@@ -772,7 +765,7 @@ QString VCamAk::deviceCreate(const QString &description,
 
     if (!this->d->m_picture.isEmpty() && defaultImage.load(this->d->m_picture)) {
         defaultImage = defaultImage.convertToFormat(QImage::Format_RGB888);
-        auto width = VCamAkPrivate::alignUp(defaultImage.width(), 32);
+        auto width = AkAlgorithm::alignUp(defaultImage.width(), 32);
         defaultImage = defaultImage.scaled(width,
                                            defaultImage.height(),
                                            Qt::IgnoreAspectRatio,
@@ -1021,7 +1014,7 @@ bool VCamAk::deviceEdit(const QString &deviceId,
 
     if (!this->d->m_picture.isEmpty() && defaultImage.load(this->d->m_picture)) {
         defaultImage = defaultImage.convertToFormat(QImage::Format_RGB888);
-        auto width = VCamAkPrivate::alignUp(defaultImage.width(), 32);
+        auto width = AkAlgorithm::alignUp(defaultImage.width(), 32);
         defaultImage = defaultImage.scaled(width,
                                            defaultImage.height(),
                                            Qt::IgnoreAspectRatio,
@@ -1250,7 +1243,7 @@ bool VCamAk::changeDescription(const QString &deviceId,
 
     if (!this->d->m_picture.isEmpty() && defaultImage.load(this->d->m_picture)) {
         defaultImage = defaultImage.convertToFormat(QImage::Format_RGB888);
-        auto width = VCamAkPrivate::alignUp(defaultImage.width(), 32);
+        auto width = AkAlgorithm::alignUp(defaultImage.width(), 32);
         defaultImage = defaultImage.scaled(width,
                                            defaultImage.height(),
                                            Qt::IgnoreAspectRatio,
@@ -1525,7 +1518,7 @@ bool VCamAk::deviceDestroy(const QString &deviceId)
 
     if (!this->d->m_picture.isEmpty() && defaultImage.load(this->d->m_picture)) {
         defaultImage = defaultImage.convertToFormat(QImage::Format_RGB888);
-        auto width = VCamAkPrivate::alignUp(defaultImage.width(), 32);
+        auto width = AkAlgorithm::alignUp(defaultImage.width(), 32);
         defaultImage = defaultImage.scaled(width,
                                            defaultImage.height(),
                                            Qt::IgnoreAspectRatio,
@@ -1989,7 +1982,7 @@ bool VCamAk::applyPicture()
 
     if (!this->d->m_picture.isEmpty() && defaultImage.load(this->d->m_picture)) {
         defaultImage = defaultImage.convertToFormat(QImage::Format_RGB888);
-        auto width = VCamAkPrivate::alignUp(defaultImage.width(), 32);
+        auto width = AkAlgorithm::alignUp(defaultImage.width(), 32);
         defaultImage = defaultImage.scaled(width,
                                            defaultImage.height(),
                                            Qt::IgnoreAspectRatio,
@@ -2602,8 +2595,6 @@ const V4L2AkFormatMap &VCamAkPrivate::v4l2AkFormatMap() const
         // RGB formats
         {V4L2_PIX_FMT_RGB32 , AkVideoCaps::Format_xrgb    , "RGB32"},
         {V4L2_PIX_FMT_RGB24 , AkVideoCaps::Format_rgb24   , "RGB24"},
-        {V4L2_PIX_FMT_RGB565, AkVideoCaps::Format_rgb565le, "RGB16"},
-        {V4L2_PIX_FMT_RGB555, AkVideoCaps::Format_rgb555le, "RGB15"},
 
         // BGR formats
         {V4L2_PIX_FMT_BGR32 , AkVideoCaps::Format_xbgr    , "BGR32"},

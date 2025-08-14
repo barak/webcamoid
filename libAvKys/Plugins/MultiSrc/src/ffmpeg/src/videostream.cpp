@@ -52,6 +52,7 @@ class VideoStreamPrivate
         VideoStream *self;
         SwsContext *m_scaleContext {nullptr};
         qreal m_lastPts {0.0};
+        bool m_firstPacket {true};
 
         explicit VideoStreamPrivate(VideoStream *self);
         AkFrac fps() const;
@@ -160,7 +161,8 @@ void VideoStream::processData(AVFrame *frame)
                                      delay,
                                      AV_SYNC_THRESHOLD_MAX);
 
-        if (!qIsNaN(diff)
+        if (!this->d->m_firstPacket
+            && !qIsNaN(diff)
             && qAbs(diff) < AV_NOSYNC_THRESHOLD
             && delay < AV_SYNC_FRAMEDUP_THRESHOLD) {
             // Video is backward the external clock.
@@ -177,8 +179,10 @@ void VideoStream::processData(AVFrame *frame)
 
                 continue;
             }
-        } else
+        } else {
             this->globalClock()->setClock(pts);
+            this->d->m_firstPacket = false;
+        }
 
         this->m_clockDiff = diff;
         auto oPacket = this->d->convert(frame);
@@ -274,6 +278,13 @@ AkPacket VideoStreamPrivate::convert(AVFrame *iFrame)
 
     oPacket.setId(self->id());
     oPacket.setPts(iFrame->pts);
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 30, 100)
+    oPacket.setDuration(iFrame->duration);
+#else
+    oPacket.setDuration(iFrame->pkt_duration);
+#endif
+
     oPacket.setTimeBase(self->timeBase());
     oPacket.setIndex(int(self->index()));
     av_freep(&oFrame.data[0]);

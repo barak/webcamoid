@@ -31,11 +31,11 @@
 #include <QtConcurrent>
 #include <ak.h>
 #include <akcaps.h>
-#include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
 #include <akpluginmanager.h>
 #include <akvideopacket.h>
+#include <iak/akelement.h>
 
 #include "qtscreendev.h"
 
@@ -472,6 +472,7 @@ void QtScreenDevPrivate::sendFrame(const QVideoFrame &frame)
                           this->m_fps);
     AkVideoPacket videoPacket(videoCaps);
     videoPacket.setPts(frame.startTime());
+    videoPacket.setDuration(frame.endTime() - frame.startTime());
     videoPacket.setTimeBase({1, 1000000});
     videoPacket.setIndex(0);
     videoPacket.setId(this->m_id);
@@ -486,8 +487,11 @@ void QtScreenDevPrivate::sendFrame(const QVideoFrame &frame)
 
     if (this->m_rotateFilter) {
         auto angle = -this->screenRotation();
-        this->m_rotateFilter->setProperty("angle", angle);
-        videoPacket = this->m_rotateFilter->iStream(videoPacket);
+
+        if (!qFuzzyIsNull(angle)) {
+            this->m_rotateFilter->setProperty("angle", angle);
+            videoPacket = this->m_rotateFilter->iStream(videoPacket);
+        }
     }
 
     emit self->oStream(videoPacket);

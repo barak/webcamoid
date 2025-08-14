@@ -20,7 +20,7 @@
 #ifndef AGING_H
 #define AGING_H
 
-#include <akplugin.h>
+#include <iak/akplugin.h>
 
 class Aging: public QObject, public AkPlugin
 {
@@ -29,8 +29,7 @@ class Aging: public QObject, public AkPlugin
     Q_PLUGIN_METADATA(IID AkPlugin_IID FILE "pspec.json")
 
     public:
-        QObject *create(const QString &key, const QString &specification) override;
-        QStringList keys() const override;
+        QObject *create() override;
 };
 
 #endif // AGING_H

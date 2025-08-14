@@ -1,0 +1,13 @@
+{
+    "type": "WebcamoidPluginsCollection",
+    "plugins": [
+        {
+            "name": "Vorbis",
+            "description": "Vorbis encoder",
+            "id": "AudioEncoder/Vorbis/libvorbis",
+            "implements": ["Element", "AudioEncoder"],
+            "priority": 600,
+            "type": "qtplugin"
+        }
+    ]
+}

@@ -44,6 +44,7 @@
 
 #include "capturedshow.h"
 #include "framegrabber.h"
+#include "../../mediafoundation/src/uvcextendedcontrols.h"
 
 #define TIME_BASE 1.0e7
 #define SOURCE_FILTER_NAME L"Source"
@@ -139,33 +140,22 @@ inline RawFmtToAkFmtMap initRawFmtToAkFmt()
 
 Q_GLOBAL_STATIC_WITH_ARGS(RawFmtToAkFmtMap, rawFmtToAkFmt, (initRawFmtToAkFmt()))
 
-using CompressedFormatToStrMap = QMap<GUID, QString>;
+using CompressedFormatToStrMap = QMap<GUID, AkCompressedVideoCaps::VideoCodecID>;
 
 inline CompressedFormatToStrMap initCompressedFormatToStr()
 {
     CompressedFormatToStrMap compressedFormatToStr {
-        {MEDIASUBTYPE_CFCC   , "mjpg"  },
-        {MEDIASUBTYPE_IJPG   , "jpeg"  },
-        {MEDIASUBTYPE_MDVF   , "dv"    },
-        {MEDIASUBTYPE_MJPG   , "mjpg"  },
-        {MEDIASUBTYPE_Plum   , "mjpg"  },
-        {MEDIASUBTYPE_QTJpeg , "jpeg"  },
-        {MEDIASUBTYPE_QTRle  , "qtrle" },
-        {MEDIASUBTYPE_QTRpza , "qtrpza"},
-        {MEDIASUBTYPE_QTSmc  , "qtsmc" },
-        {MEDIASUBTYPE_TVMJ   , "mjpg"  },
-        {MEDIASUBTYPE_WAKE   , "mjpg"  },
-        {MEDIASUBTYPE_dv25   , "dv25"  },
-        {MEDIASUBTYPE_dv50   , "dv50"  },
-        {MEDIASUBTYPE_dvh1   , "dvh1"  },
-        {MEDIASUBTYPE_dvhd   , "dvhd"  },
-        {MEDIASUBTYPE_dvsd   , "dvsd"  },
-        {MEDIASUBTYPE_dvsl   , "dvsl"  },
-        {AK_MEDIASUBTYPE_AVC1, "h264"  },
-        {AK_MEDIASUBTYPE_H264, "h264"  },
-        {AK_MEDIASUBTYPE_h264, "h264"  },
-        {AK_MEDIASUBTYPE_X264, "h264"  },
-        {AK_MEDIASUBTYPE_x264, "h264"  },
+        {MEDIASUBTYPE_CFCC   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_IJPG   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_MJPG   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_Plum   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_TVMJ   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {MEDIASUBTYPE_WAKE   , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {AK_MEDIASUBTYPE_AVC1, AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AK_MEDIASUBTYPE_H264, AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AK_MEDIASUBTYPE_h264, AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AK_MEDIASUBTYPE_X264, AkCompressedVideoCaps::VideoCodecID_h264 },
+        {AK_MEDIASUBTYPE_x264, AkCompressedVideoCaps::VideoCodecID_h264 },
     };
 
     return compressedFormatToStr;
@@ -207,7 +197,7 @@ class CaptureDShowPrivate
         QList<int> m_streams;
         QStringList m_devices;
         QMap<QString, QString> m_descriptions;
-        QMap<QString, CaptureVideoCaps> m_devicesCaps;
+        QMap<QString, AkCapsList> m_devicesCaps;
         qint64 m_id {-1};
         AkFrac m_timeBase;
         CaptureDShow::IoMethod m_ioMethod {CaptureDShow::IoMethodGrabSample};
@@ -229,7 +219,8 @@ class CaptureDShowPrivate
         explicit CaptureDShowPrivate(CaptureDShow *self);
         QString devicePath(IPropertyBag *propertyBag) const;
         QString deviceDescription(IPropertyBag *propertyBag) const;
-        CaptureVideoCaps caps(IBaseFilter *baseFilter) const;
+        static QString stringFromCLSID(const CLSID &clsid);
+        AkCapsList caps(IBaseFilter *baseFilter) const;
         AkVideoCaps::PixelFormat nearestFormat(const BITMAPINFOHEADER *bitmapHeader) const;
         AkCaps capsFromMediaType(const AM_MEDIA_TYPE *mediaType,
                                  bool *isRaw=nullptr,
@@ -265,7 +256,7 @@ class CaptureDShowPrivate
         QVariantMap controlStatus(const QVariantList &controls) const;
         QVariantMap mapDiff(const QVariantMap &map1,
                             const QVariantMap &map2) const;
-        void frameReceived(qreal time, const QByteArray &buffer);
+        void frameReceived(qreal time, QByteArray buffer);
         void sampleReceived(qreal time, IMediaSample *sample);
         AkPacket processFrame(const AM_MEDIA_TYPE *mediaType,
                               const QByteArray &buffer) const;
@@ -279,7 +270,7 @@ CaptureDShow::CaptureDShow(QObject *parent):
     this->d = new CaptureDShowPrivate(this);
     QObject::connect(&this->d->m_frameGrabber,
                      &FrameGrabber::frameReady,
-                     [this] (qreal time, const QByteArray &packet) {
+                     [this] (qreal time, QByteArray packet) {
                         this->d->frameReceived(time, packet);
                      });
     QObject::connect(&this->d->m_frameGrabber,
@@ -355,7 +346,7 @@ QString CaptureDShow::description(const QString &webcam) const
     return this->d->m_descriptions.value(webcam);
 }
 
-CaptureVideoCaps CaptureDShow::caps(const QString &webcam) const
+AkCapsList CaptureDShow::caps(const QString &webcam) const
 {
     return this->d->m_devicesCaps.value(webcam);
 }
@@ -482,6 +473,7 @@ AkPacket CaptureDShow::readFrame()
             auto controls = this->d->mapDiff(this->d->m_localCameraControls,
                                              cameraControls);
             this->d->setCameraControls(source, controls);
+            UvcExtendedControls::setControls(source, controls);
             this->d->m_localCameraControls = cameraControls;
         }
 
@@ -503,10 +495,12 @@ AkPacket CaptureDShow::readFrame()
             } else {
                 AM_MEDIA_TYPE mediaType;
                 ZeroMemory(&mediaType, sizeof(AM_MEDIA_TYPE));
-                this->d->m_grabber->GetConnectedMediaType(&mediaType);
-                packet = this->d->processFrame(&mediaType,
-                                               this->d->m_curBuffer);
-                this->d->freeMediaType(mediaType);
+
+                if (SUCCEEDED(this->d->m_grabber->GetConnectedMediaType(&mediaType))) {
+                    packet = this->d->processFrame(&mediaType,
+                                                   this->d->m_curBuffer);
+                    this->d->freeMediaType(mediaType);
+                }
             }
 
             this->d->m_curBuffer.clear();
@@ -589,10 +583,10 @@ QString CaptureDShowPrivate::devicePath(IPropertyBag *propertyBag) const
     auto hr = propertyBag->Read(L"DevicePath", &var, nullptr);
     QString devicePath;
 
-    if (SUCCEEDED(hr))
+    if (SUCCEEDED(hr))  {
         devicePath = QString::fromWCharArray(var.bstrVal);
-
-    VariantClear(&var);
+        VariantClear(&var);
+    }
 
     return devicePath;
 }
@@ -609,18 +603,32 @@ QString CaptureDShowPrivate::deviceDescription(IPropertyBag *propertyBag) const
 
     QString description;
 
-    if (SUCCEEDED(hr))
+    if (SUCCEEDED(hr)) {
         description = QString::fromWCharArray(var.bstrVal);
-
-    VariantClear(&var);
+        VariantClear(&var);
+    }
 
     return description;
 }
 
-CaptureVideoCaps CaptureDShowPrivate::caps(IBaseFilter *baseFilter) const
+QString CaptureDShowPrivate::stringFromCLSID(const CLSID &clsid)
+{
+    OLECHAR *clsidStr = nullptr;
+
+    if (FAILED(StringFromCLSID(clsid, &clsidStr)))
+        return {};
+
+    auto str = QString::fromWCharArray(clsidStr);
+    CoTaskMemFree(clsidStr);
+
+    return str;
+}
+
+AkCapsList CaptureDShowPrivate::caps(IBaseFilter *baseFilter) const
 {
     auto pins = this->enumPins(baseFilter, PINDIR_OUTPUT);
-    CaptureVideoCaps caps;
+    QVector<AkVideoCaps> rawFormats;
+    QVector<AkCompressedVideoCaps> compressedFormats;
 
     for (auto &pin: pins) {
         IEnumMediaTypes *pEnum = nullptr;
@@ -637,8 +645,10 @@ CaptureVideoCaps CaptureDShowPrivate::caps(IBaseFilter *baseFilter) const
                 && mediaType->pbFormat != nullptr) {
                 auto videoCaps = this->capsFromMediaType(mediaType);
 
-                if (videoCaps)
-                    caps << videoCaps;
+                if (videoCaps.type() == AkCaps::CapsVideo)
+                    rawFormats << videoCaps;
+                else if (videoCaps.type() == AkCaps::CapsVideoCompressed)
+                    compressedFormats << videoCaps;
             }
 
             this->deleteMediaType(mediaType);
@@ -647,12 +657,26 @@ CaptureVideoCaps CaptureDShowPrivate::caps(IBaseFilter *baseFilter) const
         pEnum->Release();
     }
 
+    std::sort(rawFormats.begin(), rawFormats.begin());
+    std::sort(compressedFormats.begin(), compressedFormats.begin());
+    AkCapsList caps;
+
+    for (auto &format: compressedFormats)
+        caps << format;
+
+    for (auto &format: rawFormats)
+        caps << format;
+
     return caps;
 }
 
 AkVideoCaps::PixelFormat CaptureDShowPrivate::nearestFormat(const BITMAPINFOHEADER *bitmapHeader) const
 {
-    static const QMap<quint32, AkVideoCaps::PixelFormat> fourccToAk {
+    static const struct
+    {
+        quint32 fourcc;
+        AkVideoCaps::PixelFormat fmt;
+    } videoCaptureDShowFourCCToAk[] = {
         {MAKEFOURCC('A', 'Y', 'U', 'V'), AkVideoCaps::Format_ayuvpack},
         {MAKEFOURCC('I', 'F', '0', '9'), AkVideoCaps::Format_yvu410p },
         {MAKEFOURCC('I', 'Y', 'U', 'V'), AkVideoCaps::Format_yuv420p },
@@ -665,12 +689,16 @@ AkVideoCaps::PixelFormat CaptureDShowPrivate::nearestFormat(const BITMAPINFOHEAD
         {MAKEFOURCC('Y', 'V', '1', '2'), AkVideoCaps::Format_yvu420p },
         {MAKEFOURCC('Y', 'V', 'U', '9'), AkVideoCaps::Format_yvu410p },
         {MAKEFOURCC('Y', 'V', 'Y', 'U'), AkVideoCaps::Format_yvyu422 },
+        {0                             , AkVideoCaps::Format_none    },
     };
 
     if (bitmapHeader->biCompression != BI_RGB
         && bitmapHeader->biCompression != BI_BITFIELDS) {
-        return fourccToAk.value(bitmapHeader->biCompression,
-                                AkVideoCaps::Format_none);
+        for (auto it = videoCaptureDShowFourCCToAk; it->fourcc; ++it)
+            if (it->fourcc == bitmapHeader->biCompression)
+                return it->fmt;
+
+        return AkVideoCaps::Format_none;
     }
 
     static const DWORD mask555[] = {0x007c00, 0x0003e0, 0x00001f};
@@ -739,7 +767,6 @@ AkCaps CaptureDShowPrivate::capsFromMediaType(const AM_MEDIA_TYPE *mediaType,
         biHeight = videoInfoHeader->bmiHeader.biHeight;
         memcpy(&rcTarget, &videoInfoHeader->rcTarget, sizeof(RECT));
         AvgTimePerFrame = videoInfoHeader->AvgTimePerFrame;
-        isRawFmt = format != AkVideoCaps::Format_none;
         format = this->nearestFormat(&videoInfoHeader->bmiHeader);
         isRawFmt = format != AkVideoCaps::Format_none;
     } else {
@@ -767,15 +794,18 @@ AkCaps CaptureDShowPrivate::capsFromMediaType(const AM_MEDIA_TYPE *mediaType,
     if (height < 1)
         height = int(qAbs(biHeight));
 
-    AkFrac fps = AvgTimePerFrame < 1? AkFrac(30, 1): AkFrac(TIME_BASE, AvgTimePerFrame);
+    AkFrac fps = AvgTimePerFrame < 1?
+                     AkFrac(30, 1):
+                     AkFrac(TIME_BASE, AvgTimePerFrame);
 
     if (isRawFmt) {
         return AkVideoCaps(format, width, height, fps);
     } else if (compressedFormatToStr->contains(mediaType->subtype)) {
         return AkCompressedVideoCaps(compressedFormatToStr->value(mediaType->subtype),
-                                     width,
-                                     height,
-                                     fps);
+                                     {AkVideoCaps::Format_yuv420p,
+                                      width,
+                                      height,
+                                      fps});
     }
 
     return {};
@@ -1357,7 +1387,7 @@ QVariantMap CaptureDShowPrivate::mapDiff(const QVariantMap &map1,
     return map;
 }
 
-void CaptureDShowPrivate::frameReceived(qreal time, const QByteArray &buffer)
+void CaptureDShowPrivate::frameReceived(qreal time, QByteArray buffer)
 {
     Q_UNUSED(time)
 
@@ -1371,12 +1401,20 @@ void CaptureDShowPrivate::sampleReceived(qreal time, IMediaSample *sample)
 {
     Q_UNUSED(time)
 
+    if (!sample)
+        return;
+
+    auto sampleSize = sample->GetSize();
+
+    if (sampleSize < 1)
+        return;
+
     this->m_mutex.lockForWrite();
     BYTE *data = nullptr;
 
     if (SUCCEEDED(sample->GetPointer(&data))) {
         this->m_curBuffer = QByteArray(reinterpret_cast<char *>(data),
-                                       int(sample->GetSize()));
+                                       int(sampleSize));
 
         if (this->m_curMediaType) {
             this->freeMediaType(*this->m_curMediaType);
@@ -1443,6 +1481,7 @@ AkPacket CaptureDShowPrivate::processFrame(const AM_MEDIA_TYPE *mediaType,
         }
 
         packet.setPts(pts);
+        packet.setDuration(1);
         packet.setTimeBase(this->m_timeBase);
         packet.setIndex(0);
         packet.setId(this->m_id);
@@ -1453,6 +1492,7 @@ AkPacket CaptureDShowPrivate::processFrame(const AM_MEDIA_TYPE *mediaType,
     AkCompressedVideoPacket packet(caps, buffer.size());
     memcpy(packet.data(), buffer.constData(), buffer.size());
     packet.setPts(pts);
+    packet.setDuration(1);
     packet.setTimeBase(this->m_timeBase);
     packet.setIndex(0);
     packet.setId(this->m_id);
@@ -1466,12 +1506,17 @@ void CaptureDShowPrivate::updateDevices()
     decltype(this->m_descriptions) descriptions;
     decltype(this->m_devicesCaps) devicesCaps;
 
+    qDebug() << "Enumerating the cameras";
     IEnumMoniker *pEnum = nullptr;
     HRESULT hr = this->enumerateCameras(&pEnum);
+    qDebug() << "Reading the cameras information";
 
     if (SUCCEEDED(hr)) {
         pEnum->Reset();
         IMoniker *moniker = nullptr;
+
+        auto videoInputDeviceCID =
+            CaptureDShowPrivate::stringFromCLSID(CLSID_VideoInputDeviceCategory);
 
         for (int i = 0; pEnum->Next(1, &moniker, nullptr) == S_OK; i++) {
             IPropertyBag *propertyBag = nullptr;
@@ -1490,6 +1535,16 @@ void CaptureDShowPrivate::updateDevices()
 
             if (devicePath.isEmpty())
                 devicePath = this->monikerDisplayName(moniker);
+
+            /* Buggy and wrong programmed virtual cameras can cause inestabilities,
+             * so prevent loading them to reduce the failure vector.
+             */
+
+            if (devicePath.startsWith("@device:sw:" + videoInputDeviceCID + "\\")) {
+                moniker->Release();
+
+                continue;
+            }
 
             auto description = this->deviceDescription(propertyBag);
             propertyBag->Release();
@@ -1510,6 +1565,15 @@ void CaptureDShowPrivate::updateDevices()
             baseFilter->Release();
 
             if (!caps.isEmpty()) {
+                auto index =
+                        Capture::nearestResolution({DEFAULT_FRAME_WIDTH,
+                                                    DEFAULT_FRAME_HEIGHT},
+                                                   DEFAULT_FRAME_FPS,
+                                                   caps);
+
+                if (index > 0)
+                    caps.move(index, 0);
+
                 devices << devicePath;
                 descriptions[devicePath] = description;
                 devicesCaps[devicePath] = caps;
@@ -1781,7 +1845,7 @@ bool CaptureDShow::init()
     }
     case AkCaps::CapsVideoCompressed: {
         AkCompressedVideoCaps videoCaps(caps);
-        this->d->m_timeBase = videoCaps.fps().invert();
+        this->d->m_timeBase = videoCaps.rawCaps().fps().invert();
 
         break;
     }
@@ -1847,7 +1911,9 @@ void CaptureDShow::setDevice(const QString &device)
 
         if (camera) {
             this->d->m_globalImageControls = this->d->imageControls(camera);
-            this->d->m_globalCameraControls = this->d->cameraControls(camera);
+            this->d->m_globalCameraControls =
+                    this->d->cameraControls(camera)
+                    + UvcExtendedControls::controls(camera);
             camera->Release();
         }
 
@@ -1869,7 +1935,7 @@ void CaptureDShow::setStreams(const QList<int> &streams)
     if (streams.isEmpty())
         return;
 
-    int stream = streams[0];
+    auto stream = streams[0];
 
     if (stream < 0)
         return;

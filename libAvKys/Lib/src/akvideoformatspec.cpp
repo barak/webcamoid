@@ -182,16 +182,20 @@ bool AkVideoFormatSpec::contains(AkColorComponent::ComponentType component) cons
     return false;
 }
 
-size_t AkVideoFormatSpec::byteLength() const
+size_t AkVideoFormatSpec::byteDepth() const
 {
-    for (auto &plane: this->d->m_planes)
-        for (size_t i = 0; i < plane.components(); ++i) {
-            auto &component = plane.component(i);
+    if (this->d->m_type == VFT_RGB)
+        return this->component(AkColorComponent::CT_R).byteDepth();
 
-            return component.byteLength();
-        }
+    return this->component(AkColorComponent::CT_Y).byteDepth();
+}
 
-    return 0;
+size_t AkVideoFormatSpec::depth() const
+{
+    if (this->d->m_type == VFT_RGB)
+        return this->component(AkColorComponent::CT_R).depth();
+
+    return this->component(AkColorComponent::CT_Y).depth();
 }
 
 size_t AkVideoFormatSpec::numberOfComponents() const
@@ -225,6 +229,34 @@ size_t AkVideoFormatSpec::mainComponents() const
     }
 
     return n;
+}
+
+bool AkVideoFormatSpec::isFast() const
+{
+    if (this->d->m_endianness != Q_BYTE_ORDER)
+        return false;
+
+    size_t curDepth = 0;
+
+    for (const auto &plane: this->d->m_planes)
+        for (size_t c = 0; c < plane.components(); ++c) {
+            auto component = plane.component(c);
+
+            if (component.shift() > 0)
+                return false;
+
+            auto depth = component.depth();
+
+            if (depth < 1 || (depth & (depth - 1)))
+                return false;
+
+            if (curDepth < 1)
+                curDepth = depth;
+            else if (depth != curDepth)
+                return false;
+        }
+
+    return true;
 }
 
 void AkVideoFormatSpec::registerTypes()

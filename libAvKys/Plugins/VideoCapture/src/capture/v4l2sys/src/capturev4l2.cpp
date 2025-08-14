@@ -22,6 +22,7 @@
 #include <QFileSystemWatcher>
 #include <QMap>
 #include <QReadWriteLock>
+#include <QSize>
 #include <QVariant>
 #include <QVector>
 #include <ak.h>
@@ -198,37 +199,33 @@ inline V4L2FmtToAkFmtMap initV4L2FmtToAkFmt()
 
 Q_GLOBAL_STATIC_WITH_ARGS(V4L2FmtToAkFmtMap, v4l2FmtToAkFmt, (initV4L2FmtToAkFmt()))
 
-using CompressedFormatToStrMap = QMap<__u32, QString>;
+using CompressedFormatToStrMap = QMap<__u32, AkCompressedVideoCaps::VideoCodecID>;
 
 inline CompressedFormatToStrMap initCompressedFormatToStr()
 {
     CompressedFormatToStrMap compressedFormatToStr {
-        {V4L2_PIX_FMT_MJPEG         , "mjpg" },
-        {V4L2_PIX_FMT_JPEG          , "jpeg" },
-        {V4L2_PIX_FMT_DV            , "dvsd" },
-        {V4L2_PIX_FMT_MPEG          , "mpeg" },
-        {V4L2_PIX_FMT_H264          , "h264" },
-        {V4L2_PIX_FMT_H264_NO_SC    , "h264" },
-        {V4L2_PIX_FMT_H264_MVC      , "h264" },
-        {V4L2_PIX_FMT_H263          , "h263" },
-        {V4L2_PIX_FMT_MPEG1         , "mpeg1"},
-        {V4L2_PIX_FMT_MPEG2         , "mpeg2"},
-        {V4L2_PIX_FMT_MPEG2_SLICE   , "mpeg2"},
-        {V4L2_PIX_FMT_MPEG4         , "mpeg4"},
-        {V4L2_PIX_FMT_XVID          , "xvid" },
-        {V4L2_PIX_FMT_VC1_ANNEX_G   , "vc1"  },
-        {V4L2_PIX_FMT_VC1_ANNEX_L   , "vc1"  },
-        {V4L2_PIX_FMT_VP8           , "vp8"  },
+        {V4L2_PIX_FMT_MJPEG         , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {V4L2_PIX_FMT_JPEG          , AkCompressedVideoCaps::VideoCodecID_jpeg },
+        {V4L2_PIX_FMT_MPEG          , AkCompressedVideoCaps::VideoCodecID_mjpeg},
+        {V4L2_PIX_FMT_H264          , AkCompressedVideoCaps::VideoCodecID_h264 },
+        {V4L2_PIX_FMT_H264_NO_SC    , AkCompressedVideoCaps::VideoCodecID_h264 },
+        {V4L2_PIX_FMT_H264_MVC      , AkCompressedVideoCaps::VideoCodecID_h264 },
+        {V4L2_PIX_FMT_MPEG1         , AkCompressedVideoCaps::VideoCodecID_mpeg1},
+        {V4L2_PIX_FMT_MPEG2         , AkCompressedVideoCaps::VideoCodecID_mpeg2},
+        {V4L2_PIX_FMT_MPEG2_SLICE   , AkCompressedVideoCaps::VideoCodecID_mpeg2},
+        {V4L2_PIX_FMT_MPEG4         , AkCompressedVideoCaps::VideoCodecID_mpeg4},
+        {V4L2_PIX_FMT_XVID          , AkCompressedVideoCaps::VideoCodecID_mpeg4},
+        {V4L2_PIX_FMT_VP8           , AkCompressedVideoCaps::VideoCodecID_vp8  },
 #ifdef V4L2_PIX_FMT_VP8_FRAME
-        {V4L2_PIX_FMT_VP8_FRAME     , "vp8"  },
+        {V4L2_PIX_FMT_VP8_FRAME     , AkCompressedVideoCaps::VideoCodecID_vp8  },
 #endif
-        {V4L2_PIX_FMT_VP9           , "vp9"  },
+        {V4L2_PIX_FMT_VP9           , AkCompressedVideoCaps::VideoCodecID_vp9  },
 #ifdef V4L2_PIX_FMT_VP9_FRAME
-        {V4L2_PIX_FMT_VP9_FRAME     , "vp9"  },
+        {V4L2_PIX_FMT_VP9_FRAME     , AkCompressedVideoCaps::VideoCodecID_vp9  },
 #endif
-        {V4L2_PIX_FMT_HEVC          , "hevc" },
+        {V4L2_PIX_FMT_HEVC          , AkCompressedVideoCaps::VideoCodecID_hevc },
 #ifdef V4L2_PIX_FMT_H264_SLICE
-        {V4L2_PIX_FMT_H264_SLICE    , "h264" },
+        {V4L2_PIX_FMT_H264_SLICE    , AkCompressedVideoCaps::VideoCodecID_h264 },
 #endif
     };
 
@@ -333,6 +330,10 @@ class CaptureV4L2Private
                             const QVariantMap &map2) const;
         inline QStringList v4l2Devices() const;
         void updateDevices();
+        void typeAndFormatFromCaps(const QString &device,
+                                   const AkCaps &caps,
+                                   __u32 &type,
+                                   __u32 &pixelformat) const;
 };
 
 CaptureV4L2::CaptureV4L2(QObject *parent):
@@ -398,12 +399,35 @@ QString CaptureV4L2::description(const QString &webcam) const
     return this->d->m_descriptions.value(webcam);
 }
 
-CaptureVideoCaps CaptureV4L2::caps(const QString &webcam) const
+AkCapsList CaptureV4L2::caps(const QString &webcam) const
 {
-    CaptureVideoCaps caps;
+    QVector<AkVideoCaps> rawFormats;
+    QVector<AkCompressedVideoCaps> compressedFormats;
 
     for (auto &format: this->d->m_devicesCaps.value(webcam))
-        caps << format.caps;
+        if (format.caps.type() == AkCaps::CapsVideo)
+            rawFormats << format.caps;
+        else if (format.caps.type() == AkCaps::CapsVideoCompressed)
+            compressedFormats << format.caps;
+
+    std::sort(rawFormats.begin(), rawFormats.begin());
+    std::sort(compressedFormats.begin(), compressedFormats.begin());
+    AkCapsList caps;
+
+    for (auto &format: compressedFormats)
+        caps << format;
+
+    for (auto &format: rawFormats)
+        caps << format;
+
+    auto index =
+            Capture::nearestResolution({DEFAULT_FRAME_WIDTH,
+                                        DEFAULT_FRAME_HEIGHT},
+                                        DEFAULT_FRAME_FPS,
+                                       caps);
+
+    if (index > 0)
+        caps.move(index, 0);
 
     return caps;
 }
@@ -641,28 +665,34 @@ bool CaptureV4L2::init()
         return false;
     }
 
-    auto supportedCaps = this->d->m_devicesCaps.value(this->d->m_device);
+    auto supportedCaps = this->caps(this->d->m_device);
     auto caps = supportedCaps[streams[0]];
-    auto v4l2PixelFormat = caps.pixelformat;
     int width = 0;
     int height = 0;
     AkFrac fps;
 
-    if (caps.caps.type() == AkCaps::CapsVideo) {
-        AkVideoCaps videoCaps(caps.caps);
+    __u32 v4l2Type = 0;
+    __u32 v4l2PixelFormat = 0;
+    this->d->typeAndFormatFromCaps(this->d->m_device,
+                                   caps,
+                                   v4l2Type,
+                                   v4l2PixelFormat);
+
+    if (caps.type() == AkCaps::CapsVideo) {
+        AkVideoCaps videoCaps(caps);
         width = videoCaps.width();
         height = videoCaps.height();
         fps = videoCaps.fps();
     } else {
-        AkCompressedVideoCaps videoCaps(caps.caps);
-        width = videoCaps.width();
-        height = videoCaps.height();
-        fps = videoCaps.fps();
+        AkCompressedVideoCaps videoCaps(caps);
+        width = videoCaps.rawCaps().width();
+        height = videoCaps.rawCaps().height();
+        fps = videoCaps.rawCaps().fps();
     }
 
     v4l2_format fmt;
     memset(&fmt, 0, sizeof(v4l2_format));
-    fmt.type = caps.type;
+    fmt.type = v4l2Type;
     x_ioctl(this->d->m_fd, VIDIOC_G_FMT, &fmt);
 
     if (fmt.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
@@ -689,7 +719,7 @@ bool CaptureV4L2::init()
     memcpy(&this->d->m_v4l2Format, &fmt, sizeof(v4l2_format));
     this->d->m_fps = fps;
     this->d->setFps(this->d->m_fd, fmt.type, this->d->m_fps);
-    this->d->m_caps = caps.caps;
+    this->d->m_caps = caps;
     this->d->m_timeBase = this->d->m_fps.invert();
 
     if (this->d->m_ioMethod == IoMethodReadWrite
@@ -745,6 +775,7 @@ bool CaptureV4L2::init()
 
     if (this->d->m_caps.type() == AkCaps::CapsVideo) {
         this->d->m_outPacket = {this->d->m_caps};
+        this->d->m_outPacket.setDuration(1);
         this->d->m_outPacket.setTimeBase(this->d->m_timeBase);
         this->d->m_outPacket.setIndex(0);
         this->d->m_outPacket.setId(this->d->m_id);
@@ -939,7 +970,7 @@ V4L2Formats CaptureV4L2Private::capsFps(int fd,
 {
     V4L2Formats caps;
     AkVideoCaps::PixelFormat fmt;
-    QString fmtCompressed;
+    AkCompressedVideoCaps::VideoCodecID fmtCompressed;
     bool isRaw = v4l2FmtToAkFmt->contains(format.pixelformat);
 
     if (isRaw)
@@ -969,6 +1000,9 @@ V4L2Formats CaptureV4L2Private::capsFps(int fd,
             fps = AkFrac(frmival.stepwise.min.denominator,
                          frmival.stepwise.max.numerator);
 
+        if (fps.value() < 1.0)
+            break;
+
         if (isRaw) {
             AkVideoCaps videoCaps(fmt, width, height, fps);
             caps << DeviceV4L2Format(videoCaps,
@@ -976,9 +1010,10 @@ V4L2Formats CaptureV4L2Private::capsFps(int fd,
                                      format.pixelformat);
         } else {
             AkCompressedVideoCaps videoCaps(fmtCompressed,
-                                            width,
-                                            height,
-                                            fps);
+                                            {AkVideoCaps::Format_yuv420p,
+                                             int(width),
+                                             int(height),
+                                             fps});
             caps << DeviceV4L2Format(videoCaps,
                                      format.type,
                                      format.pixelformat);
@@ -1007,9 +1042,10 @@ V4L2Formats CaptureV4L2Private::capsFps(int fd,
                                          format.pixelformat);
             } else {
                 AkCompressedVideoCaps videoCaps(fmtCompressed,
-                                                width,
-                                                height,
-                                                fps);
+                                                {AkVideoCaps::Format_yuv420p,
+                                                 int(width),
+                                                 int(height),
+                                                 fps});
                 caps << DeviceV4L2Format(videoCaps,
                                          format.type,
                                          format.pixelformat);
@@ -1053,9 +1089,9 @@ V4L2Formats CaptureV4L2Private::caps(int fd) const
                     }
                 }
             } else if (!compressedFormatToStr->contains(fmtdesc.pixelformat)) {
-                qDebug() << "Unknown pixel format:"
-                         << fmtdesc.pixelformat
-                         << "(" << fourccToStr(fmtdesc.pixelformat) << ")";
+                qWarning() << "Unknown pixel format:"
+                           << fmtdesc.pixelformat
+                           << "(" << fourccToStr(fmtdesc.pixelformat) << ")";
 
                 continue;
             }
@@ -1112,8 +1148,8 @@ V4L2Formats CaptureV4L2Private::caps(int fd) const
             }
         }
 
-        if (width <= 0 || height <= 0)
-            return {};
+        if (width < 1 || height < 1)
+            continue;
 
         // Enumerate all supported formats.
         memset(&fmtdesc, 0, sizeof(v4l2_fmtdesc));
@@ -1123,9 +1159,9 @@ V4L2Formats CaptureV4L2Private::caps(int fd) const
              x_ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) >= 0;
              fmtdesc.index++) {
             if (v4l2FmtToAkFmt->contains(fmtdesc.pixelformat)) {
-                qDebug() << "Unknown pixel format:"
-                         << fmtdesc.pixelformat
-                         << "(" << fourccToStr(fmtdesc.pixelformat) << ")";
+                qWarning() << "Unknown pixel format:"
+                           << fmtdesc.pixelformat
+                           << "(" << fourccToStr(fmtdesc.pixelformat) << ")";
 
                 continue;
             }
@@ -1605,6 +1641,7 @@ AkPacket CaptureV4L2Private::processFrame(const char * const *planeData,
         AkCompressedVideoPacket oPacket(this->m_caps, planeSize[0]);
         memcpy(oPacket.data(), planeData[0], planeSize[0]);
         oPacket.setPts(pts);
+        oPacket.setDuration(1);
         oPacket.setTimeBase(this->m_timeBase);
         oPacket.setIndex(0);
         oPacket.setId(this->m_id);
@@ -1733,20 +1770,27 @@ void CaptureV4L2Private::updateDevices()
 
     for (auto &devicePath: devicesFiles) {
         auto fileName = devicesDir.absoluteFilePath(devicePath);
+        qInfo() << "V4L2 video device node found:" << fileName;
         int fd = x_open(fileName.toStdString().c_str(), O_RDWR | O_NONBLOCK, 0);
 
         if (fd < 0)
             continue;
 
+        v4l2_capability capability;
+        memset(&capability, 0, sizeof(v4l2_capability));
+        QString description;
+
+        if (x_ioctl(fd, VIDIOC_QUERYCAP, &capability) >= 0)
+            description = reinterpret_cast<const char *>(capability.card);
+
+        qInfo() << "Detected camera:" << description << "(" << fileName << ")";
         auto caps = this->caps(fd);
 
         if (!caps.empty()) {
-            v4l2_capability capability;
-            memset(&capability, 0, sizeof(v4l2_capability));
-            QString description;
+            qInfo() << "Formats:";
 
-            if (x_ioctl(fd, VIDIOC_QUERYCAP, &capability) >= 0)
-                description = reinterpret_cast<const char *>(capability.card);
+            for (auto &devCaps: caps)
+                qInfo() << "    " << devCaps.caps;
 
             devices << fileName;
             descriptions[fileName] = description;
@@ -1775,6 +1819,26 @@ void CaptureV4L2Private::updateDevices()
 #endif
         emit self->webcamsChanged(this->m_devices);
     }
+}
+
+void CaptureV4L2Private::typeAndFormatFromCaps(const QString &device,
+                                               const AkCaps &caps,
+                                               __u32 &type,
+                                               __u32 &pixelformat) const
+{
+    type = 0;
+    pixelformat = 0;
+
+    if (!this->m_devicesCaps.contains(device))
+        return;
+
+    for (const auto &fmt: this->m_devicesCaps[device])
+        if (fmt.caps == caps) {
+            type = fmt.type;
+            pixelformat = fmt.pixelformat;
+
+            break;
+        }
 }
 
 #include "moc_capturev4l2.cpp"

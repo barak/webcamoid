@@ -103,8 +103,10 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        x = (Screen.width - mediaTools.windowWidth) / 2
-        y = (Screen.height - mediaTools.windowHeight) / 2
+        if (Ak.platform() != "android") {
+            x = (Screen.width - mediaTools.windowWidth) / 2
+            y = (Screen.height - mediaTools.windowHeight) / 2
+        }
     }
 
     Connections {
@@ -298,12 +300,16 @@ ApplicationWindow {
 
                 onClicked: {
                     if (photoPreview.status == Image.Ready) {
-                        let url = "" + photoPreview.icon.source
+                        if (recording.latestPhotoUri.length > 1) {
+                            Qt.openUrlExternally(recording.latestPhotoUri)
+                        } else {
+                            let url = "" + photoPreview.icon.source
 
-                        if (!url.startsWith(wdgMainWidget.filePrefix))
-                            url = wdgMainWidget.filePrefix + url
+                            if (!url.startsWith(wdgMainWidget.filePrefix))
+                                url = wdgMainWidget.filePrefix + url
 
-                        mediaTools.openUrlExternally(url)
+                            Qt.openUrlExternally(url)
+                        }
                     }
                 }
             }
@@ -427,12 +433,16 @@ ApplicationWindow {
 
                 onClicked: {
                     if (videoPreview.status == Image.Ready) {
-                        let url = recording.lastVideo
+                        if (recording.latestVideoUri.length > 1) {
+                            Qt.openUrlExternally(recording.latestVideoUri)
+                        } else {
+                            let url = recording.lastVideo
 
-                        if (!url.startsWith(wdgMainWidget.filePrefix))
-                            url = wdgMainWidget.filePrefix + url
+                            if (!url.startsWith(wdgMainWidget.filePrefix))
+                                url = wdgMainWidget.filePrefix + url
 
-                        mediaTools.openUrlExternally(url)
+                            Qt.openUrlExternally(url)
+                        }
                     }
                 }
             }

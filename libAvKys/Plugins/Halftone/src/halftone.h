@@ -20,7 +20,7 @@
 #ifndef HALFTONE_H
 #define HALFTONE_H
 
-#include <akplugin.h>
+#include <iak/akplugin.h>
 
 class Halftone: public QObject, public AkPlugin
 {
@@ -29,8 +29,7 @@ class Halftone: public QObject, public AkPlugin
     Q_PLUGIN_METADATA(IID AkPlugin_IID FILE "pspec.json")
 
     public:
-        QObject *create(const QString &key, const QString &specification) override;
-        QStringList keys() const override;
+        QObject *create() override;
 };
 
 #endif // HALFTONE_H

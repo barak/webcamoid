@@ -20,7 +20,7 @@
 #ifndef OILPAINT_H
 #define OILPAINT_H
 
-#include <akplugin.h>
+#include <iak/akplugin.h>
 
 class OilPaint: public QObject, public AkPlugin
 {
@@ -29,8 +29,7 @@ class OilPaint: public QObject, public AkPlugin
     Q_PLUGIN_METADATA(IID AkPlugin_IID FILE "pspec.json")
 
     public:
-        QObject *create(const QString &key, const QString &specification) override;
-        QStringList keys() const override;
+        QObject *create() override;
 };
 
 #endif // OILPAINT_H

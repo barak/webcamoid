@@ -31,10 +31,8 @@
 #include <akaudioconverter.h>
 #include <akaudiopacket.h>
 #include <akcaps.h>
-#include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
-#include <akpluginmanager.h>
 
 #include "audiogenelement.h"
 
@@ -401,7 +399,8 @@ void AudioGenElementPrivate::readFramesLoop()
             }
         }
 
-        iPacket.setPts(pts);
+        iPacket.setPts(nSamples);
+        iPacket.setDuration(pts);
         iPacket.setTimeBase({1, audioCaps.rate()});
         iPacket.setIndex(0);
         iPacket.setId(this->m_id);

@@ -25,10 +25,8 @@
 #include <akaudioconverter.h>
 #include <akaudiopacket.h>
 #include <akcaps.h>
-#include <akelement.h>
 #include <akfrac.h>
 #include <akpacket.h>
-#include <akpluginmanager.h>
 
 extern "C"
 {
@@ -224,8 +222,8 @@ AkCaps AudioStream::caps() const
 
     AkAudioCaps caps(sampleFormat,
                      layout,
-                     this->codecContext()->sample_rate,
-                     isPlanar);
+                     isPlanar,
+                     this->codecContext()->sample_rate);
 
     return caps;
 }
@@ -306,7 +304,8 @@ AkAudioPacket AudioStreamPrivate::frameToPacket(AVFrame *iFrame)
     }
 
     packet.setPts(iFrame->pts);
-    packet.setTimeBase(self->timeBase());
+    packet.setDuration(iFrame->nb_samples);
+    packet.setTimeBase({1, iFrame->sample_rate});
     packet.setIndex(int(self->index()));
     packet.setId(self->id());
 

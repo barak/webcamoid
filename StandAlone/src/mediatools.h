@@ -20,7 +20,7 @@
 #ifndef MEDIATOOLS_H
 #define MEDIATOOLS_H
 
-#include <akelement.h>
+#include <iak/akelement.h>
 
 class MediaToolsPrivate;
 class QQmlApplicationEngine;
@@ -79,9 +79,9 @@ class MediaTools: public QObject
     Q_PROPERTY(QString projectDonationsUrl
                READ projectDonationsUrl
                CONSTANT)
-    Q_PROPERTY(QString log
-               READ log
-               NOTIFY logUpdated)
+    Q_PROPERTY(QString projectDocumentationUrl
+               READ projectDocumentationUrl
+               CONSTANT)
     Q_PROPERTY(QString documentsDirectory
                READ documentsDirectory
                WRITE setDocumentsDirectory
@@ -123,6 +123,7 @@ class MediaTools: public QObject
         Q_INVOKABLE QString projectGitShortCommit() const;
         Q_INVOKABLE QString projectGitCommitUrl() const;
         Q_INVOKABLE QString projectDonationsUrl() const;
+        Q_INVOKABLE QString projectDocumentationUrl() const;
         Q_INVOKABLE QString fileNameFromUri(const QString &uri) const;
         Q_INVOKABLE bool matches(const QString &pattern,
                                  const QStringList &strings) const;
@@ -130,13 +131,13 @@ class MediaTools: public QObject
         Q_INVOKABLE QString currentTime(const QString &format) const;
         Q_INVOKABLE QStringList standardLocations(const QString &type) const;
         Q_INVOKABLE static QString readFile(const QString &fileName);
-        Q_INVOKABLE QString urlToLocalFile(const QUrl &url) const;
-        Q_INVOKABLE bool openUrlExternally(const QUrl &url);
+        Q_INVOKABLE QString urlToLocalFile(const QString &urlOrFile) const;
+        Q_INVOKABLE QString copyUrlToCache(const QString &urlOrFile) const;
         Q_INVOKABLE static QString convertToAbsolute(const QString &path);
         Q_INVOKABLE static void messageHandler(QtMsgType type,
                                                const QMessageLogContext &context,
                                                const QString &msg);
-        Q_INVOKABLE QString log() const;
+        Q_INVOKABLE QString readLog(quint64 lineStart=0) const;
         Q_INVOKABLE QString documentsDirectory() const;
         Q_INVOKABLE int adBannerWidth() const;
         Q_INVOKABLE int adBannerHeight() const;
@@ -167,7 +168,7 @@ class MediaTools: public QObject
         void show();
         bool showAd(AdType adType);
         void printLog();
-        void saveLog();
+        bool saveLog();
         void makedirs(const QString &path);
         void restartApp();
 };

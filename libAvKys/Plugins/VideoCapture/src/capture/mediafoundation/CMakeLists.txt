@@ -29,8 +29,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(QT_COMPONENTS
+    Core
     Concurrent
-    Core)
+    Gui)
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
@@ -67,6 +68,8 @@ set(SOURCES
     src/capturemmf.h
     src/plugin.cpp
     src/plugin.h
+    src/uvcextendedcontrols.cpp
+    src/uvcextendedcontrols.h
     pspec.json)
 
 if (NOT NOMEDIAFOUNDATION AND WIN32 AND HAVE_MEDIAFOUNDATION)

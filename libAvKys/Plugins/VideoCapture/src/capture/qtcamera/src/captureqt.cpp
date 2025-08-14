@@ -31,7 +31,6 @@
 #include <ak.h>
 #include <akfrac.h>
 #include <akcaps.h>
-#include <akelement.h>
 #include <akpacket.h>
 #include <akpluginmanager.h>
 #include <akvideocaps.h>
@@ -39,8 +38,9 @@
 #include <akvideopacket.h>
 #include <akcompressedvideocaps.h>
 #include <akcompressedvideopacket.h>
+#include <iak/akelement.h>
 
-#if (defined(Q_OS_ANDROID) || defined(Q_OS_OSX)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_MACOS)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
 #include <QPermissions>
 #endif
 
@@ -79,12 +79,12 @@ inline QtFmtToAkFmtMap initQtFmtToAkFmt()
 
 Q_GLOBAL_STATIC_WITH_ARGS(QtFmtToAkFmtMap, qtFmtToAkFmt, (initQtFmtToAkFmt()))
 
-using QtCompressedFmtToAkFmtMap = QMap<QVideoFrameFormat::PixelFormat, QString>;
+using QtCompressedFmtToAkFmtMap = QMap<QVideoFrameFormat::PixelFormat, AkCompressedVideoCaps::VideoCodecID>;
 
 inline QtCompressedFmtToAkFmtMap initQtCompressedFmtToAkFmt()
 {
     QtCompressedFmtToAkFmtMap qtCompressedFmtToAkFmt {
-        {QVideoFrameFormat::Format_Jpeg, "jpeg"},
+        {QVideoFrameFormat::Format_Jpeg, AkCompressedVideoCaps::VideoCodecID_jpeg},
     };
 
     return qtCompressedFmtToAkFmt;
@@ -125,7 +125,7 @@ class CaptureQtPrivate
         QList<int> m_streams;
         QStringList m_devices;
         QMap<QString, QString> m_descriptions;
-        QMap<QString, CaptureVideoCaps> m_devicesCaps;
+        QMap<QString, AkCapsList> m_devicesCaps;
         QReadWriteLock m_controlsMutex;
         QReadWriteLock m_frameMutex;
         AkPacket m_videoPacket;
@@ -139,7 +139,7 @@ class CaptureQtPrivate
         QMediaCaptureSession m_captureSession;
         QVideoSink m_videoSink;
 
-#if (defined(Q_OS_ANDROID) || defined(Q_OS_OSX)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_MACOS)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         QCameraPermission m_cameraPermission;
         bool m_permissionResultReady {false};
 #endif
@@ -155,8 +155,6 @@ class CaptureQtPrivate
 
         explicit CaptureQtPrivate(CaptureQt *self);
         ~CaptureQtPrivate();
-        int nearestResolution(const QSize &resolution,
-                              const CaptureVideoCaps &caps) const;
         QVariantList imageControls() const;
         bool setImageControls(const QVariantMap &imageControls) const;
         QVariantMap controlStatus(const QVariantList &controls) const;
@@ -172,10 +170,12 @@ CaptureQt::CaptureQt(QObject *parent):
 {
     this->d = new CaptureQtPrivate(this);
 
-#if (defined(Q_OS_ANDROID) || defined(Q_OS_OSX)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_MACOS)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     auto permissionStatus = qApp->checkPermission(this->d->m_cameraPermission);
 
-    if (permissionStatus != Qt::PermissionStatus::Granted) {
+    if (permissionStatus == Qt::PermissionStatus::Granted) {
+        qInfo() << "Permission granted for camera capture with Qt Camera";
+    } else {
         this->d->m_permissionResultReady = false;
         qApp->requestPermission(this->d->m_cameraPermission,
                                 this,
@@ -185,15 +185,21 @@ CaptureQt::CaptureQt(QObject *parent):
 
                                         switch (permission.status()) {
                                         case Qt::PermissionStatus::Undetermined:
+                                            qInfo() << "Permission undetermined for camera capture with Qt Camera";
                                             curStatus = PermissionStatus_Undetermined;
+
                                             break;
 
                                         case Qt::PermissionStatus::Granted:
+                                            qInfo() << "Permission granted for camera capture with Qt Camera";
                                             curStatus = PermissionStatus_Granted;
+
                                             break;
 
                                         case Qt::PermissionStatus::Denied:
+                                            qInfo() << "Permission denied for camera capture with Qt Camera";
                                             curStatus = PermissionStatus_Denied;
+
                                             break;
 
                                         default:
@@ -288,9 +294,9 @@ QString CaptureQt::description(const QString &webcam) const
     return this->d->m_descriptions.value(webcam);
 }
 
-CaptureVideoCaps CaptureQt::caps(const QString &webcam) const
+AkCapsList CaptureQt::caps(const QString &webcam) const
 {
-    CaptureVideoCaps caps;
+    AkCapsList caps;
 
     for (auto &videoCaps: this->d->m_devicesCaps.value(webcam))
         caps << videoCaps;
@@ -446,7 +452,7 @@ Capture::TorchMode CaptureQt::torchMode() const
 
 Capture::PermissionStatus CaptureQt::permissionStatus() const
 {
-#if (defined(Q_OS_ANDROID) || defined(Q_OS_OSX)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#if (defined(Q_OS_ANDROID) || defined(Q_OS_MACOS)) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     switch (qApp->checkPermission(this->d->m_cameraPermission)) {
     case Qt::PermissionStatus::Undetermined:
         return PermissionStatus_Undetermined;
@@ -472,12 +478,12 @@ bool CaptureQt::init()
     auto streams = this->streams();
 
     if (streams.isEmpty()) {
-        qDebug() << "VideoCapture: No streams available.";
+        qCritical() << "Qt VideoCapture: No streams available.";
 
         return false;
     }
 
-    auto supportedCaps = this->d->m_devicesCaps.value(this->d->m_device);
+    auto supportedCaps = this->caps(this->d->m_device);
     auto caps = supportedCaps[streams[0]];
     QVideoFrameFormat::PixelFormat pixelFormat =
         QVideoFrameFormat::Format_Invalid;
@@ -494,20 +500,18 @@ bool CaptureQt::init()
         fps = videoCaps.fps();
     } else {
         AkCompressedVideoCaps videoCaps(caps);
-        pixelFormat = qtCompressedFmtToAkFmt->key(videoCaps.format(),
+        pixelFormat = qtCompressedFmtToAkFmt->key(videoCaps.codec(),
                                                   QVideoFrameFormat::Format_Invalid);
-        width = videoCaps.width();
-        height = videoCaps.height();
-        fps = videoCaps.fps();
+        width = videoCaps.rawCaps().width();
+        height = videoCaps.rawCaps().height();
+        fps = videoCaps.rawCaps().fps();
     }
 
     QCameraDevice cameraDevice;
     QCameraFormat cameraFormat;
     quint64 k = std::numeric_limits<quint64>::max();
 
-    for (auto &camera: QMediaDevices::videoInputs()) {
-        cameraDevice = camera;
-
+    for (auto &camera: QMediaDevices::videoInputs())
         if (camera.id() == this->d->m_device)
             for (auto &format: camera.videoFormats()) {
                 quint64 diffFormat = format.pixelFormat() - pixelFormat;
@@ -518,14 +522,23 @@ bool CaptureQt::init()
                             + diffHeight * diffHeight;
 
                 if (q < k) {
+                    cameraDevice = camera;
                     cameraFormat = format;
                     k = q;
                 }
             }
+
+    if (cameraDevice.isNull()) {
+        qCritical() << "Qt VideoCapture: A suitable device was not found.";
+
+        return false;
     }
 
-    if (cameraDevice.isNull() || cameraFormat.isNull())
+    if (cameraFormat.isNull()) {
+        qCritical() << "Qt VideoCapture: A suitable format was not found.";
+
         return false;
+    }
 
     this->d->m_id = Ak::id();
     this->d->m_fps = fps;
@@ -706,33 +719,6 @@ CaptureQtPrivate::~CaptureQtPrivate()
 {
 }
 
-int CaptureQtPrivate::nearestResolution(const QSize &resolution,
-                                        const CaptureVideoCaps &caps) const
-{
-    if (caps.isEmpty())
-        return -1;
-
-    int index = -1;
-    qreal q = std::numeric_limits<qreal>::max();
-
-    for (int i = 0; i < caps.size(); ++i) {
-        AkVideoCaps videoCaps = caps.value(i);
-        qreal dw = videoCaps.width() - resolution.width();
-        qreal dh = videoCaps.height() - resolution.height();
-        qreal k = dw * dw + dh * dh;
-
-        if (k < q) {
-            index = i;
-            q = k;
-
-            if (k == 0.)
-                break;
-        }
-    }
-
-    return index;
-}
-
 QVariantList CaptureQtPrivate::imageControls() const
 {
     QVariantList controlsList;
@@ -853,7 +839,11 @@ QVariantMap CaptureQtPrivate::mapDiff(const QVariantMap &map1,
 
 qreal CaptureQtPrivate::cameraRotation(const QVideoFrame &frame) const
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+    return -qreal(frame.rotation());
+#else
     return -frame.rotationAngle();
+#endif
 }
 
 void CaptureQtPrivate::frameReady(const QVideoFrame &frame)
@@ -868,6 +858,7 @@ void CaptureQtPrivate::frameReady(const QVideoFrame &frame)
                               this->m_fps);
         AkVideoPacket packet(videoCaps);
         packet.setPts(videoFrame.startTime());
+        packet.setDuration(videoFrame.endTime() - videoFrame.startTime());
         packet.setTimeBase({1, 1000000});
         packet.setIndex(0);
         packet.setId(this->m_id);
@@ -900,6 +891,7 @@ void CaptureQtPrivate::frameReady(const QVideoFrame &frame)
                                   this->m_fps);
             AkVideoPacket packet(videoCaps);
             packet.setPts(videoFrame.startTime());
+            packet.setDuration(videoFrame.endTime() - videoFrame.startTime());
             packet.setTimeBase({1, 1000000});
             packet.setIndex(0);
             packet.setId(this->m_id);
@@ -939,7 +931,8 @@ void CaptureQtPrivate::updateDevices()
     decltype(this->m_devicesCaps) devicesCaps;
 
     for (auto &cameraDevice: QMediaDevices::videoInputs()) {
-        CaptureVideoCaps caps;
+        QVector<AkVideoCaps> rawFormats;
+        QVector<AkCompressedVideoCaps> compressedFormats;
 
         for (auto &format: cameraDevice.videoFormats()) {
             QVector<AkFrac> frameRates;
@@ -961,24 +954,43 @@ void CaptureQtPrivate::updateDevices()
                 }
             }
 
+            if (frameRates.isEmpty())
+                frameRates << AkFrac(30, 1);
+
             for (auto &fps: frameRates)
                 if (qtFmtToAkFmt->contains(format.pixelFormat())) {
                     AkVideoCaps videoCaps(qtFmtToAkFmt->value(format.pixelFormat(), AkVideoCaps::Format_none),
                                           format.resolution().width(),
                                           format.resolution().height(),
                                           fps);
-                    caps << videoCaps;
+                    rawFormats << videoCaps;
                 } else if (qtCompressedFmtToAkFmt->contains(format.pixelFormat())) {
-                    AkCompressedVideoCaps videoCaps(qtCompressedFmtToAkFmt->value(format.pixelFormat(), ""),
-                                                    format.resolution().width(),
-                                                    format.resolution().height(),
-                                                    fps);
-                    caps << videoCaps;
+                    AkCompressedVideoCaps videoCaps(qtCompressedFmtToAkFmt->value(format.pixelFormat(),
+                                                                                  AkCompressedVideoCaps::VideoCodecID_unknown),
+                                                    {AkVideoCaps::Format_yuv420p,
+                                                     format.resolution().width(),
+                                                     format.resolution().height(),
+                                                     fps});
+                    compressedFormats << videoCaps;
                 }
         }
 
+        std::sort(rawFormats.begin(), rawFormats.begin());
+        std::sort(compressedFormats.begin(), compressedFormats.begin());
+        AkCapsList caps;
+
+        for (auto &format: compressedFormats)
+            caps << format;
+
+        for (auto &format: rawFormats)
+            caps << format;
+
         if (!caps.isEmpty()) {
-            auto index = this->nearestResolution({640, 480}, caps);
+            auto index =
+                    Capture::nearestResolution({DEFAULT_FRAME_WIDTH,
+                                                DEFAULT_FRAME_HEIGHT},
+                                               DEFAULT_FRAME_FPS,
+                                               caps);
 
             if (index > 0)
                 caps.move(index, 0);
