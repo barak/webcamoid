@@ -1,3 +1,9 @@
+webcamoid (9.3.0-2) unstable; urgency=medium
+
+  * Oops! Swizzle dependencies to qt6 modules (closes: #1089101)
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Sun, 07 Sep 2025 14:35:15 +0100
+
 webcamoid (9.3.0-1) unstable; urgency=medium
 
   * New upstream release

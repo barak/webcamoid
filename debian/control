@@ -73,19 +73,16 @@ Vcs-Browser: https://salsa.debian.org/debian/webcamoid
 
 Package: webcamoid
 Architecture: linux-any
-Depends: qml-module-qt-labs-folderlistmodel,
-         qml-module-qt-labs-settings,
-         qml-module-qtqml-models2,
-         qml-module-qtquick-controls,
-         qml-module-qtquick-controls2,
-         qml-module-qtquick-dialogs,
-         qml-module-qtquick-extras,
-         qml-module-qtquick-privatewidgets,
-         qml-module-qtquick-templates2,
-         qml-module-qtgraphicaleffects,
-         qml-module-qt-labs-platform,
-         webcamoid-data,
-         webcamoid-plugins,
+Depends: qml6-module-qt-labs-folderlistmodel,
+         qml6-module-qt-labs-settings,
+         qml6-module-qtqml-models,
+         qml6-module-qtquick-controls,
+         qml6-module-qtquick-dialogs,
+         qml6-module-qtquick-templates,
+         qml6-module-qtgraphicaleffects,
+         qml6-module-qt-labs-platform,
+         webcamoid-data (= ${binary:Version}),
+         webcamoid-plugins (= ${binary:Version}),
          ${misc:Depends},
          ${shlibs:Depends}
 Description: full featured webcam capture application
