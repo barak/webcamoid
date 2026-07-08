@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2018  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -829,8 +829,12 @@ QString VCamAk::deviceCreate(const QString &description,
         return {};
     }
 
-    if (!deviceId.isEmpty())
+    if (deviceId.isEmpty()) {
+        this->d->m_error = "No new device created";
+        qWarning() << this->d->m_error.toStdString().c_str();
+    } else {
         this->d->updateDevices();
+    }
 
     return deviceId;
 }

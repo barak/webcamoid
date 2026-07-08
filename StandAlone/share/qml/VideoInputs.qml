@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -26,7 +26,12 @@ import Webcamoid
 ScrollView {
     id: view
 
-    signal openVideoInputAddEditDialog(string videoInput)
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
+
+    signal openVideoInputAddScreenDialog()
+    signal openVideoInputAddWindowDialog()
+    signal openVideoInputAddFileDialog()
+    signal openVideoInputAddUrlDialog()
     signal openVideoInputOptions(string videoInput)
 
     Component.onCompleted: {
@@ -50,9 +55,52 @@ ScrollView {
     }
 
     ColumnLayout {
+        layoutDirection: view.rtl? Qt.RightToLeft: Qt.LeftToRight
         width: view.width
         clip: true
 
+        Button {
+            text: qsTr("Add source")
+            icon.source: "image://icons/add"
+            flat: true
+
+            onClicked: addSource.popup()
+
+            Menu {
+                id: addSource
+                width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
+                margins: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+
+                MenuItem {
+                    text: videoLayer.canCaptureWindows?
+                            qsTr("Add screen"):
+                            qsTr("Add screen source")
+                    icon.source: "image://icons/screen"
+
+                    onClicked: view.openVideoInputAddScreenDialog()
+                }
+                MenuItem {
+                    text: qsTr("Add window")
+                    icon.source: "image://icons/window"
+                    height: videoLayer.canCaptureWindows? undefined: 0
+                    visible: videoLayer.canCaptureWindows
+
+                    onClicked: view.openVideoInputAddWindowDialog()
+                }
+                MenuItem {
+                    text: qsTr("Add media file")
+                    icon.source: "image://icons/file"
+
+                    onClicked: view.openVideoInputAddFileDialog()
+                }
+                MenuItem {
+                    text: qsTr("Add media URL")
+                    icon.source: "image://icons/link"
+
+                    onClicked: view.openVideoInputAddUrlDialog()
+                }
+            }
+        }
         Button {
             text: qsTr("Configure source")
             icon.source: "image://icons/settings"
@@ -60,13 +108,6 @@ ScrollView {
             visible: devicesList.count > 0
 
             onClicked: view.openVideoInputOptions(videoLayer.videoInput)
-        }
-        Button {
-            text: qsTr("Add source")
-            icon.source: "image://icons/add"
-            flat: true
-
-            onClicked: view.openVideoInputAddEditDialog("")
         }
         Label {
             id: lblNoWebcams

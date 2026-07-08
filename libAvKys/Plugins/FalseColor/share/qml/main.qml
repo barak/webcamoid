@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -23,8 +23,11 @@ import QtQuick.Layouts
 import Qt.labs.platform as LABS
 import Ak
 
-GridLayout {
-    columns: 2
+ColumnLayout {
+    id: root
+    layoutDirection: rtl? Qt.RightToLeft: Qt.LeftToRight
+
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
 
     function createColorTable()
     {
@@ -65,27 +68,19 @@ GridLayout {
     }
 
     // Soft gradient.
-    Label {
-        id: txtSoft
+    Switch {
         text: qsTr("Soft")
-    }
-    RowLayout {
-        Item {
-            Layout.fillWidth: true
-        }
-        Switch {
-            checked: FalseColor.soft
-            Accessible.name: txtSoft.text
+        checked: FalseColor.soft
+        Accessible.name: text
+        Layout.fillWidth: true
 
-            onCheckedChanged: FalseColor.soft = checked
-        }
+        onCheckedChanged: FalseColor.soft = checked
     }
 
     Button {
         text: qsTr("Add color")
         icon.source: "image://icons/add"
         flat: true
-        Layout.columnSpan: 2
 
         onClicked: colorDialog.open()
     }
@@ -93,14 +88,12 @@ GridLayout {
         text: qsTr("Clear all colors")
         icon.source: "image://icons/no"
         flat: true
-        Layout.columnSpan: 2
 
         onClicked: FalseColor.clearTable()
     }
     ColumnLayout {
         id: clyColorTable
         Layout.fillWidth: true
-        Layout.columnSpan: 2
     }
 
     LABS.ColorDialog {

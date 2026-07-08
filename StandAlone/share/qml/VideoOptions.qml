@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -25,11 +25,15 @@ ColumnLayout {
     id: videoOptions
 
     signal openErrorDialog(string title, string message)
-    signal openVideoInputAddEditDialog(string videoInput)
+    signal openVideoInputAddScreenDialog()
+    signal openVideoInputAddWindowDialog()
+    signal openVideoInputAddFileDialog()
+    signal openVideoInputAddUrlDialog()
     signal openVideoOutputAddEditDialog(string videoOutput)
     signal openVideoInputOptions(string videoInput)
-    signal openVideoOutputOptions(string videoOutput)
-    signal openVideoOutputPictureDialog()
+    signal openVirtualCameraOptions(string videoOutput)
+    signal openStreamingPlatformOptions(string videoOutput)
+    signal openLocalStreamingOptions()
     signal openVCamDownloadDialog()
     signal openVCamManualDownloadDialog()
 
@@ -42,8 +46,8 @@ ColumnLayout {
         }
         TabButton {
             text: qsTr("Outputs")
-            visible: videoLayer.isVCamSupported
-            width: videoLayer.isVCamSupported? undefined: 0
+            visible: virtualCameras.isVCamSupported || streaming.isStreamingSupported
+            width: virtualCameras.isVCamSupported || streaming.isStreamingSupported? undefined: 0
         }
     }
     StackLayout {
@@ -54,8 +58,14 @@ ColumnLayout {
         clip: true
 
         VideoInputs {
-            onOpenVideoInputAddEditDialog: videoInput =>
-                videoOptions.openVideoInputAddEditDialog(videoInput)
+            onOpenVideoInputAddScreenDialog:
+                videoOptions.openVideoInputAddScreenDialog()
+            onOpenVideoInputAddWindowDialog:
+                videoOptions.openVideoInputAddWindowDialog()
+            onOpenVideoInputAddFileDialog:
+                videoOptions.openVideoInputAddFileDialog()
+            onOpenVideoInputAddUrlDialog:
+                videoOptions.openVideoInputAddUrlDialog()
             onOpenVideoInputOptions: videoInput =>
                 videoOptions.openVideoInputOptions(videoInput)
         }
@@ -64,9 +74,12 @@ ColumnLayout {
                 videoOptions.openErrorDialog(title, message)
             onOpenVideoOutputAddEditDialog: videoOutput =>
                 videoOptions.openVideoOutputAddEditDialog(videoOutput)
-            onOpenVideoOutputOptions: videoOutput =>
-                videoOptions.openVideoOutputOptions(videoOutput)
-            onOpenVideoOutputPictureDialog: videoOptions.openVideoOutputPictureDialog()
+            onOpenVirtualCameraOptions: videoOutput =>
+                videoOptions.openVirtualCameraOptions(videoOutput)
+            onOpenStreamingPlatformOptions: videoOutput =>
+                videoOptions.openStreamingPlatformOptions(videoOutput)
+            onOpenLocalStreamingOptions:
+                videoOptions.openLocalStreamingOptions()
             onOpenVCamDownloadDialog: videoOptions.openVCamDownloadDialog()
             onOpenVCamManualDownloadDialog: videoOptions.openVCamManualDownloadDialog()
         }

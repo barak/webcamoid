@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2024  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -33,6 +33,11 @@
 #include <media/NdkMediaCodec.h>
 
 #include "videoencoderndkmediaelement.h"
+
+#if 0
+#define ENABLE_VBR // Warning, on my tests, this codec seems to crash when this
+                   // mode is enabled
+#endif
 
 #define BITRATE_MODE_CQ  0
 #define BITRATE_MODE_VBR 1
@@ -151,6 +156,7 @@ struct CodecInfo
     AkVideoEncoderCodecID codecID;
     QString mimeType;
     QVector<int32_t> formats;
+    bool isHardware {false};
 };
 
 #define COLOR_FormatMonochrome                1
@@ -496,6 +502,20 @@ qint64 VideoEncoderNDKMediaElement::encodedTimePts() const
     return this->d->m_encodedTimePts;
 }
 
+bool VideoEncoderNDKMediaElement::hasHardwareSupport(const QString &codec) const
+{
+    auto it = std::find_if(this->d->m_codecs.constBegin(),
+                           this->d->m_codecs.constEnd(),
+                           [&codec] (const CodecInfo &codecInfo) -> bool {
+        return codecInfo.name == codec;
+    });
+
+    if (it == this->d->m_codecs.constEnd())
+        return false;
+
+    return it->isHardware;
+}
+
 AkPacket VideoEncoderNDKMediaElement::iVideoStream(const AkVideoPacket &packet)
 {
     QMutexLocker mutexLocker(&this->d->m_mutex);
@@ -779,6 +799,20 @@ void VideoEncoderNDKMediaElementPrivate::listCodecs()
             if (!capabilities.isValid())
                 continue;
 
+            // Detectar si el codec es hardware-accelerated
+            bool isHardware = false;
+
+#if __ANDROID_API__ >= 29
+            isHardware = codecInfo.callMethod<jboolean>("isHardwareAccelerated", "()Z");
+#else
+            {
+                auto ndkNameStr = codecName.toString();
+                isHardware = !ndkNameStr.startsWith("OMX.google.", Qt::CaseInsensitive)
+                             && !ndkNameStr.startsWith("c2.android.", Qt::CaseInsensitive)
+                             && !ndkNameStr.startsWith("OMX.SEC.avc.", Qt::CaseInsensitive); // Samsung SW
+            }
+#endif
+
             QVector<int32_t> formats;
             auto colorFormatsArray =
                     capabilities.getObjectField("colorFormats", "[I");
@@ -810,13 +844,15 @@ void VideoEncoderNDKMediaElementPrivate::listCodecs()
                                          cname,
                                          codec->codecID,
                                          mimeTypeStr,
-                                         formats};
+                                         formats,
+                                         isHardware};
 
             qInfo() << "Codec name:" << this->m_codecs.last().name;
             qInfo() << "Codec description:" << this->m_codecs.last().description;
             qInfo() << "Native codec name:" << this->m_codecs.last().ndkName;
             qInfo() << "Codec ID:" << this->m_codecs.last().codecID;
             qInfo() << "Mime type:" << this->m_codecs.last().mimeType;
+            qInfo() << "Hardware accelerated:" << (this->m_codecs.last().isHardware? "yes": "no");
 
             qInfo() << "Supported pixel formats:";
 
@@ -912,9 +948,31 @@ bool VideoEncoderNDKMediaElementPrivate::init()
                           gop);
 
 #if __ANDROID_API__ >= 28
+#ifdef ENABLE_VBR
+    auto bitrateMode = self->bitrateMode();
+    int ndkBitrateMode = 0;
+
+    switch (bitrateMode) {
+    case AkVideoEncoder::BitrateMode_CBR:
+        ndkBitrateMode = BITRATE_MODE_CBR;
+
+        break;
+
+    case AkVideoEncoder::BitrateMode_VBR:
+    default:
+        ndkBitrateMode = BITRATE_MODE_VBR;
+
+        break;
+    }
+
+    AMediaFormat_setInt32(this->m_inputMediaFormat.data(),
+                          AMEDIAFORMAT_KEY_BITRATE_MODE,
+                          ndkBitrateMode);
+#else
     AMediaFormat_setInt32(this->m_inputMediaFormat.data(),
                           AMEDIAFORMAT_KEY_BITRATE_MODE,
                           BITRATE_MODE_CBR);
+#endif
 #endif
 
     auto result =

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2023  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -25,10 +25,11 @@ import Ak
 import AkControls as AK
 import ColorKeyElement
 
-GridLayout {
-    id: glyColorKey
-    columns: 3
+ColumnLayout {
+    id: root
+    layoutDirection: rtl? Qt.RightToLeft: Qt.LeftToRight
 
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
     readonly property string filePrefix: Ak.platform() == "windows"?
                                              "file:///":
                                              "file://"
@@ -54,45 +55,22 @@ GridLayout {
         return index
     }
 
-    Connections {
-        target: ColorKey
-
-        function onColorDiffChanged(colorDiff)
-        {
-            sldColorDiff.value = colorDiff
-            spbColorDiff.value = colorDiff
-        }
-
-        function onSmoothnessChanged(smoothness)
-        {
-            sldSmoothness.value = smoothness
-            spbSmoothness.value = smoothness
-        }
-    }
-
-    Label {
-        id: txtColor
+    AK.ColorButton {
         text: qsTr("Color")
-    }
-    RowLayout {
-        Layout.columnSpan: 2
+        currentColor: AkUtils.fromRgba(ColorKey.colorKey)
+        title: qsTr("Choose the color to filter")
+        modality: Qt.NonModal
+        horizontalAlignment: root.rtl? Text.AlignRight: Text.AlignLeft
+        Layout.fillWidth: true
 
-        Item {
-            Layout.fillWidth: true
-        }
-        AK.ColorButton {
-            currentColor: AkUtils.fromRgba(ColorKey.colorKey)
-            title: qsTr("Choose the color to filter")
-            modality: Qt.NonModal
-            Accessible.description: txtColor.text
-
-            onCurrentColorChanged: ColorKey.colorKey = AkUtils.toRgba(currentColor)
-        }
+        onCurrentColorChanged: ColorKey.colorKey = AkUtils.toRgba(currentColor)
     }
 
     Label {
         id: lblColorDiff
         text: qsTr("Color Difference")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldColorDiff
@@ -104,20 +82,12 @@ GridLayout {
 
         onValueChanged: ColorKey.colorDiff = value
     }
-    SpinBox {
-        id: spbColorDiff
-        value: ColorKey.colorDiff
-        to: sldColorDiff.to
-        stepSize: sldColorDiff.stepSize
-        editable: true
-        Accessible.name: lblColorDiff.text
-
-        onValueChanged: ColorKey.colorDiff = Number(value)
-    }
 
     Label {
         id: lblSmoothness
         text: qsTr("Smoothness")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldSmoothness
@@ -129,46 +99,23 @@ GridLayout {
 
         onValueChanged: ColorKey.smoothness = value
     }
-    SpinBox {
-        id: spbSmoothness
-        value: ColorKey.smoothness
-        to: sldSmoothness.to
-        stepSize: sldSmoothness.stepSize
-        editable: true
-        Accessible.name: lblSmoothness.text
 
-        onValueChanged: ColorKey.smoothness = Number(value)
-    }
-
-    Label {
-        id: txtNormalize
+    Switch {
         text: qsTr("Normalize")
-    }
-    RowLayout {
-        Layout.columnSpan: 2
+        checked: ColorKey.normalize
+        Accessible.name: text
+        Layout.fillWidth: true
 
-        Item {
-            Layout.fillWidth: true
-        }
-        Switch {
-            checked: ColorKey.normalize
-            Accessible.name: txtNormalize.text
-
-            onCheckedChanged: ColorKey.normalize = checked
-        }
+        onCheckedChanged: ColorKey.normalize = checked
     }
 
-    Label {
-        id: txtMode
-        text: qsTr("Background type")
-    }
-    ComboBox {
+    AK.LabeledComboBox {
         id: cbxBackgroundType
+        label: qsTr("Background type")
         textRole: "text"
         currentIndex: optionIndex(cbxBackgroundType, ColorKey.backgroundType)
         Layout.fillWidth: true
-        Layout.columnSpan: 2
-        Accessible.description: txtMode.text
+        Accessible.description: label
         model: ListModel {
             ListElement {
                 text: qsTr("No background")
@@ -186,57 +133,39 @@ GridLayout {
 
         onCurrentIndexChanged: ColorKey.backgroundType = cbxBackgroundType.model.get(currentIndex).option
     }
-
-    Label {
-        id: txtBackgroundColor
+    AK.ColorButton {
         text: qsTr("Background color")
+        currentColor: AkUtils.fromRgba(ColorKey.backgroundColor)
+        title: qsTr("Choose the background color")
+        showAlphaChannel: true
+        horizontalAlignment: root.rtl? Text.AlignRight: Text.AlignLeft
         visible: cbxBackgroundType.currentIndex == 1
-    }
-    RowLayout {
-        Layout.columnSpan: 2
-        visible: cbxBackgroundType.currentIndex == 1
+        Layout.fillWidth: true
 
-        Item {
-            Layout.fillWidth: true
-        }
-        AK.ColorButton {
-            currentColor: AkUtils.fromRgba(ColorKey.backgroundColor)
-            title: qsTr("Choose the background color")
-            showAlphaChannel: true
-            Accessible.description: txtBackgroundColor.text
-
-            onCurrentColorChanged: ColorKey.backgroundColor = AkUtils.toRgba(currentColor)
-        }
+        onCurrentColorChanged: ColorKey.backgroundColor = AkUtils.toRgba(currentColor)
     }
 
     RowLayout {
-        Layout.columnSpan: 3
+        layoutDirection: root.rtl? Qt.RightToLeft: Qt.LeftToRight
         visible: cbxBackgroundType.currentIndex == 2
 
         Image {
-            width: 16
-            height: 16
+            width: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            height: width
             fillMode: Image.PreserveAspectFit
-            sourceSize.width: 16
-            sourceSize.height: 16
-            source: toQrc(txtTable.text)
+            sourceSize: Qt.size(width, height)
+            source: toQrc(txtTable.labelText)
         }
-        TextField {
+        AK.ActionTextField {
             id: txtTable
-            text: ColorKey.background
-            placeholderText: qsTr("Source palette")
-            selectByMouse: true
-            Layout.fillWidth: true
-            Accessible.name: qsTr("Image file to use as palette")
-
-            onTextChanged: ColorKey.background = text
-        }
-        Button {
-            text: qsTr("Search")
             icon.source: "image://icons/search"
-            Accessible.description: qsTr("Search the image file to use as palette")
+            labelText: ColorKey.background
+            placeholderText: qsTr("Source palette")
+            buttonText: qsTr("Search the image file to use as palette")
+            Layout.fillWidth: true
 
-            onClicked: fileDialog.open()
+            onLabelTextChanged: ColorKey.background = text
+            onButtonClicked: fileDialog.open()
         }
     }
 
@@ -244,9 +173,9 @@ GridLayout {
         id: fileDialog
         title: qsTr("Please choose an image file")
         nameFilters: ["Image files (*.bmp *.gif *.jpg *.jpeg *.png *.pbm *.pgm *.ppm *.xbm *.xpm)"]
-        folder: glyColorKey.filePrefix + picturesPath
+        folder: root.filePrefix + picturesPath
 
         onAccepted: ColorKey.background =
-                    String(file).replace(glyColorKey.filePrefix, "")
+                    String(file).replace(root.filePrefix, "")
     }
 }

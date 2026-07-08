@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -627,12 +627,11 @@ class AKCOMMONS_EXPORT AkVideoCaps: public QObject
         Q_INVOKABLE QVariant toVariant() const;
 
         Q_INVOKABLE AkVideoCaps::PixelFormat format() const;
-        Q_INVOKABLE int bpp() const;
         Q_INVOKABLE QSize size() const;
         Q_INVOKABLE int width() const;
         Q_INVOKABLE int height() const;
         Q_INVOKABLE AkFrac fps() const;
-        Q_INVOKABLE AkFrac &fps();
+        Q_INVOKABLE int bpp() const;
 
         Q_INVOKABLE AkVideoCaps nearest(const AkVideoCapsList &caps) const;
         Q_INVOKABLE bool isSameFormat(const AkVideoCaps &other) const;

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2015  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -20,8 +20,21 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Ak
+import AkControls as AK
 
-Page {
+AK.MenuOption {
+    id: root
+
+    //: List of people contributing to the project: software
+    //  developers, translators, designers, etc..
+    title: qsTr("Contributors")
+    subtitle: qsTr("Great people who collaborated to make %1 better").arg(mediaTools.applicationName)
+    icon: "image://icons/people"
+
+    property int leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+    property int rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+
     ScrollView {
         id: scrollView
         anchors.fill: parent
@@ -35,6 +48,8 @@ Page {
             Label {
                 text: qsTr("Thanks to all these cool people that helped contributing to Webcamoid all these years.")
                 wrapMode: Text.WordWrap
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
                 Layout.fillWidth: true
             }
             TextArea {
@@ -42,6 +57,7 @@ Page {
                 text: mediaTools.readFile(":/Webcamoid/share/contributors.txt")
                 wrapMode: Text.WordWrap
                 readOnly: true
+                horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
             }
         }

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -23,46 +23,32 @@ import QtQuick.Layouts
 import Ak
 import AkControls as AK
 
-GridLayout {
-    columns: 3
+ColumnLayout {
+    id: root
+    layoutDirection: rtl? Qt.RightToLeft: Qt.LeftToRight
 
-    Connections {
-        target: ColorFilter
-
-        function onRadiusChanged(radius)
-        {
-            sldRadius.value = radius
-            spbRadius.value = radius
-        }
-    }
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
 
     // Configure strip color.
-    Label {
-        id: txtColor
+    AK.ColorButton {
         text: qsTr("Color")
-    }
-    RowLayout {
-        Layout.columnSpan: 2
+        currentColor: AkUtils.fromRgba(ColorFilter.colorf)
+        title: qsTr("Select the color to filter")
+        modality: Qt.NonModal
+        showAlphaChannel: true
+        horizontalAlignment: root.rtl? Text.AlignRight: Text.AlignLeft
+        Layout.fillWidth: true
 
-        Item {
-            Layout.fillWidth: true
-        }
-        AK.ColorButton {
-            currentColor: AkUtils.fromRgba(ColorFilter.colorf)
-            title: qsTr("Select the color to filter")
-            modality: Qt.NonModal
-            showAlphaChannel: true
-            Accessible.description: txtColor.text
-
-            onCurrentColorChanged: ColorFilter.colorf = AkUtils.toRgba(currentColor)
-            onIsOpenChanged: ColorFilter.disable = isOpen
-        }
+        onCurrentColorChanged: ColorFilter.colorf = AkUtils.toRgba(currentColor)
+        onIsOpenChanged: ColorFilter.disable = isOpen
     }
 
     // Configure color selection radius.
     Label {
         id: lblRadius
         text: qsTr("Radius")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldRadius
@@ -74,34 +60,15 @@ GridLayout {
 
         onValueChanged: ColorFilter.radius = value
     }
-    SpinBox {
-        id: spbRadius
-        value: ColorFilter.radius
-        to: sldRadius.to
-        stepSize: sldRadius.stepSize
-        editable: true
-        Accessible.name: lblRadius.text
-
-        onValueChanged: ColorFilter.radius = Number(value)
-    }
 
     // Enable soft color replacing.
-    Label {
-        id: lblSoft
+    Switch {
+        id: chkSoft
         text: qsTr("Soft")
-    }
-    RowLayout {
-        Layout.columnSpan: 2
+        checked: ColorFilter.soft
+        Accessible.name: text
+        Layout.fillWidth: true
 
-        Item {
-            Layout.fillWidth: true
-        }
-        Switch {
-            id: chkSoft
-            checked: ColorFilter.soft
-            Accessible.name: lblSoft.text
-
-            onCheckedChanged: ColorFilter.soft = checked
-        }
+        onCheckedChanged: ColorFilter.soft = checked
     }
 }

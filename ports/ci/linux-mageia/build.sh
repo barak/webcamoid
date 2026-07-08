@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -22,8 +22,6 @@ set -e
 
 if [ ! -z "${GITHUB_SHA}" ]; then
     export GIT_COMMIT_HASH="${GITHUB_SHA}"
-elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
-    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
 
 if [ "${COMPILER}" = clang ]; then
@@ -46,6 +44,7 @@ cmake \
     -LA \
     -S . \
     -B "${buildDir}" \
+    -G "Ninja" \
     -DQT_QMAKE_EXECUTABLE=qmake-qt6 \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
@@ -54,5 +53,5 @@ cmake \
     -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
     -DDAILY_BUILD="${DAILY_BUILD}"
-cmake --build "${buildDir}" --parallel "${NJOBS}"
+cmake --build "${buildDir}" --parallel "$(nproc)"
 cmake --install "${buildDir}"

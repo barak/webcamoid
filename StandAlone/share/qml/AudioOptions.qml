@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -22,6 +22,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 ColumnLayout {
+    id: audioOptions
+
+    signal openAudioInputAddDialog()
+
     TabBar {
         id: tabBar
         Layout.fillWidth: true
@@ -43,6 +47,7 @@ ColumnLayout {
         AudioOutputs {
         }
         AudioInputs {
+            onOpenAudioInputAddDialog: audioOptions.openAudioInputAddDialog()
         }
     }
 }

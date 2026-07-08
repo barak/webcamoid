@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,28 +21,20 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-GridLayout {
-    columns: 2
-
-    Label {
-        id: txtFlipHorizontally
-        text: qsTr("Flip horizontally")
-        Layout.fillWidth: true
-    }
+ColumnLayout {
     Switch {
+        text: qsTr("Flip horizontally")
         checked: Flip.horizontalFlip
-        Accessible.name: txtFlipHorizontally.text
+        Accessible.name: text
+        Layout.fillWidth: true
 
         onCheckedChanged: Flip.horizontalFlip = checked
     }
-    Label {
-        id: txtFlipVertically
-        text: qsTr("Flip vertically")
-        Layout.fillWidth: true
-    }
     Switch {
+        text: qsTr("Flip vertically")
         checked: Flip.verticalFlip
-        Accessible.name: txtFlipVertically.text
+        Accessible.name: text
+        Layout.fillWidth: true
 
         onCheckedChanged: Flip.verticalFlip = checked
     }

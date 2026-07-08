@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -2087,6 +2087,12 @@ void CaptureNdkCameraPrivate::updateDevices()
                 devicesCaps[deviceId] = caps;
                 isTorchSupported[deviceId] =
                         this->isTorchSupported(metaData);
+
+                qInfo() << "Detected camera:" << description << "(" << deviceId << ")";
+                qInfo() << "Formats:";
+
+                for (auto &devCaps: caps)
+                    qInfo() << "    " << devCaps;
             }
 
             ACameraMetadata_free(metaData);

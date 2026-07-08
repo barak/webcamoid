@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2024  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -20,10 +20,30 @@
 
 set -e
 
+if [ "${ANDROID_RELEASE_SIGNING}" = 1 ]; then
+    if [ ! -z "${KEYSTORE_DATA}" ]; then
+        export KEYSTORE_PATH="${PWD}/keystores/release.keystore"
+        mkdir -p $(dirname "${KEYSTORE_PATH}")
+        echo "${KEYSTORE_DATA}" | base64 -d > "${KEYSTORE_PATH}"
+    else
+        export KEYSTORE_PATH="${PWD}/keystores/debug.keystore"
+    fi
+
+    if [ -z "${KEYSTORE_PASS}" ]; then
+        export KEYSTORE_PASS=android
+    fi
+
+    if [ -z "${KEYSTORE_KEY_ALIAS}" ]; then
+        export KEYSTORE_KEY_ALIAS=androiddebugkey
+    fi
+
+    if [ -z "${ANDROID_KEY_PASS}" ]; then
+        export ANDROID_KEY_PASS=android
+    fi
+fi
+
 if [ ! -z "${GITHUB_SHA}" ]; then
     export GIT_COMMIT_HASH="${GITHUB_SHA}"
-elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
-    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
 
 export GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -31,8 +51,6 @@ export GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 if [ -z "${GIT_BRANCH_NAME}" ]; then
     if [ ! -z "${GITHUB_REF_NAME}" ]; then
         export GIT_BRANCH_NAME="${GITHUB_REF_NAME}"
-    elif [ ! -z "${CIRRUS_BRANCH}" ]; then
-        export GIT_BRANCH_NAME="${CIRRUS_BRANCH}"
     else
         export GIT_BRANCH_NAME=master
     fi
@@ -57,7 +75,6 @@ export PATH="${PATH}:${ANDROID_HOME}/platform-tools"
 export PATH="${PATH}:${ANDROID_HOME}/emulator"
 export PATH="${PATH}:${ANDROID_NDK}"
 export ORIG_PATH="${PATH}"
-export KEYSTORE_PATH="${PWD}/keystores/debug.keystore"
 nArchs=$(echo "${TARGET_ARCH}" | tr ':' ' ' | wc -w)
 lastArch=$(echo "${TARGET_ARCH}" | awk -F: '{print $NF}')
 
@@ -121,18 +138,12 @@ if [ "${nArchs}" = 1 ]; then
 libDir = ${qtInstallLibs}, ${ANDROID_PREFIX_LIB}
 EOF
 
-    cat << EOF > set_sdl_classes_path.conf
-[SDL]
-classesFile = ${ANDROID_PREFIX_SHARE}/share/java/sdl2.jar
-EOF
-
     python3 DeployTools/deploy.py \
         -d "${BUILD_PATH}/android-build" \
         -c "${BUILD_PATH}/package_info.conf" \
         -c "${BUILD_PATH}/package_info_android.conf" \
         -c "${PWD}/overwrite_syslibdir.conf" \
         -c "${PWD}/speedup_apk_build.conf" \
-        -c "${PWD}/set_sdl_classes_path.conf" \
         -c "${PWD}/with_ads.conf" \
         -o "${PACKAGES_DIR}"
 else
@@ -190,19 +201,13 @@ EOF
 libDir = ${qtInstallLibs}, ${ANDROID_PREFIX_LIB}
 EOF
 
-    cat << EOF > set_sdl_classes_path.conf
-[SDL]
-classesFile = ${ANDROID_PREFIX_SHARE}/java/sdl2.jar
-EOF
-
         python3 DeployTools/deploy.py \
             -r \
             -d "${BUILD_PATH}/android-build" \
             -c "${BUILD_PATH}/package_info.conf" \
             -c "${BUILD_PATH}/package_info_android.conf" \
             -c "${PWD}/package_info_multiarch.conf" \
-            -c "${PWD}/overwrite_syslibdir_${arch_}.conf" \
-            -c "${PWD}/set_sdl_classes_path.conf"
+            -c "${PWD}/overwrite_syslibdir_${arch_}.conf"
         cp -rf "${BUILD_PATH}/android-build"/* "${PWD}/webcamoid-data"
     done
 

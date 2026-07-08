@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -981,6 +981,12 @@ void CaptureLibUVCPrivate::updateDevices()
             uvc_close(deviceHnd);
 
         uvc_free_device_descriptor(descriptor);
+
+        qInfo() << "Detected camera:" << description << "(" << deviceId << ")";
+        qInfo() << "Formats:";
+
+        for (auto &devCaps: deviceCaps)
+            qInfo() << "    " << devCaps;
     }
 
     uvc_free_device_list(devices, 1);

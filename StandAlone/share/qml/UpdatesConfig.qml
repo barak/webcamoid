@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -23,18 +23,26 @@ import QtQuick.Layouts
 import QtCore
 import Qt.labs.settings 1.0
 import Ak
+import AkControls as AK
 import Webcamoid
 
-Page {
+AK.MenuOption {
+    id: root
+    title: qsTr("Updates")
+    subtitle: qsTr("Configure the update frequency.")
+    icon: "image://icons/update"
+
+    property int leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+    property int rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+
     ScrollView {
         id: scrollView
         anchors.fill: parent
         contentHeight: layout.height
         clip: true
 
-        GridLayout {
+        ColumnLayout {
             id: layout
-            columns: 2
             width: scrollView.width
 
             property int webcamoidStatus: updates.status("Webcamoid")
@@ -80,35 +88,32 @@ Page {
                 }
             }
 
-            Label {
-                id: txtNotifyNewVersions
-                text: qsTr("Notify about new versions")
-            }
             Switch {
                 id: newVersion
-                Accessible.name: txtNotifyNewVersions.text
+                text: qsTr("Notify about new versions")
                 checked: true
-                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                Accessible.name: text
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
+                Layout.fillWidth: true
 
                 onCheckedChanged: updates.notifyNewVersion = checked
             }
-            Label {
-                id: txtShowUpdatesDialog
-                text: qsTr("Show updates dialog")
-            }
             Switch {
                 id: showUpdatesDialog
-                Accessible.name: txtShowUpdatesDialog.text
+                text: qsTr("Show updates dialog")
                 checked: true
-                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                Accessible.name: text
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
+                Layout.fillWidth: true
             }
-            Label {
-                id: txtCheckNewVersions
-                text: qsTr("Check new versions")
-            }
-            ComboBox {
+            AK.LabeledComboBox {
                 id: cbxCheckInterval
-                Accessible.description: txtCheckNewVersions.text
+                label: qsTr("Check new versions")
+                Accessible.description: label
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
                 Layout.fillWidth: true
                 textRole: "description"
                 model: ListModel {
@@ -144,26 +149,23 @@ Page {
                     if (currentIndex >= 0)
                         updates.checkInterval = model.get(currentIndex).interval
             }
-
             Label {
-                text: qsTr("Last updated")
-            }
-            Label {
-                text: updates.lastUpdate.toLocaleString()
-                font.bold: true
-                Layout.alignment: Qt.AlignRight
+                text: qsTr("<b>Last updated</b>: %1").arg(updates.lastUpdate.toLocaleString())
+                wrapMode: Text.WordWrap
+                elide: Text.ElideNone
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
+                Layout.fillWidth: true
             }
 
             Item {
                 height: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
                 Layout.fillWidth: true
-                Layout.columnSpan: 2
             }
             ColumnLayout {
                 id: isOutdated
                 spacing: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
                 Layout.fillWidth: true
-                Layout.columnSpan: 2
                 visible: !mediaTools.isDailyBuild && layout.webcamoidStatus == Updates.ComponentOutdated
 
                 Label {
@@ -171,11 +173,15 @@ Page {
                             .arg(mediaTools.applicationName).arg(layout.webcamoidLatestVersion)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
+                    Layout.leftMargin: root.leftMargin
+                    Layout.rightMargin: root.rightMargin
                 }
                 Button {
                     text: qsTr("Upgrade Now!")
                     icon.source: "image://icons/internet"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                    Layout.leftMargin: root.leftMargin
+                    Layout.rightMargin: root.rightMargin
 
                     onClicked: Qt.openUrlExternally(mediaTools.projectDownloadsUrl)
                 }
@@ -184,29 +190,31 @@ Page {
                 id: isDevelopment
                 spacing: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
                 Layout.fillWidth: true
-                Layout.columnSpan: 2
                 visible: mediaTools.isDailyBuild
 
                 Label {
                     text: qsTr("Thanks for using a <b>development version</b>!<br />It will be very helpful if you can report any bug and suggestions you have.")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
+                    Layout.leftMargin: root.leftMargin
+                    Layout.rightMargin: root.rightMargin
                 }
                 Button {
                     text: qsTr("Report a Bug")
                     icon.source: "image://icons/bug"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                    Layout.leftMargin: root.leftMargin
+                    Layout.rightMargin: root.rightMargin
 
                     onClicked: Qt.openUrlExternally(mediaTools.projectIssuesUrl)
                 }
             }
         }
-    }
+        Settings {
+            category: "Updates"
 
-    Settings {
-        category: "Updates"
-
-        property alias notify: newVersion.checked
-        property alias showDialog: showUpdatesDialog.checked
+            property alias notify: newVersion.checked
+            property alias showDialog: showUpdatesDialog.checked
+        }
     }
 }

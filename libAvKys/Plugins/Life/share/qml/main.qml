@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -23,49 +23,29 @@ import QtQuick.Layouts
 import Ak
 import AkControls as AK
 
-GridLayout {
-    columns: 3
+ColumnLayout {
+    id: root
+    layoutDirection: rtl? Qt.RightToLeft: Qt.LeftToRight
 
-    Connections {
-        target: Life
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
 
-        function onThresholdChanged(threshold)
-        {
-            sldThreshold.value = threshold
-            spbThreshold.value = threshold
-        }
-
-        function onLumaThresholdChanged(lumaThreshold)
-        {
-            sldLumaThreshold.value = lumaThreshold
-            spbLumaThreshold.value = lumaThreshold
-        }
-    }
-
-    Label {
-        id: txtColor
+    AK.ColorButton {
         text: qsTr("Color")
-    }
-    RowLayout {
-        Layout.columnSpan: 2
+        currentColor: AkUtils.fromRgba(Life.lifeColor)
+        //: https://en.wikipedia.org/wiki/Life-like_cellular_automaton
+        title: qsTr("Choose the automata color")
+        showAlphaChannel: true
+        horizontalAlignment: root.rtl? Text.AlignRight: Text.AlignLeft
+        Layout.fillWidth: true
 
-        Item {
-            Layout.fillWidth: true
-        }
-        AK.ColorButton {
-            currentColor: AkUtils.fromRgba(Life.lifeColor)
-            //: https://en.wikipedia.org/wiki/Life-like_cellular_automaton
-            title: qsTr("Choose the automata color")
-            showAlphaChannel: true
-            Accessible.description: txtColor.text
-
-            onCurrentColorChanged: Life.lifeColor = AkUtils.toRgba(currentColor)
-        }
+        onCurrentColorChanged: Life.lifeColor = AkUtils.toRgba(currentColor)
     }
 
     Label {
         id: lblThreshold
         text: qsTr("Threshold")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldThreshold
@@ -73,16 +53,6 @@ GridLayout {
         to: 255
         stepSize: 1
         Layout.fillWidth: true
-        Accessible.name: lblThreshold.text
-
-        onValueChanged: Life.threshold = value
-    }
-    SpinBox {
-        id: spbThreshold
-        value: Life.threshold
-        to: sldThreshold.to
-        stepSize: sldThreshold.stepSize
-        editable: true
         Accessible.name: lblThreshold.text
 
         onValueChanged: Life.threshold = value
@@ -96,6 +66,8 @@ GridLayout {
             https://en.wikipedia.org/wiki/Luma_(video)
          */
         text: qsTr("Luma Threshold")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldLumaThreshold
@@ -103,16 +75,6 @@ GridLayout {
         to: 255
         stepSize: 1
         Layout.fillWidth: true
-        Accessible.name: txtLumaThreshold.text
-
-        onValueChanged: Life.lumaThreshold = value
-    }
-    SpinBox {
-        id: spbLumaThreshold
-        value: Life.lumaThreshold
-        to: sldLumaThreshold.to
-        stepSize: sldLumaThreshold.stepSize
-        editable: true
         Accessible.name: txtLumaThreshold.text
 
         onValueChanged: Life.lumaThreshold = value

@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2021  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ set(CMAKE_AUTORCC ON)
 
 set(QT_COMPONENTS
     Concurrent
+    Multimedia
     OpenGL
     Qml
     Quick
@@ -37,6 +38,7 @@ set(QT_COMPONENTS
 
 if (ANDROID)
     list(APPEND QT_COMPONENTS
+         CorePrivate
          Xml)
 endif()
 
@@ -44,14 +46,18 @@ find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
 set(PROJECT_SOURCES
-    audiolayer.cpp
-    audiolayer.h
+    audioinputs.cpp
+    audioinputs.h
+    audiooutputs.cpp
+    audiooutputs.h
     clioptions.cpp
     clioptions.h
     downloadmanager.cpp
     downloadmanager.h
     iconsprovider.cpp
     iconsprovider.h
+    localstreaming.cpp
+    localstreaming.h
     main.cpp
     mediatools.cpp
     mediatools.h
@@ -59,6 +65,8 @@ set(PROJECT_SOURCES
     pluginconfigs.h
     recording.cpp
     recording.h
+    streaming.cpp
+    streaming.h
     updates.cpp
     updates.h
     videodisplay.cpp
@@ -67,6 +75,8 @@ set(PROJECT_SOURCES
     videoeffects.h
     videolayer.cpp
     videolayer.h
+    virtualcameras.cpp
+    virtualcameras.h
     ../DefaultTheme.qrc
     ../colors.qrc
     ../icons.qrc
@@ -98,7 +108,7 @@ elseif (APPLE)
                           MACOSX_BUNDLE_COPYRIGHT "Copyright (C)  2011-${YEAR}  Gonzalo Exequiel Pedone"
                           MACOSX_BUNDLE_GUI_IDENTIFIER "${APP_IDENTIFIER}"
                           MACOSX_BUNDLE_ICON_FILE webcamoid.icns
-                          MACOSX_BUNDLE_INFO_STRING "Webcamoid, The ultimate webcam suite!"
+                          MACOSX_BUNDLE_INFO_STRING "Webcamoid, The ultimate camera suite!"
                           MACOSX_BUNDLE_LONG_VERSION_STRING "Webcamoid ${VERSION}"
                           MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION})
 elseif (ANDROID)
@@ -179,10 +189,6 @@ if (ANDROID)
         add_definitions(-DENABLE_ANDROID_DEBUGGING)
     endif ()
 
-    if (ENABLE_ANDROID_LOG_FILE)
-        add_definitions(-DENABLE_ANDROID_LOG_FILE)
-    endif ()
-
     if (ENABLE_ANDROID_ADS AND MVN_BIN AND (ANDROID_TARGET_SDK_VERSION GREATER_EQUAL 31))
         add_definitions(-DENABLE_ANDROID_ADS
                         -DANDROID_AD_UNIT_ID_APP_OPEN="${ANDROID_AD_UNIT_ID_APP_OPEN}"
@@ -197,14 +203,10 @@ if (ANDROID)
                    "${CMAKE_BINARY_DIR}/${BUILDDIR}/res/values/appid.xml")
 endif ()
 
-if (ENABLE_SINGLE_INSTANCE AND NOT ANDROID)
-    add_definitions(-DENABLE_SINGLE_INSTANCE)
-endif ()
-
 if (FAKE_APPLE)
     install(TARGETS StandAlone DESTINATION ${BINDIR})
 elseif (APPLE)
-        install(TARGETS StandAlone DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(TARGETS StandAlone DESTINATION ${CMAKE_INSTALL_PREFIX})
 elseif (NOT ANDROID)
     install(TARGETS StandAlone DESTINATION ${BINDIR})
 endif ()

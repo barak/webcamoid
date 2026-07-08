@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,22 +21,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-GridLayout {
-    columns: 3
-
-    Connections {
-        target: Temperature
-
-        function onTemperatureChanged(temperature)
-        {
-            sldTemperature.value = temperature
-            spbTemperature.value = temperature
-        }
-    }
-
+ColumnLayout {
     Label {
         id: txtTemperature
         text: qsTr("Temperature")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldTemperature
@@ -45,17 +35,6 @@ GridLayout {
         from: 1000
         to: 40000
         Layout.fillWidth: true
-        Accessible.name: txtTemperature.text
-
-        onValueChanged: Temperature.temperature = value
-    }
-    SpinBox {
-        id: spbTemperature
-        value: Temperature.temperature
-        from: sldTemperature.from
-        to: sldTemperature.to
-        stepSize: sldTemperature.stepSize
-        editable: true
         Accessible.name: txtTemperature.text
 
         onValueChanged: Temperature.temperature = value

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -28,12 +28,12 @@ Item {
             qsTr("The virtual camera is in use by the following applications:")
         message += "<br/><br/>"
 
-        let pids = videoLayer.clientsPids
+        let pids = virtualCameras.clientsPids
 
         for (let i in pids)
             message += "<b>"
                     + pids[i]
-                    + "</b>: <i>" + videoLayer.clientExe(pids[i])
+                    + "</b>: <i>" + virtualCameras.clientExe(pids[i])
                     + "</i><br/>"
 
         message += "<br/>"

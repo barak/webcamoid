@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -68,6 +68,7 @@ pacman --noconfirm --needed -S \
     git \
     lib32-mpg123 \
     make \
+    ninja \
     mpg123 \
     nsis \
     pkgconf \
@@ -89,7 +90,6 @@ pacman --noconfirm --needed -S \
     mingw-w64-qt6-multimedia \
     mingw-w64-qt6-svg \
     mingw-w64-qt6-tools \
-    mingw-w64-sdl2 \
     mingw-w64-vulkan-headers
 
 # Install NSIS

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,11 +21,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Ak
+import AkControls as AK
 import RippleElement
 
-GridLayout {
-    columns: 3
-
+ColumnLayout {
     function modeIndex(mode)
     {
         var index = -1
@@ -39,69 +38,13 @@ GridLayout {
         return index
     }
 
-    Connections {
-        target: Ripple
-
-        function onAmplitudeChanged(amplitude)
-        {
-            sldAmplitude.value = amplitude
-            spbAmplitude.value = amplitude
-        }
-
-        function onDecayChanged(decay)
-        {
-            sldDecay.value = decay
-            spbDecay.value = decay
-        }
-
-        function onThresholdChanged(threshold)
-        {
-            sldThreshold.value = threshold
-            spbThreshold.value = threshold
-        }
-
-        function onLumaThresholdChanged(lumaThreshold)
-        {
-            sldLumaThreshold.value = lumaThreshold
-            spbLumaThreshold.value = lumaThreshold
-        }
-
-        function onMinDropSizeChanged(minDropSize)
-        {
-            sldMinDropSize.value = minDropSize
-            spbMinDropSize.value = minDropSize
-        }
-
-        function onMaxDropSizeChanged(maxDropSize)
-        {
-            sldMaxDropSize.value = maxDropSize
-            spbMaxDropSize.value = maxDropSize
-        }
-
-        function onDropSigmaChanged(dropSigma)
-        {
-            sldDropSigma.value = dropSigma
-            spbDropSigma.value = dropSigma * spbDropSigma.multiplier
-        }
-
-        function onDropProbabilityChanged(dropProbability)
-        {
-            sldDropProbability.value = dropProbability
-            spbDropProbability.value = dropProbability * spbDropProbability.multiplier
-        }
-    }
-
-    Label {
-        id: txtMode
-        text: qsTr("Mode")
-    }
-    ComboBox {
+    AK.LabeledComboBox {
         id: cbxMode
+        label: qsTr("Mode")
         textRole: "text"
         currentIndex: modeIndex(Ripple.mode)
-        Layout.columnSpan: 2
         Layout.fillWidth: true
-        Accessible.description: txtMode.text
+        Accessible.description: label
 
         model: ListModel {
             ListElement {
@@ -117,16 +60,19 @@ GridLayout {
         onCurrentIndexChanged: Ripple.mode = cbxMode.model.get(currentIndex).mode
     }
     Label {
-        text: qsTr("<b>General parameters</b>")
+        text: qsTr("General parameters")
         topPadding: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
         bottomPadding: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        wrapMode: Text.Wrap
-        Layout.columnSpan: 3
+        wrapMode: Text.WordWrap
+        elide: Text.ElideNone
+        font: AkTheme.fontSettings.h6
         Layout.fillWidth: true
     }
     Label {
         id: txtAmplitude
         text: qsTr("Amplitude")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldAmplitude
@@ -138,19 +84,11 @@ GridLayout {
 
         onValueChanged: Ripple.amplitude = value
     }
-    SpinBox {
-        id: spbAmplitude
-        value: Ripple.amplitude
-        to: sldAmplitude.to
-        stepSize: sldAmplitude.stepSize
-        editable: true
-        Accessible.name: txtAmplitude.text
-
-        onValueChanged: Ripple.amplitude = Number(value)
-    }
     Label {
         id: txtDecay
         text: qsTr("Decay")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldDecay
@@ -162,27 +100,20 @@ GridLayout {
 
         onValueChanged: Ripple.decay = value
     }
-    SpinBox {
-        id: spbDecay
-        value: Ripple.decay
-        to: sldDecay.to
-        stepSize: sldDecay.stepSize
-        editable: true
-        Accessible.name: txtDecay.text
-
-        onValueChanged: Ripple.decay = Number(value)
-    }
     Label {
-        text: qsTr("<b>Motion detection parameters</b>")
+        text: qsTr("Motion detection parameters")
         topPadding: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
         bottomPadding: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        wrapMode: Text.Wrap
-        Layout.columnSpan: 3
+        wrapMode: Text.WordWrap
+        elide: Text.ElideNone
+        font: AkTheme.fontSettings.h6
         Layout.fillWidth: true
     }
     Label {
         id: txtThreshold
         text: qsTr("Threshold")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldThreshold
@@ -194,16 +125,6 @@ GridLayout {
 
         onValueChanged: Ripple.threshold = value
     }
-    SpinBox {
-        id: spbThreshold
-        value: Ripple.threshold
-        to: sldThreshold.to
-        stepSize: sldThreshold.stepSize
-        editable: true
-        Accessible.name: txtThreshold.text
-
-        onValueChanged: Ripple.threshold = Number(value)
-    }
     Label {
         id: txtLumaThreshold
         /*: Minimum luminance/light/white level/intensity in a gray or black and
@@ -212,6 +133,8 @@ GridLayout {
             https://en.wikipedia.org/wiki/Luma_(video)
          */
         text: qsTr("Luma threshold")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldLumaThreshold
@@ -223,28 +146,20 @@ GridLayout {
 
         onValueChanged: Ripple.lumaThreshold = value
     }
-    SpinBox {
-        id: spbLumaThreshold
-        value: Ripple.lumaThreshold
-        to: sldLumaThreshold.to
-        stepSize: sldLumaThreshold.stepSize
-        editable: true
-        Accessible.name: txtLumaThreshold.text
-
-        onValueChanged: Ripple.lumaThreshold = Number(value)
-    }
     Label {
-        text: qsTr("<b>Rain parameters</b>")
+        text: qsTr("Rain parameters")
         topPadding: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
         bottomPadding: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        wrapMode: Text.Wrap
-        Layout.columnSpan: 3
+        wrapMode: Text.WordWrap
+        elide: Text.ElideNone
+        font: AkTheme.fontSettings.h6
         Layout.fillWidth: true
     }
     Label {
         id: txtMinDropSize
-
         text: qsTr("Minimum drop size")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldMinDropSize
@@ -256,20 +171,11 @@ GridLayout {
 
         onValueChanged: Ripple.minDropSize = value
     }
-    SpinBox {
-        id: spbMinDropSize
-        value: Ripple.minDropSize
-        to: sldMinDropSize.to
-        stepSize: sldMinDropSize.stepSize
-        editable: true
-        Accessible.name: txtMinDropSize.text
-
-        onValueChanged: Ripple.minDropSize = Number(value)
-    }
     Label {
         id: txtMaxDropSize
-
         text: qsTr("Maximum drop size")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldMaxDropSize
@@ -281,19 +187,11 @@ GridLayout {
 
         onValueChanged: Ripple.maxDropSize = value
     }
-    SpinBox {
-        id: spbMaxDropSize
-        value: Ripple.maxDropSize
-        to: sldMaxDropSize.to
-        stepSize: sldMaxDropSize.stepSize
-        editable: true
-        Accessible.name: txtMaxDropSize.text
-
-        onValueChanged: Ripple.maxDropSize = Number(value)
-    }
     Label {
         id: lblDropSigma
         text: qsTr("Drop thickness")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldDropSigma
@@ -306,33 +204,11 @@ GridLayout {
 
         onValueChanged: Ripple.dropSigma = value
     }
-    SpinBox {
-        id: spbDropSigma
-        value: multiplier * Ripple.dropSigma
-        from: multiplier * sldDropSigma.from
-        to: multiplier * sldDropSigma.to
-        stepSize: multiplier * sldDropSigma.stepSize
-        editable: true
-        Accessible.name: lblDropSigma.text
-
-        readonly property int decimals: 2
-        readonly property int multiplier: Math.pow(10, decimals)
-
-        validator: DoubleValidator {
-            bottom: Math.min(spbDropSigma.from, spbDropSigma.to)
-            top:  Math.max(spbDropSigma.from, spbDropSigma.to)
-        }
-        textFromValue: function(value, locale) {
-            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
-        }
-        valueFromText: function(text, locale) {
-            return Number.fromLocaleString(locale, text) * multiplier
-        }
-        onValueModified: Ripple.dropSigma = value / multiplier
-    }
     Label {
         id: lblDropProbability
         text: qsTr("Drop frequency")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldDropProbability
@@ -344,29 +220,5 @@ GridLayout {
         Accessible.name: lblDropProbability.text
 
         onValueChanged: Ripple.dropProbability = value
-    }
-    SpinBox {
-        id: spbDropProbability
-        value: multiplier * Ripple.dropProbability
-        from: multiplier * sldDropProbability.from
-        to: multiplier * sldDropProbability.to
-        stepSize: multiplier * sldDropProbability.stepSize
-        editable: true
-        Accessible.name: lblDropProbability.text
-
-        readonly property int decimals: 2
-        readonly property int multiplier: Math.pow(10, decimals)
-
-        validator: DoubleValidator {
-            bottom: Math.min(spbDropProbability.from, spbDropProbability.to)
-            top:  Math.max(spbDropProbability.from, spbDropProbability.to)
-        }
-        textFromValue: function(value, locale) {
-            return Number(value / multiplier).toLocaleString(locale, 'f', decimals)
-        }
-        valueFromText: function(text, locale) {
-            return Number.fromLocaleString(locale, text) * multiplier
-        }
-        onValueModified: Ripple.dropProbability = value / multiplier
     }
 }

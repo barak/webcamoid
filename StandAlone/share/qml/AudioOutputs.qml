@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -20,23 +20,18 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Ak
+import AkControls as AK
 
 ScrollView {
     id: view
 
-    Component.onCompleted: devicesList.update()
-    onVisibleChanged: devicesList.forceActiveFocus()
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
 
-    Connections {
-        target: audioLayer
-
-        function onOutputsChanged()
-        {
-            devicesList.update()
-        }
-    }
+    onVisibleChanged: volumeSlider.forceActiveFocus()
 
     ColumnLayout {
+        layoutDirection: view.rtl? Qt.RightToLeft: Qt.LeftToRight
         width: view.width
         clip: true
 
@@ -44,62 +39,33 @@ ScrollView {
             text: qsTr("Configure output")
             icon.source: "image://icons/settings"
             flat: true
-            visible: devicesList.count > 0
 
-            onClicked: deviceOptions.openOptions(audioLayer.audioOutput)
+            onClicked: deviceOptions.open()
         }
-        OptionList {
-            id: devicesList
+        Label {
+            id: deviceInfo
+            text: audioOutputs.description(audioOutputs.audioOutput)
+            font.bold: true
+            wrapMode: Text.WordWrap
+            Layout.leftMargin: AkUnit.create(8 * AkTheme.controlScale, "dp").pixels
+            Layout.rightMargin: AkUnit.create(8 * AkTheme.controlScale, "dp").pixels
             Layout.fillWidth: true
-            Layout.minimumHeight: minHeight
+        }
+        Slider {
+            id: volumeSlider
+            from: 0.0
+            to: 1.5
+            value: audioOutputs.volume
+            stepSize: 0.01
+            Layout.leftMargin: AkUnit.create(8 * AkTheme.controlScale, "dp").pixels
+            Layout.rightMargin: AkUnit.create(8 * AkTheme.controlScale, "dp").pixels
+            Layout.fillWidth: true
 
-            property bool updating: false
-            property int minHeight: 0
-
-            function update() {
-                devicesList.minHeight = 0
-                let devices = audioLayer.outputs
-
-                for (let i = count - 1; i >= 0; i--)
-                    removeItem(itemAt(i))
-
-                let index = devices.indexOf(audioLayer.audioOutput)
-
-                if (index < 0) {
-                    if (devices.length == 1)
-                        index = 0
-                    else if (devices.length >= 2)
-                        index = 1
-                }
-
-                updating = true
-
-                for (let i in devices) {
-                    let component = Qt.createComponent("AudioDeviceItem.qml")
-
-                    if (component.status !== Component.Ready)
-                        continue
-
-                    let obj = component.createObject(devicesList)
-                    obj.text = audioLayer.description(devices[i])
-                    obj.device = devices[i]
-                    obj.highlighted = i == index
-                    devicesList.minHeight += obj.height
-
-                    obj.Keys.onSpacePressed.connect(() => deviceOptions.openOptions(audioLayer.audioOutput))
-                }
-
-                updating = false
-                setCurrentIndex(index)
-            }
-
-            onCurrentIndexChanged:
-                if (!updating && itemAt(currentIndex))
-                    audioLayer.audioOutput = itemAt(currentIndex).device
+            onMoved: audioOutputs.volume = value
         }
     }
 
-    AudioDeviceOptions {
+    AudioOutputDeviceOptions {
         id: deviceOptions
         anchors.centerIn: Overlay.overlay
     }

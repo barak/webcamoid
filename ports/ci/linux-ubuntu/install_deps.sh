@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -86,12 +86,12 @@ apt-get -qq -y install \
     python3-pip \
     wget
 
-if [ "${architecture}" = amd64 ]; then
-    apt-get -qq -y install \
-        libgpgme11
+if apt-cache show libgpgme11 2>/dev/null | grep -q "^Package:"; then
+    apt-get -qq -y install libgpgme11
+elif apt-cache show libgpgme11t64 2>/dev/null | grep -q "^Package:"; then
+    apt-get -qq -y install libgpgme11t64
 else
-    apt-get -qq -y install \
-        libgpgme11t64
+    apt-get -qq -y install libgpgme45
 fi
 
 mkdir -p .local/bin
@@ -125,10 +125,13 @@ if [[ ( "${architecture}" = amd64 || "${architecture}" = arm64v8 ) && ! -z "${QT
             --accept-licenses \
             --accept-messages \
             --confirm-command \
-            install
-        cd .local
-        cp -rvf ~/QtIFW/* .
-        cd ..
+            install || true
+
+        if [ -d ~/QtIFW ]; then
+            cd .local
+            cp -rvf ~/QtIFW/* .
+            cd ..
+        fi
     fi
 fi
 
@@ -178,22 +181,18 @@ apt-get -y install \
     libavformat-dev \
     libavutil-dev \
     libgl1-mesa-dev \
-    libjack-dev \
     libkmod-dev \
     libpipewire-0.3-dev \
     libpipewire-0.3-modules \
     libpulse-dev \
     libqt6opengl6-dev \
     libqt6svg6-dev \
-    libsdl2-dev \
     libswresample-dev \
     libswscale-dev \
     libusb-dev \
     libusb-1.0-0-dev \
     libuvc-dev \
     libv4l-dev \
-    libvlc-dev \
-    libvlccore-dev \
     libvulkan-dev \
     libwebpdemux2 \
     libxext-dev \
@@ -201,6 +200,7 @@ apt-get -y install \
     lintian \
     linux-libc-dev \
     make \
+    ninja-build \
     patchelf \
     pkg-config \
     portaudio19-dev \
@@ -216,7 +216,6 @@ apt-get -y install \
     qml6-module-qtquick-controls \
     qml6-module-qtquick-dialogs \
     qml6-module-qtquick-layouts \
-    qml6-module-qtquick-nativestyle \
     qml6-module-qtquick-shapes \
     qml6-module-qtquick-templates \
     qml6-module-qtquick-window \
@@ -227,20 +226,21 @@ apt-get -y install \
     qt6-l10n-tools \
     qt6-multimedia-dev \
     qt6-wayland \
-    rpm \
-    rpmlint \
-    vlc-plugin-base \
     xvfb
 
-if [[ "${DOCKERIMG}" != */ubuntu:rolling && "${DISTRO}" != ubuntu_devel ]]; then
+if [[ "${DOCKERIMG}" != */ubuntu:rolling &&
+      "${DISTRO}" != ubuntu_devel &&
+      "${architecture}" != arm64v8 &&
+      "${architecture}" != arm32v7 &&
+      "${architecture}" != riscv64 ]]; then
     apt-get -y install \
         libqt6multimediaquick6
 fi
 
-if [ "${UPLOAD}" != 1 ]; then
+if [[ "${DOCKERIMG}" != *"/ubuntu:devel" &&
+      "${architecture}" != arm64v8 &&
+      "${architecture}" != arm32v7 &&
+      "${architecture}" != riscv64 ]]; then
     apt-get -y install \
-        gstreamer1.0-plugins-base \
-        gstreamer1.0-plugins-good \
-        libgstreamer-plugins-base1.0-dev \
-        libgstreamer1.0-0
+        qml6-module-qtquick-nativestyle
 fi

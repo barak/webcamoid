@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -27,12 +27,10 @@ pkg install -y \
     cmake \
     ffmpeg \
     git \
-    gstreamer1 \
-    gstreamer1-plugins-good \
-    jackit \
     libuvc \
     libXext \
     libXfixes \
+    ninja \
     pkgconf \
     patchelf \
     pipewire \
@@ -45,6 +43,4 @@ pkg install -y \
     qt6-svg \
     qt6-tools \
     qt6-wayland \
-    sdl2 \
-    v4l_compat \
-    vlc
+    v4l_compat

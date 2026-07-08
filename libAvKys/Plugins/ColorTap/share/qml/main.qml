@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -22,9 +22,13 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt.labs.platform as LABS
 import Ak
+import AkControls as AK
 
 ColumnLayout {
-    id: clyColorTap
+    id: root
+    layoutDirection: rtl? Qt.RightToLeft: Qt.LeftToRight
+
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
 
     readonly property string filePrefix: Ak.platform() == "windows"?
                                              "file:///":
@@ -32,91 +36,90 @@ ColumnLayout {
 
     function toQrc(uri)
     {
+        if (uri.length < 1)
+            return ""
+
         if (uri.indexOf(":") == 0)
             return "qrc" + uri
 
         return "file:" + uri
     }
 
-    RowLayout {
-        Label {
-            id: txtColorTable
-            text: qsTr("Color table")
-        }
-        ComboBox {
-            id: cbxTable
-            textRole: "text"
-            Layout.fillWidth: true
-            Accessible.description: txtColorTable.text
+    AK.LabeledComboBox {
+        id: cbxTable
+        label: qsTr("Color table")
+        textRole: "text"
+        Layout.fillWidth: true
+        Accessible.description: label
 
-            model: ListModel {
-                ListElement {
-                    //: Base color, show the image without modifications
-                    text: qsTr("Base")
-                    table: ":/ColorTap/share/tables/base.bmp"
-                }
-                ListElement {
-                    text: qsTr("Metal")
-                    table: ":/ColorTap/share/tables/metal.bmp"
-                }
-                ListElement {
-                    //: https://en.wikipedia.org/wiki/Heat_map
-                    text: qsTr("Heat")
-                    table: ":/ColorTap/share/tables/heat.bmp"
-                }
-                ListElement {
-                    text: qsTr("Old Photo")
-                    table: ":/ColorTap/share/tables/oldphoto.bmp"
-                }
-                ListElement {
-                    text: qsTr("Red & Green")
-                    table: ":/ColorTap/share/tables/redgreen.bmp"
-                }
-                ListElement {
-                    //: https://en.wikipedia.org/wiki/Sepia_(color)
-                    text: qsTr("Sepia")
-                    table: ":/ColorTap/share/tables/sepia.bmp"
-                }
-                ListElement {
-                    text: qsTr("X-Pro")
-                    table: ":/ColorTap/share/tables/xpro.bmp"
-                }
-                ListElement {
-                    text: qsTr("X-Ray")
-                    table: ":/ColorTap/share/tables/xray.bmp"
-                }
-                ListElement {
-                    text: qsTr("Yellow & Blue")
-                    table: ":/ColorTap/share/tables/yellowblue.bmp"
-                }
-                ListElement {
-                    text: qsTr("Custom")
-                    table: ""
-                }
+        model: ListModel {
+            ListElement {
+                //: Base color, show the image without modifications
+                text: qsTr("Base")
+                table: ":/ColorTap/share/tables/base.bmp"
             }
-
-            onCurrentIndexChanged: ColorTap.table = cbxTable.model.get(currentIndex).table
+            ListElement {
+                text: qsTr("Metal")
+                table: ":/ColorTap/share/tables/metal.bmp"
+            }
+            ListElement {
+                //: https://en.wikipedia.org/wiki/Heat_map
+                text: qsTr("Heat")
+                table: ":/ColorTap/share/tables/heat.bmp"
+            }
+            ListElement {
+                text: qsTr("Old Photo")
+                table: ":/ColorTap/share/tables/oldphoto.bmp"
+            }
+            ListElement {
+                text: qsTr("Red & Green")
+                table: ":/ColorTap/share/tables/redgreen.bmp"
+            }
+            ListElement {
+                //: https://en.wikipedia.org/wiki/Sepia_(color)
+                text: qsTr("Sepia")
+                table: ":/ColorTap/share/tables/sepia.bmp"
+            }
+            ListElement {
+                text: qsTr("X-Pro")
+                table: ":/ColorTap/share/tables/xpro.bmp"
+            }
+            ListElement {
+                text: qsTr("X-Ray")
+                table: ":/ColorTap/share/tables/xray.bmp"
+            }
+            ListElement {
+                text: qsTr("Yellow & Blue")
+                table: ":/ColorTap/share/tables/yellowblue.bmp"
+            }
+            ListElement {
+                text: qsTr("Custom")
+                table: ""
+            }
         }
+
+        onCurrentIndexChanged: ColorTap.table = cbxTable.model.get(currentIndex).table
     }
 
     RowLayout {
-        Image {
-            width: 16
-            height: 16
-            fillMode: Image.PreserveAspectFit
-            sourceSize.width: 16
-            sourceSize.height: 16
-            source: toQrc(txtTable.text)
-        }
-        TextField {
-            id: txtTable
-            text: ColorTap.table
-            placeholderText: qsTr("Source palette")
-            selectByMouse: true
-            Layout.fillWidth: true
-            Accessible.name: qsTr("Image file to use as palette")
+        layoutDirection: root.rtl? Qt.RightToLeft: Qt.LeftToRight
 
-            onTextChanged: {
+        Image {
+            width: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            height: width
+            fillMode: Image.PreserveAspectFit
+            sourceSize: Qt.size(width, height)
+            source: toQrc(txtTable.labelText)
+        }
+        AK.ActionTextField {
+            id: txtTable
+            icon.source: "image://icons/search"
+            labelText: ColorTap.table
+            placeholderText: qsTr("Source palette")
+            buttonText: qsTr("Search the image file to use as palette")
+            Layout.fillWidth: true
+
+            onLabelTextChanged: {
                 for (var i = 0; i < cbxTable.model.count; i++) {
                     if (cbxTable.model.get(i).table == ColorTap.table) {
                         cbxTable.currentIndex = i
@@ -130,13 +133,7 @@ ColumnLayout {
                     }
                 }
             }
-        }
-        Button {
-            text: qsTr("Search")
-            icon.source: "image://icons/search"
-            Accessible.description: qsTr("Search the image file to use as palette")
-
-            onClicked: fileDialog.open()
+            onButtonClicked: fileDialog.open()
         }
     }
 
@@ -144,9 +141,9 @@ ColumnLayout {
         id: fileDialog
         title: qsTr("Please choose an image file")
         nameFilters: ["Image files (*.bmp *.gif *.jpg *.jpeg *.png *.pbm *.pgm *.ppm *.xbm *.xpm)"]
-        folder: clyColorTap.filePrefix + picturesPath
+        folder: root.filePrefix + picturesPath
 
         onAccepted: ColorTap.table =
-                    String(file).replace(clyColorTap.filePrefix, "")
+                    String(file).replace(root.filePrefix, "")
     }
 }

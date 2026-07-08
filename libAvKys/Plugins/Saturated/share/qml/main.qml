@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,22 +21,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-GridLayout {
-    columns: 3
-
-    Connections {
-        target: Saturated
-
-        function onFactor(factor)
-        {
-            sldFactor.value = factor
-            spbFactor.value = factor
-        }
-    }
-
+ColumnLayout {
     Label {
         id: txtFactor
         text: qsTr("Factor")
+        font.bold: true
+        Layout.fillWidth: true
     }
     Slider {
         id: sldFactor
@@ -47,15 +37,5 @@ GridLayout {
         Accessible.name: txtFactor.text
 
         onValueChanged: Saturated.factor = value
-    }
-    SpinBox {
-        id: spbFactor
-        value: Saturated.factor
-        to: sldFactor.to
-        stepSize: sldFactor.stepSize
-        editable: true
-        Accessible.name: txtFactor.text
-
-        onValueChanged: Saturated.factor = Number(value)
     }
 }

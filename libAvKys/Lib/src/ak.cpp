@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -31,6 +31,7 @@
 #include "ak.h"
 #include "akaudiocaps.h"
 #include "akaudioconverter.h"
+#include "akaudiomixer.h"
 #include "akaudiopacket.h"
 #include "akcaps.h"
 #include "akcolorcomponent.h"
@@ -41,11 +42,13 @@
 #include "akcompressedvideocaps.h"
 #include "akcompressedvideopacket.h"
 #include "akfrac.h"
+#include "akglpipeline.h"
 #include "akmenuoption.h"
 #include "akpacket.h"
 #include "akplugininfo.h"
 #include "akpluginmanager.h"
 #include "akpropertyoption.h"
+#include "akstreamingstats.h"
 #include "aksubtitlecaps.h"
 #include "aksubtitlepacket.h"
 #include "akunit.h"
@@ -57,6 +60,7 @@
 #include "iak/akelement.h"
 #include "qml/akcolorizedimage.h"
 #include "qml/akfontsettings.h"
+#include "qml/akmediagallerymodel.h"
 #include "qml/akpalette.h"
 #include "qml/akpalettegroup.h"
 #include "qml/aktheme.h"
@@ -109,6 +113,7 @@ void Ak::registerTypes()
     });
     AkAudioCaps::registerTypes();
     AkAudioConverter::registerTypes();
+    AkAudioMixer::registerTypes();
     AkAudioPacket::registerTypes();
     AkCaps::registerTypes();
     AkColorComponent::registerTypes();
@@ -122,6 +127,8 @@ void Ak::registerTypes()
     AkElement::registerTypes();
     AkFontSettings::registerTypes();
     AkFrac::registerTypes();
+    AkGLPipeline::registerTypes();
+    AkMediaGalleryModel::registerTypes();
     AkMenuOption::registerTypes();
     AkPacket::registerTypes();
     AkPalette::registerTypes();
@@ -129,6 +136,7 @@ void Ak::registerTypes()
     AkPluginInfo::registerTypes();
     AkPluginManager::registerTypes();
     AkPropertyOption::registerTypes();
+    AkStreamingStats::registerTypes();
     AkSubtitleCaps::registerTypes();
     AkSubtitlePacket::registerTypes();
     AkTheme::registerTypes();

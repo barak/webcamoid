@@ -1,0 +1,4968 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="bs">
+<context>
+    <name>About</name>
+    <message>
+        <location filename="../qml/About.qml" line="31"/>
+        <source>About %1</source>
+        <extracomment>Information of the program, like name, description, version,</extracomment>
+        <translation>O programu %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="32"/>
+        <source>%1 version, copyleft, and build information.</source>
+        <translation>Informacije o verziji %1, copyleft-u i građenju.</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="82"/>
+        <source>Built from</source>
+        <extracomment>Built from &quot;short commit hash&quot;</extracomment>
+        <translation>Građeno od</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="88"/>
+        <source>Built from %1</source>
+        <translation>Građeno od %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="90"/>
+        <source>Open the commit in your web browser</source>
+        <translation>Otvori commit u vašem web pretraživaču</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="96"/>
+        <source>Using Qt %1</source>
+        <translation>Koristi Qt %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="102"/>
+        <source>Webcam capture application.</source>
+        <translation>Aplikacija za snimanje web kamere.</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="109"/>
+        <source>A multi-platform camera application for picture and video capture.</source>
+        <translation>Višeplatformska aplikacija za kamere za slikanje i snimanje videa.</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="123"/>
+        <source>Website</source>
+        <translation>Web stranica</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="129"/>
+        <source>Go to %1 website</source>
+        <translation>Idi na web stranicu %1</translation>
+    </message>
+</context>
+<context>
+    <name>AddPlatformDialog</name>
+    <message>
+        <location filename="../qml/AddPlatformDialog.qml" line="33"/>
+        <source>Add platform</source>
+        <translation>Dodaj platformu</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddPlatformDialog.qml" line="42"/>
+        <source>Platform</source>
+        <translation>Platforma</translation>
+    </message>
+</context>
+<context>
+    <name>AddStreamingPlatformDialog</name>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="28"/>
+        <source>Add platform</source>
+        <translation>Dodaj platformu</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="57"/>
+        <source>Name</source>
+        <translation>Naziv</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="63"/>
+        <source>My Platform</source>
+        <translation>Moja platforma</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="68"/>
+        <source>Website</source>
+        <translation>Web stranica</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="79"/>
+        <source>Streaming URL</source>
+        <translation>URL za streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="90"/>
+        <source>Key configs URL</source>
+        <translation>URL konfiguracije ključa</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="101"/>
+        <source>Documentation URL</source>
+        <translation>URL dokumentacije</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="113"/>
+        <source>Needs key</source>
+        <translation>Potreban je ključ</translation>
+    </message>
+</context>
+<context>
+    <name>AddVideoFormat</name>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="52"/>
+        <source>Add Video Format</source>
+        <translation>Dodaj video format</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="53"/>
+        <source>Change Video Format</source>
+        <translation>Promijeni video format</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="105"/>
+        <source>Remove format</source>
+        <translation>Ukloni format</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="116"/>
+        <source>Format</source>
+        <translation>Format</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="128"/>
+        <source>Width</source>
+        <translation>Širina</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="141"/>
+        <source>Height</source>
+        <translation>Visina</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="154"/>
+        <source>Frame rate</source>
+        <translation>Brzina slike (fps)</translation>
+    </message>
+</context>
+<context>
+    <name>AkMediaGalleryModel</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="170"/>
+        <source>Share file</source>
+        <translation>Podijeli datoteku</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="276"/>
+        <source>Share files</source>
+        <translation>Podijeli datoteke</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="359"/>
+        <source>Use as...</source>
+        <translation>Koristi kao...</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="396"/>
+        <source>Copy to...</source>
+        <translation>Kopiraj u...</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="402"/>
+        <source>All Files (*)</source>
+        <translation>Sve datoteke (*)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="418"/>
+        <source>Move to...</source>
+        <translation>Premjesti u...</translation>
+    </message>
+</context>
+<context>
+    <name>AudioCodecOptions</name>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="28"/>
+        <source>Audio Codec Options</source>
+        <translation>Opcije audio kodeka</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="223"/>
+        <source>Audio codec</source>
+        <translation>Audio kodek</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="240"/>
+        <source>Bitrate</source>
+        <translation>Brzina prijenosa (bitrate)</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="247"/>
+        <source>Bitrate (bits/secs)</source>
+        <translation>Brzina prijenosa (bitova/sek)</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="256"/>
+        <source>Advanced options</source>
+        <translation>Napredne opcije</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputAdd</name>
+    <message>
+        <location filename="../qml/AudioInputAdd.qml" line="30"/>
+        <source>Select the audio source to add</source>
+        <translation>Odaberite audio izvor za dodavanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputAdd.qml" line="55"/>
+        <source>Audio input</source>
+        <translation>Audio ulaz</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputDeviceOptions</name>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="29"/>
+        <source>Audio Input Settings</source>
+        <translation>Postavke audio ulaza</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="124"/>
+        <source>Sample Format</source>
+        <extracomment>A sample represents the strength of the wave at a certain time. A sample can be expressed as the number of bits defining it (more bits better sound), the type of data representing it (signed integer, unsigned integer, floating point), and the endianness of the data (big endian, little endian). The sample format is the representation of that information. For example, &apos;s16le&apos; means that each sample format is represented by a 16 bits signed integer arranged as little endian.</extracomment>
+        <translation>Format uzorka</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="142"/>
+        <source>Channels</source>
+        <translation>Kanali</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="161"/>
+        <source>Sample Rate</source>
+        <extracomment>Number of audio samples per channel to be played per second.</extracomment>
+        <translation>Stopa uzorkovanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="188"/>
+        <source>Latency (ms)</source>
+        <extracomment>The latency is the amount of accumulated audio ready to play, measured in time. Higher latency == smoother audio playback, but more desynchronization with the video. Lowerer latency == audio synchronization near to the video, but glitchy audio playback. https://en.wikipedia.org/wiki/Latency_(audio)</extracomment>
+        <translation>Latencija (ms)</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputSourceItem</name>
+    <message>
+        <location filename="../qml/AudioInputSourceItem.qml" line="72"/>
+        <source>Remove</source>
+        <translation>Ukloni</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputs</name>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="62"/>
+        <source>Add audio input</source>
+        <translation>Dodaj audio ulaz</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="74"/>
+        <source>Add device input</source>
+        <translation>Dodaj ulaz uređaja</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="80"/>
+        <source>Add video source</source>
+        <translation>Dodaj video izvor</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="93"/>
+        <source>Configure audio input settings</source>
+        <translation>Konfiguriši postavke audio ulaza</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOptions</name>
+    <message>
+        <location filename="../qml/AudioOptions.qml" line="34"/>
+        <source>Outputs</source>
+        <translation>Izlazi</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOptions.qml" line="37"/>
+        <source>Sources</source>
+        <translation>Izvori</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOutputDeviceOptions</name>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="29"/>
+        <source>Audio Device Options</source>
+        <translation>Opcije audio uređaja</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="120"/>
+        <source>Audio input</source>
+        <translation>Audio ulaz</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="186"/>
+        <source>Sample Format</source>
+        <extracomment>An sample represents the strength of the wave at a certain time. A sample can be expressed as the number of bits defining it (more bits better sound), the type of data representing it (signed integer, unsigned integer, floating point), and the endianness of the data (big endian, little endian). The sample format is the representation of that information. For example, &apos;s16le&apos; means that each sample format is represented by a 16 bits signed integer arranged as little endian.</extracomment>
+        <translation>Format uzorka</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="207"/>
+        <source>Channels</source>
+        <translation>Kanali</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="229"/>
+        <source>Sample Rate</source>
+        <extracomment>Number of audio samples per channel to be played per second.</extracomment>
+        <translation>Stopa uzorkovanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="259"/>
+        <source>Latency (ms)</source>
+        <extracomment>The latency is the amount of accumulated audio ready to play, measured in time. Higher latency == smoother audio playback, but more desynchronization with the video. Lowerer latency == audio synchronization near to the video, but glitchy audio playback. https://en.wikipedia.org/wiki/Latency_(audio)</extracomment>
+        <translation>Latencija (ms)</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOutputs</name>
+    <message>
+        <location filename="../qml/AudioOutputs.qml" line="39"/>
+        <source>Configure output</source>
+        <translation>Konfiguriši izlaz</translation>
+    </message>
+</context>
+<context>
+    <name>CaptureSettingsDialog</name>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="32"/>
+        <source>Video capture settings</source>
+        <translation>Postavke snimanja videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="33"/>
+        <source>Image capture settings</source>
+        <translation>Postavke snimanja slike</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="58"/>
+        <source>Use flash</source>
+        <translation>Koristi blic</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="61"/>
+        <source>Use flash when taking a photo</source>
+        <translation>Koristi blic prilikom slikanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="66"/>
+        <source>Delay</source>
+        <translation>Odgoda</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="70"/>
+        <source>Photo timer</source>
+        <translation>Foto tajmer</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="71"/>
+        <source>The time to wait before the photo is taken</source>
+        <translation>Vrijeme čekanja prije nego što se slika uslika</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="77"/>
+        <source>Now</source>
+        <translation>Odmah</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="86"/>
+        <source>%1 seconds</source>
+        <translation>%1 sekundi</translation>
+    </message>
+</context>
+<context>
+    <name>ColorSchemeAddEdit</name>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="66"/>
+        <source>Edit color scheme</source>
+        <translation>Uredi šemu boja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="67"/>
+        <source>Create a new color scheme</source>
+        <translation>Kreiraj novu šemu boja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="71"/>
+        <source>Color Palette %1</source>
+        <translation>Paleta boja %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="94"/>
+        <source>Palette name</source>
+        <translation>Naziv palete</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="103"/>
+        <source>Enabled</source>
+        <translation>Omogućeno</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="106"/>
+        <source>Disabled</source>
+        <translation>Onemogućeno</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="110"/>
+        <source>Preview</source>
+        <translation>Pregled</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="169"/>
+        <source>Window text &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;</source>
+        <translation>Tekst prozora &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="215"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="697"/>
+        <source>Button text</source>
+        <translation>Tekst dugmeta</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="260"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="837"/>
+        <source>Tooltip text</source>
+        <translation>Tekst tooltip-a</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="349"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="730"/>
+        <source>Placeholder text</source>
+        <translation>Tekst rezervnog mjesta</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="350"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="722"/>
+        <source>Text</source>
+        <translation>Tekst</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="541"/>
+        <source>Progress %1%</source>
+        <translation>Napredak %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="649"/>
+        <source>Color group</source>
+        <translation>Grupa boja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="650"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="680"/>
+        <source>Window</source>
+        <translation>Prozor</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="651"/>
+        <source>Buttons</source>
+        <translation>Dugmad</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="652"/>
+        <source>Input Controls</source>
+        <translation>Kontrole unosa</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="653"/>
+        <source>Control accents</source>
+        <translation>Akcenti kontrola</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="654"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="820"/>
+        <source>Highlight</source>
+        <translation>Istaknuto</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="655"/>
+        <source>Tooltips</source>
+        <translation>Tooltip-ovi</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="656"/>
+        <source>Hyperlinks</source>
+        <translation>Hiperlinkovi</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="672"/>
+        <source>Window text</source>
+        <translation>Tekst prozora</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="674"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="682"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="699"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="707"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="724"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="732"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="740"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="748"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="765"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="773"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="781"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="789"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="797"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="814"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="822"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="839"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="847"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="864"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="872"/>
+        <source>Choose the color for %1</source>
+        <translation>Odaberi boju za %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="705"/>
+        <source>Button</source>
+        <translation>Dugme</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="738"/>
+        <source>Base</source>
+        <translation>Baza</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="746"/>
+        <source>Alternate base</source>
+        <translation>Alternativna baza</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="763"/>
+        <source>Light</source>
+        <translation>Svijetlo</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="771"/>
+        <source>Mid light</source>
+        <translation>Srednje svijetlo</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="779"/>
+        <source>Mid</source>
+        <translation>Srednje</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="787"/>
+        <source>Dark</source>
+        <translation>Tamno</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="795"/>
+        <source>Shadow</source>
+        <translation>Sjena</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="812"/>
+        <source>Highlighted text</source>
+        <translation>Istaknuti tekst</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="845"/>
+        <source>ToolTip base</source>
+        <translation>Baza tooltip-a</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="862"/>
+        <source>Link</source>
+        <translation>Link</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="870"/>
+        <source>Visited link</source>
+        <translation>Posjećeni link</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="961"/>
+        <source>Brightness</source>
+        <translation>Svjetlina</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="977"/>
+        <source>Contrast</source>
+        <translation>Kontrast</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="994"/>
+        <source>Contrast color</source>
+        <translation>Kontrastna boja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="996"/>
+        <source>Choose the contrast color</source>
+        <translation>Odaberi kontrastnu boju</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="1001"/>
+        <source>Saturation</source>
+        <translation>Zasićenje</translation>
+    </message>
+</context>
+<context>
+    <name>ColorSchemes</name>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="29"/>
+        <source>Customize Colors</source>
+        <translation>Prilagodi boje</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="31"/>
+        <source>Change %1 colors.</source>
+        <extracomment>Changer the program colors</extracomment>
+        <translation>Promijeni boje za %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="52"/>
+        <source>Color scheme</source>
+        <translation>Šema boja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="64"/>
+        <source>Add</source>
+        <translation>Dodaj</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="69"/>
+        <source>Create a new color scheme from the current selected one</source>
+        <translation>Kreiraj novu šemu boja iz trenutno odabrane</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="74"/>
+        <source>Edit</source>
+        <translation>Uredi</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="80"/>
+        <source>Edit the selected color scheme</source>
+        <translation>Uredi odabranu šemu boja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="85"/>
+        <source>Remove</source>
+        <translation>Ukloni</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="91"/>
+        <source>Delete the selected color scheme</source>
+        <translation>Obriši odabranu šemu boja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="99"/>
+        <source>Import</source>
+        <translation>Uvezi</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="104"/>
+        <source>Add a new color scheme from a file</source>
+        <translation>Dodaj novu šemu boja iz datoteke</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="109"/>
+        <source>Export</source>
+        <translation>Izvezi</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="113"/>
+        <source>Save the selected color scheme into a file</source>
+        <translation>Sačuvaj odabranu šemu boja u datoteku</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="128"/>
+        <source>Export color scheme</source>
+        <translation>Izvezi šemu boja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="140"/>
+        <source>Enabled</source>
+        <translation>Omogućeno</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="143"/>
+        <source>Disabled</source>
+        <translation>Onemogućeno</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="147"/>
+        <source>Preview</source>
+        <translation>Pregled</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="168"/>
+        <source>Window text &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;</source>
+        <translation>Tekst prozora &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="174"/>
+        <source>Button text</source>
+        <translation>Tekst dugmeta</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="179"/>
+        <source>Tooltip text</source>
+        <translation>Tekst tooltip-a</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="188"/>
+        <source>Placeholder text</source>
+        <translation>Tekst rezervnog mjesta</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="189"/>
+        <source>Text</source>
+        <translation>Tekst</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="219"/>
+        <source>Progress %1%</source>
+        <translation>Napredak %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="246"/>
+        <source>Select the color scheme to import</source>
+        <translation>Odaberite šemu boja za uvoz</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="280"/>
+        <source>Save the color scheme to a file</source>
+        <translation>Sačuvajte šemu boja u datoteku</translation>
+    </message>
+</context>
+<context>
+    <name>Commons</name>
+    <message>
+        <location filename="../qml/Commons.qml" line="28"/>
+        <source>The virtual camera is in use by the following applications:</source>
+        <translation>Virtuelnu kameru koriste sljedeće aplikacije:</translation>
+    </message>
+    <message>
+        <location filename="../qml/Commons.qml" line="40"/>
+        <source>Stop the camera in those applications or close them and try again.</source>
+        <translation>Zaustavite kameru u tim aplikacijama ili ih zatvorite i pokušajte ponovo.</translation>
+    </message>
+</context>
+<context>
+    <name>Contributors</name>
+    <message>
+        <location filename="../qml/Contributors.qml" line="31"/>
+        <source>Contributors</source>
+        <extracomment>List of people contributing to the project: software</extracomment>
+        <translation>Doprinosioci</translation>
+    </message>
+    <message>
+        <location filename="../qml/Contributors.qml" line="32"/>
+        <source>Great people who collaborated to make %1 better</source>
+        <translation>Odlični ljudi koji su doprinijeli da %1 bude bolji</translation>
+    </message>
+    <message>
+        <location filename="../qml/Contributors.qml" line="49"/>
+        <source>Thanks to all these cool people that helped contributing to Webcamoid all these years.</source>
+        <translation>Zahvaljujemo svim ovim sjajnim ljudima koji su pomogli u doprinosu Webcamoidu svih ovih godina.</translation>
+    </message>
+</context>
+<context>
+    <name>DebugLog</name>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="30"/>
+        <source>Debug Log</source>
+        <translation>Debug zapisnik</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="31"/>
+        <source>Information to help fixing bugs in %1.</source>
+        <translation>Informacije za pomoć u popravljanju grešaka u %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="74"/>
+        <source>Logs directory</source>
+        <translation>Direktorij zapisnika</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="86"/>
+        <source>Search directory to save logs</source>
+        <translation>Pretraži direktorij za spremanje zapisnika</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="100"/>
+        <source>Clear</source>
+        <translation>Očisti</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="103"/>
+        <source>Clear the debug log</source>
+        <translation>Očisti debug zapisnik</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="114"/>
+        <source>Save</source>
+        <translation>Spremi</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="117"/>
+        <source>Save the debug log</source>
+        <translation>Spremi debug zapisnik</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="142"/>
+        <source>Select the folder to save the logs</source>
+        <translation>Odaberi mapu za spremanje zapisnika</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadDialog</name>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="35"/>
+        <source>Downloading %1</source>
+        <translation>Preuzimanje %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="155"/>
+        <source>&lt;b&gt;From:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Od:&lt;/b&gt; %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="160"/>
+        <source>&lt;b&gt;To:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Za:&lt;/b&gt; %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="165"/>
+        <source>&lt;b&gt;Size:&lt;/b&gt; %1 %2B / %3 %4B</source>
+        <translation>&lt;b&gt;Veličina:&lt;/b&gt; %1 %2B / %3 %4B</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="173"/>
+        <source>&lt;b&gt;Speed:&lt;/b&gt; %1 %2B/s</source>
+        <translation>&lt;b&gt;Brzina:&lt;/b&gt; %1 %2B/s</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="179"/>
+        <source>&lt;b&gt;Time remaining:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Preostalo vrijeme:&lt;/b&gt; %1</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadFailedDialog</name>
+    <message>
+        <location filename="../qml/DownloadFailedDialog.qml" line="34"/>
+        <source>Download failed</source>
+        <translation>Preuzimanje nije uspjelo</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadSucceededDialog</name>
+    <message>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="34"/>
+        <source>Download ready</source>
+        <translation>Preuzimanje završeno</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="52"/>
+        <source>Install the virtual camera?</source>
+        <translation>Instalirati virtuelnu kameru?</translation>
+    </message>
+</context>
+<context>
+    <name>GeneralConfig</name>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="28"/>
+        <source>General Options</source>
+        <translation>Opće opcije</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="29"/>
+        <source>Configure capture, recording frameworks, and others.</source>
+        <translation>Konfiguriraj okvire za snimanje, snimanje i drugo.</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="77"/>
+        <source>Play sources on start</source>
+        <translation>Reproduciraj izvore pri pokretanju</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="87"/>
+        <source>Only allow one instance of %1</source>
+        <translation>Dozvoli samo jednu instancu %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="99"/>
+        <source>Hide controls on pointer out</source>
+        <translation>Sakrij kontrole pri izlasku pokazivača</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="111"/>
+        <source>Frameworks and libraries</source>
+        <translation>Okviri i biblioteke</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="121"/>
+        <source>Video capture</source>
+        <translation>Snimanje videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="139"/>
+        <source>Screen capture</source>
+        <translation>Snimanje ekrana</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="157"/>
+        <source>Audio capture/playback</source>
+        <translation>Snimanje/reprodukcija zvuka</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="175"/>
+        <source>Video convert</source>
+        <translation>Konvertovanje videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="193"/>
+        <source>Video playback</source>
+        <translation>Reprodukcija videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="211"/>
+        <source>Virtual camera driver</source>
+        <translation>Upravljački program virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="234"/>
+        <source>Root method</source>
+        <extracomment>The preferred method for executing commands with elevated privileges in the system.</extracomment>
+        <translation>Root metoda</translation>
+    </message>
+</context>
+<context>
+    <name>ImageCapture</name>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="29"/>
+        <source>Image Capture</source>
+        <translation>Snimanje slike</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="30"/>
+        <source>Configure photografy quality and formats.</source>
+        <translation>Konfiguriši kvalitet i formate fotografija.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="54"/>
+        <source>Images directory</source>
+        <translation>Direktorij slika</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="66"/>
+        <source>Select the save directory</source>
+        <translation>Odaberi direktorij za spremanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="80"/>
+        <source>File format</source>
+        <translation>Format datoteke</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="110"/>
+        <source>Quality</source>
+        <translation>Kvaliteta</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="142"/>
+        <source>Flash settings</source>
+        <translation>Postavke blica</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="152"/>
+        <source>Use flash</source>
+        <translation>Koristi blic</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="155"/>
+        <source>Use flash when taking a photo</source>
+        <translation>Koristi blic prilikom slikanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="164"/>
+        <source>Delay</source>
+        <translation>Odgoda</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="167"/>
+        <source>Photo timer</source>
+        <translation>Foto tajmer</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="168"/>
+        <source>The time to wait before the photo is taken</source>
+        <translation>Vrijeme čekanja prije nego što se slika uslika</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="176"/>
+        <source>Now</source>
+        <translation>Odmah</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="219"/>
+        <source>%1 seconds</source>
+        <translation>%1 sekundi</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="247"/>
+        <source>Select the folder to save your photos</source>
+        <translation>Odaberi mapu za spremanje vaših fotografija</translation>
+    </message>
+</context>
+<context>
+    <name>License</name>
+    <message>
+        <location filename="../qml/License.qml" line="27"/>
+        <source>License</source>
+        <extracomment>Program license.</extracomment>
+        <translation>Licenca</translation>
+    </message>
+    <message>
+        <location filename="../qml/License.qml" line="28"/>
+        <source>know your rights</source>
+        <translation>upoznajte svoja prava</translation>
+    </message>
+</context>
+<context>
+    <name>LocalSettingsMenu</name>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="36"/>
+        <source>Copy to clipboard</source>
+        <translation>Kopiraj u međuspremnik</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="43"/>
+        <source>Recording settings</source>
+        <translation>Postavke snimanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="44"/>
+        <source>Capture settings</source>
+        <translation>Postavke snimanja</translation>
+    </message>
+</context>
+<context>
+    <name>LocalStreamingAdvanced</name>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="31"/>
+        <source>Local streaming advanced options</source>
+        <translation>Napredne opcije lokalnog streaminga</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="130"/>
+        <source>Local streaming quality</source>
+        <translation>Kvalitet lokalnog streaminga</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="155"/>
+        <source>Streaming quality</source>
+        <translation>Kvalitet streaminga</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="208"/>
+        <source>Custom</source>
+        <translation>Prilagođeno</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="211"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Kvalitet videa: %1×%2 %3 FPS</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="212"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Bitrate videa: %1 Mbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="213"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Stopa uzorkovanja zvuka: %1 kHz</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="214"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Bitrate zvuka: %1 kbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="223"/>
+        <source>Video quality</source>
+        <translation>Kvalitet videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="241"/>
+        <source>Output width</source>
+        <translation>Izlazna širina</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="264"/>
+        <source>Output height</source>
+        <translation>Izlazna visina</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="287"/>
+        <source>Output frame rate</source>
+        <translation>Izlazna brzina slike</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="310"/>
+        <source>Video bitrate (kbps)</source>
+        <translation>Bitrate videa (kbps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="330"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Korak ključnih okvira (ms)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="349"/>
+        <source>Video codec</source>
+        <translation>Video kodek</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="432"/>
+        <source>Audio quality</source>
+        <translation>Kvalitet zvuka</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="450"/>
+        <source>Sample rate</source>
+        <translation>Stopa uzorkovanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="473"/>
+        <source>Audio bitrate (kbps)</source>
+        <translation>Bitrate zvuka (kbps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="494"/>
+        <source>Audio codec</source>
+        <translation>Audio kodek</translation>
+    </message>
+</context>
+<context>
+    <name>LocalStreamingOptions</name>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="99"/>
+        <source>Remove</source>
+        <translation>Ukloni</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="116"/>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="135"/>
+        <source>Format</source>
+        <translation>Format</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="193"/>
+        <source>Resource name</source>
+        <translation>Naziv resursa</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="216"/>
+        <source>Streaming URL</source>
+        <translation>URL za streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="234"/>
+        <source>Open URL in the webbrowser</source>
+        <translation>Otvori URL u web pretraživaču</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="244"/>
+        <source>Advanced options</source>
+        <translation>Napredne opcije</translation>
+    </message>
+</context>
+<context>
+    <name>LogSavedDialog</name>
+    <message>
+        <location filename="../qml/LogSavedDialog.qml" line="31"/>
+        <source>Done</source>
+        <translation>Gotovo</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogSavedDialog.qml" line="41"/>
+        <source>Log file saved</source>
+        <translation>Zapisnik spremljen</translation>
+    </message>
+</context>
+<context>
+    <name>MainPanel</name>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="27"/>
+        <source>Audio</source>
+        <translation>Audio</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="29"/>
+        <source>Video</source>
+        <translation>Video</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="31"/>
+        <source>Effects</source>
+        <translation>Efekti</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="33"/>
+        <source>Video Source Options</source>
+        <translation>Opcije video izvora</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="35"/>
+        <source>Virtual Camera Options</source>
+        <translation>Opcije virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="37"/>
+        <source>Streaming Platform Options</source>
+        <translation>Opcije streaming platforme</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="39"/>
+        <source>Local Streaming Options</source>
+        <translation>Opcije lokalnog streaminga</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="40"/>
+        <source>%1 options</source>
+        <translation>Opcije %1</translation>
+    </message>
+</context>
+<context>
+    <name>MediaGalleryDialog</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="84"/>
+        <source>%1 selected</source>
+        <translation>%1 odabrano</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="128"/>
+        <source>Select all</source>
+        <translation>Odaberi sve</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="135"/>
+        <source>Deselect all</source>
+        <translation>Poništi odabir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="286"/>
+        <source>The directory is empty</source>
+        <translation>Direktorij je prazan</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="294"/>
+        <source>Confirm delete</source>
+        <translation>Potvrdi brisanje</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="302"/>
+        <source>Delete %n picture(s) permanently?</source>
+        <translation>
+            <numerusform>Obriši trajno %n sliku?</numerusform>
+            <numerusform>Obriši trajno %n slike?</numerusform>
+            <numerusform>Obriši trajno %n slika?</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="309"/>
+        <source>This action can&apos;t be undone.</source>
+        <translation>Ova radnja se ne može poništiti.</translation>
+    </message>
+</context>
+<context>
+    <name>MediaTools</name>
+    <message>
+        <location filename="../../src/mediatools.cpp" line="1226"/>
+        <source>%1/log %2.txt</source>
+        <translation>%1/zapisnik %2.txt</translation>
+    </message>
+</context>
+<context>
+    <name>MediaViewerDialog</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="138"/>
+        <source>Use as</source>
+        <translation>Koristi kao</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="143"/>
+        <source>Open with</source>
+        <translation>Otvori pomoću</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="148"/>
+        <source>Delete</source>
+        <translation>Obriši</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="156"/>
+        <source>Move to</source>
+        <translation>Premjesti u</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="161"/>
+        <source>Copy to</source>
+        <translation>Kopiraj u</translation>
+    </message>
+</context>
+<context>
+    <name>OptionsPanel</name>
+    <message>
+        <location filename="../qml/OptionsPanel.qml" line="203"/>
+        <source>Close %1 panel</source>
+        <translation>Zatvori panel %1</translation>
+    </message>
+</context>
+<context>
+    <name>PipewireScreenDev</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/pipewire/src/pipewirescreendev.cpp" line="538"/>
+        <source>PipeWire Screen</source>
+        <translation>PipeWire ekran</translation>
+    </message>
+</context>
+<context>
+    <name>PluginConfig</name>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="29"/>
+        <location filename="../qml/PluginConfig.qml" line="49"/>
+        <source>Plugins</source>
+        <translation>Dodaci</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="30"/>
+        <source>Enable and disable %1 plugins</source>
+        <translation>Omogući i onemogući dodatke %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="46"/>
+        <source>Paths</source>
+        <translation>Putanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="197"/>
+        <source>Search plugins in subfolders</source>
+        <translation>Traži dodatke u podmapama</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="209"/>
+        <source>Add path</source>
+        <translation>Dodaj putanju</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="252"/>
+        <source>Update</source>
+        <translation>Ažuriraj</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="255"/>
+        <source>Update plugins list</source>
+        <translation>Ažuriraj listu dodataka</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="285"/>
+        <source>Add plugins search path</source>
+        <translation>Dodaj putanju za pretragu dodataka</translation>
+    </message>
+</context>
+<context>
+    <name>PluginsPathItem</name>
+    <message>
+        <location filename="../qml/PluginsPathItem.qml" line="52"/>
+        <source>Remove</source>
+        <translation>Ukloni</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="44"/>
+        <source>Webcam capture application.</source>
+        <translation>Aplikacija za snimanje web kamere.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="47"/>
+        <source>Load settings from PATH. If PATH is empty, load configs from application directory.</source>
+        <translation>Učitaj postavke iz PUTANJE. Ako je PUTANJA prazna, učitaj konfiguracije iz direktorija aplikacije.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="49"/>
+        <source>PATH</source>
+        <translation>PUTANJA</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="54"/>
+        <source>Search in the specified plugins paths recursively.</source>
+        <translation>Pretraži u navedenim putanjama dodataka rekurzivno.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="59"/>
+        <source>Semi-colon separated list of paths to search for plugins.</source>
+        <translation>Lista putanja odvojenih tačkom-zarezom za pretragu dodataka.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="61"/>
+        <location filename="../../src/clioptions.cpp" line="70"/>
+        <source>PATH1;PATH2;PATH3;...</source>
+        <translation>PUTANJA1;PUTANJA2;PUTANJA3;...</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="68"/>
+        <source>Semi-colon separated list of paths to avoid loading.</source>
+        <extracomment>Blacklist of plugins that could have conflicts when loading in Webcamoid.</extracomment>
+        <translation>Lista putanja odvojenih tačkom-zarezom koje treba izbjegavati pri učitavanju.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="74"/>
+        <source>Open a new instance of %1.</source>
+        <translation>Otvori novu instancu %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording.cpp" line="1512"/>
+        <source>%1/Video %2.%3</source>
+        <translation>%1/Video %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="724"/>
+        <source>3GP Video</source>
+        <translation>3GP Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="725"/>
+        <source>AVI Video</source>
+        <translation>AVI Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="726"/>
+        <source>Windows Bitmap</source>
+        <translation>Windows Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="727"/>
+        <source>Microsoft Windows Cursor</source>
+        <translation>Microsoft Windows kursor</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="729"/>
+        <source>Flash Video</source>
+        <extracomment>Adobe FLV Flash video</extracomment>
+        <translation>Flash Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="730"/>
+        <source>Animated GIF</source>
+        <translation>Animirani GIF</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="731"/>
+        <source>Graphic Interchange Format</source>
+        <translation>Graphic Interchange Format</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="732"/>
+        <source>Apple Icon Image</source>
+        <translation>Apple ikona slike</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="733"/>
+        <source>Microsoft Windows Icon</source>
+        <translation>Microsoft Windows ikona</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="734"/>
+        <source>Joint Photographic Experts Group</source>
+        <translation>Joint Photographic Experts Group</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="735"/>
+        <source>MKV Video</source>
+        <translation>MKV Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="736"/>
+        <source>Animated PNG</source>
+        <translation>Animirani PNG</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="737"/>
+        <source>Multiple-image Network Graphics</source>
+        <translation>Multiple-image Network Graphics</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="738"/>
+        <source>QuickTime Video</source>
+        <translation>QuickTime Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="739"/>
+        <source>MP4 Video</source>
+        <translation>MP4 Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="740"/>
+        <source>MPEG Video</source>
+        <translation>MPEG Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="741"/>
+        <source>Ogg Video</source>
+        <translation>Ogg Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="742"/>
+        <source>Portable Bitmap</source>
+        <translation>Portable Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="743"/>
+        <source>Portable Graymap</source>
+        <translation>Portable Graymap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="744"/>
+        <source>Portable Network Graphics</source>
+        <translation>Portable Network Graphics</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="745"/>
+        <source>Portable Pixmap</source>
+        <translation>Portable Pixmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="747"/>
+        <source>RealMedia Video</source>
+        <extracomment>Don&apos;t translate &quot;RealMedia&quot;, leave it as is.</extracomment>
+        <translation>RealMedia Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="748"/>
+        <source>Scalable Vector Graphics</source>
+        <translation>Scalable Vector Graphics</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="749"/>
+        <source>Truevision TGA</source>
+        <translation>Truevision TGA</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="750"/>
+        <source>Tagged Image File Format</source>
+        <translation>Tagged Image File Format</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="751"/>
+        <source>DVD Video</source>
+        <translation>DVD Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="752"/>
+        <source>Wireless Bitmap</source>
+        <translation>Wireless Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="753"/>
+        <source>WebM Video</source>
+        <translation>WebM Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="754"/>
+        <source>WebP</source>
+        <translation>WebP</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="756"/>
+        <source>Windows Media Video</source>
+        <extracomment>Also known as WMV, is a video file format.</extracomment>
+        <translation>Windows Media Video</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="757"/>
+        <source>X11 Bitmap</source>
+        <translation>X11 Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="758"/>
+        <source>X11 Pixmap</source>
+        <translation>X11 Pixmap</translation>
+    </message>
+</context>
+<context>
+    <name>RecordingNotice</name>
+    <message>
+        <location filename="../qml/RecordingNotice.qml" line="64"/>
+        <source>Recording</source>
+        <translation>Snimanje</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMenu</name>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="60"/>
+        <source>Video</source>
+        <translation>Video</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="66"/>
+        <source>Audio</source>
+        <translation>Audio</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="72"/>
+        <source>Effects</source>
+        <translation>Efekti</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="78"/>
+        <source>Preferences</source>
+        <translation>Postavke</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="84"/>
+        <source>Donate</source>
+        <translation>Doniraj</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="90"/>
+        <source>Help</source>
+        <translation>Pomoć</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="96"/>
+        <source>About</source>
+        <translation>O programu</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="103"/>
+        <source>Play sources</source>
+        <translation>Reproduciraj izvore</translation>
+    </message>
+</context>
+<context>
+    <name>Streaming</name>
+    <message>
+        <location filename="../qml/Streaming.qml" line="29"/>
+        <source>Streaming</source>
+        <translation>Streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="30"/>
+        <source>Configure video streaming to many platforms.</source>
+        <translation>Konfiguriši video streaming na više platformi.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="122"/>
+        <location filename="../qml/Streaming.qml" line="147"/>
+        <source>Streaming quality</source>
+        <translation>Kvalitet streaminga</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="200"/>
+        <source>Custom</source>
+        <translation>Prilagođeno</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="203"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Kvalitet videa: %1×%2 %3 FPS</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="204"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Bitrate videa: %1 Mbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="205"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Stopa uzorkovanja zvuka: %1 kHz</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="206"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Bitrate zvuka: %1 kbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="214"/>
+        <source>Advanced settings</source>
+        <translation>Napredne postavke</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="229"/>
+        <source>Video quality</source>
+        <translation>Kvalitet videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="247"/>
+        <source>Output width</source>
+        <translation>Izlazna širina</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="270"/>
+        <source>Output height</source>
+        <translation>Izlazna visina</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="293"/>
+        <source>Output frame rate</source>
+        <translation>Izlazna brzina slike</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="316"/>
+        <source>Video bitrate (kbps)</source>
+        <translation>Bitrate videa (kbps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="336"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Korak ključnih okvira (ms)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="353"/>
+        <source>Video codec</source>
+        <translation>Video kodek</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="436"/>
+        <source>Audio quality</source>
+        <translation>Kvalitet zvuka</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="454"/>
+        <source>Sample rate</source>
+        <translation>Stopa uzorkovanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="477"/>
+        <source>Audio bitrate (kbps)</source>
+        <translation>Bitrate zvuka (kbps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="498"/>
+        <source>Audio codec</source>
+        <translation>Audio kodek</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="521"/>
+        <source>Streaming platform settings</source>
+        <translation>Postavke streaming platforme</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="532"/>
+        <source>Platform</source>
+        <translation>Platforma</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="540"/>
+        <source>Add platform</source>
+        <translation>Dodaj platformu</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="547"/>
+        <source>Remove platform</source>
+        <translation>Ukloni platformu</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="561"/>
+        <source>Website</source>
+        <translation>Web stranica</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="581"/>
+        <source>Visit website</source>
+        <translation>Posjeti web stranicu</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="596"/>
+        <source>Streaming URL</source>
+        <translation>URL za streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="627"/>
+        <source>Hide streaming URL</source>
+        <translation>Sakrij URL za streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="628"/>
+        <source>Show streaming URL</source>
+        <translation>Prikaži URL za streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="647"/>
+        <source>Streaming key</source>
+        <translation>Streaming ključ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="680"/>
+        <source>Hide streaming key</source>
+        <translation>Sakrij streaming ključ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="681"/>
+        <source>Show streaming key</source>
+        <translation>Prikaži streaming ključ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="700"/>
+        <source>Streaming configuration help</source>
+        <translation>Pomoć za konfiguraciju streaminga</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="712"/>
+        <source>Get streaming key</source>
+        <translation>Nabavi streaming ključ</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingFailedDialog</name>
+    <message>
+        <location filename="../qml/StreamingFailedDialog.qml" line="31"/>
+        <source>Streaming failed</source>
+        <translation>Streaming nije uspio</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingPlatformOptions</name>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="60"/>
+        <source>Remove</source>
+        <translation>Ukloni</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="72"/>
+        <source>Website</source>
+        <translation>Web stranica</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="92"/>
+        <source>Visit website</source>
+        <translation>Posjeti web stranicu</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="107"/>
+        <source>Streaming URL</source>
+        <translation>URL za streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="138"/>
+        <source>Hide streaming URL</source>
+        <translation>Sakrij URL za streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="139"/>
+        <source>Show streaming URL</source>
+        <translation>Prikaži URL za streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="158"/>
+        <source>Streaming key</source>
+        <translation>Streaming ključ</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="191"/>
+        <source>Hide streaming key</source>
+        <translation>Sakrij streaming ključ</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="192"/>
+        <source>Show streaming key</source>
+        <translation>Prikaži streaming ključ</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="211"/>
+        <source>Streaming configuration help</source>
+        <translation>Pomoć za konfiguraciju streaminga</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="223"/>
+        <source>Get streaming key</source>
+        <translation>Nabavi streaming ključ</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingStartStopDialog</name>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="33"/>
+        <source>Start streaming</source>
+        <translation>Započni streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="34"/>
+        <source>Stop streaming</source>
+        <translation>Zaustavi streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="50"/>
+        <source>Thousands of people will start watching you around the world on internet.&lt;br/&gt;Are you sure that you want to start streaming?</source>
+        <translation>Hiljade ljudi će vas početi gledati širom svijeta na internetu.&lt;br/&gt;Jeste li sigurni da želite započeti streaming?</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="51"/>
+        <source>Are you sure that you want to stop streaming?</source>
+        <translation>Jeste li sigurni da želite zaustaviti streaming?</translation>
+    </message>
+</context>
+<context>
+    <name>TableColor</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="40"/>
+        <source>Select the new color</source>
+        <translation>Odaberi novu boju</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="42"/>
+        <source>Color %1</source>
+        <translation>Boja %1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="51"/>
+        <source>Remove color</source>
+        <translation>Ukloni boju</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="52"/>
+        <source>Remove color %1</source>
+        <translation>Ukloni boju %1</translation>
+    </message>
+</context>
+<context>
+    <name>ThirdPartyLicenses</name>
+    <message>
+        <location filename="../qml/ThirdPartyLicenses.qml" line="31"/>
+        <source>3rd Party Licenses</source>
+        <extracomment>License for 3rd party components used in Webcamoid, like</extracomment>
+        <translation>Licence trećih strana</translation>
+    </message>
+    <message>
+        <location filename="../qml/ThirdPartyLicenses.qml" line="32"/>
+        <source>Licenses for the code incorporated into %1</source>
+        <translation>Licence za kod uključen u %1</translation>
+    </message>
+</context>
+<context>
+    <name>UpdatesConfig</name>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="31"/>
+        <source>Updates</source>
+        <translation>Ažuriranja</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="32"/>
+        <source>Configure the update frequency.</source>
+        <translation>Konfiguriraj učestalost ažuriranja.</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="93"/>
+        <source>Notify about new versions</source>
+        <translation>Obavijesti o novim verzijama</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="104"/>
+        <source>Show updates dialog</source>
+        <translation>Prikaži dijalog za ažuriranja</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="113"/>
+        <source>Check new versions</source>
+        <translation>Provjeri nove verzije</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="121"/>
+        <source>Daily</source>
+        <translation>Dnevno</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="125"/>
+        <source>Every two days</source>
+        <translation>Svaka dva dana</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="129"/>
+        <source>Weekly</source>
+        <translation>Sedmično</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="133"/>
+        <source>Every two weeks</source>
+        <translation>Svake dvije sedmice</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="137"/>
+        <source>Monthly</source>
+        <translation>Mjesečno</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="141"/>
+        <source>Never</source>
+        <translation>Nikad</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="153"/>
+        <source>&lt;b&gt;Last updated&lt;/b&gt;: %1</source>
+        <translation>&lt;b&gt;Posljednje ažurirano&lt;/b&gt;: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="172"/>
+        <source>Your version of %1 is outdated. Latest version is &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation>Vaša verzija %1 je zastarjela. Najnovija verzija je &lt;b&gt;%2&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="180"/>
+        <source>Upgrade Now!</source>
+        <translation>Nadogradi sada!</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="196"/>
+        <source>Thanks for using a &lt;b&gt;development version&lt;/b&gt;!&lt;br /&gt;It will be very helpful if you can report any bug and suggestions you have.</source>
+        <translation>Hvala što koristite &lt;b&gt;razvojnu verziju&lt;/b&gt;!&lt;br /&gt;Bilo bi vrlo korisno ako prijavite bilo kakvu grešku i prijedloge koje imate.</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="203"/>
+        <source>Report a Bug</source>
+        <translation>Prijavi grešku</translation>
+    </message>
+</context>
+<context>
+    <name>UpdatesDialog</name>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="30"/>
+        <source>New version available!</source>
+        <translation>Dostupna nova verzija!</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="74"/>
+        <source>Download %1 %2 NOW!</source>
+        <translation>Preuzmi %1 %2 SADA!</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="81"/>
+        <source>Show this dialog next time</source>
+        <translation>Prikaži ovaj dijalog sljedeći put</translation>
+    </message>
+</context>
+<context>
+    <name>VCamInstallFailedDialog</name>
+    <message>
+        <location filename="../qml/VCamInstallFailedDialog.qml" line="31"/>
+        <source>Installation failed</source>
+        <translation>Instalacija nije uspjela</translation>
+    </message>
+</context>
+<context>
+    <name>VCamInstallSucceededDialog</name>
+    <message>
+        <location filename="../qml/VCamInstallSucceededDialog.qml" line="31"/>
+        <source>Installation succeeded</source>
+        <translation>Instalacija uspješna</translation>
+    </message>
+    <message>
+        <location filename="../qml/VCamInstallSucceededDialog.qml" line="40"/>
+        <source>Restart Webcamoid?</source>
+        <translation>Ponovo pokrenuti Webcamoid?</translation>
+    </message>
+</context>
+<context>
+    <name>VCamManualDownloadDialog</name>
+    <message>
+        <location filename="../qml/VCamManualDownloadDialog.qml" line="31"/>
+        <source>Can&apos;t get latest version</source>
+        <translation>Nije moguće dobiti najnoviju verziju</translation>
+    </message>
+    <message>
+        <location filename="../qml/VCamManualDownloadDialog.qml" line="40"/>
+        <source>Download the virtual camera manually?</source>
+        <translation>Preuzeti virtuelnu kameru ručno?</translation>
+    </message>
+</context>
+<context>
+    <name>VideoCodecOptions</name>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="28"/>
+        <source>Video Codec Options</source>
+        <translation>Opcije video kodeka</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="234"/>
+        <source>Video codec</source>
+        <translation>Video kodek</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="251"/>
+        <source>Bitrate</source>
+        <translation>Brzina prijenosa (bitrate)</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="258"/>
+        <source>Bitrate (bits/secs)</source>
+        <translation>Brzina prijenosa (bitova/sek)</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="268"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Korak ključnih okvira (ms)</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="275"/>
+        <source>1000</source>
+        <translation>1000</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="284"/>
+        <source>Advanced options</source>
+        <translation>Napredne opcije</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectOptions</name>
+    <message>
+        <location filename="../qml/VideoEffectOptions.qml" line="56"/>
+        <source>Remove</source>
+        <translation>Ukloni</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectOptions.qml" line="61"/>
+        <source>Remove %1 video effect</source>
+        <translation>Ukloni %1 video efekat</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsDialog</name>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="29"/>
+        <source>Add video effect</source>
+        <translation>Dodaj video efekat</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="69"/>
+        <source>Effect</source>
+        <translation>Efekat</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="133"/>
+        <source>Chain effect</source>
+        <extracomment>Apply the effect over the other effects.</extracomment>
+        <translation>Lančani efekat</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsList</name>
+    <message>
+        <location filename="../qml/VideoEffectsList.qml" line="50"/>
+        <source>Add effect</source>
+        <translation>Dodaj efekat</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsList.qml" line="57"/>
+        <source>Remove all effects</source>
+        <translation>Ukloni sve efekte</translation>
+    </message>
+</context>
+<context>
+    <name>VideoFormatOptions</name>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="28"/>
+        <source>Video Format Options</source>
+        <translation>Opcije video formata</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="208"/>
+        <source>File format</source>
+        <translation>Format datoteke</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="223"/>
+        <source>Advanced options</source>
+        <translation>Napredne opcije</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddEdit</name>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="185"/>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="124"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="169"/>
+        <source>Description</source>
+        <translation>Opis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="82"/>
+        <source>Edit media file source</source>
+        <translation>Uredi izvor medijske datoteke</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="86"/>
+        <source>Edit media URL source</source>
+        <translation>Uredi izvor medijskog URL-a</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="90"/>
+        <source>Add media file source</source>
+        <translation>Dodaj izvor medijske datoteke</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="91"/>
+        <source>Add media URL source</source>
+        <translation>Dodaj izvor medijskog URL-a</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="130"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="175"/>
+        <source>Source title</source>
+        <translation>Naslov izvora</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="140"/>
+        <source>Path</source>
+        <translation>Putanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="148"/>
+        <source>File path</source>
+        <translation>Putanja datoteke</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="149"/>
+        <source>Search file to use as source</source>
+        <translation>Traži datoteku za korištenje kao izvor</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="234"/>
+        <source>Choose the file to add as source</source>
+        <translation>Odaberi datoteku za dodavanje kao izvor</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddScreen</name>
+    <message>
+        <location filename="../qml/VideoInputAddScreen.qml" line="30"/>
+        <source>Select the screen to add</source>
+        <translation>Odaberite ekran za dodavanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddScreen.qml" line="55"/>
+        <source>Screen</source>
+        <translation>Ekran</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddWindow</name>
+    <message>
+        <location filename="../qml/VideoInputAddWindow.qml" line="30"/>
+        <source>Select the window to add</source>
+        <translation>Odaberite prozor za dodavanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddWindow.qml" line="55"/>
+        <source>Window</source>
+        <translation>Prozor</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputOptions</name>
+    <message>
+        <location filename="../qml/VideoInputOptions.qml" line="61"/>
+        <source>Edit</source>
+        <translation>Uredi</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputOptions.qml" line="74"/>
+        <source>Remove</source>
+        <translation>Ukloni</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputs</name>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="105"/>
+        <source>Configure source</source>
+        <translation>Konfiguriši izvor</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="63"/>
+        <source>Add source</source>
+        <translation>Dodaj izvor</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="76"/>
+        <source>Add screen</source>
+        <translation>Dodaj ekran</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="77"/>
+        <source>Add screen source</source>
+        <translation>Dodaj izvor ekrana</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="83"/>
+        <source>Add window</source>
+        <translation>Dodaj prozor</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="91"/>
+        <source>Add media file</source>
+        <translation>Dodaj medijsku datoteku</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="97"/>
+        <source>Add media URL</source>
+        <translation>Dodaj medijski URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="117"/>
+        <source>No cameras found</source>
+        <translation>Nema pronađenih kamera</translation>
+    </message>
+</context>
+<context>
+    <name>VideoLayer</name>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="131"/>
+        <source>All Image and Video Files</source>
+        <translation>Sve slikovne i video datoteke</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="168"/>
+        <source>All Files</source>
+        <translation>Sve datoteke</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOptions</name>
+    <message>
+        <location filename="../qml/VideoOptions.qml" line="45"/>
+        <source>Sources</source>
+        <translation>Izvori</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOptions.qml" line="48"/>
+        <source>Outputs</source>
+        <translation>Izlazi</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputAddEdit</name>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="233"/>
+        <source>Edit Virtual Camera</source>
+        <translation>Uredi virtuelnu kameru</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="234"/>
+        <source>Add Virtual Camera</source>
+        <translation>Dodaj virtuelnu kameru</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="275"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="346"/>
+        <source>Virtual camera name</source>
+        <translation>Naziv virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="296"/>
+        <source>Add format</source>
+        <translation>Dodaj format</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="306"/>
+        <source>Clear formats</source>
+        <translation>Očisti formate</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="368"/>
+        <source>Format</source>
+        <translation>Format</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="379"/>
+        <source>Width</source>
+        <translation>Širina</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="392"/>
+        <source>Height</source>
+        <translation>Visina</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="405"/>
+        <source>Frame rate</source>
+        <translation>Brzina slike (fps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="430"/>
+        <source>Can&apos;t edit the virtual camera</source>
+        <translation>Nije moguće uređivati virtuelnu kameru</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="431"/>
+        <source>Can&apos;t add the virtual camera</source>
+        <translation>Nije moguće dodati virtuelnu kameru</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="441"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="451"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="487"/>
+        <source>Error editing the virtual camera</source>
+        <translation>Greška pri uređivanju virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="442"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="452"/>
+        <source>Error adding the virtual camera</source>
+        <translation>Greška pri dodavanju virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="443"/>
+        <source>Camera description can&apos;t be empty.</source>
+        <translation>Opis kamere ne može biti prazan.</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="453"/>
+        <source>Camera description and formats can&apos;t be empty.</source>
+        <translation>Opis kamere i formati ne mogu biti prazni.</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="497"/>
+        <source>Error creating the virtual camera</source>
+        <translation>Greška pri kreiranju virtuelne kamere</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputPicture</name>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="30"/>
+        <source>Virtual camera output picture</source>
+        <translation>Izlazna slika virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="75"/>
+        <source>Virtual camera default output picture</source>
+        <translation>Zadana izlazna slika virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="76"/>
+        <source>Search image to use as default output picture</source>
+        <translation>Traži sliku za korištenje kao zadana izlazna slika</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="97"/>
+        <source>Can&apos;t set virtual camera picture</source>
+        <translation>Nije moguće postaviti sliku virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="101"/>
+        <source>Error Removing Virtual Cameras</source>
+        <translation>Greška Pri Uklanjanju Virtuelnih Kamera</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="113"/>
+        <source>Please choose an image file</source>
+        <translation>Molimo odaberite slikovnu datoteku</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputs</name>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="90"/>
+        <source>Add output</source>
+        <translation>Dodaj izlaz</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="102"/>
+        <source>Add virtual camera</source>
+        <translation>Dodaj virtuelnu kameru</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="115"/>
+        <source>Error Creating Virtual Camera</source>
+        <translation>Greška Pri Kreiranju Virtuelne Kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="123"/>
+        <source>Add streaming platform</source>
+        <translation>Dodaj streaming platformu</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="131"/>
+        <source>Add local streaming</source>
+        <translation>Dodaj lokalni streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="196"/>
+        <source>Local Streaming</source>
+        <translation>Lokalni streaming</translation>
+    </message>
+</context>
+<context>
+    <name>VideoRecording</name>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="31"/>
+        <source>Video Recording</source>
+        <translation>Snimanje videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="32"/>
+        <source>Configure video recording format and codecs.</source>
+        <translation>Konfiguriraj format i kodeke za snimanje videa.</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="114"/>
+        <source>Videos directory</source>
+        <translation>Direktorij videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="126"/>
+        <source>Select the save directory</source>
+        <translation>Odaberi direktorij za spremanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="140"/>
+        <source>Record audio</source>
+        <translation>Snimaj zvuk</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="151"/>
+        <source>Use flash</source>
+        <translation>Koristi blic</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="154"/>
+        <source>Use flash when recording a video</source>
+        <translation>Koristi blic prilikom snimanja videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="165"/>
+        <location filename="../qml/VideoRecording.qml" line="190"/>
+        <source>Recording quality</source>
+        <translation>Kvalitet snimanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="240"/>
+        <source>Custom</source>
+        <translation>Prilagođeno</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="244"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Kvalitet videa: %1×%2 %3 FPS</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="245"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Bitrate videa: %1 Mbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="246"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Stopa uzorkovanja zvuka: %1 kHz</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="247"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Bitrate zvuka: %1 kbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="255"/>
+        <source>Advanced settings</source>
+        <translation>Napredne postavke</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="268"/>
+        <source>Video quality</source>
+        <translation>Kvalitet videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="286"/>
+        <source>Output width</source>
+        <translation>Izlazna širina</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="309"/>
+        <source>Output height</source>
+        <translation>Izlazna visina</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="332"/>
+        <source>Output Frame rate</source>
+        <translation>Izlazna brzina slike</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="357"/>
+        <source>Audio quality</source>
+        <translation>Kvalitet zvuka</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="375"/>
+        <source>Sample rate</source>
+        <translation>Uzorkovanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="400"/>
+        <source>File format and codecs</source>
+        <translation>Format datoteke i kodeci</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="411"/>
+        <source>Configure the file format</source>
+        <translation>Konfiguriraj format datoteke</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="413"/>
+        <source>Configure the file format for recording</source>
+        <translation>Konfiguriraj format datoteke za snimanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="421"/>
+        <source>Configure the video codec</source>
+        <translation>Konfiguriraj video kodek</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="423"/>
+        <source>Configure the video codec for recording</source>
+        <translation>Konfiguriraj video kodek za snimanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="431"/>
+        <source>Configure the audio codec</source>
+        <translation>Konfiguriraj audio kodek</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="434"/>
+        <source>Configure the audio codec for recording</source>
+        <translation>Konfiguriraj audio kodek za snimanje</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="468"/>
+        <source>Select the folder to save your videos</source>
+        <translation>Odaberi mapu za spremanje vaših videa</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraInstallDialog</name>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="32"/>
+        <source>Virtual camera install</source>
+        <translation>Instalacija virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="52"/>
+        <source>The virtual camera in Windows may not work properly and may cause inestability in the system.&lt;br/&gt;</source>
+        <translation>Virtuelna kamera u Windowsima možda neće raditi ispravno i može izazvati nestabilnost sistema.&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="53"/>
+        <source>If you want to share audio and video of your current seesion, consider using &lt;b&gt;local streaming&lt;/b&gt; which is more stable and powerful.&lt;br/&gt;&lt;br/&gt;</source>
+        <translation>Ako želite dijeliti zvuk i video svog trenutnog sesije, razmislite o korištenju &lt;b&gt;lokalnog streaminga&lt;/b&gt; koji je stabilniji i moćniji.&lt;br/&gt;&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="54"/>
+        <source>Are you sure that you want to continue?</source>
+        <translation>Jeste li sigurni da želite nastaviti?</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="56"/>
+        <source>The virtual camera is not installed, do you want to install it?</source>
+        <translation>Virtuelna kamera nije instalirana, želite li je instalirati?</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="57"/>
+        <source>The virtual camera is not installed. Please, install &lt;b&gt;v4l2loopback&lt;/b&gt;.</source>
+        <translation>Virtuelna kamera nije instalirana. Molimo, instalirajte &lt;b&gt;v4l2loopback&lt;/b&gt;.</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraOptions</name>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="65"/>
+        <source>Edit</source>
+        <translation>Uredi</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="77"/>
+        <source>Can&apos;t Edit The Virtual Camera</source>
+        <translation>Nije moguće uređivati virtuelnu kameru</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="84"/>
+        <source>Set output picture</source>
+        <translation>Postavi izlaznu sliku</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="95"/>
+        <source>Remove</source>
+        <translation>Ukloni</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="110"/>
+        <source>Error removing the virtual camera</source>
+        <translation>Greška pri uklanjanju virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="114"/>
+        <source>Can&apos;t Remove The Virtual Camera</source>
+        <translation>Nije moguće ukloniti virtuelnu kameru</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraUpdateDialog</name>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="33"/>
+        <source>Virtual camera update</source>
+        <translation>Ažuriranje virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="54"/>
+        <source>The virtual camera is outdated (%1), install the latest version (%2)?</source>
+        <translation>Virtuelna kamera je zastarjela (%1), instalirati najnoviju verziju (%2)?</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="62"/>
+        <source>Show this dialog next time</source>
+        <translation>Prikaži ovaj dijalog sljedeći put</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameras</name>
+    <message>
+        <location filename="../../src/virtualcameras.cpp" line="567"/>
+        <source>Virtual Camera</source>
+        <translation>Virtuelna kamera</translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="30"/>
+        <source>Hue</source>
+        <translation>Nijansa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="79"/>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="48"/>
+        <source>Saturation</source>
+        <translation>Zasićenje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="66"/>
+        <source>Luminance</source>
+        <translation>Svjetlina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="28"/>
+        <source>Number of scratches</source>
+        <translation>Broj ogrebotina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="45"/>
+        <source>Aging intensity</source>
+        <translation>Intenzitet starenja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="64"/>
+        <source>Dust density</source>
+        <translation>Gustoća prašine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="83"/>
+        <source>Scratch density</source>
+        <translation>Gustoća ogrebotina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="102"/>
+        <source>Scratch brightness</source>
+        <translation>Svjetlina ogrebotina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="121"/>
+        <source>Pits density</source>
+        <translation>Gustoća udubljenja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="28"/>
+        <source>Vertical sync</source>
+        <translation>Vertikalna sinhronizacija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="46"/>
+        <source>Horizontal offset</source>
+        <translation>Horizontalni pomak</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="64"/>
+        <source>Horizontal sync factor</source>
+        <translation>Faktor horizontalne sinhronizacije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="82"/>
+        <source>Horizontal sync smoothness</source>
+        <translation>Glatkoća horizontalne sinhronizacije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="99"/>
+        <source>Hue dephasing factor</source>
+        <translation>Faktor fazne razlike nijanse</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="117"/>
+        <source>Noise</source>
+        <translation>Šum</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="27"/>
+        <source>Width</source>
+        <translation>Širina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="33"/>
+        <source>Aspect ratio width</source>
+        <translation>Širina omjera slike</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="45"/>
+        <source>Height</source>
+        <translation>Visina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="51"/>
+        <source>Aspect ratio height</source>
+        <translation>Visina omjera slike</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Blur/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/OilPaint/share/qml/main.qml" line="27"/>
+        <source>Radius</source>
+        <translation>Radijus</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="47"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="235"/>
+        <source>Number of colors</source>
+        <translation>Broj boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="64"/>
+        <source>Color difference</source>
+        <translation>Razlika boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="81"/>
+        <source>Show edges</source>
+        <translation>Prikaži ivice</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="36"/>
+        <source>Canny mode</source>
+        <extracomment>https://en.wikipedia.org/wiki/Canny_edge_detector</extracomment>
+        <translation>Canny mod</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="47"/>
+        <source>Equalize</source>
+        <extracomment>https://en.wikipedia.org/wiki/Histogram_equalization</extracomment>
+        <translation>Izjednači</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="92"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="58"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="125"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="114"/>
+        <source>Threshold</source>
+        <translation>Prag</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="77"/>
+        <source>Linecolor</source>
+        <translation>Boja linije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="79"/>
+        <source>Choose the line color</source>
+        <translation>Odaberite boju linije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="111"/>
+        <source>Line color</source>
+        <translation>Boja linije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="113"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="182"/>
+        <source>Choose a color</source>
+        <translation>Odaberi boju</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="124"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="130"/>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="167"/>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="206"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="212"/>
+        <source>Scan block</source>
+        <translation>Blok skeniranja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="42"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="42"/>
+        <source>Transform matrix</source>
+        <extracomment>https://en.wikipedia.org/wiki/Transformation_matrix</extracomment>
+        <translation>Matrica transformacije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="58"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="58"/>
+        <source>Column 0, Row 0</source>
+        <translation>Kolona 0, Red 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="70"/>
+        <source>Column 1, Row 0</source>
+        <translation>Kolona 1, Red 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="82"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="82"/>
+        <source>Column 2, Row 0</source>
+        <translation>Kolona 2, Red 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="94"/>
+        <source>Column 3, Row 0</source>
+        <translation>Kolona 3, Red 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="108"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="97"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="96"/>
+        <source>Column 0, Row 1</source>
+        <translation>Kolona 0, Red 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="121"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="120"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="108"/>
+        <source>Column 1, Row 1</source>
+        <translation>Kolona 1, Red 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="133"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="121"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="120"/>
+        <source>Column 2, Row 1</source>
+        <translation>Kolona 2, Red 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="145"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="144"/>
+        <source>Column 3, Row 1</source>
+        <translation>Kolona 3, Red 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="159"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="135"/>
+        <source>Column 0, Row 2</source>
+        <translation>Kolona 0, Red 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="171"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="147"/>
+        <source>Column 1, Row 2</source>
+        <translation>Kolona 1, Red 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="183"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="159"/>
+        <source>Column 2, Row 2</source>
+        <translation>Kolona 2, Red 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="195"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="194"/>
+        <source>Column 3, Row 2</source>
+        <translation>Kolona 3, Red 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="43"/>
+        <source>Mode</source>
+        <translation>Mod</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="56"/>
+        <source>Natural</source>
+        <translation>Prirodno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="60"/>
+        <source>Fixed</source>
+        <translation>Fiksno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="76"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="66"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="72"/>
+        <source>Symbols</source>
+        <translation>Simboli</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="86"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="94"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="82"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="90"/>
+        <source>Font</source>
+        <translation>Font</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="95"/>
+        <source>Search the font to be used</source>
+        <translation>Traži font za korištenje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="103"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="100"/>
+        <source>Hinting</source>
+        <translation>Hinting</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="111"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="108"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="139"/>
+        <source>Default</source>
+        <translation>Zadano</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="115"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="112"/>
+        <source>No hinting</source>
+        <translation>Bez hintinga</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="116"/>
+        <source>Vertical hinting</source>
+        <translation>Vertikalni hinting</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="123"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="120"/>
+        <source>Full hinting</source>
+        <translation>Puni hinting</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="134"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="131"/>
+        <source>Style</source>
+        <extracomment>Different font rendering strategies</extracomment>
+        <translation>Stil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="143"/>
+        <source>Bitmap</source>
+        <translation>Bitmapa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="147"/>
+        <source>Device</source>
+        <translation>Uređaj</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="154"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="151"/>
+        <source>Outline</source>
+        <translation>Obris</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="155"/>
+        <source>Force outline</source>
+        <translation>Forsiraj obris</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="162"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="159"/>
+        <source>Match</source>
+        <translation>Podudaranje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="166"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="163"/>
+        <source>Quality</source>
+        <translation>Kvalitet</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="167"/>
+        <source>Antialias</source>
+        <translation>Antialias</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="171"/>
+        <source>No antialias</source>
+        <translation>Bez antialiasa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="178"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="175"/>
+        <source>Compatible with OpenGL</source>
+        <translation>Kompatibilno sa OpenGL</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="179"/>
+        <source>Force integer metrics</source>
+        <translation>Forsiraj cjelobrojne metrike</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="186"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="183"/>
+        <source>No subpixel antialias</source>
+        <translation>Bez subpikselnog antialiasa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="190"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="187"/>
+        <source>No font merging</source>
+        <translation>Bez spajanja fontova</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="198"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="205"/>
+        <source>Foreground color</source>
+        <translation>Boja prednjeg plana</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="200"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="207"/>
+        <source>Choose the foreground color</source>
+        <translation>Odaberi boju prednjeg plana</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="208"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="87"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="214"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="137"/>
+        <source>Background color</source>
+        <translation>Boja pozadine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="210"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="89"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="216"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="139"/>
+        <source>Choose the background color</source>
+        <translation>Odaberi boju pozadine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="218"/>
+        <source>Reversed</source>
+        <translation>Obrnuto</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="228"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="316"/>
+        <source>Please choose a font</source>
+        <translation>Molimo odaberite font</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="35"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Dice/share/qml/main.qml" line="27"/>
+        <source>Size</source>
+        <translation>Veličina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="33"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="125"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="33"/>
+        <source>Color</source>
+        <translation>Boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="54"/>
+        <source>Choose the strips color</source>
+        <translation>Odaberi boju traka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="36"/>
+        <source>Select the color to filter</source>
+        <translation>Odaberi boju za filtriranje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="67"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="81"/>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="72"/>
+        <source>Soft</source>
+        <translation>Meko</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="61"/>
+        <source>Choose the color to filter</source>
+        <translation>Odaberi boju za filtriranje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="71"/>
+        <source>Color Difference</source>
+        <translation>Razlika boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="88"/>
+        <source>Smoothness</source>
+        <translation>Glatkoća</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="104"/>
+        <source>Normalize</source>
+        <translation>Normaliziraj</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="114"/>
+        <source>Background type</source>
+        <translation>Tip pozadine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="121"/>
+        <source>No background</source>
+        <translation>Bez pozadine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="129"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="242"/>
+        <source>Image</source>
+        <translation>Slika</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="163"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="118"/>
+        <source>Source palette</source>
+        <translation>Izvorna paleta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="164"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="119"/>
+        <source>Search the image file to use as palette</source>
+        <translation>Traži slikovnu datoteku za korištenje kao paleta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="832"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="842"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="222"/>
+        <source>Please choose an image file</source>
+        <translation>Molimo odaberite slikovnu datoteku</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="34"/>
+        <source>Old color</source>
+        <translation>Stara boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="36"/>
+        <source>Select the color to replace</source>
+        <translation>Odaberi boju za zamjenu</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="48"/>
+        <source>New color</source>
+        <translation>Nova boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="50"/>
+        <source>Select the new color</source>
+        <translation>Odaberi novu boju</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="50"/>
+        <source>Color table</source>
+        <translation>Tablica boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="58"/>
+        <source>Base</source>
+        <extracomment>Base color, show the image without modifications</extracomment>
+        <translation>Baza</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="62"/>
+        <source>Metal</source>
+        <translation>Metal</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="67"/>
+        <source>Heat</source>
+        <extracomment>https://en.wikipedia.org/wiki/Heat_map</extracomment>
+        <translation>Toplota</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="71"/>
+        <source>Old Photo</source>
+        <translation>Stara fotografija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="75"/>
+        <source>Red &amp; Green</source>
+        <translation>Crvena &amp; Zelena</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="80"/>
+        <source>Sepia</source>
+        <extracomment>https://en.wikipedia.org/wiki/Sepia_(color)</extracomment>
+        <translation>Sepija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="84"/>
+        <source>X-Pro</source>
+        <translation>X-Pro</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="88"/>
+        <source>X-Ray</source>
+        <translation>X-Zrake</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="92"/>
+        <source>Yellow &amp; Blue</source>
+        <translation>Žuta &amp; Plava</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="96"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="463"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="527"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="104"/>
+        <source>Custom</source>
+        <translation>Prilagođeno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Contrast/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="44"/>
+        <source>Contrast</source>
+        <translation>Kontrast</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="43"/>
+        <source>Convolve matrix</source>
+        <extracomment>https://en.wikipedia.org/wiki/Kernel_(image_processing)</extracomment>
+        <translation>Matrica konvolucije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Emboss/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="167"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/Plugins/Saturated/share/qml/main.qml" line="27"/>
+        <source>Factor</source>
+        <translation>Faktor</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Emboss/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="185"/>
+        <source>Bias</source>
+        <translation>Pristrasnost</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="33"/>
+        <source>Edit</source>
+        <translation>Uredi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="35"/>
+        <source>Enable edition mode</source>
+        <translation>Omogući režim uređivanja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="42"/>
+        <source>Pixels/%</source>
+        <translation>Pikseli/%</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="43"/>
+        <source>Select cropping unit</source>
+        <translation>Odaberi jedinicu za rezanje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="50"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="184"/>
+        <source>Reset</source>
+        <translation>Resetuj</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="52"/>
+        <source>Reset parameters</source>
+        <translation>Resetuj parametre</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="57"/>
+        <location filename="../../../libAvKys/Plugins/Rotate/share/qml/main.qml" line="46"/>
+        <source>Keep resolution</source>
+        <translation>Zadrži rezoluciju</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="66"/>
+        <source>Left</source>
+        <translation>Lijevo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="83"/>
+        <source>Right</source>
+        <translation>Desno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="100"/>
+        <source>Top</source>
+        <translation>Vrh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="117"/>
+        <source>Bottom</source>
+        <translation>Dno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="133"/>
+        <source>Fill color</source>
+        <translation>Boja popune</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="135"/>
+        <source>Choose the filling color</source>
+        <translation>Odaberi boju za popunu</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="42"/>
+        <source>Grab mode</source>
+        <translation>Mod hvatanja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="50"/>
+        <source>Random square</source>
+        <translation>Nasumični kvadrat</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="54"/>
+        <source>Vertical increase</source>
+        <translation>Vertikalno povećanje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="58"/>
+        <source>Horizontal increase</source>
+        <translation>Horizontalno povećanje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="62"/>
+        <source>Rings increase</source>
+        <translation>Povećanje prstenova</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="78"/>
+        <source>Block size</source>
+        <translation>Veličina bloka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="97"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="33"/>
+        <location filename="../../../libAvKys/Plugins/Quark/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Quark/share/qml/main.qml" line="33"/>
+        <source>Number of frames</source>
+        <translation>Broj okvira</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="69"/>
+        <source>Mu</source>
+        <extracomment>Mu factor (µ letter from greek), represents the average of a group of values. https://en.wikipedia.org/wiki/Arithmetic_mean</extracomment>
+        <translation>Mu</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="93"/>
+        <source>Sigma</source>
+        <extracomment>Sigma factor (σ letter from greek), represents the standard deviation of a group of values. https://en.wikipedia.org/wiki/Standard_deviation</extracomment>
+        <translation>Sigma</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/Plugins/FpsControl/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/Plugins/ImageSrc/share/qml/main.qml" line="56"/>
+        <source>Frame rate</source>
+        <translation>Brzina slike (fps)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="297"/>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="80"/>
+        <source>Show cursor</source>
+        <translation>Prikaži kursor</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="92"/>
+        <source>Cursor size</source>
+        <translation>Veličina kursora</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="73"/>
+        <source>Amplitude</source>
+        <translation>Amplituda</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="54"/>
+        <source>Frequency</source>
+        <translation>Frekvencija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="68"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="74"/>
+        <source>Grid size</source>
+        <translation>Veličina mreže</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="27"/>
+        <source>Speed</source>
+        <translation>Brzina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="45"/>
+        <source>Zoom rate</source>
+        <translation>Stopa zumiranja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="62"/>
+        <source>Strength</source>
+        <translation>Snaga</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="103"/>
+        <source>Haar file</source>
+        <extracomment>https://en.wikipedia.org/wiki/Haar-like_feature</extracomment>
+        <translation>Haar datoteka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="111"/>
+        <source>Eye</source>
+        <translation>Oko</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="75"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="115"/>
+        <source>Eye glasses</source>
+        <translation>Naočare</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="79"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="119"/>
+        <source>Frontal face alternative 1</source>
+        <translation>Prednje lice alternativa 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="123"/>
+        <source>Frontal face alternative 2</source>
+        <translation>Prednje lice alternativa 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="87"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="127"/>
+        <source>Frontal face alternative 3</source>
+        <translation>Prednje lice alternativa 3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="131"/>
+        <source>Frontal face default</source>
+        <translation>Prednje lice zadano</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="135"/>
+        <source>Full body</source>
+        <translation>Cijelo tijelo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="99"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="139"/>
+        <source>Left Eye 1</source>
+        <translation>Lijevo oko 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="103"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="143"/>
+        <source>Lower body</source>
+        <translation>Donji dio tijela</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="107"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="147"/>
+        <source>Eye pair big</source>
+        <translation>Par očiju veliko</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="111"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="151"/>
+        <source>Eye pair small</source>
+        <translation>Par očiju malo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="115"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="155"/>
+        <source>Left ear</source>
+        <translation>Lijevo uho</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="159"/>
+        <source>Left eye 2</source>
+        <translation>Lijevo oko 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="123"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="163"/>
+        <source>Mouth</source>
+        <translation>Usta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="127"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="167"/>
+        <source>Nose</source>
+        <translation>Nos</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="131"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="171"/>
+        <source>Right ear</source>
+        <translation>Desno uho</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="135"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="175"/>
+        <source>Right Eye 1</source>
+        <translation>Desno oko 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="139"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="179"/>
+        <source>Upper body 1</source>
+        <translation>Gornji dio tijela 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="143"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="183"/>
+        <source>Profile face</source>
+        <translation>Profil lica</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="147"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="187"/>
+        <source>Right eye 2</source>
+        <translation>Desno oko 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="151"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="191"/>
+        <source>Smile</source>
+        <translation>Osmijeh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="155"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="195"/>
+        <source>Upper body</source>
+        <translation>Gornji dio tijela</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="226"/>
+        <source>Marker type</source>
+        <translation>Tip markera</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="234"/>
+        <source>Rectangle</source>
+        <translation>Pravougaonik</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="238"/>
+        <source>Ellipse</source>
+        <translation>Elipsa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="246"/>
+        <source>Pixelate</source>
+        <translation>Pixeliziraj</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="113"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="93"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="250"/>
+        <source>Blur</source>
+        <translation>Zamagli</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="254"/>
+        <source>Blur Outer</source>
+        <translation>Zamagli vanjske dijelove</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="258"/>
+        <source>Background Image</source>
+        <translation>Pozadinska slika</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="269"/>
+        <source>Marker style</source>
+        <translation>Stil markera</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="277"/>
+        <source>Solid</source>
+        <translation>Puna linija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="281"/>
+        <source>Dash</source>
+        <translation>Crtica</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="285"/>
+        <source>Dot</source>
+        <translation>Tačka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="289"/>
+        <source>Dash dot</source>
+        <translation>Crtica-tačka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="293"/>
+        <source>Dash dot dot</source>
+        <translation>Crtica-tačka-tačka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="303"/>
+        <source>Marker color</source>
+        <translation>Boja markera</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="305"/>
+        <source>Select marker color</source>
+        <translation>Odaberi boju markera</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="316"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="322"/>
+        <source>Marker width</source>
+        <translation>Širina markera</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="336"/>
+        <source>Masks</source>
+        <translation>Maske</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="343"/>
+        <source>Angel</source>
+        <translation>Anđeo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="347"/>
+        <source>Bear</source>
+        <translation>Medvjed</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="351"/>
+        <source>Beaver</source>
+        <translation>Dabar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="355"/>
+        <source>Cat</source>
+        <translation>Mačka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="359"/>
+        <source>Chicken</source>
+        <translation>Kokoš</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="363"/>
+        <source>Cow</source>
+        <translation>Krava</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="367"/>
+        <source>Devil</source>
+        <translation>Đavo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="371"/>
+        <source>Dog</source>
+        <translation>Pas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="379"/>
+        <source>Elephant</source>
+        <translation>Slon</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="423"/>
+        <source>Mouse</source>
+        <translation>Miš</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="435"/>
+        <source>Pumpkin</source>
+        <translation>Bundeva</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="451"/>
+        <source>Skull</source>
+        <translation>Lobanja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="375"/>
+        <source>Dragon</source>
+        <translation>Zmaj</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="383"/>
+        <source>Elk</source>
+        <translation>Jelen</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="387"/>
+        <source>Frog</source>
+        <translation>Žaba</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="391"/>
+        <source>Ghost</source>
+        <translation>Duh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="395"/>
+        <source>Giraffe</source>
+        <translation>Žirafa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="399"/>
+        <source>Gnu</source>
+        <translation>Gnu</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="403"/>
+        <source>Goat</source>
+        <translation>Koza</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="407"/>
+        <source>Hippo</source>
+        <translation>Nilski konj</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="411"/>
+        <source>Horse</source>
+        <translation>Konj</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="415"/>
+        <source>Koala</source>
+        <translation>Koala</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="419"/>
+        <source>Monkey</source>
+        <translation>Majmun</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="427"/>
+        <source>Panda</source>
+        <translation>Panda</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="431"/>
+        <source>Penguin</source>
+        <translation>Pingvin</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="439"/>
+        <source>Raccoon</source>
+        <translation>Rakun</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="443"/>
+        <source>Rhino</source>
+        <translation>Nosorog</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="447"/>
+        <source>Sheep</source>
+        <translation>Ovca</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="455"/>
+        <source>Triceratops</source>
+        <translation>Triceratops</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="459"/>
+        <source>Zebra</source>
+        <translation>Zebra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="473"/>
+        <source>Marker picture</source>
+        <translation>Slika markera</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="491"/>
+        <source>Replace face with this picture</source>
+        <translation>Zamijeni lice ovom slikom</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="492"/>
+        <source>Search the image to put into the detected rectangle</source>
+        <translation>Traži sliku za postavljanje u otkriveni pravougaonik</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="516"/>
+        <source>Background</source>
+        <translation>Pozadina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="523"/>
+        <source>Black Square</source>
+        <translation>Crni kvadrat</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="537"/>
+        <source>Background picture</source>
+        <translation>Pozadinska slika</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="555"/>
+        <source>Replace background with this picture</source>
+        <translation>Zamijeni pozadinu ovom slikom</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="556"/>
+        <source>Search the image to use as background</source>
+        <translation>Traži sliku za korištenje kao pozadina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="580"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="586"/>
+        <source>Pixel grid size</source>
+        <translation>Veličina piksel mreže</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="600"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="606"/>
+        <source>Blur radius</source>
+        <translation>Radijus zamućenja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="618"/>
+        <source>Face Area Settings</source>
+        <translation>Postavke područja lica</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="623"/>
+        <source>Advanced face area settings for background blur or image below.</source>
+        <translation>Napredne postavke područja lica za zamućenje pozadine ili sliku ispod.</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="632"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="741"/>
+        <source>Scale</source>
+        <translation>Skaliranje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="652"/>
+        <source>Horizontal Offset</source>
+        <translation>Horizontalni pomak</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="671"/>
+        <source>Vertical Offset</source>
+        <translation>Vertikalni pomak</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="691"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="761"/>
+        <source>Width Adjust %</source>
+        <translation>Prilagodba širine %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="710"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="779"/>
+        <source>Height Adjust %</source>
+        <translation>Prilagodba visine %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="730"/>
+        <source>Round Area</source>
+        <translation>Okruglo područje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="798"/>
+        <source>Horizontal Radius %</source>
+        <translation>Horizontalni radijus %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="815"/>
+        <source>Vertical Radius %</source>
+        <translation>Vertikalni radijus %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="191"/>
+        <source>Face bracketing duration (seconds)</source>
+        <translation>Trajanje zagrade lica (sekunde)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="207"/>
+        <source>Face bracket count</source>
+        <translation>Broj zagrada lica</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="223"/>
+        <source>Zoom out rate</source>
+        <translation>Stopa smanjenja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="239"/>
+        <source>Zoom in rate</source>
+        <translation>Stopa povećanja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="255"/>
+        <source>Face padding (% of face size)</source>
+        <translation>Podstava lica (% veličine lica)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="272"/>
+        <source>Padding top</source>
+        <translation>Podstava vrh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="290"/>
+        <source>Padding left</source>
+        <translation>Podstava lijevo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="308"/>
+        <source>Padding right</source>
+        <translation>Podstava desno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="325"/>
+        <source>Padding bottom</source>
+        <translation>Podstava dno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="339"/>
+        <source>Face margin (% of face size)</source>
+        <translation>Margina lica (% veličine lica)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="357"/>
+        <source>Margin top</source>
+        <translation>Margina vrh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="376"/>
+        <source>Margin left</source>
+        <translation>Margina lijevo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="395"/>
+        <source>Margin right</source>
+        <translation>Margina desno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="412"/>
+        <source>Margin bottom</source>
+        <translation>Margina dno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="427"/>
+        <source>Aspect ratio</source>
+        <translation>Omjer slike</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="438"/>
+        <source>e.g. 16:9, 4:3</source>
+        <translation>npr. 16:9, 4:3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="464"/>
+        <source>Lock viewport</source>
+        <translation>Zaključaj prikaz</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="474"/>
+        <source>Debug mode</source>
+        <translation>Debug mod</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="81"/>
+        <source>Add color</source>
+        <translation>Dodaj boju</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="88"/>
+        <source>Clear all colors</source>
+        <translation>Očisti sve boje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="102"/>
+        <source>Select the color to add</source>
+        <extracomment>Select the color to add to the color table</extracomment>
+        <translation>Odaberi boju za dodavanje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="56"/>
+        <source>Hard</source>
+        <translation>Tvrdo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="60"/>
+        <source>Luminance soft</source>
+        <translation>Meka luminancija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="64"/>
+        <source>Luminance hard</source>
+        <translation>Tvrda luminancija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="75"/>
+        <source>Cooling</source>
+        <translation>Hlađenje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="95"/>
+        <source>Dissolve</source>
+        <translation>Rastvaranje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/Zoom/share/qml/main.qml" line="27"/>
+        <source>Zoom</source>
+        <translation>Zum</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="135"/>
+        <source>Luma threshold</source>
+        <extracomment>Minimum luminance/light/white level/intensity in a gray or black and white picture. https://en.wikipedia.org/wiki/Luma_(video)</extracomment>
+        <translation>Luma prag</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="194"/>
+        <source>Alpha diff</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Alpha razlika</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="217"/>
+        <source>Alpha variation</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Alpha varijacija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="251"/>
+        <source>Cold color</source>
+        <translation>Hladna boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="253"/>
+        <source>Choose the fire cold color</source>
+        <translation>Odaberite hladnu boju vatre</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="260"/>
+        <source>Hot color</source>
+        <translation>Vruća boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="262"/>
+        <source>Choose the fire hot color</source>
+        <translation>Odaberite vruću boju vatre</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Flip/share/qml/main.qml" line="26"/>
+        <source>Flip horizontally</source>
+        <translation>Okreni vodoravno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Flip/share/qml/main.qml" line="34"/>
+        <source>Flip vertically</source>
+        <translation>Okreni okomito</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FpsControl/share/qml/main.qml" line="74"/>
+        <source>Fill gaps</source>
+        <translation>Popuni praznine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="54"/>
+        <source>Stride</source>
+        <translation>Korak</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Gamma/share/qml/main.qml" line="29"/>
+        <source>Gamma</source>
+        <translation>Gamma</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="57"/>
+        <source>Pattern</source>
+        <translation>Uzorak</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="64"/>
+        <source>90° Halftone 6x6</source>
+        <translation>90° Poluton 6x6</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="68"/>
+        <source>Cluster 3</source>
+        <translation>Klaster 3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="72"/>
+        <source>Cluster 4</source>
+        <translation>Klaster 4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="76"/>
+        <source>Cluster 8</source>
+        <translation>Klaster 8</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="80"/>
+        <source>Lines 4x4</source>
+        <translation>Linije 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="84"/>
+        <source>Magic 2x2</source>
+        <translation>Magija 2x2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="88"/>
+        <source>Magic 4x4</source>
+        <translation>Magija 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="92"/>
+        <source>Ordered 4x4</source>
+        <translation>Uređeno 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="96"/>
+        <source>Ordered 6x6</source>
+        <translation>Uređeno 6x6</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="100"/>
+        <source>Ordered 8x8</source>
+        <translation>Uređeno 8x8</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="123"/>
+        <source>Bitmap pattern</source>
+        <translation>Bitmap uzorak</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="124"/>
+        <source>Search the image to use as pattern</source>
+        <translation>Traži sliku za korištenje kao uzorak</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="148"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="154"/>
+        <source>Pattern size</source>
+        <translation>Veličina uzorka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="166"/>
+        <source>Lightning</source>
+        <translation>Munja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="183"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="189"/>
+        <source>Slope</source>
+        <translation>Nagib</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="202"/>
+        <source>Interception</source>
+        <translation>Presretanje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="208"/>
+        <source>Intercept</source>
+        <translation>Presretni</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="51"/>
+        <source>Spiral 1</source>
+        <translation>Spirala 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="55"/>
+        <source>Spiral 2</source>
+        <translation>Spirala 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="59"/>
+        <source>Parabola</source>
+        <translation>Parabola</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="63"/>
+        <source>Horizontal stripe</source>
+        <translation>Horizontalna pruga</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="78"/>
+        <source>Speed increment</source>
+        <translation>Povećanje brzine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ImageSrc/share/qml/main.qml" line="46"/>
+        <source>Force frame rate</source>
+        <translation>Forsiraj brzinu slike</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Implode/share/qml/main.qml" line="28"/>
+        <source>Amount</source>
+        <translation>Količina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="36"/>
+        <source>Choose the automata color</source>
+        <extracomment>https://en.wikipedia.org/wiki/Life-like_cellular_automaton</extracomment>
+        <translation>Odaberi boju automata</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="68"/>
+        <source>Luma Threshold</source>
+        <extracomment>Minimum luminance/light/white level/intensity in a gray or black and white picture. https://en.wikipedia.org/wiki/Luma_(video)</extracomment>
+        <translation>Luma prag</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="54"/>
+        <source>Number of drops</source>
+        <translation>Broj kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="91"/>
+        <source>Select font</source>
+        <translation>Odaberi font</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="196"/>
+        <source>Cursor color</source>
+        <translation>Boja kursora</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="198"/>
+        <source>Choose the cursor color</source>
+        <translation>Odaberi boju kursora</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="225"/>
+        <source>Minimum drop length</source>
+        <translation>Minimalna dužina kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="231"/>
+        <source>Min. drop length</source>
+        <translation>Min. dužina kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="243"/>
+        <source>Maximum drop length</source>
+        <translation>Maksimalna dužina kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="249"/>
+        <source>Max. drop length</source>
+        <translation>Maks. dužina kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="261"/>
+        <source>Minimum speed</source>
+        <translation>Minimalna brzina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="267"/>
+        <source>Min. speed</source>
+        <translation>Min. brzina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="279"/>
+        <source>Maximum speed</source>
+        <translation>Maksimalna brzina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="285"/>
+        <source>Max. speed</source>
+        <translation>Maks. brzina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="306"/>
+        <source>Show rain</source>
+        <translation>Prikaži kišu</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="123"/>
+        <source>Video track</source>
+        <translation>Video traka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="135"/>
+        <source>Audio track</source>
+        <translation>Audio traka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="147"/>
+        <source>Subtitles track</source>
+        <translation>Podnaslov traka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="160"/>
+        <source>Synchronise</source>
+        <translation>Sinhroniziraj</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="45"/>
+        <source>Simple</source>
+        <translation>Jednostavno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Opacity/share/qml/main.qml" line="28"/>
+        <source>Opacity</source>
+        <translation>Neprozirnost</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Otsu/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="61"/>
+        <source>Levels</source>
+        <translation>Nivoi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="27"/>
+        <source>Brightness</source>
+        <translation>Svjetlina</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="56"/>
+        <source>Hard color</source>
+        <translation>Tvrda boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="60"/>
+        <source>Soft color</source>
+        <translation>Meka boja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="64"/>
+        <source>Hard natural</source>
+        <translation>Tvrdo prirodno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="68"/>
+        <source>Soft natural</source>
+        <translation>Meko prirodno</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="72"/>
+        <source>Luminance hard color</source>
+        <translation>Tvrda boja luminancije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="76"/>
+        <source>Luminance soft color</source>
+        <translation>Meka boja luminancije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="80"/>
+        <source>Luminance hard natural</source>
+        <translation>Tvrda prirodna luminancija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="84"/>
+        <source>Luminance soft natural</source>
+        <translation>Meka prirodna luminancija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="165"/>
+        <source>Alpha differential</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Alpha diferencijal</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="180"/>
+        <source>Radiation color</source>
+        <translation>Boja radijacije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="51"/>
+        <source>Motion detect</source>
+        <translation>Detekcija pokreta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="55"/>
+        <source>Rain</source>
+        <translation>Kiša</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="63"/>
+        <source>General parameters</source>
+        <translation>Opći parametri</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="89"/>
+        <source>Decay</source>
+        <translation>Opadanje</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="104"/>
+        <source>Motion detection parameters</source>
+        <translation>Parametri detekcije pokreta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="150"/>
+        <source>Rain parameters</source>
+        <translation>Parametri kiše</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="160"/>
+        <source>Minimum drop size</source>
+        <translation>Minimalna veličina kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="176"/>
+        <source>Maximum drop size</source>
+        <translation>Maksimalna veličina kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="192"/>
+        <source>Drop thickness</source>
+        <translation>Debljina kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="209"/>
+        <source>Drop frequency</source>
+        <translation>Frekvencija kapi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="38"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="44"/>
+        <source>Show lines</source>
+        <translation>Prikaži linije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="56"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="62"/>
+        <source>Hide lines</source>
+        <translation>Sakrij linije</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="73"/>
+        <source>Hide color</source>
+        <translation>Boja skrivanja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="75"/>
+        <source>Choose the hide color</source>
+        <translation>Odaberi boju skrivanja</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Shagadelic/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Shagadelic/share/qml/main.qml" line="33"/>
+        <source>Mask</source>
+        <translation>Maska</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Temperature/share/qml/main.qml" line="27"/>
+        <source>Temperature</source>
+        <translation>Temperatura</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="129"/>
+        <source>Video format</source>
+        <translation>Video format</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="146"/>
+        <source>Resolution</source>
+        <translation>Rezolucija</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="164"/>
+        <source>FPS</source>
+        <translation>FPS</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="188"/>
+        <source>Reset to default values</source>
+        <translation>Resetuj na zadane vrijednosti</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="35"/>
+        <source>Choose the vignette color</source>
+        <translation>Odaberi boju vinjete</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="46"/>
+        <source>Aspect</source>
+        <extracomment>Aspect ratio</extracomment>
+        <translation>Omjer</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="80"/>
+        <source>Softness</source>
+        <translation>Mekoća</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="33"/>
+        <source>Palette</source>
+        <translation>Paleta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="43"/>
+        <source>Frame length</source>
+        <translation>Dužina okvira</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="111"/>
+        <source>Hue offset</source>
+        <translation>Pomak nijanse</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="126"/>
+        <source>Light</source>
+        <translation>Svjetlo</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="136"/>
+        <source>Light threshold</source>
+        <translation>Prag svjetla</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="153"/>
+        <source>Light color</source>
+        <translation>Boja svjetla</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="155"/>
+        <source>Choose the color of the light</source>
+        <translation>Odaberite boju svjetla</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="162"/>
+        <source>Shadow</source>
+        <translation>Sjena</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="172"/>
+        <source>Shadow threshold</source>
+        <translation>Prag sjene</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="189"/>
+        <source>Shadow color</source>
+        <translation>Boja sjene</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="191"/>
+        <source>Choose the color of the shadow</source>
+        <translation>Odaberi boju sjene</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="27"/>
+        <source>Ripples</source>
+        <translation>Valovi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="43"/>
+        <source>Duration (in seconds)</source>
+        <translation>Trajanje (u sekundama)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="28"/>
+        <source>X-Axis</source>
+        <translation>X-Osa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="38"/>
+        <source>Amplitude (X)</source>
+        <translation>Amplituda (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="54"/>
+        <source>Frequency (X)</source>
+        <translation>Frekvencija (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="70"/>
+        <source>Phase (X)</source>
+        <translation>Faza (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="85"/>
+        <source>Y-Axis</source>
+        <translation>Y-Osa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="95"/>
+        <source>Amplitude (Y)</source>
+        <translation>Amplituda (Y)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="111"/>
+        <source>Frequency (Y)</source>
+        <translation>Frekvencija (Y)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="127"/>
+        <source>Phase (Y)</source>
+        <translation>Faza (Y)</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="46"/>
+        <source>Daily Build</source>
+        <translation>Dnevna verzija</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="60"/>
+        <source>%1/Picture %2.%3</source>
+        <translation>%1/Slika %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="258"/>
+        <source>Main menu</source>
+        <translation>Glavni meni</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="264"/>
+        <source>Open main menu</source>
+        <translation>Otvori glavni meni</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="295"/>
+        <source>Start streaming</source>
+        <translation>Započni streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="295"/>
+        <source>Stop streaming</source>
+        <translation>Zaustavi streaming</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="300"/>
+        <source>You must add at least one streaming platform to the video outputs</source>
+        <translation>Morate dodati barem jednu streaming platformu na video izlaze</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="302"/>
+        <source>The following platforms are not configured:&lt;br/&gt;&lt;br/&gt;%1</source>
+        <translation>Sljedeće platforme nisu konfigurisane:&lt;br/&gt;&lt;br/&gt;%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="336"/>
+        <source>Capture options</source>
+        <translation>Opcije snimanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="342"/>
+        <source>Open capture options menu</source>
+        <translation>Otvori meni opcija snimanja</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="373"/>
+        <source>Open last photo</source>
+        <translation>Otvori posljednju fotografiju</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="384"/>
+        <source>Open last photo taken</source>
+        <translation>Otvori posljednju uslikanu fotografiju</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="415"/>
+        <location filename="../qml/main.qml" line="418"/>
+        <source>Take a photo</source>
+        <translation>Snimi fotografiju</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="419"/>
+        <source>Image capture mode</source>
+        <translation>Režim snimanja slike</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="422"/>
+        <source>Make a capture and save it to an image file</source>
+        <translation>Napravi snimak i spremi ga u slikovnu datoteku</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="423"/>
+        <source>Put %1 in image capture mode</source>
+        <translation>Postavi %1 u režim snimanja slike</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="472"/>
+        <location filename="../qml/main.qml" line="478"/>
+        <source>Record video</source>
+        <translation>Snimi video</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="473"/>
+        <location filename="../qml/main.qml" line="479"/>
+        <source>Stop video recording</source>
+        <translation>Zaustavi snimanje videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="476"/>
+        <source>Video capture mode</source>
+        <translation>Režim snimanja videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="482"/>
+        <source>Put %1 in video recording mode</source>
+        <translation>Postavi %1 u režim snimanja videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="484"/>
+        <source>Start recording to a video file</source>
+        <translation>Započni snimanje u video datoteku</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="485"/>
+        <source>Stop current video recording</source>
+        <translation>Zaustavi trenutno snimanje videa</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="512"/>
+        <source>Open last video</source>
+        <translation>Otvori posljednji video</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="524"/>
+        <source>Open last recorded video</source>
+        <translation>Otvori posljednji snimljeni video</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="760"/>
+        <source>Installing virtual camera</source>
+        <translation>Instaliranje virtuelne kamere</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="761"/>
+        <source>Running commands</source>
+        <translation>Pokretanje komandi</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Rotate/share/qml/main.qml" line="29"/>
+        <source>Angle %1°</source>
+        <translation>Ugao %1°</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Pixelate/share/qml/main.qml" line="27"/>
+        <source>Block width</source>
+        <translation>Širina bloka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Pixelate/share/qml/main.qml" line="44"/>
+        <source>Block height</source>
+        <translation>Visina bloka</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="28"/>
+        <source>Center X</source>
+        <translation>Centar X</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="47"/>
+        <source>Center Y</source>
+        <translation>Centar Y</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="66"/>
+        <source>Degrees</source>
+        <translation>Stepeni</translation>
+    </message>
+</context>
+</TS>

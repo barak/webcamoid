@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2015  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -93,6 +93,19 @@ class MediaTools: public QObject
     Q_PROPERTY(int adBannerHeight
                READ adBannerHeight
                NOTIFY adBannerHeightChanged)
+    Q_PROPERTY(bool singleInstanceAllowed
+               READ singleInstanceAllowed
+               CONSTANT)
+    Q_PROPERTY(bool singleInstance
+               READ singleInstance
+               WRITE setSingleInstance
+               RESET resetSingleInstance
+               NOTIFY singleInstanceChanged)
+    Q_PROPERTY(bool hideControlsOnPointerOut
+               READ hideControlsOnPointerOut
+               WRITE setHideControlsOnPointerOut
+               RESET resetHideControlsOnPointerOut
+               NOTIFY hideControlsOnPointerOutChanged)
 
     public:
         enum AdType {
@@ -131,8 +144,10 @@ class MediaTools: public QObject
         Q_INVOKABLE QString currentTime(const QString &format) const;
         Q_INVOKABLE QStringList standardLocations(const QString &type) const;
         Q_INVOKABLE static QString readFile(const QString &fileName);
+        Q_INVOKABLE bool sendFile(const QString &fileName, const QString &subject={});
         Q_INVOKABLE QString urlToLocalFile(const QString &urlOrFile) const;
-        Q_INVOKABLE QString copyUrlToCache(const QString &urlOrFile) const;
+        Q_INVOKABLE QString urlToLocalFolder(const QString &urlOrFolder) const;
+        Q_INVOKABLE QString organizeFile(const QString &filePath) const;
         Q_INVOKABLE static QString convertToAbsolute(const QString &path);
         Q_INVOKABLE static void messageHandler(QtMsgType type,
                                                const QMessageLogContext &context,
@@ -141,6 +156,9 @@ class MediaTools: public QObject
         Q_INVOKABLE QString documentsDirectory() const;
         Q_INVOKABLE int adBannerWidth() const;
         Q_INVOKABLE int adBannerHeight() const;
+        Q_INVOKABLE bool singleInstanceAllowed() const;
+        Q_INVOKABLE bool singleInstance() const;
+        Q_INVOKABLE bool hideControlsOnPointerOut() const;
 
     private:
         MediaToolsPrivate *d;
@@ -154,15 +172,21 @@ class MediaTools: public QObject
         void documentsDirectoryChanged(const QString &documentsDirectory);
         void adBannerWidthChanged(int adBannerWidth);
         void adBannerHeightChanged(int adBannerHeight);
+        void singleInstanceChanged(bool singleInstance);
+        void hideControlsOnPointerOutChanged(bool hideControlsOnPointerOut);
 
     public slots:
         bool init(const CliOptions &cliOptions);
         void setWindowWidth(int windowWidth);
         void setWindowHeight(int windowHeight);
         void setDocumentsDirectory(const QString &documentsDirectory);
+        void setSingleInstance(bool singleInstance);
+        void setHideControlsOnPointerOut(bool hideControlsOnPointerOut);
         void resetWindowWidth();
         void resetWindowHeight();
         void resetDocumentsDirectory();
+        void resetSingleInstance();
+        void resetHideControlsOnPointerOut();
         void loadConfigs();
         void saveConfigs();
         void show();

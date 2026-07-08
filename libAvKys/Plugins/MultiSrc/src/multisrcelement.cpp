@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 #include <QMutex>
 #include <QQmlContext>
 #include <QReadWriteLock>
+#include <akpacket.h>
 #include <akplugininfo.h>
 #include <akpluginmanager.h>
 
@@ -45,6 +46,7 @@ MultiSrcElement::MultiSrcElement():
     AkMultimediaSourceElement()
 {
     this->d = new MultiSrcElementPrivate(this);
+
     QObject::connect(akPluginManager,
                      &AkPluginManager::linksChanged,
                      this,

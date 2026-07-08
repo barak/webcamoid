@@ -1,0 +1,4967 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="hy">
+<context>
+    <name>About</name>
+    <message>
+        <location filename="../qml/About.qml" line="31"/>
+        <source>About %1</source>
+        <extracomment>Information of the program, like name, description, version,</extracomment>
+        <translation>%1-ի մասին</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="32"/>
+        <source>%1 version, copyleft, and build information.</source>
+        <translation>%1 տարբերակ, copyleft և հավաքման տվյալներ:</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="82"/>
+        <source>Built from</source>
+        <extracomment>Built from &quot;short commit hash&quot;</extracomment>
+        <translation>Կառուցված է</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="88"/>
+        <source>Built from %1</source>
+        <translation>Կառուցված է %1-ից</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="90"/>
+        <source>Open the commit in your web browser</source>
+        <translation>Բացեք կոմիտը ձեր վեբ դիտարկիչում</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="96"/>
+        <source>Using Qt %1</source>
+        <translation>Օգտագործվում է Qt %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="102"/>
+        <source>Webcam capture application.</source>
+        <translation>Վեբ-տեսախցիկից նկարահանման հավելված:</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="109"/>
+        <source>A multi-platform camera application for picture and video capture.</source>
+        <translation>Բազմահարթակ տեսախցիկի հավելված նկարների և տեսանյութերի նկարահանման համար:</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="123"/>
+        <source>Website</source>
+        <translation>Կայք</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="129"/>
+        <source>Go to %1 website</source>
+        <translation>Անցնել %1 կայք</translation>
+    </message>
+</context>
+<context>
+    <name>AddPlatformDialog</name>
+    <message>
+        <location filename="../qml/AddPlatformDialog.qml" line="33"/>
+        <source>Add platform</source>
+        <translation>Ավելացնել հարթակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddPlatformDialog.qml" line="42"/>
+        <source>Platform</source>
+        <translation>Հարթակ</translation>
+    </message>
+</context>
+<context>
+    <name>AddStreamingPlatformDialog</name>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="28"/>
+        <source>Add platform</source>
+        <translation>Ավելացնել հարթակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="57"/>
+        <source>Name</source>
+        <translation>Անուն</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="63"/>
+        <source>My Platform</source>
+        <translation>Իմ հարթակը</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="68"/>
+        <source>Website</source>
+        <translation>Կայք</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="79"/>
+        <source>Streaming URL</source>
+        <translation>Հեռարձակման URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="90"/>
+        <source>Key configs URL</source>
+        <translation>Բանալիների կոնֆիգուրացիաների URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="101"/>
+        <source>Documentation URL</source>
+        <translation>Փաստաթղթերի URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="113"/>
+        <source>Needs key</source>
+        <translation>Պահանջվում է բանալի</translation>
+    </message>
+</context>
+<context>
+    <name>AddVideoFormat</name>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="52"/>
+        <source>Add Video Format</source>
+        <translation>Ավելացնել Տեսաֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="53"/>
+        <source>Change Video Format</source>
+        <translation>Փոխել Տեսաֆորմատը</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="105"/>
+        <source>Remove format</source>
+        <translation>Հեռացնել ֆորմատը</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="116"/>
+        <source>Format</source>
+        <translation>Ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="128"/>
+        <source>Width</source>
+        <translation>Լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="141"/>
+        <source>Height</source>
+        <translation>Բարձրություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="154"/>
+        <source>Frame rate</source>
+        <translation>Կադրերի արագություն</translation>
+    </message>
+</context>
+<context>
+    <name>AkMediaGalleryModel</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="170"/>
+        <source>Share file</source>
+        <translation>Կիսվել ֆայլով</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="276"/>
+        <source>Share files</source>
+        <translation>Կիսվել ֆայլերով</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="359"/>
+        <source>Use as...</source>
+        <translation>Օգտագործել որպես...</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="396"/>
+        <source>Copy to...</source>
+        <translation>Պատճենել դեպի...</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="402"/>
+        <source>All Files (*)</source>
+        <translation>Բոլոր ֆայլերը (*)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="418"/>
+        <source>Move to...</source>
+        <translation>Տեղափոխել դեպի...</translation>
+    </message>
+</context>
+<context>
+    <name>AudioCodecOptions</name>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="28"/>
+        <source>Audio Codec Options</source>
+        <translation>Ձայնային Կոդեկի Կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="223"/>
+        <source>Audio codec</source>
+        <translation>Ձայնային կոդեկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="240"/>
+        <source>Bitrate</source>
+        <translation>Բիթրեյթ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="247"/>
+        <source>Bitrate (bits/secs)</source>
+        <translation>Բիթրեյթ (բիթ/վրկ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="256"/>
+        <source>Advanced options</source>
+        <translation>Ընդլայնված կարգավորումներ</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputAdd</name>
+    <message>
+        <location filename="../qml/AudioInputAdd.qml" line="30"/>
+        <source>Select the audio source to add</source>
+        <translation>Ընտրեք ավելացնելու ձայնային աղբյուրը</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputAdd.qml" line="55"/>
+        <source>Audio input</source>
+        <translation>Ձայնային մուտք</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputDeviceOptions</name>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="29"/>
+        <source>Audio Input Settings</source>
+        <translation>Ձայնային մուտքի կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="124"/>
+        <source>Sample Format</source>
+        <extracomment>A sample represents the strength of the wave at a certain time. A sample can be expressed as the number of bits defining it (more bits better sound), the type of data representing it (signed integer, unsigned integer, floating point), and the endianness of the data (big endian, little endian). The sample format is the representation of that information. For example, &apos;s16le&apos; means that each sample format is represented by a 16 bits signed integer arranged as little endian.</extracomment>
+        <translation>Նմուշի ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="142"/>
+        <source>Channels</source>
+        <translation>Ալիքներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="161"/>
+        <source>Sample Rate</source>
+        <extracomment>Number of audio samples per channel to be played per second.</extracomment>
+        <translation>Նմուշի հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="188"/>
+        <source>Latency (ms)</source>
+        <extracomment>The latency is the amount of accumulated audio ready to play, measured in time. Higher latency == smoother audio playback, but more desynchronization with the video. Lowerer latency == audio synchronization near to the video, but glitchy audio playback. https://en.wikipedia.org/wiki/Latency_(audio)</extracomment>
+        <translation>Հապաղում (մվ)</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputSourceItem</name>
+    <message>
+        <location filename="../qml/AudioInputSourceItem.qml" line="72"/>
+        <source>Remove</source>
+        <translation>Հեռացնել</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputs</name>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="62"/>
+        <source>Add audio input</source>
+        <translation>Ավելացնել ձայնային մուտք</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="74"/>
+        <source>Add device input</source>
+        <translation>Ավելացնել սարքի մուտք</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="80"/>
+        <source>Add video source</source>
+        <translation>Ավելացնել տեսանյութի աղբյուր</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="93"/>
+        <source>Configure audio input settings</source>
+        <translation>Կարգավորել ձայնային մուտքի կարգավորումները</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOptions</name>
+    <message>
+        <location filename="../qml/AudioOptions.qml" line="34"/>
+        <source>Outputs</source>
+        <translation>Ելքեր</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOptions.qml" line="37"/>
+        <source>Sources</source>
+        <translation>Աղբյուրներ</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOutputDeviceOptions</name>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="29"/>
+        <source>Audio Device Options</source>
+        <translation>Ձայնային սարքի կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="120"/>
+        <source>Audio input</source>
+        <translation>Ձայնային մուտք</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="186"/>
+        <source>Sample Format</source>
+        <extracomment>An sample represents the strength of the wave at a certain time. A sample can be expressed as the number of bits defining it (more bits better sound), the type of data representing it (signed integer, unsigned integer, floating point), and the endianness of the data (big endian, little endian). The sample format is the representation of that information. For example, &apos;s16le&apos; means that each sample format is represented by a 16 bits signed integer arranged as little endian.</extracomment>
+        <translation>Նմուշի ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="207"/>
+        <source>Channels</source>
+        <translation>Ալիքներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="229"/>
+        <source>Sample Rate</source>
+        <extracomment>Number of audio samples per channel to be played per second.</extracomment>
+        <translation>Նմուշի հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="259"/>
+        <source>Latency (ms)</source>
+        <extracomment>The latency is the amount of accumulated audio ready to play, measured in time. Higher latency == smoother audio playback, but more desynchronization with the video. Lowerer latency == audio synchronization near to the video, but glitchy audio playback. https://en.wikipedia.org/wiki/Latency_(audio)</extracomment>
+        <translation>Հապաղում (մվ)</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOutputs</name>
+    <message>
+        <location filename="../qml/AudioOutputs.qml" line="39"/>
+        <source>Configure output</source>
+        <translation>Կարգավորել ելքը</translation>
+    </message>
+</context>
+<context>
+    <name>CaptureSettingsDialog</name>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="32"/>
+        <source>Video capture settings</source>
+        <translation>Տեսանյութի նկարահանման կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="33"/>
+        <source>Image capture settings</source>
+        <translation>Նկարի նկարահանման կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="58"/>
+        <source>Use flash</source>
+        <translation>Օգտագործել բռնկում</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="61"/>
+        <source>Use flash when taking a photo</source>
+        <translation>Օգտագործել բռնկում լուսանկարելիս</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="66"/>
+        <source>Delay</source>
+        <translation>Հապաղում</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="70"/>
+        <source>Photo timer</source>
+        <translation>Լուսանկարի ժամաչափ</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="71"/>
+        <source>The time to wait before the photo is taken</source>
+        <translation>Սպասելու ժամանակը մինչև լուսանկարի արվելը</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="77"/>
+        <source>Now</source>
+        <translation>Հիմա</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="86"/>
+        <source>%1 seconds</source>
+        <translation>%1 վայրկյան</translation>
+    </message>
+</context>
+<context>
+    <name>ColorSchemeAddEdit</name>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="66"/>
+        <source>Edit color scheme</source>
+        <translation>Խմբագրել գունային սխեման</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="67"/>
+        <source>Create a new color scheme</source>
+        <translation>Ստեղծել նոր գունային սխեմա</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="71"/>
+        <source>Color Palette %1</source>
+        <translation>Գունային Պալիտրա %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="94"/>
+        <source>Palette name</source>
+        <translation>Պալիտրայի անուն</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="103"/>
+        <source>Enabled</source>
+        <translation>Միացված է</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="106"/>
+        <source>Disabled</source>
+        <translation>Անջատված է</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="110"/>
+        <source>Preview</source>
+        <translation>Նախադիտում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="169"/>
+        <source>Window text &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;</source>
+        <translation>Պատուհանի տեքստ &lt;a href=&quot;#&quot;&gt;հղում&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="215"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="697"/>
+        <source>Button text</source>
+        <translation>Կոճակի տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="260"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="837"/>
+        <source>Tooltip text</source>
+        <translation>Հուշման տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="349"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="730"/>
+        <source>Placeholder text</source>
+        <translation>Փոխարինիչի տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="350"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="722"/>
+        <source>Text</source>
+        <translation>Տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="541"/>
+        <source>Progress %1%</source>
+        <translation>Առաջընթաց %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="649"/>
+        <source>Color group</source>
+        <translation>Գունային խումբ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="650"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="680"/>
+        <source>Window</source>
+        <translation>Պատուհան</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="651"/>
+        <source>Buttons</source>
+        <translation>Կոճակներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="652"/>
+        <source>Input Controls</source>
+        <translation>Մուտքագրման Վերահսկիչներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="653"/>
+        <source>Control accents</source>
+        <translation>Վերահսկիչի շեշտեր</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="654"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="820"/>
+        <source>Highlight</source>
+        <translation>Ընդգծում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="655"/>
+        <source>Tooltips</source>
+        <translation>Հուշումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="656"/>
+        <source>Hyperlinks</source>
+        <translation>Հիպերհղումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="672"/>
+        <source>Window text</source>
+        <translation>Պատուհանի տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="674"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="682"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="699"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="707"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="724"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="732"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="740"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="748"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="765"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="773"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="781"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="789"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="797"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="814"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="822"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="839"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="847"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="864"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="872"/>
+        <source>Choose the color for %1</source>
+        <translation>Ընտրեք գույնը %1-ի համար</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="705"/>
+        <source>Button</source>
+        <translation>Կոճակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="738"/>
+        <source>Base</source>
+        <translation>Հիմք</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="746"/>
+        <source>Alternate base</source>
+        <translation>Այլընտրանքային հիմք</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="763"/>
+        <source>Light</source>
+        <translation>Բաց</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="771"/>
+        <source>Mid light</source>
+        <translation>Միջին բաց</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="779"/>
+        <source>Mid</source>
+        <translation>Միջին</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="787"/>
+        <source>Dark</source>
+        <translation>Մուգ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="795"/>
+        <source>Shadow</source>
+        <translation>Ստվեր</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="812"/>
+        <source>Highlighted text</source>
+        <translation>Ընդգծված տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="845"/>
+        <source>ToolTip base</source>
+        <translation>Հուշման հիմք</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="862"/>
+        <source>Link</source>
+        <translation>Հղում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="870"/>
+        <source>Visited link</source>
+        <translation>Այցելած հղում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="961"/>
+        <source>Brightness</source>
+        <translation>Պայծառություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="977"/>
+        <source>Contrast</source>
+        <translation>Կոնտրաստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="994"/>
+        <source>Contrast color</source>
+        <translation>Կոնտրաստ գույն</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="996"/>
+        <source>Choose the contrast color</source>
+        <translation>Ընտրեք կոնտրաստ գույնը</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="1001"/>
+        <source>Saturation</source>
+        <translation>Հագեցվածություն</translation>
+    </message>
+</context>
+<context>
+    <name>ColorSchemes</name>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="29"/>
+        <source>Customize Colors</source>
+        <translation>Հարմարեցնել գույները</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="31"/>
+        <source>Change %1 colors.</source>
+        <extracomment>Changer the program colors</extracomment>
+        <translation>Փոխել %1-ի գույները:</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="52"/>
+        <source>Color scheme</source>
+        <translation>Գունային սխեմա</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="64"/>
+        <source>Add</source>
+        <translation>Ավելացնել</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="69"/>
+        <source>Create a new color scheme from the current selected one</source>
+        <translation>Ստեղծել նոր գունային սխեմա ընթացիկ ընտրվածից</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="74"/>
+        <source>Edit</source>
+        <translation>Խմբագրել</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="80"/>
+        <source>Edit the selected color scheme</source>
+        <translation>Խմբագրել ընտրված գունային սխեման</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="85"/>
+        <source>Remove</source>
+        <translation>Հեռացնել</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="91"/>
+        <source>Delete the selected color scheme</source>
+        <translation>Ջնջել ընտրված գունային սխեման</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="99"/>
+        <source>Import</source>
+        <translation>Ներմուծել</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="104"/>
+        <source>Add a new color scheme from a file</source>
+        <translation>Ավելացնել նոր գունային սխեմա ֆայլից</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="109"/>
+        <source>Export</source>
+        <translation>Արտահանել</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="113"/>
+        <source>Save the selected color scheme into a file</source>
+        <translation>Պահպանել ընտրված գունային սխեման ֆայլում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="128"/>
+        <source>Export color scheme</source>
+        <translation>Արտահանել գունային սխեման</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="140"/>
+        <source>Enabled</source>
+        <translation>Միացված է</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="143"/>
+        <source>Disabled</source>
+        <translation>Անջատված է</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="147"/>
+        <source>Preview</source>
+        <translation>Նախադիտում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="168"/>
+        <source>Window text &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;</source>
+        <translation>Պատուհանի տեքստ &lt;a href=&quot;#&quot;&gt;հղում&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="174"/>
+        <source>Button text</source>
+        <translation>Կոճակի տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="179"/>
+        <source>Tooltip text</source>
+        <translation>Հուշման տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="188"/>
+        <source>Placeholder text</source>
+        <translation>Փոխարինիչի տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="189"/>
+        <source>Text</source>
+        <translation>Տեքստ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="219"/>
+        <source>Progress %1%</source>
+        <translation>Առաջընթաց %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="246"/>
+        <source>Select the color scheme to import</source>
+        <translation>Ընտրեք ներմուծելու գունային սխեման</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="280"/>
+        <source>Save the color scheme to a file</source>
+        <translation>Պահպանել գունային սխեման ֆայլում</translation>
+    </message>
+</context>
+<context>
+    <name>Commons</name>
+    <message>
+        <location filename="../qml/Commons.qml" line="28"/>
+        <source>The virtual camera is in use by the following applications:</source>
+        <translation>Վիրտուալ տեսախցիկը օգտագործվում է հետևյալ հավելվածների կողմից՝</translation>
+    </message>
+    <message>
+        <location filename="../qml/Commons.qml" line="40"/>
+        <source>Stop the camera in those applications or close them and try again.</source>
+        <translation>Կանգնեցրեք տեսախցիկը այդ հավելվածներում կամ փակեք դրանք և նորից փորձեք:</translation>
+    </message>
+</context>
+<context>
+    <name>Contributors</name>
+    <message>
+        <location filename="../qml/Contributors.qml" line="31"/>
+        <source>Contributors</source>
+        <extracomment>List of people contributing to the project: software</extracomment>
+        <translation>Ներդրողներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Contributors.qml" line="32"/>
+        <source>Great people who collaborated to make %1 better</source>
+        <translation>Հիանալի մարդիկ, որոնք համագործակցել են %1-ը բարելավելու համար</translation>
+    </message>
+    <message>
+        <location filename="../qml/Contributors.qml" line="49"/>
+        <source>Thanks to all these cool people that helped contributing to Webcamoid all these years.</source>
+        <translation>Շնորհակալություն բոլոր այս հիանալի մարդկանց, ովքեր օգնել են ներդրում կատարել Webcamoid-ին այս բոլոր տարիների ընթացքում:</translation>
+    </message>
+</context>
+<context>
+    <name>DebugLog</name>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="30"/>
+        <source>Debug Log</source>
+        <translation>Կարգաբերման Մատյան</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="31"/>
+        <source>Information to help fixing bugs in %1.</source>
+        <translation>Տեղեկատվություն, որն օգնում է վրիպակները շտկել %1-ում:</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="74"/>
+        <source>Logs directory</source>
+        <translation>Մատյանի պանակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="86"/>
+        <source>Search directory to save logs</source>
+        <translation>Փնտրել պանակ՝ մատյանները պահելու համար</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="100"/>
+        <source>Clear</source>
+        <translation>Մաքրել</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="103"/>
+        <source>Clear the debug log</source>
+        <translation>Մաքրել կարգաբերման մատյանը</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="114"/>
+        <source>Save</source>
+        <translation>Պահպանել</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="117"/>
+        <source>Save the debug log</source>
+        <translation>Պահպանել կարգաբերման մատյանը</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="142"/>
+        <source>Select the folder to save the logs</source>
+        <translation>Ընտրեք պանակը՝ մատյանները պահպանելու համար</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadDialog</name>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="35"/>
+        <source>Downloading %1</source>
+        <translation>Բեռնում է %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="155"/>
+        <source>&lt;b&gt;From:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Սկսած՝&lt;/b&gt; %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="160"/>
+        <source>&lt;b&gt;To:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Մինչև՝&lt;/b&gt; %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="165"/>
+        <source>&lt;b&gt;Size:&lt;/b&gt; %1 %2B / %3 %4B</source>
+        <translation>&lt;b&gt;Չափս՝&lt;/b&gt; %1 %2Բ / %3 %4Բ</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="173"/>
+        <source>&lt;b&gt;Speed:&lt;/b&gt; %1 %2B/s</source>
+        <translation>&lt;b&gt;Արագություն՝&lt;/b&gt; %1 %2Բ/վ</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="179"/>
+        <source>&lt;b&gt;Time remaining:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Մնացած ժամանակ՝&lt;/b&gt; %1</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadFailedDialog</name>
+    <message>
+        <location filename="../qml/DownloadFailedDialog.qml" line="34"/>
+        <source>Download failed</source>
+        <translation>Բեռնումը ձախողվեց</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadSucceededDialog</name>
+    <message>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="34"/>
+        <source>Download ready</source>
+        <translation>Բեռնումը պատրաստ է</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="52"/>
+        <source>Install the virtual camera?</source>
+        <translation>Տեղադրե՞լ վիրտուալ տեսախցիկը:</translation>
+    </message>
+</context>
+<context>
+    <name>GeneralConfig</name>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="28"/>
+        <source>General Options</source>
+        <translation>Ընդհանուր Կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="29"/>
+        <source>Configure capture, recording frameworks, and others.</source>
+        <translation>Կարգավորել նկարահանումը, ձայնագրության շրջանակները և այլն:</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="77"/>
+        <source>Play sources on start</source>
+        <translation>Նվագարկել աղբյուրները մեկնարկի ժամանակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="87"/>
+        <source>Only allow one instance of %1</source>
+        <translation>Թույլատրել միայն մեկ օրինակ %1-ից</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="99"/>
+        <source>Hide controls on pointer out</source>
+        <translation>Թաքցնել վերահսկիչները ցուցիչի դուրս գալու դեպքում</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="111"/>
+        <source>Frameworks and libraries</source>
+        <translation>Շրջանակներ և գրադարաններ</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="121"/>
+        <source>Video capture</source>
+        <translation>Տեսանյութի նկարահանում</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="139"/>
+        <source>Screen capture</source>
+        <translation>Էկրանի նկարահանում</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="157"/>
+        <source>Audio capture/playback</source>
+        <translation>Ձայնի նկարահանում/նվագարկում</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="175"/>
+        <source>Video convert</source>
+        <translation>Տեսանյութի փոխակերպում</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="193"/>
+        <source>Video playback</source>
+        <translation>Տեսանյութի նվագարկում</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="211"/>
+        <source>Virtual camera driver</source>
+        <translation>Վիրտուալ տեսախցիկի վարորդ</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="234"/>
+        <source>Root method</source>
+        <extracomment>The preferred method for executing commands with elevated privileges in the system.</extracomment>
+        <translation>Root մեթոդ</translation>
+    </message>
+</context>
+<context>
+    <name>ImageCapture</name>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="29"/>
+        <source>Image Capture</source>
+        <translation>Նկարի Նկարահանում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="30"/>
+        <source>Configure photografy quality and formats.</source>
+        <translation>Կարգավորել լուսանկարման որակը և ֆորմատները:</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="54"/>
+        <source>Images directory</source>
+        <translation>Նկարների պանակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="66"/>
+        <source>Select the save directory</source>
+        <translation>Ընտրել պահպանման պանակը</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="80"/>
+        <source>File format</source>
+        <translation>Ֆայլի ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="110"/>
+        <source>Quality</source>
+        <translation>Որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="142"/>
+        <source>Flash settings</source>
+        <translation>Բռնկման կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="152"/>
+        <source>Use flash</source>
+        <translation>Օգտագործել բռնկում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="155"/>
+        <source>Use flash when taking a photo</source>
+        <translation>Օգտագործել բռնկում լուսանկարելիս</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="164"/>
+        <source>Delay</source>
+        <translation>Հապաղում</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="167"/>
+        <source>Photo timer</source>
+        <translation>Լուսանկարի ժամաչափ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="168"/>
+        <source>The time to wait before the photo is taken</source>
+        <translation>Սպասելու ժամանակը մինչև լուսանկարի արվելը</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="176"/>
+        <source>Now</source>
+        <translation>Հիմա</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="219"/>
+        <source>%1 seconds</source>
+        <translation>%1 վայրկյան</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="247"/>
+        <source>Select the folder to save your photos</source>
+        <translation>Ընտրեք պանակը՝ ձեր լուսանկարները պահելու համար</translation>
+    </message>
+</context>
+<context>
+    <name>License</name>
+    <message>
+        <location filename="../qml/License.qml" line="27"/>
+        <source>License</source>
+        <extracomment>Program license.</extracomment>
+        <translation>Լիցենզիա</translation>
+    </message>
+    <message>
+        <location filename="../qml/License.qml" line="28"/>
+        <source>know your rights</source>
+        <translation>իմացեք ձեր իրավունքները</translation>
+    </message>
+</context>
+<context>
+    <name>LocalSettingsMenu</name>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="36"/>
+        <source>Copy to clipboard</source>
+        <translation>Պատճենել սեղմատախտակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="43"/>
+        <source>Recording settings</source>
+        <translation>Ձայնագրման կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="44"/>
+        <source>Capture settings</source>
+        <translation>Նկարահանման կարգավորումներ</translation>
+    </message>
+</context>
+<context>
+    <name>LocalStreamingAdvanced</name>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="31"/>
+        <source>Local streaming advanced options</source>
+        <translation>Տեղական հեռարձակման ընդլայնված կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="130"/>
+        <source>Local streaming quality</source>
+        <translation>Տեղական հեռարձակման որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="155"/>
+        <source>Streaming quality</source>
+        <translation>Հեռարձակման որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="208"/>
+        <source>Custom</source>
+        <translation>Անհատական</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="211"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Տեսանյութի որակ՝ %1×%2 %3 FPS</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="212"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Տեսանյութի բիթրեյթ՝ %1 Մբ/վ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="213"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Ձայնի նմուշի հաճախականություն՝ %1 կՀց</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="214"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Ձայնի բիթրեյթ՝ %1 կբ/վ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="223"/>
+        <source>Video quality</source>
+        <translation>Տեսանյութի որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="241"/>
+        <source>Output width</source>
+        <translation>Ելքի լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="264"/>
+        <source>Output height</source>
+        <translation>Ելքի բարձրություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="287"/>
+        <source>Output frame rate</source>
+        <translation>Ելքի կադրերի հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="310"/>
+        <source>Video bitrate (kbps)</source>
+        <translation>Տեսանյութի բիթրեյթ (կբ/վ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="330"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Հիմնական կադրերի քայլ (մվ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="349"/>
+        <source>Video codec</source>
+        <translation>Տեսանյութի կոդեկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="432"/>
+        <source>Audio quality</source>
+        <translation>Ձայնի որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="450"/>
+        <source>Sample rate</source>
+        <translation>Նմուշի հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="473"/>
+        <source>Audio bitrate (kbps)</source>
+        <translation>Ձայնի բիթրեյթ (կբ/վ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="494"/>
+        <source>Audio codec</source>
+        <translation>Ձայնային կոդեկ</translation>
+    </message>
+</context>
+<context>
+    <name>LocalStreamingOptions</name>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="99"/>
+        <source>Remove</source>
+        <translation>Հեռացնել</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="116"/>
+        <source>Port</source>
+        <translation>Պորտ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="135"/>
+        <source>Format</source>
+        <translation>Ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="193"/>
+        <source>Resource name</source>
+        <translation>Ռեսուրսի անուն</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="216"/>
+        <source>Streaming URL</source>
+        <translation>Հեռարձակման URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="234"/>
+        <source>Open URL in the webbrowser</source>
+        <translation>Բացել URL-ը վեբ դիտարկիչում</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="244"/>
+        <source>Advanced options</source>
+        <translation>Ընդլայնված կարգավորումներ</translation>
+    </message>
+</context>
+<context>
+    <name>LogSavedDialog</name>
+    <message>
+        <location filename="../qml/LogSavedDialog.qml" line="31"/>
+        <source>Done</source>
+        <translation>Կատարված է</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogSavedDialog.qml" line="41"/>
+        <source>Log file saved</source>
+        <translation>Մատյանի ֆայլը պահպանված է</translation>
+    </message>
+</context>
+<context>
+    <name>MainPanel</name>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="27"/>
+        <source>Audio</source>
+        <translation>Ձայն</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="29"/>
+        <source>Video</source>
+        <translation>Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="31"/>
+        <source>Effects</source>
+        <translation>Էֆեկտներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="33"/>
+        <source>Video Source Options</source>
+        <translation>Տեսանյութի Աղբյուրի Կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="35"/>
+        <source>Virtual Camera Options</source>
+        <translation>Վիրտուալ տեսախցիկի կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="37"/>
+        <source>Streaming Platform Options</source>
+        <translation>Հեռարձակման հարթակի կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="39"/>
+        <source>Local Streaming Options</source>
+        <translation>Տեղական հեռարձակման կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="40"/>
+        <source>%1 options</source>
+        <translation>%1 կարգավորումներ</translation>
+    </message>
+</context>
+<context>
+    <name>MediaGalleryDialog</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="84"/>
+        <source>%1 selected</source>
+        <translation>%1 ընտրված</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="128"/>
+        <source>Select all</source>
+        <translation>Ընտրել բոլորը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="135"/>
+        <source>Deselect all</source>
+        <translation>Չեղարկել բոլորի ընտրությունը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="286"/>
+        <source>The directory is empty</source>
+        <translation>Պանակը դատարկ է</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="294"/>
+        <source>Confirm delete</source>
+        <translation>Հաստատել ջնջումը</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="302"/>
+        <source>Delete %n picture(s) permanently?</source>
+        <translation>
+            <numerusform>%n նկարը մշտապես ջնջե՞լ:</numerusform>
+            <numerusform>%n նկարները մշտապես ջնջե՞լ:</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="309"/>
+        <source>This action can&apos;t be undone.</source>
+        <translation>Այս գործողությունը հնարավոր չէ չեղարկել:</translation>
+    </message>
+</context>
+<context>
+    <name>MediaTools</name>
+    <message>
+        <location filename="../../src/mediatools.cpp" line="1226"/>
+        <source>%1/log %2.txt</source>
+        <translation>%1/մատյան %2.txt</translation>
+    </message>
+</context>
+<context>
+    <name>MediaViewerDialog</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="138"/>
+        <source>Use as</source>
+        <translation>Օգտագործել որպես</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="143"/>
+        <source>Open with</source>
+        <translation>Բացել հետևյալով</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="148"/>
+        <source>Delete</source>
+        <translation>Ջնջել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="156"/>
+        <source>Move to</source>
+        <translation>Տեղափոխել դեպի</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="161"/>
+        <source>Copy to</source>
+        <translation>Պատճենել դեպի</translation>
+    </message>
+</context>
+<context>
+    <name>OptionsPanel</name>
+    <message>
+        <location filename="../qml/OptionsPanel.qml" line="203"/>
+        <source>Close %1 panel</source>
+        <translation>Փակել %1 վահանակը</translation>
+    </message>
+</context>
+<context>
+    <name>PipewireScreenDev</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/pipewire/src/pipewirescreendev.cpp" line="538"/>
+        <source>PipeWire Screen</source>
+        <translation>PipeWire Էկրան</translation>
+    </message>
+</context>
+<context>
+    <name>PluginConfig</name>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="29"/>
+        <location filename="../qml/PluginConfig.qml" line="49"/>
+        <source>Plugins</source>
+        <translation>Պլագիններ</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="30"/>
+        <source>Enable and disable %1 plugins</source>
+        <translation>Միացնել և անջատել %1 պլագինները</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="46"/>
+        <source>Paths</source>
+        <translation>Ուղիներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="197"/>
+        <source>Search plugins in subfolders</source>
+        <translation>Փնտրել պլագինները ենթապանակներում</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="209"/>
+        <source>Add path</source>
+        <translation>Ավելացնել ուղի</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="252"/>
+        <source>Update</source>
+        <translation>Թարմացնել</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="255"/>
+        <source>Update plugins list</source>
+        <translation>Թարմացնել պլագինների ցուցակը</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="285"/>
+        <source>Add plugins search path</source>
+        <translation>Ավելացնել պլագինների որոնման ուղի</translation>
+    </message>
+</context>
+<context>
+    <name>PluginsPathItem</name>
+    <message>
+        <location filename="../qml/PluginsPathItem.qml" line="52"/>
+        <source>Remove</source>
+        <translation>Հեռացնել</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="44"/>
+        <source>Webcam capture application.</source>
+        <translation>Վեբ-տեսախցիկից նկարահանման հավելված:</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="47"/>
+        <source>Load settings from PATH. If PATH is empty, load configs from application directory.</source>
+        <translation>Բեռնել կարգավորումները PATH-ից: Եթե PATH-ը դատարկ է, բեռնել կոնֆիգները հավելվածի պանակից:</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="49"/>
+        <source>PATH</source>
+        <translation>ՈՒՂԻ</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="54"/>
+        <source>Search in the specified plugins paths recursively.</source>
+        <translation>Փնտրել նշված պլագինների ուղիներում ռեկուրսիվ:</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="59"/>
+        <source>Semi-colon separated list of paths to search for plugins.</source>
+        <translation>Պլագինների որոնման կիսակետերով առանձնացված ուղիների ցանկ:</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="61"/>
+        <location filename="../../src/clioptions.cpp" line="70"/>
+        <source>PATH1;PATH2;PATH3;...</source>
+        <translation>ՈՒՂԻ1;ՈՒՂԻ2;ՈՒՂԻ3;...</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="68"/>
+        <source>Semi-colon separated list of paths to avoid loading.</source>
+        <extracomment>Blacklist of plugins that could have conflicts when loading in Webcamoid.</extracomment>
+        <translation>Բեռնումից խուսափելու ուղիների կիսակետերով առանձնացված ցանկ:</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="74"/>
+        <source>Open a new instance of %1.</source>
+        <translation>Բացել %1-ի նոր օրինակ:</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording.cpp" line="1512"/>
+        <source>%1/Video %2.%3</source>
+        <translation>%1/Տեսանյութ %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="724"/>
+        <source>3GP Video</source>
+        <translation>3GP Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="725"/>
+        <source>AVI Video</source>
+        <translation>AVI Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="726"/>
+        <source>Windows Bitmap</source>
+        <translation>Windows Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="727"/>
+        <source>Microsoft Windows Cursor</source>
+        <translation>Microsoft Windows Կուրսոր</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="729"/>
+        <source>Flash Video</source>
+        <extracomment>Adobe FLV Flash video</extracomment>
+        <translation>Flash Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="730"/>
+        <source>Animated GIF</source>
+        <translation>Շարժվող GIF</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="731"/>
+        <source>Graphic Interchange Format</source>
+        <translation>Գրաֆիկական Փոխանակման Ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="732"/>
+        <source>Apple Icon Image</source>
+        <translation>Apple Պատկերի Սրբապատկեր</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="733"/>
+        <source>Microsoft Windows Icon</source>
+        <translation>Microsoft Windows Սրբապատկեր</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="734"/>
+        <source>Joint Photographic Experts Group</source>
+        <translation>Joint Photographic Experts Group</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="735"/>
+        <source>MKV Video</source>
+        <translation>MKV Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="736"/>
+        <source>Animated PNG</source>
+        <translation>Շարժվող PNG</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="737"/>
+        <source>Multiple-image Network Graphics</source>
+        <translation>Բազմապատկեր Ցանցային Գրաֆիկա</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="738"/>
+        <source>QuickTime Video</source>
+        <translation>QuickTime Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="739"/>
+        <source>MP4 Video</source>
+        <translation>MP4 Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="740"/>
+        <source>MPEG Video</source>
+        <translation>MPEG Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="741"/>
+        <source>Ogg Video</source>
+        <translation>Ogg Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="742"/>
+        <source>Portable Bitmap</source>
+        <translation>Փոխադրելի Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="743"/>
+        <source>Portable Graymap</source>
+        <translation>Փոխադրելի Graymap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="744"/>
+        <source>Portable Network Graphics</source>
+        <translation>Փոխադրելի Ցանցային Գրաֆիկա</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="745"/>
+        <source>Portable Pixmap</source>
+        <translation>Փոխադրելի Pixmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="747"/>
+        <source>RealMedia Video</source>
+        <extracomment>Don&apos;t translate &quot;RealMedia&quot;, leave it as is.</extracomment>
+        <translation>RealMedia Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="748"/>
+        <source>Scalable Vector Graphics</source>
+        <translation>Մասշտաբավորելի Վեկտորային Գրաֆիկա</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="749"/>
+        <source>Truevision TGA</source>
+        <translation>Truevision TGA</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="750"/>
+        <source>Tagged Image File Format</source>
+        <translation>Նշագրված Պատկերի Ֆայլի Ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="751"/>
+        <source>DVD Video</source>
+        <translation>DVD Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="752"/>
+        <source>Wireless Bitmap</source>
+        <translation>Առանց լարի Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="753"/>
+        <source>WebM Video</source>
+        <translation>WebM Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="754"/>
+        <source>WebP</source>
+        <translation>WebP</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="756"/>
+        <source>Windows Media Video</source>
+        <extracomment>Also known as WMV, is a video file format.</extracomment>
+        <translation>Windows Media Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="757"/>
+        <source>X11 Bitmap</source>
+        <translation>X11 Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="758"/>
+        <source>X11 Pixmap</source>
+        <translation>X11 Pixmap</translation>
+    </message>
+</context>
+<context>
+    <name>RecordingNotice</name>
+    <message>
+        <location filename="../qml/RecordingNotice.qml" line="64"/>
+        <source>Recording</source>
+        <translation>Ձայնագրում</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMenu</name>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="60"/>
+        <source>Video</source>
+        <translation>Տեսանյութ</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="66"/>
+        <source>Audio</source>
+        <translation>Ձայն</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="72"/>
+        <source>Effects</source>
+        <translation>Էֆեկտներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="78"/>
+        <source>Preferences</source>
+        <translation>Նախապատվություններ</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="84"/>
+        <source>Donate</source>
+        <translation>Նվիրաբերել</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="90"/>
+        <source>Help</source>
+        <translation>Օգնություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="96"/>
+        <source>About</source>
+        <translation>Մասին</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="103"/>
+        <source>Play sources</source>
+        <translation>Նվագարկել աղբյուրները</translation>
+    </message>
+</context>
+<context>
+    <name>Streaming</name>
+    <message>
+        <location filename="../qml/Streaming.qml" line="29"/>
+        <source>Streaming</source>
+        <translation>Հեռարձակում</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="30"/>
+        <source>Configure video streaming to many platforms.</source>
+        <translation>Կարգավորել տեսանյութի հեռարձակումը բազմաթիվ հարթակներ:</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="122"/>
+        <location filename="../qml/Streaming.qml" line="147"/>
+        <source>Streaming quality</source>
+        <translation>Հեռարձակման որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="200"/>
+        <source>Custom</source>
+        <translation>Անհատական</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="203"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Տեսանյութի որակ՝ %1×%2 %3 FPS</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="204"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Տեսանյութի բիթրեյթ՝ %1 Մբ/վ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="205"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Ձայնի նմուշի հաճախականություն՝ %1 կՀց</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="206"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Ձայնի բիթրեյթ՝ %1 կբ/վ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="214"/>
+        <source>Advanced settings</source>
+        <translation>Ընդլայնված կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="229"/>
+        <source>Video quality</source>
+        <translation>Տեսանյութի որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="247"/>
+        <source>Output width</source>
+        <translation>Ելքի լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="270"/>
+        <source>Output height</source>
+        <translation>Ելքի բարձրություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="293"/>
+        <source>Output frame rate</source>
+        <translation>Ելքի կադրերի հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="316"/>
+        <source>Video bitrate (kbps)</source>
+        <translation>Տեսանյութի բիթրեյթ (կբ/վ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="336"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Հիմնական կադրերի քայլ (մվ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="353"/>
+        <source>Video codec</source>
+        <translation>Տեսանյութի կոդեկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="436"/>
+        <source>Audio quality</source>
+        <translation>Ձայնի որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="454"/>
+        <source>Sample rate</source>
+        <translation>Նմուշի հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="477"/>
+        <source>Audio bitrate (kbps)</source>
+        <translation>Ձայնի բիթրեյթ (կբ/վ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="498"/>
+        <source>Audio codec</source>
+        <translation>Ձայնային կոդեկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="521"/>
+        <source>Streaming platform settings</source>
+        <translation>Հեռարձակման հարթակի կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="532"/>
+        <source>Platform</source>
+        <translation>Հարթակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="540"/>
+        <source>Add platform</source>
+        <translation>Ավելացնել հարթակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="547"/>
+        <source>Remove platform</source>
+        <translation>Հեռացնել հարթակը</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="561"/>
+        <source>Website</source>
+        <translation>Կայք</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="581"/>
+        <source>Visit website</source>
+        <translation>Այցելել կայք</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="596"/>
+        <source>Streaming URL</source>
+        <translation>Հեռարձակման URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="627"/>
+        <source>Hide streaming URL</source>
+        <translation>Թաքցնել հեռարձակման URL-ը</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="628"/>
+        <source>Show streaming URL</source>
+        <translation>Ցույց տալ հեռարձակման URL-ը</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="647"/>
+        <source>Streaming key</source>
+        <translation>Հեռարձակման բանալի</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="680"/>
+        <source>Hide streaming key</source>
+        <translation>Թաքցնել հեռարձակման բանալին</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="681"/>
+        <source>Show streaming key</source>
+        <translation>Ցույց տալ հեռարձակման բանալին</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="700"/>
+        <source>Streaming configuration help</source>
+        <translation>Հեռարձակման կոնֆիգուրացիայի օգնություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="712"/>
+        <source>Get streaming key</source>
+        <translation>Ստանալ հեռարձակման բանալին</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingFailedDialog</name>
+    <message>
+        <location filename="../qml/StreamingFailedDialog.qml" line="31"/>
+        <source>Streaming failed</source>
+        <translation>Հեռարձակումը ձախողվեց</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingPlatformOptions</name>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="60"/>
+        <source>Remove</source>
+        <translation>Հեռացնել</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="72"/>
+        <source>Website</source>
+        <translation>Կայք</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="92"/>
+        <source>Visit website</source>
+        <translation>Այցելել կայք</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="107"/>
+        <source>Streaming URL</source>
+        <translation>Հեռարձակման URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="138"/>
+        <source>Hide streaming URL</source>
+        <translation>Թաքցնել հեռարձակման URL-ը</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="139"/>
+        <source>Show streaming URL</source>
+        <translation>Ցույց տալ հեռարձակման URL-ը</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="158"/>
+        <source>Streaming key</source>
+        <translation>Հեռարձակման բանալի</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="191"/>
+        <source>Hide streaming key</source>
+        <translation>Թաքցնել հեռարձակման բանալին</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="192"/>
+        <source>Show streaming key</source>
+        <translation>Ցույց տալ հեռարձակման բանալին</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="211"/>
+        <source>Streaming configuration help</source>
+        <translation>Հեռարձակման կոնֆիգուրացիայի օգնություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="223"/>
+        <source>Get streaming key</source>
+        <translation>Ստանալ հեռարձակման բանալին</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingStartStopDialog</name>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="33"/>
+        <source>Start streaming</source>
+        <translation>Սկսել հեռարձակումը</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="34"/>
+        <source>Stop streaming</source>
+        <translation>Դադարեցնել հեռարձակումը</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="50"/>
+        <source>Thousands of people will start watching you around the world on internet.&lt;br/&gt;Are you sure that you want to start streaming?</source>
+        <translation>Հազարավոր մարդիկ կսկսեն դիտել ձեզ ամբողջ աշխարհում համացանցի միջոցով:&lt;br/&gt;Համոզվա՞ծ եք, որ ցանկանում եք սկսել հեռարձակումը:</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="51"/>
+        <source>Are you sure that you want to stop streaming?</source>
+        <translation>Համոզվա՞ծ եք, որ ցանկանում եք դադարեցնել հեռարձակումը:</translation>
+    </message>
+</context>
+<context>
+    <name>TableColor</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="40"/>
+        <source>Select the new color</source>
+        <translation>Ընտրեք նոր գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="42"/>
+        <source>Color %1</source>
+        <translation>Գույն %1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="51"/>
+        <source>Remove color</source>
+        <translation>Հեռացնել գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="52"/>
+        <source>Remove color %1</source>
+        <translation>Հեռացնել գույնը %1</translation>
+    </message>
+</context>
+<context>
+    <name>ThirdPartyLicenses</name>
+    <message>
+        <location filename="../qml/ThirdPartyLicenses.qml" line="31"/>
+        <source>3rd Party Licenses</source>
+        <extracomment>License for 3rd party components used in Webcamoid, like</extracomment>
+        <translation>3-րդ Կողմի Լիցենզիաներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ThirdPartyLicenses.qml" line="32"/>
+        <source>Licenses for the code incorporated into %1</source>
+        <translation>Լիցենզիաներ %1-ում ներառված կոդի համար</translation>
+    </message>
+</context>
+<context>
+    <name>UpdatesConfig</name>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="31"/>
+        <source>Updates</source>
+        <translation>Թարմացումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="32"/>
+        <source>Configure the update frequency.</source>
+        <translation>Կարգավորել թարմացման հաճախականությունը:</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="93"/>
+        <source>Notify about new versions</source>
+        <translation>Տեղեկացնել նոր տարբերակների մասին</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="104"/>
+        <source>Show updates dialog</source>
+        <translation>Ցույց տալ թարմացումների երկխոսությունը</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="113"/>
+        <source>Check new versions</source>
+        <translation>Ստուգել նոր տարբերակները</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="121"/>
+        <source>Daily</source>
+        <translation>Օրական</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="125"/>
+        <source>Every two days</source>
+        <translation>Ամեն երկու օրը մեկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="129"/>
+        <source>Weekly</source>
+        <translation>Շաբաթական</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="133"/>
+        <source>Every two weeks</source>
+        <translation>Ամեն երկու շաբաթը մեկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="137"/>
+        <source>Monthly</source>
+        <translation>Ամսական</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="141"/>
+        <source>Never</source>
+        <translation>Երբեք</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="153"/>
+        <source>&lt;b&gt;Last updated&lt;/b&gt;: %1</source>
+        <translation>&lt;b&gt;Վերջին թարմացումը&lt;/b&gt;: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="172"/>
+        <source>Your version of %1 is outdated. Latest version is &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation>Ձեր %1 տարբերակը հնացած է: Վերջին տարբերակը &lt;b&gt;%2&lt;/b&gt; է:</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="180"/>
+        <source>Upgrade Now!</source>
+        <translation>Թարմացրեք հիմա:</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="196"/>
+        <source>Thanks for using a &lt;b&gt;development version&lt;/b&gt;!&lt;br /&gt;It will be very helpful if you can report any bug and suggestions you have.</source>
+        <translation>Շնորհակալություն &lt;b&gt;մշակման տարբերակ&lt;/b&gt; օգտագործելու համար:&lt;br /&gt;Շատ օգտակար կլինի, եթե կարողանաք զեկուցել ցանկացած վրիպակ և առաջարկություն:</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="203"/>
+        <source>Report a Bug</source>
+        <translation>Հաղորդել Վրիպակ</translation>
+    </message>
+</context>
+<context>
+    <name>UpdatesDialog</name>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="30"/>
+        <source>New version available!</source>
+        <translation>Նոր տարբերակ է հասանելի:</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="74"/>
+        <source>Download %1 %2 NOW!</source>
+        <translation>Բեռնել %1 %2 ՀԻՄԱ:</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="81"/>
+        <source>Show this dialog next time</source>
+        <translation>Ցույց տալ այս երկխոսությունը հաջորդ անգամ</translation>
+    </message>
+</context>
+<context>
+    <name>VCamInstallFailedDialog</name>
+    <message>
+        <location filename="../qml/VCamInstallFailedDialog.qml" line="31"/>
+        <source>Installation failed</source>
+        <translation>Տեղադրումը ձախողվեց</translation>
+    </message>
+</context>
+<context>
+    <name>VCamInstallSucceededDialog</name>
+    <message>
+        <location filename="../qml/VCamInstallSucceededDialog.qml" line="31"/>
+        <source>Installation succeeded</source>
+        <translation>Տեղադրումը հաջողվեց</translation>
+    </message>
+    <message>
+        <location filename="../qml/VCamInstallSucceededDialog.qml" line="40"/>
+        <source>Restart Webcamoid?</source>
+        <translation>Վերագործարկե՞լ Webcamoid-ը:</translation>
+    </message>
+</context>
+<context>
+    <name>VCamManualDownloadDialog</name>
+    <message>
+        <location filename="../qml/VCamManualDownloadDialog.qml" line="31"/>
+        <source>Can&apos;t get latest version</source>
+        <translation>Չհաջողվեց ստանալ վերջին տարբերակը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VCamManualDownloadDialog.qml" line="40"/>
+        <source>Download the virtual camera manually?</source>
+        <translation>Ձեռքով բեռնե՞լ վիրտուալ տեսախցիկը:</translation>
+    </message>
+</context>
+<context>
+    <name>VideoCodecOptions</name>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="28"/>
+        <source>Video Codec Options</source>
+        <translation>Տեսանյութի Կոդեկի Կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="234"/>
+        <source>Video codec</source>
+        <translation>Տեսանյութի կոդեկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="251"/>
+        <source>Bitrate</source>
+        <translation>Բիթրեյթ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="258"/>
+        <source>Bitrate (bits/secs)</source>
+        <translation>Բիթրեյթ (բիթ/վրկ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="268"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Հիմնական կադրերի քայլ (մվ)</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="275"/>
+        <source>1000</source>
+        <translation>1000</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="284"/>
+        <source>Advanced options</source>
+        <translation>Ընդլայնված կարգավորումներ</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectOptions</name>
+    <message>
+        <location filename="../qml/VideoEffectOptions.qml" line="56"/>
+        <source>Remove</source>
+        <translation>Հեռացնել</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectOptions.qml" line="61"/>
+        <source>Remove %1 video effect</source>
+        <translation>Հեռացնել %1 տեսաէֆեկտը</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsDialog</name>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="29"/>
+        <source>Add video effect</source>
+        <translation>Ավելացնել տեսաէֆեկտ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="69"/>
+        <source>Effect</source>
+        <translation>Էֆեկտ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="133"/>
+        <source>Chain effect</source>
+        <extracomment>Apply the effect over the other effects.</extracomment>
+        <translation>Շղթայական էֆեկտ</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsList</name>
+    <message>
+        <location filename="../qml/VideoEffectsList.qml" line="50"/>
+        <source>Add effect</source>
+        <translation>Ավելացնել էֆեկտ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsList.qml" line="57"/>
+        <source>Remove all effects</source>
+        <translation>Հեռացնել բոլոր էֆեկտները</translation>
+    </message>
+</context>
+<context>
+    <name>VideoFormatOptions</name>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="28"/>
+        <source>Video Format Options</source>
+        <translation>Տեսաֆորմատի Կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="208"/>
+        <source>File format</source>
+        <translation>Ֆայլի ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="223"/>
+        <source>Advanced options</source>
+        <translation>Ընդլայնված կարգավորումներ</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddEdit</name>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="185"/>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="124"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="169"/>
+        <source>Description</source>
+        <translation>Նկարագրություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="82"/>
+        <source>Edit media file source</source>
+        <translation>Խմբագրել մեդիա ֆայլի աղբյուրը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="86"/>
+        <source>Edit media URL source</source>
+        <translation>Խմբագրել մեդիա URL աղբյուրը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="90"/>
+        <source>Add media file source</source>
+        <translation>Ավելացնել մեդիա ֆայլի աղբյուր</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="91"/>
+        <source>Add media URL source</source>
+        <translation>Ավելացնել մեդիա URL աղբյուր</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="130"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="175"/>
+        <source>Source title</source>
+        <translation>Աղբյուրի վերնագիր</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="140"/>
+        <source>Path</source>
+        <translation>Ուղի</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="148"/>
+        <source>File path</source>
+        <translation>Ֆայլի ուղի</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="149"/>
+        <source>Search file to use as source</source>
+        <translation>Փնտրել ֆայլ՝ որպես աղբյուր օգտագործելու համար</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="234"/>
+        <source>Choose the file to add as source</source>
+        <translation>Ընտրել ֆայլը՝ որպես աղբյուր ավելացնելու համար</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddScreen</name>
+    <message>
+        <location filename="../qml/VideoInputAddScreen.qml" line="30"/>
+        <source>Select the screen to add</source>
+        <translation>Ընտրեք ավելացնելու էկրանը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddScreen.qml" line="55"/>
+        <source>Screen</source>
+        <translation>Էկրան</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddWindow</name>
+    <message>
+        <location filename="../qml/VideoInputAddWindow.qml" line="30"/>
+        <source>Select the window to add</source>
+        <translation>Ընտրեք ավելացնելու պատուհանը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddWindow.qml" line="55"/>
+        <source>Window</source>
+        <translation>Պատուհան</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputOptions</name>
+    <message>
+        <location filename="../qml/VideoInputOptions.qml" line="61"/>
+        <source>Edit</source>
+        <translation>Խմբագրել</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputOptions.qml" line="74"/>
+        <source>Remove</source>
+        <translation>Հեռացնել</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputs</name>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="105"/>
+        <source>Configure source</source>
+        <translation>Կարգավորել աղբյուրը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="63"/>
+        <source>Add source</source>
+        <translation>Ավելացնել աղբյուր</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="76"/>
+        <source>Add screen</source>
+        <translation>Ավելացնել էկրան</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="77"/>
+        <source>Add screen source</source>
+        <translation>Ավելացնել էկրանի աղբյուր</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="83"/>
+        <source>Add window</source>
+        <translation>Ավելացնել պատուհան</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="91"/>
+        <source>Add media file</source>
+        <translation>Ավելացնել մեդիա ֆայլ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="97"/>
+        <source>Add media URL</source>
+        <translation>Ավելացնել մեդիա URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="117"/>
+        <source>No cameras found</source>
+        <translation>Տեսախցիկներ չեն գտնվել</translation>
+    </message>
+</context>
+<context>
+    <name>VideoLayer</name>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="131"/>
+        <source>All Image and Video Files</source>
+        <translation>Բոլոր Պատկերի և Տեսանյութի Ֆայլերը</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="168"/>
+        <source>All Files</source>
+        <translation>Բոլոր Ֆայլերը</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOptions</name>
+    <message>
+        <location filename="../qml/VideoOptions.qml" line="45"/>
+        <source>Sources</source>
+        <translation>Աղբյուրներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOptions.qml" line="48"/>
+        <source>Outputs</source>
+        <translation>Ելքեր</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputAddEdit</name>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="233"/>
+        <source>Edit Virtual Camera</source>
+        <translation>Խմբագրել Վիրտուալ Տեսախցիկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="234"/>
+        <source>Add Virtual Camera</source>
+        <translation>Ավելացնել Վիրտուալ Տեսախցիկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="275"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="346"/>
+        <source>Virtual camera name</source>
+        <translation>Վիրտուալ տեսախցիկի անուն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="296"/>
+        <source>Add format</source>
+        <translation>Ավելացնել ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="306"/>
+        <source>Clear formats</source>
+        <translation>Մաքրել ֆորմատները</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="368"/>
+        <source>Format</source>
+        <translation>Ֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="379"/>
+        <source>Width</source>
+        <translation>Լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="392"/>
+        <source>Height</source>
+        <translation>Բարձրություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="405"/>
+        <source>Frame rate</source>
+        <translation>Կադրերի արագություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="430"/>
+        <source>Can&apos;t edit the virtual camera</source>
+        <translation>Չի հաջողվում խմբագրել վիրտուալ տեսախցիկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="431"/>
+        <source>Can&apos;t add the virtual camera</source>
+        <translation>Չի հաջողվում ավելացնել վիրտուալ տեսախցիկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="441"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="451"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="487"/>
+        <source>Error editing the virtual camera</source>
+        <translation>Սխալ վիրտուալ տեսախցիկը խմբագրելիս</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="442"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="452"/>
+        <source>Error adding the virtual camera</source>
+        <translation>Սխալ վիրտուալ տեսախցիկը ավելացնելիս</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="443"/>
+        <source>Camera description can&apos;t be empty.</source>
+        <translation>Տեսախցիկի նկարագրությունը չի կարող դատարկ լինել:</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="453"/>
+        <source>Camera description and formats can&apos;t be empty.</source>
+        <translation>Տեսախցիկի նկարագրությունն ու ֆորմատները չեն կարող դատարկ լինել:</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="497"/>
+        <source>Error creating the virtual camera</source>
+        <translation>Սխալ վիրտուալ տեսախցիկ ստեղծելիս</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputPicture</name>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="30"/>
+        <source>Virtual camera output picture</source>
+        <translation>Վիրտուալ տեսախցիկի ելքային պատկեր</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="75"/>
+        <source>Virtual camera default output picture</source>
+        <translation>Վիրտուալ տեսախցիկի լռելյայն ելքային պատկեր</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="76"/>
+        <source>Search image to use as default output picture</source>
+        <translation>Փնտրել պատկեր՝ որպես լռելյայն ելքային պատկեր օգտագործելու համար</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="97"/>
+        <source>Can&apos;t set virtual camera picture</source>
+        <translation>Չի հաջողվում սահմանել վիրտուալ տեսախցիկի պատկերը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="101"/>
+        <source>Error Removing Virtual Cameras</source>
+        <translation>Սխալ Վիրտուալ Տեսախցիկները Հեռացնելիս</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="113"/>
+        <source>Please choose an image file</source>
+        <translation>Խնդրում ենք ընտրել պատկերի ֆայլ</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputs</name>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="90"/>
+        <source>Add output</source>
+        <translation>Ավելացնել ելք</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="102"/>
+        <source>Add virtual camera</source>
+        <translation>Ավելացնել վիրտուալ տեսախցիկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="115"/>
+        <source>Error Creating Virtual Camera</source>
+        <translation>Սխալ Վիրտուալ Տեսախցիկ Ստեղծելիս</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="123"/>
+        <source>Add streaming platform</source>
+        <translation>Ավելացնել հեռարձակման հարթակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="131"/>
+        <source>Add local streaming</source>
+        <translation>Ավելացնել տեղական հեռարձակում</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="196"/>
+        <source>Local Streaming</source>
+        <translation>Տեղական հեռարձակում</translation>
+    </message>
+</context>
+<context>
+    <name>VideoRecording</name>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="31"/>
+        <source>Video Recording</source>
+        <translation>Տեսանյութի Ձայնագրում</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="32"/>
+        <source>Configure video recording format and codecs.</source>
+        <translation>Կարգավորել տեսանյութի ձայնագրման ֆորմատն ու կոդեկները:</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="114"/>
+        <source>Videos directory</source>
+        <translation>Տեսանյութերի պանակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="126"/>
+        <source>Select the save directory</source>
+        <translation>Ընտրել պահպանման պանակը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="140"/>
+        <source>Record audio</source>
+        <translation>Ձայնագրել ձայնը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="151"/>
+        <source>Use flash</source>
+        <translation>Օգտագործել բռնկում</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="154"/>
+        <source>Use flash when recording a video</source>
+        <translation>Օգտագործել բռնկում տեսանյութ ձայնագրելիս</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="165"/>
+        <location filename="../qml/VideoRecording.qml" line="190"/>
+        <source>Recording quality</source>
+        <translation>Ձայնագրման որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="240"/>
+        <source>Custom</source>
+        <translation>Անհատական</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="244"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Տեսանյութի որակ՝ %1×%2 %3 FPS</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="245"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Տեսանյութի բիթրեյթ՝ %1 Մբ/վ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="246"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Ձայնի նմուշի հաճախականություն՝ %1 կՀց</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="247"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Ձայնի բիթրեյթ՝ %1 կբ/վ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="255"/>
+        <source>Advanced settings</source>
+        <translation>Ընդլայնված կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="268"/>
+        <source>Video quality</source>
+        <translation>Տեսանյութի որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="286"/>
+        <source>Output width</source>
+        <translation>Ելքի լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="309"/>
+        <source>Output height</source>
+        <translation>Ելքի բարձրություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="332"/>
+        <source>Output Frame rate</source>
+        <translation>Ելքի Կադրերի արագություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="357"/>
+        <source>Audio quality</source>
+        <translation>Ձայնի որակ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="375"/>
+        <source>Sample rate</source>
+        <translation>Նմուշի հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="400"/>
+        <source>File format and codecs</source>
+        <translation>Ֆայլի ֆորմատ և կոդեկներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="411"/>
+        <source>Configure the file format</source>
+        <translation>Կարգավորել ֆայլի ֆորմատը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="413"/>
+        <source>Configure the file format for recording</source>
+        <translation>Կարգավորել ձայնագրման ֆայլի ֆորմատը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="421"/>
+        <source>Configure the video codec</source>
+        <translation>Կարգավորել տեսանյութի կոդեկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="423"/>
+        <source>Configure the video codec for recording</source>
+        <translation>Կարգավորել ձայնագրման տեսանյութի կոդեկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="431"/>
+        <source>Configure the audio codec</source>
+        <translation>Կարգավորել ձայնային կոդեկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="434"/>
+        <source>Configure the audio codec for recording</source>
+        <translation>Կարգավորել ձայնագրման ձայնային կոդեկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="468"/>
+        <source>Select the folder to save your videos</source>
+        <translation>Ընտրեք պանակը՝ ձեր տեսանյութերը պահելու համար</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraInstallDialog</name>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="32"/>
+        <source>Virtual camera install</source>
+        <translation>Վիրտուալ տեսախցիկի տեղադրում</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="52"/>
+        <source>The virtual camera in Windows may not work properly and may cause inestability in the system.&lt;br/&gt;</source>
+        <translation>Windows-ում վիրտուալ տեսախցիկը կարող է ճիշտ չաշխատել և առաջացնել անկայունություն համակարգում:&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="53"/>
+        <source>If you want to share audio and video of your current seesion, consider using &lt;b&gt;local streaming&lt;/b&gt; which is more stable and powerful.&lt;br/&gt;&lt;br/&gt;</source>
+        <translation>Եթե ցանկանում եք կիսվել ձեր ընթացիկ սեսիայի ձայնով և տեսանյութով, դիտարկեք &lt;b&gt;տեղական հեռարձակման&lt;/b&gt; օգտագործումը, որն ավելի կայուն և հզոր է:&lt;br/&gt;&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="54"/>
+        <source>Are you sure that you want to continue?</source>
+        <translation>Համոզվա՞ծ եք, որ ցանկանում եք շարունակել:</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="56"/>
+        <source>The virtual camera is not installed, do you want to install it?</source>
+        <translation>Վիրտուալ տեսախցիկը տեղադրված չէ, ցանկանու՞մ եք տեղադրել այն:</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="57"/>
+        <source>The virtual camera is not installed. Please, install &lt;b&gt;v4l2loopback&lt;/b&gt;.</source>
+        <translation>Վիրտուալ տեսախցիկը տեղադրված չէ: Խնդրում ենք տեղադրել &lt;b&gt;v4l2loopback&lt;/b&gt;:</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraOptions</name>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="65"/>
+        <source>Edit</source>
+        <translation>Խմբագրել</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="77"/>
+        <source>Can&apos;t Edit The Virtual Camera</source>
+        <translation>Հնարավոր չէ խմբագրել վիրտուալ տեսախցիկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="84"/>
+        <source>Set output picture</source>
+        <translation>Սահմանել ելքային պատկեր</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="95"/>
+        <source>Remove</source>
+        <translation>Հեռացնել</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="110"/>
+        <source>Error removing the virtual camera</source>
+        <translation>Սխալ վիրտուալ տեսախցիկը հեռացնելիս</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="114"/>
+        <source>Can&apos;t Remove The Virtual Camera</source>
+        <translation>Հնարավոր չէ հեռացնել վիրտուալ տեսախցիկը</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraUpdateDialog</name>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="33"/>
+        <source>Virtual camera update</source>
+        <translation>Վիրտուալ տեսախցիկի թարմացում</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="54"/>
+        <source>The virtual camera is outdated (%1), install the latest version (%2)?</source>
+        <translation>Վիրտուալ տեսախցիկը հնացած է (%1), տեղադրե՞լ վերջին տարբերակը (%2):</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="62"/>
+        <source>Show this dialog next time</source>
+        <translation>Ցույց տալ այս երկխոսությունը հաջորդ անգամ</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameras</name>
+    <message>
+        <location filename="../../src/virtualcameras.cpp" line="567"/>
+        <source>Virtual Camera</source>
+        <translation>Վիրտուալ տեսախցիկ</translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="30"/>
+        <source>Hue</source>
+        <translation>Երանգ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="79"/>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="48"/>
+        <source>Saturation</source>
+        <translation>Հագեցվածություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="66"/>
+        <source>Luminance</source>
+        <translation>Պայծառություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="28"/>
+        <source>Number of scratches</source>
+        <translation>Գծերի քանակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="45"/>
+        <source>Aging intensity</source>
+        <translation>Ծերացման ինտենսիվություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="64"/>
+        <source>Dust density</source>
+        <translation>Փոշու խտություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="83"/>
+        <source>Scratch density</source>
+        <translation>Քերծվածքների խտություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="102"/>
+        <source>Scratch brightness</source>
+        <translation>Քերծվածքների պայծառություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="121"/>
+        <source>Pits density</source>
+        <translation>Փոսերի խտություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="28"/>
+        <source>Vertical sync</source>
+        <translation>Ուղղահայաց սինխրոնիզացիա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="46"/>
+        <source>Horizontal offset</source>
+        <translation>Հորիզոնական տեղաշարժ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="64"/>
+        <source>Horizontal sync factor</source>
+        <translation>Հորիզոնական սինխրոնիզացիայի գործակից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="82"/>
+        <source>Horizontal sync smoothness</source>
+        <translation>Հորիզոնական սինխրոնիզացիայի հարթություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="99"/>
+        <source>Hue dephasing factor</source>
+        <translation>Երանգի ապաֆազավորման գործակից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="117"/>
+        <source>Noise</source>
+        <translation>Աղմուկ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="27"/>
+        <source>Width</source>
+        <translation>Լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="33"/>
+        <source>Aspect ratio width</source>
+        <translation>Քվարի լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="45"/>
+        <source>Height</source>
+        <translation>Բարձրություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="51"/>
+        <source>Aspect ratio height</source>
+        <translation>Քվարի բարձրություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Blur/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/OilPaint/share/qml/main.qml" line="27"/>
+        <source>Radius</source>
+        <translation>Շառավիղ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="47"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="235"/>
+        <source>Number of colors</source>
+        <translation>Գույների քանակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="64"/>
+        <source>Color difference</source>
+        <translation>Գույների տարբերություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="81"/>
+        <source>Show edges</source>
+        <translation>Ցույց տալ եզրերը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="36"/>
+        <source>Canny mode</source>
+        <extracomment>https://en.wikipedia.org/wiki/Canny_edge_detector</extracomment>
+        <translation>Canny ռեժիմ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="47"/>
+        <source>Equalize</source>
+        <extracomment>https://en.wikipedia.org/wiki/Histogram_equalization</extracomment>
+        <translation>Հավասարեցնել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="92"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="58"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="125"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="114"/>
+        <source>Threshold</source>
+        <translation>Շեմ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="77"/>
+        <source>Linecolor</source>
+        <translation>Գծի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="79"/>
+        <source>Choose the line color</source>
+        <translation>Ընտրել գծի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="111"/>
+        <source>Line color</source>
+        <translation>Գծի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="113"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="182"/>
+        <source>Choose a color</source>
+        <translation>Ընտրել գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="124"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="130"/>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="167"/>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="206"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="212"/>
+        <source>Scan block</source>
+        <translation>Սկանավորման բլոկ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="42"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="42"/>
+        <source>Transform matrix</source>
+        <extracomment>https://en.wikipedia.org/wiki/Transformation_matrix</extracomment>
+        <translation>Փոխակերպման մատրիցա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="58"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="58"/>
+        <source>Column 0, Row 0</source>
+        <translation>Սյուն 0, Տող 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="70"/>
+        <source>Column 1, Row 0</source>
+        <translation>Սյուն 1, Տող 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="82"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="82"/>
+        <source>Column 2, Row 0</source>
+        <translation>Սյուն 2, Տող 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="94"/>
+        <source>Column 3, Row 0</source>
+        <translation>Սյուն 3, Տող 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="108"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="97"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="96"/>
+        <source>Column 0, Row 1</source>
+        <translation>Սյուն 0, Տող 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="121"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="120"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="108"/>
+        <source>Column 1, Row 1</source>
+        <translation>Սյուն 1, Տող 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="133"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="121"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="120"/>
+        <source>Column 2, Row 1</source>
+        <translation>Սյուն 2, Տող 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="145"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="144"/>
+        <source>Column 3, Row 1</source>
+        <translation>Սյուն 3, Տող 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="159"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="135"/>
+        <source>Column 0, Row 2</source>
+        <translation>Սյուն 0, Տող 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="171"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="147"/>
+        <source>Column 1, Row 2</source>
+        <translation>Սյուն 1, Տող 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="183"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="159"/>
+        <source>Column 2, Row 2</source>
+        <translation>Սյուն 2, Տող 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="195"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="194"/>
+        <source>Column 3, Row 2</source>
+        <translation>Սյուն 3, Տող 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="43"/>
+        <source>Mode</source>
+        <translation>Լռելյայն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="56"/>
+        <source>Natural</source>
+        <translation>Բնական</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="60"/>
+        <source>Fixed</source>
+        <translation>Ամրագրված</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="76"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="66"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="72"/>
+        <source>Symbols</source>
+        <translation>Սիմվոլներ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="86"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="94"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="82"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="90"/>
+        <source>Font</source>
+        <translation>Տառատեսակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="95"/>
+        <source>Search the font to be used</source>
+        <translation>Որոնել օգտագործվող տառատեսակը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="103"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="100"/>
+        <source>Hinting</source>
+        <translation>Հինթինգ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="111"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="108"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="139"/>
+        <source>Default</source>
+        <translation>Լռելյայն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="115"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="112"/>
+        <source>No hinting</source>
+        <translation>Հինթինգ չկա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="116"/>
+        <source>Vertical hinting</source>
+        <translation>Ուղղահայաց հինթինգ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="123"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="120"/>
+        <source>Full hinting</source>
+        <translation>Լրիվ հինթինգ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="134"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="131"/>
+        <source>Style</source>
+        <extracomment>Different font rendering strategies</extracomment>
+        <translation>Ոճ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="143"/>
+        <source>Bitmap</source>
+        <translation>Բիթքարտեզ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="147"/>
+        <source>Device</source>
+        <translation>Սարք</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="154"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="151"/>
+        <source>Outline</source>
+        <translation>Դասավորություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="155"/>
+        <source>Force outline</source>
+        <translation>Հարկադրել դասավորությունը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="162"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="159"/>
+        <source>Match</source>
+        <translation>Դասավորություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="166"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="163"/>
+        <source>Quality</source>
+        <translation>Որակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="167"/>
+        <source>Antialias</source>
+        <translation>Անտիալիաս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="171"/>
+        <source>No antialias</source>
+        <translation>Անտիալիաս չկա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="178"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="175"/>
+        <source>Compatible with OpenGL</source>
+        <translation>Համատեղելի OpenGL-ի հետ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="179"/>
+        <source>Force integer metrics</source>
+        <translation>Հարկադրել ամբողջ թվային չափումներ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="186"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="183"/>
+        <source>No subpixel antialias</source>
+        <translation>Ներբիթային անտիալիաս չկա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="190"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="187"/>
+        <source>No font merging</source>
+        <translation>Տառատեսակների միաձուլում չկա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="198"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="205"/>
+        <source>Foreground color</source>
+        <translation>Առաջին պլանի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="200"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="207"/>
+        <source>Choose the foreground color</source>
+        <translation>Ընտրել առաջին պլանի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="208"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="87"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="214"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="137"/>
+        <source>Background color</source>
+        <translation>Ֆոնի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="210"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="89"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="216"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="139"/>
+        <source>Choose the background color</source>
+        <translation>Ընտրել ֆոնի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="218"/>
+        <source>Reversed</source>
+        <translation>Հակադարձված</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="228"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="316"/>
+        <source>Please choose a font</source>
+        <translation>Խնդրում ենք ընտրել տառատեսակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="35"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Dice/share/qml/main.qml" line="27"/>
+        <source>Size</source>
+        <translation>Չափս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="33"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="125"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="33"/>
+        <source>Color</source>
+        <translation>Գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="54"/>
+        <source>Choose the strips color</source>
+        <translation>Ընտրել շերտերի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="36"/>
+        <source>Select the color to filter</source>
+        <translation>Ընտրել ֆիլտրելու գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="67"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="81"/>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="72"/>
+        <source>Soft</source>
+        <translation>Փափուկ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="61"/>
+        <source>Choose the color to filter</source>
+        <translation>Ընտրել ֆիլտրելու գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="71"/>
+        <source>Color Difference</source>
+        <translation>Գույների Տարբերություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="88"/>
+        <source>Smoothness</source>
+        <translation>Հարթություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="104"/>
+        <source>Normalize</source>
+        <translation>Նորմալացնել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="114"/>
+        <source>Background type</source>
+        <translation>Ֆոնի տեսակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="121"/>
+        <source>No background</source>
+        <translation>Ֆոն չկա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="129"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="242"/>
+        <source>Image</source>
+        <translation>Պատկեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="163"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="118"/>
+        <source>Source palette</source>
+        <translation>Աղբյուրի պալիտրա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="164"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="119"/>
+        <source>Search the image file to use as palette</source>
+        <translation>Որոնել պատկերի ֆայլը՝ որպես պալիտրա օգտագործելու համար</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="832"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="842"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="222"/>
+        <source>Please choose an image file</source>
+        <translation>Խնդրում ենք ընտրել պատկերի ֆայլ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="34"/>
+        <source>Old color</source>
+        <translation>Հին գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="36"/>
+        <source>Select the color to replace</source>
+        <translation>Ընտրել փոխարինելու գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="48"/>
+        <source>New color</source>
+        <translation>Նոր գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="50"/>
+        <source>Select the new color</source>
+        <translation>Ընտրել նոր գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="50"/>
+        <source>Color table</source>
+        <translation>Գունային աղյուսակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="58"/>
+        <source>Base</source>
+        <extracomment>Base color, show the image without modifications</extracomment>
+        <translation>Հիմք</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="62"/>
+        <source>Metal</source>
+        <translation>Մետաղ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="67"/>
+        <source>Heat</source>
+        <extracomment>https://en.wikipedia.org/wiki/Heat_map</extracomment>
+        <translation>Ջերմություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="71"/>
+        <source>Old Photo</source>
+        <translation>Հին Լուսանկար</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="75"/>
+        <source>Red &amp; Green</source>
+        <translation>Կարմիր &amp; Կանաչ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="80"/>
+        <source>Sepia</source>
+        <extracomment>https://en.wikipedia.org/wiki/Sepia_(color)</extracomment>
+        <translation>Սեպիա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="84"/>
+        <source>X-Pro</source>
+        <translation>X-Pro</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="88"/>
+        <source>X-Ray</source>
+        <translation>Ռենտգեն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="92"/>
+        <source>Yellow &amp; Blue</source>
+        <translation>Դեղին &amp; Կապույտ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="96"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="463"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="527"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="104"/>
+        <source>Custom</source>
+        <translation>Անհատական</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Contrast/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="44"/>
+        <source>Contrast</source>
+        <translation>Կոնտրաստ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="43"/>
+        <source>Convolve matrix</source>
+        <extracomment>https://en.wikipedia.org/wiki/Kernel_(image_processing)</extracomment>
+        <translation>Կոնվոլյուցիայի մատրիցա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Emboss/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="167"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/Plugins/Saturated/share/qml/main.qml" line="27"/>
+        <source>Factor</source>
+        <translation>Գործակից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Emboss/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="185"/>
+        <source>Bias</source>
+        <translation>Կողմնակալություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="33"/>
+        <source>Edit</source>
+        <translation>Խմբագրել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="35"/>
+        <source>Enable edition mode</source>
+        <translation>Միացնել խմբագրման ռեժիմը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="42"/>
+        <source>Pixels/%</source>
+        <translation>Պիքսելներ/%</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="43"/>
+        <source>Select cropping unit</source>
+        <translation>Ընտրել կտրման միավորը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="50"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="184"/>
+        <source>Reset</source>
+        <translation>Վերականգնել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="52"/>
+        <source>Reset parameters</source>
+        <translation>Վերականգնել պարամետրերը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="57"/>
+        <location filename="../../../libAvKys/Plugins/Rotate/share/qml/main.qml" line="46"/>
+        <source>Keep resolution</source>
+        <translation>Պահպանել լուծաչափը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="66"/>
+        <source>Left</source>
+        <translation>Ձախ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="83"/>
+        <source>Right</source>
+        <translation>Աջ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="100"/>
+        <source>Top</source>
+        <translation>Վերև</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="117"/>
+        <source>Bottom</source>
+        <translation>Ներքև</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="133"/>
+        <source>Fill color</source>
+        <translation>Լրացման գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="135"/>
+        <source>Choose the filling color</source>
+        <translation>Ընտրել լրացման գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="42"/>
+        <source>Grab mode</source>
+        <translation>Պատկերի գրավման ռեժիմ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="50"/>
+        <source>Random square</source>
+        <translation>Պատահական քառակուսի</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="54"/>
+        <source>Vertical increase</source>
+        <translation>Ուղղահայաց աճ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="58"/>
+        <source>Horizontal increase</source>
+        <translation>Հորիզոնական աճ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="62"/>
+        <source>Rings increase</source>
+        <translation>Օղակների աճ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="78"/>
+        <source>Block size</source>
+        <translation>Բլոկի չափս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="97"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="33"/>
+        <location filename="../../../libAvKys/Plugins/Quark/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Quark/share/qml/main.qml" line="33"/>
+        <source>Number of frames</source>
+        <translation>Կադրերի քանակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="69"/>
+        <source>Mu</source>
+        <extracomment>Mu factor (µ letter from greek), represents the average of a group of values. https://en.wikipedia.org/wiki/Arithmetic_mean</extracomment>
+        <translation>Մյու</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="93"/>
+        <source>Sigma</source>
+        <extracomment>Sigma factor (σ letter from greek), represents the standard deviation of a group of values. https://en.wikipedia.org/wiki/Standard_deviation</extracomment>
+        <translation>Սիգմա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/Plugins/FpsControl/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/Plugins/ImageSrc/share/qml/main.qml" line="56"/>
+        <source>Frame rate</source>
+        <translation>Կադրերի արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="297"/>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="80"/>
+        <source>Show cursor</source>
+        <translation>Ցույց տալ կուրսորը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="92"/>
+        <source>Cursor size</source>
+        <translation>Կուրսորի չափս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="73"/>
+        <source>Amplitude</source>
+        <translation>Ամպլիտուդ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="54"/>
+        <source>Frequency</source>
+        <translation>Հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="68"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="74"/>
+        <source>Grid size</source>
+        <translation>Ցանցի չափս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="27"/>
+        <source>Speed</source>
+        <translation>Արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="45"/>
+        <source>Zoom rate</source>
+        <translation>Խոշորացման արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="62"/>
+        <source>Strength</source>
+        <translation>Հզորություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="103"/>
+        <source>Haar file</source>
+        <extracomment>https://en.wikipedia.org/wiki/Haar-like_feature</extracomment>
+        <translation>Haar ֆայլ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="111"/>
+        <source>Eye</source>
+        <translation>Աչք</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="75"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="115"/>
+        <source>Eye glasses</source>
+        <translation>Աչքի ակնոցներ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="79"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="119"/>
+        <source>Frontal face alternative 1</source>
+        <translation>Առջևի դեմքի այլընտրանք 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="123"/>
+        <source>Frontal face alternative 2</source>
+        <translation>Առջևի դեմքի այլընտրանք 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="87"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="127"/>
+        <source>Frontal face alternative 3</source>
+        <translation>Առջևի դեմքի այլընտրանք 3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="131"/>
+        <source>Frontal face default</source>
+        <translation>Առջևի դեմքի լռելյայն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="135"/>
+        <source>Full body</source>
+        <translation>Ամբողջ մարմին</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="99"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="139"/>
+        <source>Left Eye 1</source>
+        <translation>Ձախ Աչք 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="103"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="143"/>
+        <source>Lower body</source>
+        <translation>Ստորին մարմին</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="107"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="147"/>
+        <source>Eye pair big</source>
+        <translation>Աչքերի զույգ մեծ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="111"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="151"/>
+        <source>Eye pair small</source>
+        <translation>Աչքերի զույգ փոքր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="115"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="155"/>
+        <source>Left ear</source>
+        <translation>Ձախ ականջ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="159"/>
+        <source>Left eye 2</source>
+        <translation>Ձախ աչք 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="123"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="163"/>
+        <source>Mouth</source>
+        <translation>Բերան</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="127"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="167"/>
+        <source>Nose</source>
+        <translation>Քիթ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="131"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="171"/>
+        <source>Right ear</source>
+        <translation>Աջ ականջ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="135"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="175"/>
+        <source>Right Eye 1</source>
+        <translation>Աջ Աչք 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="139"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="179"/>
+        <source>Upper body 1</source>
+        <translation>Վերին մարմին 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="143"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="183"/>
+        <source>Profile face</source>
+        <translation>Դիմապատկեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="147"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="187"/>
+        <source>Right eye 2</source>
+        <translation>Աջ աչք 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="151"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="191"/>
+        <source>Smile</source>
+        <translation>Ժպիտ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="155"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="195"/>
+        <source>Upper body</source>
+        <translation>Վերին մարմին</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="226"/>
+        <source>Marker type</source>
+        <translation>Նշիչի տեսակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="234"/>
+        <source>Rectangle</source>
+        <translation>Ուղղանկյուն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="238"/>
+        <source>Ellipse</source>
+        <translation>Էլիպս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="246"/>
+        <source>Pixelate</source>
+        <translation>Պիքսելացնել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="113"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="93"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="250"/>
+        <source>Blur</source>
+        <translation>Թափանցիկություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="254"/>
+        <source>Blur Outer</source>
+        <translation>Թափանցիկություն Արտաքին</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="258"/>
+        <source>Background Image</source>
+        <translation>Ֆոնի Պատկեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="269"/>
+        <source>Marker style</source>
+        <translation>Նշիչի ոճ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="277"/>
+        <source>Solid</source>
+        <translation>Միագույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="281"/>
+        <source>Dash</source>
+        <translation>Կտրտված</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="285"/>
+        <source>Dot</source>
+        <translation>Կետ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="289"/>
+        <source>Dash dot</source>
+        <translation>Կտրտված կետ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="293"/>
+        <source>Dash dot dot</source>
+        <translation>Կտրտված կետ կետ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="303"/>
+        <source>Marker color</source>
+        <translation>Նշիչի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="305"/>
+        <source>Select marker color</source>
+        <translation>Ընտրել նշիչի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="316"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="322"/>
+        <source>Marker width</source>
+        <translation>Նշիչի լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="336"/>
+        <source>Masks</source>
+        <translation>Դիմակներ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="343"/>
+        <source>Angel</source>
+        <translation>Հրեշտակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="347"/>
+        <source>Bear</source>
+        <translation>Արջ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="351"/>
+        <source>Beaver</source>
+        <translation>Կուղբ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="355"/>
+        <source>Cat</source>
+        <translation>Կատու</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="359"/>
+        <source>Chicken</source>
+        <translation>Հավ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="363"/>
+        <source>Cow</source>
+        <translation>Կով</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="367"/>
+        <source>Devil</source>
+        <translation>Սատանա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="371"/>
+        <source>Dog</source>
+        <translation>Շուն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="379"/>
+        <source>Elephant</source>
+        <translation>Փիղ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="423"/>
+        <source>Mouse</source>
+        <translation>Մուկ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="435"/>
+        <source>Pumpkin</source>
+        <translation>Դդում</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="451"/>
+        <source>Skull</source>
+        <translation>Գանգ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="375"/>
+        <source>Dragon</source>
+        <translation>Դրակոն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="383"/>
+        <source>Elk</source>
+        <translation>Այծյամ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="387"/>
+        <source>Frog</source>
+        <translation>Գորտ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="391"/>
+        <source>Ghost</source>
+        <translation>Ուրվական</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="395"/>
+        <source>Giraffe</source>
+        <translation>Ընձուղտ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="399"/>
+        <source>Gnu</source>
+        <translation>Գնու</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="403"/>
+        <source>Goat</source>
+        <translation>Այծ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="407"/>
+        <source>Hippo</source>
+        <translation>Գետաձի</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="411"/>
+        <source>Horse</source>
+        <translation>Ձի</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="415"/>
+        <source>Koala</source>
+        <translation>Կոալա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="419"/>
+        <source>Monkey</source>
+        <translation>Կապիկ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="427"/>
+        <source>Panda</source>
+        <translation>Պանդա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="431"/>
+        <source>Penguin</source>
+        <translation>Պինգվին</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="439"/>
+        <source>Raccoon</source>
+        <translation>Ռակուն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="443"/>
+        <source>Rhino</source>
+        <translation>Ռինոկերոս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="447"/>
+        <source>Sheep</source>
+        <translation>Գառ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="455"/>
+        <source>Triceratops</source>
+        <translation>Տրիցերատոպս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="459"/>
+        <source>Zebra</source>
+        <translation>Զեբրա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="473"/>
+        <source>Marker picture</source>
+        <translation>Նշիչի պատկեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="491"/>
+        <source>Replace face with this picture</source>
+        <translation>Փոխարինել դեմքը այս պատկերով</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="492"/>
+        <source>Search the image to put into the detected rectangle</source>
+        <translation>Որոնել պատկերը՝ տեղադրելու հայտնաբերված ուղղանկյունում</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="516"/>
+        <source>Background</source>
+        <translation>Ֆոն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="523"/>
+        <source>Black Square</source>
+        <translation>Սեւ Քառակուսի</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="537"/>
+        <source>Background picture</source>
+        <translation>Ֆոնի պատկեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="555"/>
+        <source>Replace background with this picture</source>
+        <translation>Փոխարինել ֆոնը այս պատկերով</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="556"/>
+        <source>Search the image to use as background</source>
+        <translation>Որոնել պատկերը՝ որպես ֆոն օգտագործելու համար</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="580"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="586"/>
+        <source>Pixel grid size</source>
+        <translation>Պիքսելային ցանցի չափս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="600"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="606"/>
+        <source>Blur radius</source>
+        <translation>Թափանցիկության շառավիղ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="618"/>
+        <source>Face Area Settings</source>
+        <translation>Դեմքի Տարածքի Կարգավորումներ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="623"/>
+        <source>Advanced face area settings for background blur or image below.</source>
+        <translation>Ընդլայնված դեմքի տարածքի կարգավորումներ ֆոնի թափանցիկության կամ ներքևի պատկերի համար:</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="632"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="741"/>
+        <source>Scale</source>
+        <translation>Մասշտաբ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="652"/>
+        <source>Horizontal Offset</source>
+        <translation>Հորիզոնական Տեղաշարժ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="671"/>
+        <source>Vertical Offset</source>
+        <translation>Ուղղահայաց Տեղաշարժ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="691"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="761"/>
+        <source>Width Adjust %</source>
+        <translation>Լայնության Ճշգրտում %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="710"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="779"/>
+        <source>Height Adjust %</source>
+        <translation>Բարձրության Ճշգրտում %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="730"/>
+        <source>Round Area</source>
+        <translation>Կլոր Տարածք</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="798"/>
+        <source>Horizontal Radius %</source>
+        <translation>Հորիզոնական Շառավիղ %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="815"/>
+        <source>Vertical Radius %</source>
+        <translation>Ուղղահայաց Շառավիղ %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="191"/>
+        <source>Face bracketing duration (seconds)</source>
+        <translation>Դեմքի բրեկետավորման տևողություն (վայրկյան)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="207"/>
+        <source>Face bracket count</source>
+        <translation>Դեմքի բրեկետների քանակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="223"/>
+        <source>Zoom out rate</source>
+        <translation>Հեռացման արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="239"/>
+        <source>Zoom in rate</source>
+        <translation>Մոտեցման արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="255"/>
+        <source>Face padding (% of face size)</source>
+        <translation>Դեմքի լցոնում (% դեմքի չափսից)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="272"/>
+        <source>Padding top</source>
+        <translation>Լցոնում վերևից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="290"/>
+        <source>Padding left</source>
+        <translation>Լցոնում ձախից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="308"/>
+        <source>Padding right</source>
+        <translation>Լցոնում աջից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="325"/>
+        <source>Padding bottom</source>
+        <translation>Լցոնում ներքևից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="339"/>
+        <source>Face margin (% of face size)</source>
+        <translation>Դեմքի մարժա (% դեմքի չափսից)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="357"/>
+        <source>Margin top</source>
+        <translation>Մարժա վերևից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="376"/>
+        <source>Margin left</source>
+        <translation>Մարժա ձախից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="395"/>
+        <source>Margin right</source>
+        <translation>Մարժա աջից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="412"/>
+        <source>Margin bottom</source>
+        <translation>Մարժա ներքևից</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="427"/>
+        <source>Aspect ratio</source>
+        <translation>Քվար</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="438"/>
+        <source>e.g. 16:9, 4:3</source>
+        <translation>օրինակ՝ 16:9, 4:3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="464"/>
+        <source>Lock viewport</source>
+        <translation>Կողպել դիտորդը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="474"/>
+        <source>Debug mode</source>
+        <translation>Կարգաբերման ռեժիմ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="81"/>
+        <source>Add color</source>
+        <translation>Ավելացնել գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="88"/>
+        <source>Clear all colors</source>
+        <translation>Մաքրել բոլոր գույները</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="102"/>
+        <source>Select the color to add</source>
+        <extracomment>Select the color to add to the color table</extracomment>
+        <translation>Ընտրել ավելացնելու գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="56"/>
+        <source>Hard</source>
+        <translation>Կոշտ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="60"/>
+        <source>Luminance soft</source>
+        <translation>Փափուկ լյումինանս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="64"/>
+        <source>Luminance hard</source>
+        <translation>Կոշտ լյումինանս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="75"/>
+        <source>Cooling</source>
+        <translation>Սառեցում</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="95"/>
+        <source>Dissolve</source>
+        <translation>Լուծարվել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/Zoom/share/qml/main.qml" line="27"/>
+        <source>Zoom</source>
+        <translation>Խոշորացում</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="135"/>
+        <source>Luma threshold</source>
+        <extracomment>Minimum luminance/light/white level/intensity in a gray or black and white picture. https://en.wikipedia.org/wiki/Luma_(video)</extracomment>
+        <translation>Լյումա շեմ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="194"/>
+        <source>Alpha diff</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Ալֆա տարբերություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="217"/>
+        <source>Alpha variation</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Ալֆա փոփոխություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="251"/>
+        <source>Cold color</source>
+        <translation>Սառը գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="253"/>
+        <source>Choose the fire cold color</source>
+        <translation>Ընտրել կրակի սառը գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="260"/>
+        <source>Hot color</source>
+        <translation>Տաք գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="262"/>
+        <source>Choose the fire hot color</source>
+        <translation>Ընտրել կրակի տաք գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Flip/share/qml/main.qml" line="26"/>
+        <source>Flip horizontally</source>
+        <translation>Հորիզոնական շրջել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Flip/share/qml/main.qml" line="34"/>
+        <source>Flip vertically</source>
+        <translation>Ուղղահայաց շրջել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FpsControl/share/qml/main.qml" line="74"/>
+        <source>Fill gaps</source>
+        <translation>Լրացնել բացերը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="54"/>
+        <source>Stride</source>
+        <translation>Քայլ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Gamma/share/qml/main.qml" line="29"/>
+        <source>Gamma</source>
+        <translation>Գամմա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="57"/>
+        <source>Pattern</source>
+        <translation>Նախշ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="64"/>
+        <source>90° Halftone 6x6</source>
+        <translation>90° Կեստոն 6x6</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="68"/>
+        <source>Cluster 3</source>
+        <translation>Կլաստեր 3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="72"/>
+        <source>Cluster 4</source>
+        <translation>Կլաստեր 4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="76"/>
+        <source>Cluster 8</source>
+        <translation>Կլաստեր 8</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="80"/>
+        <source>Lines 4x4</source>
+        <translation>Գծեր 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="84"/>
+        <source>Magic 2x2</source>
+        <translation>Կախարդական 2x2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="88"/>
+        <source>Magic 4x4</source>
+        <translation>Կախարդական 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="92"/>
+        <source>Ordered 4x4</source>
+        <translation>Կարգավորված 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="96"/>
+        <source>Ordered 6x6</source>
+        <translation>Կարգավորված 6x6</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="100"/>
+        <source>Ordered 8x8</source>
+        <translation>Կարգավորված 8x8</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="123"/>
+        <source>Bitmap pattern</source>
+        <translation>Բիթքարտեզի նախշ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="124"/>
+        <source>Search the image to use as pattern</source>
+        <translation>Որոնել պատկերը՝ որպես նախշ օգտագործելու համար</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="148"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="154"/>
+        <source>Pattern size</source>
+        <translation>Նախշի չափս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="166"/>
+        <source>Lightning</source>
+        <translation>Կայծակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="183"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="189"/>
+        <source>Slope</source>
+        <translation>Լանջ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="202"/>
+        <source>Interception</source>
+        <translation>Ընդհատում</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="208"/>
+        <source>Intercept</source>
+        <translation>Ընդհատել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="51"/>
+        <source>Spiral 1</source>
+        <translation>Պարույր 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="55"/>
+        <source>Spiral 2</source>
+        <translation>Պարույր 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="59"/>
+        <source>Parabola</source>
+        <translation>Պարաբոլա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="63"/>
+        <source>Horizontal stripe</source>
+        <translation>Հորիզոնական շերտ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="78"/>
+        <source>Speed increment</source>
+        <translation>Արագության աճ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ImageSrc/share/qml/main.qml" line="46"/>
+        <source>Force frame rate</source>
+        <translation>Հարկադրել կադրերի արագությունը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Implode/share/qml/main.qml" line="28"/>
+        <source>Amount</source>
+        <translation>Քանակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="36"/>
+        <source>Choose the automata color</source>
+        <extracomment>https://en.wikipedia.org/wiki/Life-like_cellular_automaton</extracomment>
+        <translation>Ընտրել ավտոմատի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="68"/>
+        <source>Luma Threshold</source>
+        <extracomment>Minimum luminance/light/white level/intensity in a gray or black and white picture. https://en.wikipedia.org/wiki/Luma_(video)</extracomment>
+        <translation>Լյումա Շեմ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="54"/>
+        <source>Number of drops</source>
+        <translation>Կաթիլների քանակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="91"/>
+        <source>Select font</source>
+        <translation>Ընտրել տառատեսակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="196"/>
+        <source>Cursor color</source>
+        <translation>Կուրսորի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="198"/>
+        <source>Choose the cursor color</source>
+        <translation>Ընտրել կուրսորի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="225"/>
+        <source>Minimum drop length</source>
+        <translation>Նվազագույն կաթիլի երկարություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="231"/>
+        <source>Min. drop length</source>
+        <translation>Նվ. կաթիլի երկարություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="243"/>
+        <source>Maximum drop length</source>
+        <translation>Առավելագույն կաթիլի երկարություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="249"/>
+        <source>Max. drop length</source>
+        <translation>Առ. կաթիլի երկարություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="261"/>
+        <source>Minimum speed</source>
+        <translation>Նվազագույն արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="267"/>
+        <source>Min. speed</source>
+        <translation>Նվ. արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="279"/>
+        <source>Maximum speed</source>
+        <translation>Առավելագույն արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="285"/>
+        <source>Max. speed</source>
+        <translation>Առ. արագություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="306"/>
+        <source>Show rain</source>
+        <translation>Ցույց տալ անձրևը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="123"/>
+        <source>Video track</source>
+        <translation>Տեսանյութի ձայնագրություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="135"/>
+        <source>Audio track</source>
+        <translation>Ձայնային ձայնագրություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="147"/>
+        <source>Subtitles track</source>
+        <translation>Ենթագրերի ձայնագրություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="160"/>
+        <source>Synchronise</source>
+        <translation>Սինխրոնիզացնել</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="45"/>
+        <source>Simple</source>
+        <translation>Պարզ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Opacity/share/qml/main.qml" line="28"/>
+        <source>Opacity</source>
+        <translation>Թափանցիկություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Otsu/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="61"/>
+        <source>Levels</source>
+        <translation>Մակարդակներ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="27"/>
+        <source>Brightness</source>
+        <translation>Պայծառություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="56"/>
+        <source>Hard color</source>
+        <translation>Կոշտ գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="60"/>
+        <source>Soft color</source>
+        <translation>Փափուկ գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="64"/>
+        <source>Hard natural</source>
+        <translation>Կոշտ բնական</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="68"/>
+        <source>Soft natural</source>
+        <translation>Փափուկ բնական</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="72"/>
+        <source>Luminance hard color</source>
+        <translation>Կոշտ լյումինանսի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="76"/>
+        <source>Luminance soft color</source>
+        <translation>Փափուկ լյումինանսի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="80"/>
+        <source>Luminance hard natural</source>
+        <translation>Կոշտ լյումինանսի բնական</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="84"/>
+        <source>Luminance soft natural</source>
+        <translation>Փափուկ լյումինանսի բնական</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="165"/>
+        <source>Alpha differential</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Ալֆա դիֆերենցիալ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="180"/>
+        <source>Radiation color</source>
+        <translation>Ճառագայթման գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="51"/>
+        <source>Motion detect</source>
+        <translation>Շարժման հայտնաբերում</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="55"/>
+        <source>Rain</source>
+        <translation>Անձրև</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="63"/>
+        <source>General parameters</source>
+        <translation>Ընդհանուր պարամետրեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="89"/>
+        <source>Decay</source>
+        <translation>Քայքայում</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="104"/>
+        <source>Motion detection parameters</source>
+        <translation>Շարժման հայտնաբերման պարամետրեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="150"/>
+        <source>Rain parameters</source>
+        <translation>Անձրևի պարամետրեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="160"/>
+        <source>Minimum drop size</source>
+        <translation>Նվազագույն կաթիլի չափս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="176"/>
+        <source>Maximum drop size</source>
+        <translation>Առավելագույն կաթիլի չափս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="192"/>
+        <source>Drop thickness</source>
+        <translation>Կաթիլի հաստություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="209"/>
+        <source>Drop frequency</source>
+        <translation>Կաթիլի հաճախականություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="38"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="44"/>
+        <source>Show lines</source>
+        <translation>Ցույց տալ գծերը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="56"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="62"/>
+        <source>Hide lines</source>
+        <translation>Թաքցնել գծերը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="73"/>
+        <source>Hide color</source>
+        <translation>Թաքցնել գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="75"/>
+        <source>Choose the hide color</source>
+        <translation>Ընտրել թաքցնելու գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Shagadelic/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Shagadelic/share/qml/main.qml" line="33"/>
+        <source>Mask</source>
+        <translation>Դիմակ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Temperature/share/qml/main.qml" line="27"/>
+        <source>Temperature</source>
+        <translation>Ջերմաստիճան</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="129"/>
+        <source>Video format</source>
+        <translation>Տեսաֆորմատ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="146"/>
+        <source>Resolution</source>
+        <translation>Լուծաչափ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="164"/>
+        <source>FPS</source>
+        <translation>Կադր/վ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="188"/>
+        <source>Reset to default values</source>
+        <translation>Վերականգնել լռելյայն արժեքները</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="35"/>
+        <source>Choose the vignette color</source>
+        <translation>Ընտրել վինետի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="46"/>
+        <source>Aspect</source>
+        <extracomment>Aspect ratio</extracomment>
+        <translation>Քվար</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="80"/>
+        <source>Softness</source>
+        <translation>Փափկություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="33"/>
+        <source>Palette</source>
+        <translation>Պալիտրա</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="43"/>
+        <source>Frame length</source>
+        <translation>Կադրի երկարություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="111"/>
+        <source>Hue offset</source>
+        <translation>Երանգի տեղաշարժ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="126"/>
+        <source>Light</source>
+        <translation>Լույս</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="136"/>
+        <source>Light threshold</source>
+        <translation>Լույսի շեմ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="153"/>
+        <source>Light color</source>
+        <translation>Լույսի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="155"/>
+        <source>Choose the color of the light</source>
+        <translation>Ընտրել լույսի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="162"/>
+        <source>Shadow</source>
+        <translation>Ստվեր</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="172"/>
+        <source>Shadow threshold</source>
+        <translation>Ստվերի շեմ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="189"/>
+        <source>Shadow color</source>
+        <translation>Ստվերի գույն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="191"/>
+        <source>Choose the color of the shadow</source>
+        <translation>Ընտրել ստվերի գույնը</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="27"/>
+        <source>Ripples</source>
+        <translation>Ալիքներ</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="43"/>
+        <source>Duration (in seconds)</source>
+        <translation>Տևողություն (վայրկյաններում)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="28"/>
+        <source>X-Axis</source>
+        <translation>X-Առանցք</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="38"/>
+        <source>Amplitude (X)</source>
+        <translation>Ամպլիտուդ (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="54"/>
+        <source>Frequency (X)</source>
+        <translation>Հաճախականություն (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="70"/>
+        <source>Phase (X)</source>
+        <translation>Փուլ (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="85"/>
+        <source>Y-Axis</source>
+        <translation>Y-Առանցք</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="95"/>
+        <source>Amplitude (Y)</source>
+        <translation>Ամպլիտուդ (Y)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="111"/>
+        <source>Frequency (Y)</source>
+        <translation>Հաճախականություն (Y)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="127"/>
+        <source>Phase (Y)</source>
+        <translation>Փուլ (Y)</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="46"/>
+        <source>Daily Build</source>
+        <translation>Օրական Հավաք</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="60"/>
+        <source>%1/Picture %2.%3</source>
+        <translation>%1/Նկար %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="258"/>
+        <source>Main menu</source>
+        <translation>Գլխավոր ցանկ</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="264"/>
+        <source>Open main menu</source>
+        <translation>Բացել գլխավոր ցանկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="295"/>
+        <source>Start streaming</source>
+        <translation>Սկսել հեռարձակումը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="295"/>
+        <source>Stop streaming</source>
+        <translation>Դադարեցնել հեռարձակումը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="300"/>
+        <source>You must add at least one streaming platform to the video outputs</source>
+        <translation>Դուք պետք է ավելացնեք առնվազն մեկ հեռարձակման հարթակ տեսանյութի ելքերում</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="302"/>
+        <source>The following platforms are not configured:&lt;br/&gt;&lt;br/&gt;%1</source>
+        <translation>Հետևյալ հարթակները կոնֆիգուրացված չեն:&lt;br/&gt;&lt;br/&gt;%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="336"/>
+        <source>Capture options</source>
+        <translation>Նկարահանման ընտրանքներ</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="342"/>
+        <source>Open capture options menu</source>
+        <translation>Բացել նկարահանման ընտրանքների ցանկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="373"/>
+        <source>Open last photo</source>
+        <translation>Բացել վերջին լուսանկարը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="384"/>
+        <source>Open last photo taken</source>
+        <translation>Բացել վերջին արված լուսանկարը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="415"/>
+        <location filename="../qml/main.qml" line="418"/>
+        <source>Take a photo</source>
+        <translation>Լուսանկարել</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="419"/>
+        <source>Image capture mode</source>
+        <translation>Նկարի նկարահանման ռեժիմ</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="422"/>
+        <source>Make a capture and save it to an image file</source>
+        <translation>Կատարել նկարահանում և պահպանել պատկերի ֆայլում</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="423"/>
+        <source>Put %1 in image capture mode</source>
+        <translation>Փոխանցել %1-ը նկարի նկարահանման ռեժիմ</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="472"/>
+        <location filename="../qml/main.qml" line="478"/>
+        <source>Record video</source>
+        <translation>Տեսանյութ ձայնագրել</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="473"/>
+        <location filename="../qml/main.qml" line="479"/>
+        <source>Stop video recording</source>
+        <translation>Դադարեցնել տեսանյութի ձայնագրումը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="476"/>
+        <source>Video capture mode</source>
+        <translation>Տեսանյութի նկարահանման ռեժիմ</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="482"/>
+        <source>Put %1 in video recording mode</source>
+        <translation>Փոխանցել %1-ը տեսանյութի ձայնագրման ռեժիմ</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="484"/>
+        <source>Start recording to a video file</source>
+        <translation>Սկսել ձայնագրումը տեսանյութի ֆայլում</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="485"/>
+        <source>Stop current video recording</source>
+        <translation>Դադարեցնել ընթացիկ տեսանյութի ձայնագրումը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="512"/>
+        <source>Open last video</source>
+        <translation>Բացել վերջին տեսանյութը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="524"/>
+        <source>Open last recorded video</source>
+        <translation>Բացել վերջին ձայնագրված տեսանյութը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="760"/>
+        <source>Installing virtual camera</source>
+        <translation>Տեղադրում է վիրտուալ տեսախցիկը</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="761"/>
+        <source>Running commands</source>
+        <translation>Կատարվում են հրամանները</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Rotate/share/qml/main.qml" line="29"/>
+        <source>Angle %1°</source>
+        <translation>Անկյուն %1°</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Pixelate/share/qml/main.qml" line="27"/>
+        <source>Block width</source>
+        <translation>Բլոկի լայնություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Pixelate/share/qml/main.qml" line="44"/>
+        <source>Block height</source>
+        <translation>Բլոկի բարձրություն</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="28"/>
+        <source>Center X</source>
+        <translation>Կենտրոն X</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="47"/>
+        <source>Center Y</source>
+        <translation>Կենտրոն Y</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="66"/>
+        <source>Degrees</source>
+        <translation>Աստիճան</translation>
+    </message>
+</context>
+</TS>

@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2021  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -53,6 +53,10 @@ set(SOURCES
     src/qtscreendev.cpp
     src/qtscreendev.h
     pspec.json)
+
+if (ANDROID)
+    set(QT_DEFAULT_MEDIA_BACKEND ffmpeg)
+endif()
 
 if (Qt${QT_VERSION_MAJOR}Multimedia_FOUND AND NOT NOQTSCREENCAPTURE AND NOT NOSCREENCAPTURE)
     qt_add_plugin(DesktopCapture_qtscreen

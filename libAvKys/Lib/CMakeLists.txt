@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2021  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -28,14 +28,24 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(QT_COMPONENTS
+    Concurrent
     Quick
+    Multimedia
+    OpenGL
     Widgets)
+
+if (ANDROID)
+    list(APPEND QT_COMPONENTS
+         CorePrivate)
+endif()
+
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${QT_MINIMUM_VERSION} COMPONENTS
              ${QT_COMPONENTS}
              REQUIRED)
+
 qt_add_library(avkys
                src/ak.cpp
                src/ak.h
@@ -44,6 +54,8 @@ qt_add_library(avkys
                src/akaudiocaps.h
                src/akaudioconverter.cpp
                src/akaudioconverter.h
+               src/akaudiomixer.cpp
+               src/akaudiomixer.h
                src/akaudiopacket.cpp
                src/akaudiopacket.h
                src/akcaps.cpp
@@ -71,6 +83,8 @@ qt_add_library(avkys
                src/akcpufeatures.h
                src/akfrac.cpp
                src/akfrac.h
+               src/akglpipeline.cpp
+               src/akglpipeline.h
                src/akmenuoption.cpp
                src/akmenuoption.h
                src/akpacket.cpp
@@ -83,8 +97,11 @@ qt_add_library(avkys
                src/akpluginmanager.h
                src/akpropertyoption.cpp
                src/akpropertyoption.h
-               src/aksimd.h
+               src/akringbuffer.h
                src/aksimd.cpp
+               src/aksimd.h
+               src/akstreamingstats.cpp
+               src/akstreamingstats.h
                src/aksubtitlecaps.cpp
                src/aksubtitlecaps.h
                src/aksubtitlepacket.cpp
@@ -109,14 +126,20 @@ qt_add_library(avkys
                src/iak/akmultimediasourceelement.h
                src/iak/akplugin.h
                src/iak/aksimdoptimizations.h
+               src/iak/akvideoeffect.cpp
+               src/iak/akvideoeffect.h
                src/iak/akvideoencoder.cpp
                src/iak/akvideoencoder.h
                src/iak/akvideomuxer.cpp
                src/iak/akvideomuxer.h
+               src/iak/akvideostreamer.cpp
+               src/iak/akvideostreamer.h
                src/qml/akcolorizedimage.cpp
                src/qml/akcolorizedimage.h
                src/qml/akfontsettings.cpp
                src/qml/akfontsettings.h
+               src/qml/akmediagallerymodel.cpp
+               src/qml/akmediagallerymodel.h
                src/qml/akpalette.cpp
                src/qml/akpalette.h
                src/qml/akpalettegroup.cpp
@@ -156,8 +179,16 @@ if (IPO_IS_SUPPORTED)
 endif ()
 
 target_compile_definitions(avkys PRIVATE AVKYS_LIBRARY)
+
 list(TRANSFORM QT_COMPONENTS PREPEND Qt${QT_VERSION_MAJOR}:: OUTPUT_VARIABLE QT_LIBS)
 target_link_libraries(avkys PRIVATE ${QT_LIBS})
+
+if (ANDROID)
+    target_link_libraries(avkys
+                          PRIVATE
+                          Qt${QT_VERSION_MAJOR}::CorePrivate)
+endif ()
+
 add_definitions(-DAKCOMMONS_LIBRARY
                 -DBINDIR="${BINDIR}"
                 -DAKPLUGINSDIR="${AKPLUGINSDIR}"

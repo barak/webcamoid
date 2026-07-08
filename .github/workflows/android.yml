@@ -7,7 +7,6 @@ env:
   ANDROID_TARGET_PLATFORM: 36
   DOCKERIMG: archlinux:latest
   ARCH_ROOT_URL: https://mirror.rackspace.com/archlinux
-  NJOBS: 4
 
 jobs:
   build:
@@ -28,7 +27,10 @@ jobs:
       UPLOAD: ${{ matrix.upload }}
       ENABLE_ADS: ${{ matrix.enable_ads }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+        token: ${{ secrets.UPLOAD_TOKEN }}
     - name: Release build
       uses: addnab/docker-run-action@v3
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -45,13 +47,17 @@ jobs:
           -e GITHUB_RUN_ID=${{ github.run_id }}
           -e GIT_COMMIT_HASH=${{ github.sha }}
           -e GIT_BRANCH_NAME=${{ github.ref_name }}
+          -e ANDROID_RELEASE_SIGNING=${{ vars.ANDROID_RELEASE_SIGNING }}
+          -e KEYSTORE_DATA=${{ secrets.KEYSTORE_DATA }}
+          -e KEYSTORE_PASS=${{ secrets.KEYSTORE_PASS }}
+          -e KEYSTORE_KEY_ALIAS=${{ secrets.KEYSTORE_KEY_ALIAS }}
+          -e ANDROID_KEY_PASS=${{ secrets.ANDROID_KEY_PASS }}
           -e FILE_PASSWORD=${{ secrets.FILE_PASSWORD }}
           -e DOCKERIMG=${{ env.DOCKERIMG }}
           -e ARCH_ROOT_URL=${{ env.ARCH_ROOT_URL }}
           -e ANDROID_MINIMUM_PLATFORM=${{ env.ANDROID_MINIMUM_PLATFORM }}
           -e ANDROID_TARGET_PLATFORM=${{ env.ANDROID_TARGET_PLATFORM }}
           -e TARGET_ARCH=${{ env.TARGET_ARCH }}
-          -e NJOBS=${{ env.NJOBS }}
           -e UPLOAD=${{ matrix.upload }}
           -e ENABLE_ADS=${{ matrix.enable_ads }}
         run: |
@@ -92,13 +98,17 @@ jobs:
           -e GITHUB_RUN_ID=${{ github.run_id }}
           -e GIT_COMMIT_HASH=${{ github.sha }}
           -e GIT_BRANCH_NAME=${{ github.ref_name }}
+          -e ANDROID_RELEASE_SIGNING=${{ vars.ANDROID_RELEASE_SIGNING }}
+          -e KEYSTORE_DATA=${{ secrets.KEYSTORE_DATA }}
+          -e KEYSTORE_PASS=${{ secrets.KEYSTORE_PASS }}
+          -e KEYSTORE_KEY_ALIAS=${{ secrets.KEYSTORE_KEY_ALIAS }}
+          -e ANDROID_KEY_PASS=${{ secrets.ANDROID_KEY_PASS }}
           -e FILE_PASSWORD=${{ secrets.FILE_PASSWORD }}
           -e DOCKERIMG=${{ env.DOCKERIMG }}
           -e ARCH_ROOT_URL=${{ env.ARCH_ROOT_URL }}
           -e ANDROID_MINIMUM_PLATFORM=${{ env.ANDROID_MINIMUM_PLATFORM }}
           -e ANDROID_TARGET_PLATFORM=${{ env.ANDROID_TARGET_PLATFORM }}
           -e TARGET_ARCH=${{ env.TARGET_ARCH }}
-          -e NJOBS=${{ env.NJOBS }}
           -e UPLOAD=${{ matrix.upload }}
           -e ENABLE_ADS=${{ matrix.enable_ads }}
           -e DAILY_BUILD=1
@@ -132,15 +142,14 @@ jobs:
         files: |
           webcamoid-packages/android/*
     - name: Release Upload
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.upload }}
       with:
         repository: webcamoid/WebcamoidPrivate
         files: webcamoid-packages/android/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
+        token: ${{ secrets.UPLOAD_TOKEN }}
     - name: Daily Build Upload
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       if: ${{ !startsWith(github.ref, 'refs/tags/') && matrix.upload && github.ref == 'refs/heads/master' }}
       with:
         repository: webcamoid/WebcamoidPrivate
@@ -149,5 +158,4 @@ jobs:
         files: webcamoid-packages/android/*
         name: Daily Build
         tag_name: daily-build
-      env:
-        GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
+        token: ${{ secrets.UPLOAD_TOKEN }}

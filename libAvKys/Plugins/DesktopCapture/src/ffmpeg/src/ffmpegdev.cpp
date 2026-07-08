@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2023  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -71,7 +71,6 @@ class FFmpegDevPrivate
         explicit FFmpegDevPrivate(FFmpegDev *self);
         QStringList listAVFoundationDevices() const;
         QSize screenSize(const QString &format, const QString &input) const;
-        void setupGeometrySignals();
         AkFrac fps() const;
         AkFrac timeBase() const;
         AkVideoPacket convert(AVFrame *iFrame);
@@ -90,22 +89,6 @@ FFmpegDev::FFmpegDev():
 #ifndef QT_DEBUG
     av_log_set_level(AV_LOG_QUIET);
 #endif
-
-    this->d->setupGeometrySignals();
-    QObject::connect(qApp,
-                     &QGuiApplication::screenAdded,
-                     this,
-                     [=]() {
-                         this->d->setupGeometrySignals();
-                         this->d->updateDevices();
-                     });
-    QObject::connect(qApp,
-                     &QGuiApplication::screenRemoved,
-                     this,
-                     [=]() {
-                         this->d->setupGeometrySignals();
-                         this->d->updateDevices();
-                     });
 
     this->d->updateDevices();
 }
@@ -161,6 +144,11 @@ AkVideoCaps FFmpegDev::caps(int stream)
     return this->d->m_devicesCaps.value(this->d->m_device);
 }
 
+bool FFmpegDev::canCaptureWindows() const
+{
+    return false;
+}
+
 bool FFmpegDev::canCaptureCursor() const
 {
     return true;
@@ -179,6 +167,13 @@ bool FFmpegDev::showCursor() const
 int FFmpegDev::cursorSize() const
 {
     return 0;
+}
+
+bool FFmpegDev::isWindow(const QString &media) const
+{
+    Q_UNUSED(media)
+
+    return false;
 }
 
 void FFmpegDev::setFps(const AkFrac &fps)
@@ -408,6 +403,11 @@ bool FFmpegDev::uninit()
     return true;
 }
 
+void FFmpegDev::updateDevices()
+{
+    this->d->updateDevices();
+}
+
 FFmpegDevPrivate::FFmpegDevPrivate(FFmpegDev *self):
     self(self)
 {
@@ -492,18 +492,6 @@ QSize FFmpegDevPrivate::screenSize(const QString &format, const QString &input) 
     }
 
     return screenSize;
-}
-
-void FFmpegDevPrivate::setupGeometrySignals()
-{
-    size_t i = 0;
-
-    for (auto &screen: QGuiApplication::screens()) {
-        QObject::connect(screen,
-                         &QScreen::geometryChanged,
-                         [=]() { this->updateDevices(); });
-        i++;
-    }
 }
 
 AkFrac FFmpegDevPrivate::fps() const

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2025  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ class AKCOMMONS_EXPORT AkSimdOptimizations: public QObject
         {
         }
 
-        ~AkSimdOptimizations()
+        virtual ~AkSimdOptimizations()
         {
         }
 

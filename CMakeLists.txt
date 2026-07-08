@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2021  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -28,33 +28,6 @@ endif ()
 
 add_subdirectory(libAvKys)
 add_subdirectory(StandAlone)
-
-# Try detecting Qmake executable.
-
-set(QT_QMAKE_EXECUTABLE qmake CACHE FILEPATH "Qt qmake path")
-find_program(QT_QMAKE_EXECUTABLE_BIN "${QT_QMAKE_EXECUTABLE}")
-
-# Retrieve useful variables related to Qt installation.
-
-if (QT_QMAKE_EXECUTABLE_BIN)
-    execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_PREFIX
-                    OUTPUT_VARIABLE QT_INSTALL_PREFIX
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_LIBS
-                    OUTPUT_VARIABLE QT_INSTALL_LIBS
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_BINS
-                    OUTPUT_VARIABLE QT_INSTALL_BINS
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_PLUGINS
-                    OUTPUT_VARIABLE QT_INSTALL_PLUGINS
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_QML
-                    OUTPUT_VARIABLE QT_INSTALL_QML
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif ()
-
-set(QT_INSTALL_SRC "${QT_INSTALL_PREFIX}/src" CACHE PATH "Qt sources templates directory")
 
 # Set platform related variables to be used in package_info.conf.
 
@@ -105,7 +78,7 @@ else ()
     set(MAIN_EXECUTABLE ${BINDIR}/webcamoid)
     set(APP_LIBDIR ${LIBDIR})
     set(QTIFW_TARGET_DIR "\@HomeDir\@/Webcamoid")
-    set(OUTPUT_FORMATS "AppImage, CompressedTarXz, QtIFW, DebPackage, RpmPackage")
+    set(OUTPUT_FORMATS "AppImage, CompressedTarXz, QtIFW")
     set(INSTALLER_ICON "StandAlone/share/themes/WebcamoidTheme/icons/hicolor/128x128/webcamoid.png")
     set(RUN_PROGRAM "\@TargetDir\@/webcamoid.sh")
     set(OUTPUT_QML_DIR ${LIBDIR}/qt/qml)
@@ -150,63 +123,13 @@ endif ()
 
 find_package(PkgConfig)
 
-# Try detecting VLC plugins install path.
+# Try detecting PulseAudio plugins install path.
 
-pkg_check_modules(VLC_PLUGINS vlc-plugin)
+pkg_check_modules(PULSEAUDIO_MODULES libpulse)
 
-if (VLC_PLUGINS_FOUND)
-    pkg_get_variable(VLC_PLUGINS_DIR vlc-plugin pluginsdir)
-elseif (APPLE AND NOT VLC_PLUGINS_FOUND)
-    message("-- Checking for 'VLC'")
-
-    # Check user defined VLC path first.
-
-    if (NOT "${VLC_INSTALL_PATH}" STREQUAL "" AND EXISTS "${VLC_INSTALL_PATH}")
-        set(VLCAPP_DIR "${VLCAPP_INSTALL_DIR}")
-    endif()
-
-    # Check VLC installed by homebrew.
-
-    if ("${VLCAPP_DIR}" STREQUAL "")
-        set(VLCAPPBIN "/usr/local/bin/vlc")
-
-        if (EXISTS ${VLCAPPBIN})
-            get_filename_component(VLCAPPBIN_PATH ${VLCAPPBIN} REALPATH)
-            get_filename_component(VLCAPP_INSTALL_DIR ${VLCAPPBIN_PATH} DIRECTORY)
-            set(VLCAPP_DIR "${VLCAPP_INSTALL_DIR}/VLC.app")
-        endif()
-    endif()
-
-    # Check VLC manually installed by the user.
-
-    if ("${VLCAPP_DIR}" STREQUAL "")
-        set(VLCAPPDIR "/Applications/VLC.app")
-
-        if (EXISTS "${VLCAPPDIR}")
-            set(VLCAPP_DIR "${VLCAPPDIR}")
-        endif()
-    endif()
-
-    if (NOT "${VLCAPP_DIR}" STREQUAL "")
-        set(VLCAPP_PLUGINS_DIR "${VLCAPP_DIR}/Contents/MacOS/plugins")
-
-        if (EXISTS ${VLCAPP_PLUGINS_DIR})
-            message("--   Found VLC in '${VLCAPP_DIR}'")
-            set(VLC_PLUGINS_DIR "${VLCAPP_PLUGINS_DIR}")
-        else ()
-            message("--   No 'VLC' found")
-        endif ()
-    else ()
-        message("--   No 'VLC' found")
-    endif ()
-endif ()
-
-# Try detecting GStreamer plugins install path.
-
-pkg_check_modules(GST_PLUGINS gstreamer-1.0)
-
-if (GST_PLUGINS_FOUND)
-    pkg_get_variable(GST_PLUGINS_DIR gstreamer-1.0 pluginsdir)
+if (PULSEAUDIO_MODULES_FOUND)
+    pkg_get_variable(PULSEAUDIO_MODULES_DIR libpulse modlibexecdir)
+    get_filename_component(PULSEAUDIO_MODULES_DIR ${PULSEAUDIO_MODULES_DIR} DIRECTORY)
 endif ()
 
 # Try detecting PipeWire plugins install path.
@@ -224,6 +147,8 @@ endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     set(PACKAGE_IS_DEBUG true)
+else ()
+    set(PACKAGE_IS_DEBUG false)
 endif()
 
 set(DEB_INSTALL_ROOT_PREFIX "usr" CACHE STRING "Install prefix relative to the system")

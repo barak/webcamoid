@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -22,8 +22,6 @@ set -e
 
 if [ ! -z "${GITHUB_SHA}" ]; then
     export GIT_COMMIT_HASH="${GITHUB_SHA}"
-elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
-    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
 
 export GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -31,8 +29,6 @@ export GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 if [ -z "${GIT_BRANCH_NAME}" ]; then
     if [ ! -z "${GITHUB_REF_NAME}" ]; then
         export GIT_BRANCH_NAME="${GITHUB_REF_NAME}"
-    elif [ ! -z "${CIRRUS_BRANCH}" ]; then
-        export GIT_BRANCH_NAME="${CIRRUS_BRANCH}"
     else
         export GIT_BRANCH_NAME=master
     fi
@@ -55,47 +51,10 @@ export PYTHONPATH="${PWD}/DeployTools"
 cat << EOF > force_plugins_copy.conf
 [Qt]
 extraPlugins = egldeviceintegrations, multimedia, xcbglintegrations, wayland-decoration-client, wayland-graphics-integration-client, wayland-graphics-integration-server, wayland-shell-integration
-
-[Vlc]
-haveVLC = true
-EOF
-
-if [ "${UPLOAD}" != 1 ]; then
-    cat << EOF >> force_plugins_copy.conf
-
-[GStreamer]
-haveGStreamer = true
-EOF
-fi
-
-cat << EOF > description.txt
-Webcamoid is a multi-platform camera suite with many features like:
-
-* Cross-platform (GNU/Linux, Mac, Windows, Android, FreeBSD)
-* Take pictures and record videos with the webcam.
-* Manages multiple webcams.
-* Written in C++ and Qt.
-* Custom controls for each webcam.
-* Add funny effects to the webcam.
-* 60+ effects available.
-* Translated to many languages.
-* Use custom network and local files as capture devices.
-* Capture from desktop.
-* Many recording formats.
-* Virtual webcam support for feeding other programs (GNU/Linux, Mac, Windows)
-EOF
-
-cat << EOF > package_description.conf
-[DebPackage]
-descriptionFile = ${PWD}/description.txt
-
-[RpmPackage]
-descriptionFile = ${PWD}/description.txt
 EOF
 
 xvfb-run --auto-servernum python3 DeployTools/deploy.py \
     -d "${INSTALL_PREFIX}" \
     -c "${BUILD_PATH}/package_info.conf" \
     -c "${PWD}/force_plugins_copy.conf" \
-    -c "${PWD}/package_description.conf" \
     -o "${PACKAGES_DIR}"

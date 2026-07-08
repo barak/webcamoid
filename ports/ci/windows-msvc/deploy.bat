@@ -1,4 +1,4 @@
-REM Webcamoid, webcam capture application.
+REM Webcamoid, camera capture application.
 REM Copyright (C) 2022  Gonzalo Exequiel Pedone
 REM
 REM Webcamoid is free software: you can redistribute it and/or modify
@@ -17,10 +17,8 @@ REM
 REM Web-Site: http://webcamoid.github.io/
 
 if not "%GITHUB_SHA%" == "" set GIT_COMMIT_HASH="%GITHUB_SHA%"
-if not "%CIRRUS_CHANGE_IN_REPO%" == "" set GIT_COMMIT_HASH="%CIRRUS_CHANGE_IN_REPO%"
 
 if not "%GITHUB_REF_NAME%" == "" set GIT_BRANCH_NAME="%GITHUB_REF_NAME%"
-if not "%CIRRUS_BRANCH%" == "" set GIT_BRANCH_NAME="%CIRRUS_BRANCH%"
 if not "%GIT_BRANCH_NAME%" == "" set GIT_BRANCH_NAME=master
 
 git clone "https://github.com/webcamoid/DeployTools.git"
@@ -28,8 +26,7 @@ git clone "https://github.com/webcamoid/DeployTools.git"
 set QTDIR=C:\Qt\%QTVER%\msvc2019_64
 set TOOLSDIR=C:\Qt\Tools\QtCreator
 set FFMPEG_PATH=%CD%\ffmpeg-%FFMPEG_VERSION%-full_build-shared
-set GSTREAMER_DEV_PATH=C:\gstreamer\1.0\x86_64
-set PATH=%QTDIR%\bin;%TOOLSDIR%\bin;%FFMPEG_PATH%\bin;%GSTREAMER_DEV_PATH%\bin;%PATH%
+set PATH=%QTDIR%\bin;%TOOLSDIR%\bin;%FFMPEG_PATH%\bin;%PATH%
 set INSTALL_PREFIX=%CD%/webcamoid-data
 set PACKAGES_DIR=%CD%/webcamoid-packages/windows
 set BUILD_PATH=%CD%/build

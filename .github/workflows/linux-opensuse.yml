@@ -6,7 +6,6 @@ env:
   QTIFWVER: 4.8.1
   APPIMAGEVER: continuous
   DOCKERIMG: opensuse/tumbleweed
-  NJOBS: 4
 
 jobs:
   build:
@@ -19,7 +18,10 @@ jobs:
          - compiler: gcc
          - compiler: clang
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+        token: ${{ secrets.UPLOAD_TOKEN }}
     - name: Release build
       uses: addnab/docker-run-action@v3
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -39,7 +41,6 @@ jobs:
           -e APPIMAGEVER=${{ env.APPIMAGEVER }}
           -e COMPILER=${{ matrix.compiler }}
           -e DOCKERIMG=${{ env.DOCKERIMG }}
-          -e NJOBS=${{ env.NJOBS }}
           -e QTIFWVER=${{ env.QTIFWVER }}
         run: |
           cd /sources
@@ -77,7 +78,6 @@ jobs:
           -e APPIMAGEVER=${{ env.APPIMAGEVER }}
           -e COMPILER=${{ matrix.compiler }}
           -e DOCKERIMG=${{ env.DOCKERIMG }}
-          -e NJOBS=${{ env.NJOBS }}
           -e QTIFWVER=${{ env.QTIFWVER }}
           -e DAILY_BUILD=1
         run: |

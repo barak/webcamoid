@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -64,17 +64,25 @@ T.Dialog {
     header: Item {
         id: rectangle
         clip: true
-        visible: control.title
-        height: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+        visible: control.title.length > 0
+        height: Math.max(AkUnit.create(64 * AkTheme.controlScale, "dp").pixels,
+                         titleLabel.height + control.topPadding + control.bottomPadding)
+        width: 200
+        anchors.leftMargin: control.leftPadding
+        anchors.rightMargin: control.rightPadding
 
         Label {
+            id: titleLabel
             text: control.title
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
+            anchors.right: parent.right
             anchors.leftMargin: control.leftPadding
-            elide: Label.ElideRight
+            anchors.rightMargin: control.rightPadding
             font: AkTheme.fontSettings.h6
             enabled: control.enabled
+            elide: Label.ElideNone
+            wrapMode: Label.WordWrap
         }
 
         Rectangle {

@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2025  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -46,14 +46,10 @@ set(SOURCES
 
 # Check if SVE is supported
 
-include(CheckCXXCompilerFlag)
-
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag("-march=armv8-a+sve" COMPILER_SUPPORTS_SVE)
-
-    if (COMPILER_SUPPORTS_SVE)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a+sve")
-    endif()
+    set(SIMD_FLAGS -march=armv8-a+sve)
 endif ()
 
 if (BUILD_PROCESSOR_ARM AND COMPILER_SUPPORTS_SVE AND NOT NOSIMDSVE)
@@ -66,6 +62,10 @@ if (BUILD_PROCESSOR_ARM AND COMPILER_SUPPORTS_SVE AND NOT NOSIMDSVE)
 else ()
     add_library(SimdCore_sve EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
+
+if (COMPILER_SUPPORTS_SVE)
+    target_compile_options(SimdCore_sve PRIVATE ${SIMD_FLAGS})
+endif()
 
 set_target_properties(SimdCore_sve PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}

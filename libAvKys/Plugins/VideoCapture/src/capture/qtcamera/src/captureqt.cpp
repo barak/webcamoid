@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -417,6 +417,8 @@ AkPacket CaptureQt::readFrame()
         this->d->m_localImageControls = imageControls;
     }
 
+    this->d->m_frameMutex.lockForWrite();
+
     if (!this->d->m_videoPacket)
         if (!this->d->m_packetReady.wait(&this->d->m_frameMutex, 1000)) {
             this->d->m_frameMutex.unlock();
@@ -543,29 +545,43 @@ bool CaptureQt::init()
     this->d->m_id = Ak::id();
     this->d->m_fps = fps;
 
-    this->d->m_camera = CameraPtr(new QCamera(cameraDevice));
+    // Create QCamera in the main thread
+    bool ok = false;
+    QMetaObject::invokeMethod(qApp,
+                              [this, &cameraDevice, &cameraFormat, &ok]() {
+            this->d->m_camera = CameraPtr(new QCamera(cameraDevice));
 
-    if (this->d->m_torchMode == Torch_Off
-        && this->d->m_camera->torchMode() == QCamera::TorchOn)
-        this->d->m_camera->setTorchMode(QCamera::TorchOff);
-    else if (this->d->m_torchMode == Torch_On
-             && this->d->m_camera->torchMode() == QCamera::TorchOff)
-        this->d->m_camera->setTorchMode(QCamera::TorchOn);
+            if (this->d->m_torchMode == Torch_Off
+                && this->d->m_camera->torchMode() == QCamera::TorchOn)
+                this->d->m_camera->setTorchMode(QCamera::TorchOff);
+            else if (this->d->m_torchMode == Torch_On
+                     && this->d->m_camera->torchMode() == QCamera::TorchOff)
+                this->d->m_camera->setTorchMode(QCamera::TorchOn);
 
-    this->d->m_camera->setCameraFormat(cameraFormat);
-    this->d->m_captureSession.setCamera(this->d->m_camera.data());
-    this->d->m_captureSession.setVideoSink(&this->d->m_videoSink);
-    this->d->m_camera->start();
+            this->d->m_camera->setCameraFormat(cameraFormat);
+            this->d->m_captureSession.setCamera(this->d->m_camera.data());
+            this->d->m_captureSession.setVideoSink(&this->d->m_videoSink);
+            this->d->m_camera->start();
+            ok = true;
+        },
+        Qt::BlockingQueuedConnection
+    );
 
-    return true;
+    return ok;
 }
 
 void CaptureQt::uninit()
 {
-    if (this->d->m_camera) {
-        this->d->m_camera->stop();
-        this->d->m_camera = {};
-    }
+    QMetaObject::invokeMethod(qApp, [this]() {
+            if (this->d->m_camera) {
+                this->d->m_camera->stop();
+                this->d->m_captureSession.setCamera(nullptr);
+                this->d->m_captureSession.setVideoSink(nullptr);
+                this->d->m_camera = {};
+            }
+        },
+        Qt::BlockingQueuedConnection
+    );
 }
 
 void CaptureQt::setDevice(const QString &device)
@@ -866,15 +882,16 @@ void CaptureQtPrivate::frameReady(const QVideoFrame &frame)
         videoFrame.map(QVideoFrame::ReadOnly);
 
         for (int plane = 0; plane < packet.planes(); ++plane) {
-            auto line = videoFrame.bits(plane);
+            auto srcBits = videoFrame.bits(plane);
             auto srcLineSize = videoFrame.bytesPerLine(plane);
-            auto lineSize = qMin<size_t>(packet.lineSize(plane), srcLineSize);
+            auto dstLineSize = packet.lineSize(plane);
+            auto lineSize = qMin<size_t>(dstLineSize, srcLineSize);
             auto heightDiv = packet.heightDiv(plane);
+            int planeHeight = videoFrame.height() >> heightDiv;
 
-            for (int y = 0; y < videoFrame.height(); ++y) {
-                auto ys = y >> heightDiv;
-                memcpy(packet.line(plane, y),
-                       line + ys * srcLineSize,
+            for (int y = 0; y < planeHeight; ++y) {
+                memcpy(packet.line(plane, y << heightDiv),
+                       srcBits + y * srcLineSize,
                        lineSize);
             }
         }
@@ -999,6 +1016,12 @@ void CaptureQtPrivate::updateDevices()
             devices << deviceId;
             descriptions[deviceId] = cameraDevice.description();
             devicesCaps[deviceId] = caps;
+
+            qInfo() << "Detected camera:" << cameraDevice.description() << "(" << deviceId << ")";
+            qInfo() << "Formats:";
+
+            for (auto &devCaps: caps)
+                qInfo() << "    " << devCaps;
         }
     }
 

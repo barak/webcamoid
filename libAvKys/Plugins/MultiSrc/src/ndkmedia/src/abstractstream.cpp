@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -68,6 +68,7 @@ class AbstractStreamPrivate
         uint m_index {0};
         AkElement::ElementState m_state {AkElement::ElementStateNull};
         bool m_sync {true};
+        bool m_hasAudioRef {false};
         bool m_run {false};
         bool m_paused {false};
 
@@ -235,6 +236,11 @@ qreal &AbstractStream::clockDiff()
 bool AbstractStream::running() const
 {
     return this->d->m_run;
+}
+
+bool AbstractStream::hasAudioRef() const
+{
+    return this->d->m_hasAudioRef;
 }
 
 AbstractStream::EnqueueResult AbstractStream::packetEnqueue(bool eos)
@@ -483,6 +489,11 @@ bool AbstractStream::setState(AkElement::ElementState state)
 void AbstractStream::setSync(bool sync)
 {
     this->d->m_sync = sync;
+}
+
+void AbstractStream::setHasAudioRef(bool hasAudioRef)
+{
+    this->d->m_hasAudioRef = hasAudioRef;
 }
 
 AbstractStreamPrivate::AbstractStreamPrivate(AbstractStream *self):

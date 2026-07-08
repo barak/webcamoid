@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -38,8 +38,11 @@ RowLayout {
     property alias text: label.text
     property alias font: label.font
     property alias color: label.color
+    property alias elide: label.elide
+    property alias wrapMode: label.wrapMode
     property int alignment: Qt.AlignHCenter | Qt.AlignVCenter
-    property int elide: Text.ElideNone
+
+    readonly property bool rtl: mirrored != (Qt.application.layoutDirection === Qt.RightToLeft)
 
     Item {
         width: iconLabel.leftPadding
@@ -47,9 +50,7 @@ RowLayout {
     GridLayout {
         id: mainLayout
         rowSpacing: columnSpacing
-        layoutDirection: iconLabel.mirrored?
-                                Qt.RightToLeft:
-                                Qt.LeftToRight
+        layoutDirection: iconLabel.rtl? Qt.RightToLeft: Qt.LeftToRight
         columns: iconLabel.display == AbstractButton.TextUnderIcon? 1: 2
         Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
@@ -65,12 +66,13 @@ RowLayout {
         Text {
             id: label
             visible: text && iconLabel.display != AbstractButton.IconOnly
-            Layout.alignment: iconLabel.alignment
-            Layout.fillWidth: true
-            elide: iconLabel.elide
+            horizontalAlignment: iconLabel.rtl? Text.AlignRight: Text.AlignLeft
+            elide: iconLabel.rtl? Text.ElideLeft: Text.ElideRight
             linkColor: iconLabel.enabled?
                            AkTheme.palette.active.link:
                            AkTheme.palette.disabled.link
+           Layout.alignment: iconLabel.alignment
+           Layout.fillWidth: true
         }
     }
     Item {

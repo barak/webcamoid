@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -20,13 +20,18 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Ak
 
 Rectangle {
     id: recordingNotice
-    color: "black"
-    width: 128
-    height: 60
-    radius: 4
+    color: AkTheme.palette.active.toolTipBase
+    border.color: AkTheme.palette.active.dark
+    border.width: AkUnit.create(1 * AkTheme.controlScale, "dp").pixels
+    width: AkUnit.create(128 * AkTheme.controlScale, "dp").pixels
+    height: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+    radius: AkUnit.create(8 * AkTheme.controlScale, "dp").pixels
+
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
 
     onVisibleChanged: {
         if (visible) {
@@ -42,26 +47,30 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
 
         RowLayout {
+            layoutDirection: recordingNotice.rtl? Qt.RightToLeft: Qt.LeftToRight
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            Image {
+            AkColorizedImage {
                 id: recordingIcon
+                color: AkTheme.palette.active.toolTipText
                 source: "image://icons/recording"
                 sourceSize: Qt.size(width, height)
-                width: 32
-                height: 32
+                implicitWidth: AkUnit.create(32 * AkTheme.controlScale, "dp").pixels
+                implicitHeight: implicitWidth
+                asynchronous: true
+                mipmap: true
             }
             Label {
                 text: qsTr("Recording")
-                color: "white"
+                color: AkTheme.palette.active.toolTipText
                 font.bold: true
             }
         }
         Label {
             id: recordingTime
-            color: "white"
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            color: AkTheme.palette.active.toolTipText
             font.bold: true
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
         }
     }
 

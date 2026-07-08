@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -18,21 +18,27 @@
  */
 
 import QtQuick
+import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 import Ak
+import AkControls as AK
 import Qt.labs.platform as LABS
 
 Dialog {
     id: outputPictureDialog
     title: qsTr("Virtual camera output picture")
     standardButtons: Dialog.Ok | Dialog.Cancel | Dialog.Reset
-    width: AkUnit.create(450 * AkTheme.controlScale, "dp").pixels
-    height: AkUnit.create(350 * AkTheme.controlScale, "dp").pixels
+    width: physicalWidth <= 100 || physicalHeight <= 100?
+               wdgMainWidget.width: wdgMainWidget.width * 0.75
+    height: physicalWidth <= 100 || physicalHeight <= 100?
+                wdgMainWidget.height: wdgMainWidget.height * 0.75
     modal: true
 
     signal openErrorDialog(string title, string message)
 
+    property real physicalWidth: wdgMainWidget.width / Screen.pixelDensity
+    property real physicalHeight: wdgMainWidget.height / Screen.pixelDensity
     readonly property string filePrefix: Ak.platform() == "windows"?
                                              "file:///":
                                              "file://"
@@ -47,9 +53,9 @@ Dialog {
 
     onVisibleChanged: {
         if (visible)
-            txtTable.text = videoLayer.picture
+            txtTable.labelText = virtualCameras.picture
 
-        btnSearch.forceActiveFocus()
+        txtTable.forceActiveFocus()
     }
 
     ScrollView {
@@ -58,46 +64,38 @@ Dialog {
         contentHeight: pictureControls.height
         clip: true
 
-        GridLayout {
+        ColumnLayout {
             id: pictureControls
             width: pictureView.width
-            columns: 2
 
-            TextField {
+            AK.ActionTextField {
                 id: txtTable
-                text: videoLayer.picture
-                placeholderText: qsTr("Virtual camera default output picture")
-                selectByMouse: true
-                Layout.fillWidth: true
-            }
-            Button {
-                id: btnSearch
-                text: qsTr("Search")
-                Accessible.description: qsTr("Search image to use as default output picture")
                 icon.source: "image://icons/search"
+                labelText: virtualCameras.picture
+                placeholderText: qsTr("Virtual camera default output picture")
+                buttonText: qsTr("Search image to use as default output picture")
+                Layout.fillWidth: true
 
-                onClicked: fileDialog.open()
+                onButtonClicked: fileDialog.open()
             }
             Image {
-                width: 160
-                height: 120
+                width: AkUnit.create(160 * AkTheme.controlScale, "dp").pixels
+                height: AkUnit.create(120 * AkTheme.controlScale, "dp").pixels
                 fillMode: Image.PreserveAspectFit
-                sourceSize.width: 160
-                sourceSize.height: 120
-                source: toQrc(txtTable.text)
-                Layout.columnSpan: 2
+                sourceSize: Qt.size(width, height)
+                source: toQrc(txtTable.labelText)
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
             }
         }
     }
 
     onAccepted: {
-        videoLayer.picture = txtTable.text
+        virtualCameras.picture = txtTable.labelText
 
-        if (videoLayer.clientsPids.length < 1) {
-            if (!videoLayer.applyPicture()) {
+        if (virtualCameras.clientsPids.length < 1) {
+            if (!virtualCameras.applyPicture()) {
                 let title = qsTr("Can't set virtual camera picture")
-                outputPictureDialog.openErrorDialog(title, videoLayer.outputError)
+                outputPictureDialog.openErrorDialog(title, virtualCameras.outputError)
             }
         } else {
             let title = qsTr("Error Removing Virtual Cameras")
@@ -106,8 +104,8 @@ Dialog {
         }
     }
     onReset: {
-        videoLayer.picture = undefined
-        txtTable.text = videoLayer.picture
+        virtualCameras.picture = undefined
+        txtTable.labelText = virtualCameras.picture
     }
 
     LABS.FileDialog {
@@ -117,7 +115,7 @@ Dialog {
         folder: outputPictureDialog.filePrefix + recording.imagesDirectory
 
         onAccepted: {
-            txtTable.text =
+            txtTable.labelText =
                     String(file).replace(outputPictureDialog.filePrefix, "")
         }
     }

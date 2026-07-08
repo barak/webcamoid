@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2024  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -22,11 +22,5 @@ project(VideoEncoders)
 
 include(../../../../cmake/ProjectCommons.cmake)
 
-add_subdirectory(av1)
 add_subdirectory(ffmpeg)
 add_subdirectory(ndkmedia)
-add_subdirectory(rav1e)
-add_subdirectory(svtav1)
-add_subdirectory(svtvp9)
-add_subdirectory(vpx)
-add_subdirectory(x264)

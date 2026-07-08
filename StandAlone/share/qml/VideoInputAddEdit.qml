@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2015  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -18,26 +18,39 @@
  */
 
 import QtQuick
+import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt.labs.platform as LABS
 import Ak
+import AkControls as AK
 
 Dialog {
     id: addEdit
     standardButtons: Dialog.Ok | Dialog.Cancel
-    width: AkUnit.create(420 * AkTheme.controlScale, "dp").pixels
-    height: AkUnit.create(320 * AkTheme.controlScale, "dp").pixels
+    width: physicalWidth <= 100 || physicalHeight <= 100?
+               wdgMainWidget.width: wdgMainWidget.width * 0.75
+    height: physicalWidth <= 100 || physicalHeight <= 100?
+                wdgMainWidget.height: wdgMainWidget.height * 0.75
     modal: true
+
+    property real physicalWidth: wdgMainWidget.width / Screen.pixelDensity
+    property real physicalHeight: wdgMainWidget.height / Screen.pixelDensity
+    property bool editMode: false
+    property int mediaType: VideoInputAddEdit.MediaType.FileMedia
 
     readonly property string filePrefix: Ak.platform() == "windows"?
                                              "file:///":
                                              "file://"
-    property bool editMode: false
 
     signal edited()
 
-    onVisibleChanged: tabBar.currentItem.forceActiveFocus()
+    onVisibleChanged: {
+        if (addEdit.mediaType == VideoInputAddEdit.MediaType.FileMedia)
+            fileDescription.forceActiveFocus()
+        else
+            urlDescription.forceActiveFocus()
+    }
 
     function isFile(url)
     {
@@ -56,47 +69,44 @@ Dialog {
 
     function openOptions(device)
     {
-        title = device?
-                    qsTr("Edit Source"):
-                    qsTr("Add Source")
         addEdit.editMode = device != ""
         fileDescription.text = videoLayer.description(device)
         urlDescription.text = fileDescription.text
-        filePath.text = ""
+        filePath.labelText = ""
         urlPath.text = ""
-        tabBar.currentIndex = 0
 
         if (device) {
             if (addEdit.isFile(device)) {
-                filePath.text = device
+                addEdit.mediaType = VideoInputAddEdit.MediaType.FileMedia
+                filePath.labelText = device
+                title = qsTr("Edit media file source")
             } else {
+                addEdit.mediaType = VideoInputAddEdit.MediaType.UrlMedia
                 urlPath.text = device
-                tabBar.currentIndex = 1
+                title = qsTr("Edit media URL source")
             }
+        } else {
+            title = mediaType === VideoInputAddEdit.MediaType.FileMedia?
+                        qsTr("Add media file source"):
+                        qsTr("Add media URL source")
         }
 
         open()
     }
 
+    enum MediaType {
+        FileMedia,
+        UrlMedia
+    }
+
     ColumnLayout {
         anchors.fill: parent
 
-        TabBar {
-            id: tabBar
-            Layout.fillWidth: true
-
-            TabButton {
-                text: qsTr("File")
-            }
-            TabButton {
-                text: qsTr("URL")
-            }
-        }
         StackLayout {
             id: stack
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: tabBar.currentIndex
+            currentIndex: addEdit.mediaType
 
             ScrollView {
                 id: fileScrollView
@@ -131,23 +141,15 @@ Dialog {
                         font.bold: true
                         Layout.fillWidth: true
                     }
-                    RowLayout {
-                        TextField {
-                            id: filePath
-                            placeholderText: qsTr("File path")
-                            Accessible.name: txtPath.text
-                            text: addEdit.editMode? videoLayer.videoInput: ""
-                            selectByMouse: true
-                            Layout.fillWidth: true
-                        }
+                    AK.ActionTextField {
+                        id: filePath
+                        icon.source: "image://icons/search"
+                        labelText: addEdit.editMode? videoLayer.videoInput: ""
+                        placeholderText: qsTr("File path")
+                        buttonText: qsTr("Search file to use as source")
+                        Layout.fillWidth: true
 
-                        Button {
-                            text: qsTr("Search")
-                            Accessible.description: qsTr("Search file to use as source")
-                            icon.source: "image://icons/search"
-
-                            onClicked: fileDialog.open()
-                        }
+                        onButtonClicked: fileDialog.open()
                     }
                 }
             }
@@ -201,9 +203,12 @@ Dialog {
         let description = ""
         let uri = ""
 
-        if (tabBar.currentIndex == 0) {
+        if (addEdit.mediaType == VideoInputAddEdit.MediaType.FileMedia) {
             description = fileDescription.text
-            uri = filePath.text
+            uri = filePath.labelText
+
+            if (Ak.platform() == "android")
+                uri = mediaTools.organizeFile(uri)
         } else {
             description = urlDescription.text
             uri = urlPath.text
@@ -238,10 +243,10 @@ Dialog {
             if (videoLayer.supportedFileFormats.indexOf(suffix) < 0)
                 return;
 
-            filePath.text = fpath;
+            filePath.labelText = fpath;
             urlPath.text = "";
             fileDescription.text =
-                    addEdit.defaultDescription(filePath.text);
+                    addEdit.defaultDescription(filePath.labelText);
             urlDescription.text = fileDescription.text;
         }
     }

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2023  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -32,12 +32,17 @@ OptionsPanel {
            layout.currentIndex < 4?
                qsTr("Video Source Options"):
            layout.currentIndex < 5?
-               qsTr("Video Output Options"):
+               qsTr("Virtual Camera Options"):
+           layout.currentIndex < 6?
+               qsTr("Streaming Platform Options"):
+           layout.currentIndex < 7?
+               qsTr("Local Streaming Options"):
                qsTr("%1 options").arg(effectOptions.effectDescription)
     edge: Qt.RightEdge
 
     signal openErrorDialog(string title, string message)
     signal openVideoEffectsDialog()
+    signal openLocalStreamingAdvancedDialog()
 
     function previousPage()
     {
@@ -83,7 +88,7 @@ OptionsPanel {
     }
 
     Connections {
-        target: videoLayer
+        target: virtualCameras
 
         function onVcamInstallFinished(exitCode, error)
         {
@@ -102,12 +107,23 @@ OptionsPanel {
         clip: true
 
         AudioOptions {
+            onOpenAudioInputAddDialog: audioInputAdd.open()
         }
         VideoOptions {
             onOpenErrorDialog: (title, message) =>
                 panel.openErrorDialog(title, message)
-            onOpenVideoInputAddEditDialog: videoInput =>
-                videoInputAddEdit.openOptions(videoInput)
+            onOpenVideoInputAddScreenDialog:
+                videoInputAddScreen.open()
+            onOpenVideoInputAddWindowDialog:
+                videoInputAddWindow.open()
+            onOpenVideoInputAddFileDialog: {
+                videoInputAddEdit.mediaType = VideoInputAddEdit.MediaType.FileMedia
+                videoInputAddEdit.openOptions("")
+            }
+            onOpenVideoInputAddUrlDialog: {
+                videoInputAddEdit.mediaType = VideoInputAddEdit.MediaType.UrlMedia
+                videoInputAddEdit.openOptions("")
+            }
             onOpenVideoOutputAddEditDialog: videoOutput =>
                 videoOutputAddEdit.openOptions(videoOutput)
             onOpenVideoInputOptions: function (videoInput) {
@@ -115,12 +131,20 @@ OptionsPanel {
                 layout.currentIndex = 3
                 videoInputOptions.setInput(videoInput)
             }
-            onOpenVideoOutputOptions: function (videoOutput) {
+            onOpenVirtualCameraOptions: function (videoOutput) {
                 closeAndOpen()
                 layout.currentIndex = 4
-                videoOutputOptions.setOutput(videoOutput)
+                virtualCameraOptions.setOutput(videoOutput)
             }
-            onOpenVideoOutputPictureDialog: videoOutputPicture.open()
+            onOpenStreamingPlatformOptions: function (videoOutput) {
+                closeAndOpen()
+                layout.currentIndex = 5
+                streamingPlatformOptions.setOutput(videoOutput)
+            }
+            onOpenLocalStreamingOptions: {
+                closeAndOpen()
+                layout.currentIndex = 6
+            }
             onOpenVCamDownloadDialog: vcamDownload.openDownloads()
             onOpenVCamManualDownloadDialog: vcamManualDownload.open()
         }
@@ -128,7 +152,7 @@ OptionsPanel {
             onOpenVideoEffectsDialog: panel.openVideoEffectsDialog()
             onOpenVideoEffectOptions: function (effectIndex) {
                 closeAndOpen()
-                layout.currentIndex = 5
+                layout.currentIndex = 7
                 effectOptions.effectIndex = effectIndex
             }
         }
@@ -145,8 +169,8 @@ OptionsPanel {
                 videoInputAddEdit.openOptions(videoInput)
             onVideoInputRemoved: closeOption()
         }
-        VideoOutputOptions {
-            id: videoOutputOptions
+        VirtualCameraOptions {
+            id: virtualCameraOptions
 
             function closeOption()
             {
@@ -159,6 +183,31 @@ OptionsPanel {
             onOpenVideoOutputAddEditDialog: videoOutput =>
                 videoOutputAddEdit.openOptions(videoOutput)
             onVideoOutputRemoved: closeOption()
+            onOpenVideoOutputPictureDialog: videoOutputPicture.open()
+        }
+        StreamingPlatformOptions {
+            id: streamingPlatformOptions
+
+            function closeOption()
+            {
+                closeAndOpen()
+                layout.currentIndex = 1
+            }
+
+            onVideoOutputRemoved: closeOption()
+        }
+        LocalStreamingOptions {
+            id: localStreamingOptions
+
+            function closeOption()
+            {
+                closeAndOpen()
+                layout.currentIndex = 1
+            }
+
+            onRemoved: closeOption()
+            onOpenLocalStreamingAdvancedDialog:
+                panel.openLocalStreamingAdvancedDialog()
         }
         VideoEffectOptions {
             id: effectOptions
@@ -173,6 +222,18 @@ OptionsPanel {
         }
     }
 
+    AudioInputAdd {
+        id: audioInputAdd
+        anchors.centerIn: Overlay.overlay
+    }
+    VideoInputAddScreen {
+        id: videoInputAddScreen
+        anchors.centerIn: Overlay.overlay
+    }
+    VideoInputAddWindow {
+        id: videoInputAddWindow
+        anchors.centerIn: Overlay.overlay
+    }
     VideoInputAddEdit {
         id: videoInputAddEdit
         anchors.centerIn: Overlay.overlay
@@ -187,7 +248,7 @@ OptionsPanel {
             panel.openErrorDialog(title, message)
         onOpenOutputFormatDialog: (index, caps) =>
             addVideoFormat.openOptions(index, caps)
-        onEdited: videoOutputOptions.closeOption()
+        onEdited: virtualCameraOptions.closeOption()
     }
     AddVideoFormat {
         id:  addVideoFormat

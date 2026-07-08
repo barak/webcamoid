@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2021  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -38,9 +38,10 @@ Dialog {
 
         Label {
             text: qsTr("Download the virtual camera manually?")
+            wrapMode: Text.WordWrap
             Layout.fillWidth: true
         }
     }
 
-    onAccepted: Qt.openUrlExternally(videoLayer.vcamDownloadUrl)
+    onAccepted: Qt.openUrlExternally(virtualCameras.vcamDownloadUrl)
 }

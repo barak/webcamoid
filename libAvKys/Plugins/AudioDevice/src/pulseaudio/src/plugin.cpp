@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -19,6 +19,18 @@
 
 #include "plugin.h"
 #include "audiodevpulseaudio.h"
+
+bool Plugin::canLoad()
+{
+#ifdef USE_PIPEWIRE_DYNLOAD
+    if (!QLibrary("pulse").load())
+        return false;
+
+    return QLibrary("pulse-simple").load();
+#else
+    return true;
+#endif
+}
 
 QObject *Plugin::create()
 {

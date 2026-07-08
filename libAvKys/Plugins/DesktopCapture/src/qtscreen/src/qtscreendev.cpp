@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2017  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -28,6 +28,11 @@
 #include <QTime>
 #include <QVideoFrame>
 #include <QVideoSink>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0) && !defined(Q_OS_ANDROID)
+    #include <QWindowCapture>
+#endif
+
 #include <QtConcurrent>
 #include <ak.h>
 #include <akcaps.h>
@@ -40,6 +45,7 @@
 #include "qtscreendev.h"
 
 using ScreenCapturePtr = QSharedPointer<QScreenCapture>;
+using WindowCapturePtr = QSharedPointer<QWindowCapture>;
 using MediaCaptureSessionPtr = QSharedPointer<QMediaCaptureSession>;
 
 class QtScreenDevPrivate
@@ -59,9 +65,16 @@ class QtScreenDevPrivate
         QFuture<void> m_threadStatus;
         QMutex m_mutex;
         ScreenCapturePtr m_screenCapture;
+        WindowCapturePtr m_windowCapture;
         MediaCaptureSessionPtr m_captureSession;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0) && !defined(Q_OS_ANDROID)
+        QMap<QString, QCapturableWindow> m_capturableWindows;
+#endif
+
         QVideoSink m_videoSink;
         QVideoFrame m_curFrame;
+        QSize m_currentFrameSize;
         AkElementPtr m_rotateFilter {akPluginManager->create<AkElement>("VideoFilter/Rotate")};
         QList<QSize> m_availableSizes;
         QString m_iconsPath {":/Webcamoid/share/themes/WebcamoidTheme/icons"};
@@ -75,11 +88,12 @@ class QtScreenDevPrivate
                           const QSize &requestedSize) const;
         QImage cursorImage(const QSize &requestedSize) const;
         QImage cursorImage(QSize *size, const QSize &requestedSize) const;
-        void setupGeometrySignals();
+        QStringList windows() const;
         qreal screenRotation() const;
         void frameReady(const QVideoFrame &frame);
         void sendFrame(const QVideoFrame &frame);
         void updateDevices();
+        bool isWindowDevice(const QString &device) const;
 };
 
 QtScreenDev::QtScreenDev():
@@ -88,21 +102,6 @@ QtScreenDev::QtScreenDev():
     this->d = new QtScreenDevPrivate(this);
     this->d->m_availableSizes =
         this->d->availableSizes(this->d->m_iconsPath, this->d->m_themeName);
-    this->d->setupGeometrySignals();
-    QObject::connect(qApp,
-                     &QGuiApplication::screenAdded,
-                     this,
-                     [=]() {
-                         this->d->setupGeometrySignals();
-                         this->d->updateDevices();
-                     });
-    QObject::connect(qApp,
-                     &QGuiApplication::screenRemoved,
-                     this,
-                     [=]() {
-                         this->d->setupGeometrySignals();
-                         this->d->updateDevices();
-                     });
     QObject::connect(&this->d->m_videoSink,
                      &QVideoSink::videoFrameChanged,
                      this,
@@ -165,6 +164,15 @@ AkVideoCaps QtScreenDev::caps(int stream)
     return this->d->m_devicesCaps.value(this->d->m_device);
 }
 
+bool QtScreenDev::canCaptureWindows() const
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0) && !defined(Q_OS_ANDROID)
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool QtScreenDev::canCaptureCursor() const
 {
 #ifdef Q_OS_ANDROID
@@ -191,6 +199,11 @@ bool QtScreenDev::showCursor() const
 int QtScreenDev::cursorSize() const
 {
     return this->d->m_cursorSize;
+}
+
+bool QtScreenDev::isWindow(const QString &media) const
+{
+    return this->d->isWindowDevice(media);
 }
 
 void QtScreenDev::setFps(const AkFrac &fps)
@@ -270,6 +283,41 @@ void QtScreenDev::resetCursorSize()
 bool QtScreenDev::init()
 {
     auto device = this->d->m_device;
+    this->d->m_id = Ak::id();
+    this->d->m_captureSession = MediaCaptureSessionPtr(new QMediaCaptureSession);
+    this->d->m_captureSession->setVideoSink(&this->d->m_videoSink);
+    auto curCaps = this->d->m_devicesCaps.value(device);
+    this->d->m_currentFrameSize = {curCaps.width(), curCaps.height()};
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0) && !defined(Q_OS_ANDROID)
+    if (device.startsWith("window://")) {
+        // Window capture
+
+        if (!this->d->m_capturableWindows.contains(device))
+            return false;
+
+        auto targetWindow = this->d->m_capturableWindows.value(device);
+
+        if (!targetWindow.isValid())
+            return false;
+
+        this->d->m_windowCapture = WindowCapturePtr(new QWindowCapture);
+        this->d->m_windowCapture->setWindow(targetWindow);
+        this->d->m_captureSession->setWindowCapture(this->d->m_windowCapture.data());
+        this->d->m_windowCapture->start();
+
+        QObject::connect(this->d->m_windowCapture.data(),
+                         &QWindowCapture::errorOccurred,
+                         [=] (QWindowCapture::Error error,
+                              const QString &errorString) {
+            Q_UNUSED(error)
+            qDebug() << "Error starting window capture:" << errorString;
+        });
+
+        return true;
+    }
+#endif
+
     auto curScreen = device.remove("screen://").toInt();
     auto screens = QGuiApplication::screens();
 
@@ -281,12 +329,9 @@ bool QtScreenDev::init()
     if (!screen)
         return false;
 
-    this->d->m_id = Ak::id();
     this->d->m_curScreen = screen;
     this->d->m_screenCapture = ScreenCapturePtr::create(screen);
-    this->d->m_captureSession = MediaCaptureSessionPtr(new QMediaCaptureSession);
     this->d->m_captureSession->setScreenCapture(this->d->m_screenCapture.data());
-    this->d->m_captureSession->setVideoSink(&this->d->m_videoSink);
     this->d->m_screenCapture->start();
 
     QObject::connect(this->d->m_screenCapture.data(),
@@ -308,10 +353,24 @@ bool QtScreenDev::uninit()
         this->d->m_screenCapture = {};
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0) && !defined(Q_OS_ANDROID)
+    if (this->d->m_windowCapture) {
+        this->d->m_windowCapture->stop();
+        this->d->m_windowCapture = {};
+    }
+#endif
+
     this->d->m_captureSession = {};
+    this->d->m_curScreen = nullptr;
+    this->d->m_currentFrameSize = QSize();
     this->d->m_threadStatus.waitForFinished();
 
     return true;
+}
+
+void QtScreenDev::updateDevices()
+{
+    this->d->updateDevices();
 }
 
 QtScreenDevPrivate::QtScreenDevPrivate(QtScreenDev *self):
@@ -411,16 +470,13 @@ QImage QtScreenDevPrivate::cursorImage(QSize *size,
     return icon.convertToFormat(QImage::Format_ARGB32);
 }
 
-void QtScreenDevPrivate::setupGeometrySignals()
+QStringList QtScreenDevPrivate::windows() const
 {
-    size_t i = 0;
-
-    for (auto &screen: QGuiApplication::screens()) {
-        QObject::connect(screen,
-                         &QScreen::geometryChanged,
-                         [=]() { this->updateDevices(); });
-        i++;
-    }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0) && !defined(Q_OS_ANDROID)
+    return this->m_capturableWindows.keys();
+#else
+    return {};
+#endif
 }
 
 qreal QtScreenDevPrivate::screenRotation() const
@@ -444,10 +500,29 @@ void QtScreenDevPrivate::frameReady(const QVideoFrame &frame)
 
 void QtScreenDevPrivate::sendFrame(const QVideoFrame &frame)
 {
-    auto frameImage = frame.toImage();
-    frameImage = frameImage.convertToFormat(QImage::Format_ARGB32);
+    QVideoFrame frameCopy(frame);
 
-    if (this->m_showCursor) {
+    if (!frameCopy.map(QVideoFrame::ReadOnly))
+        return;
+
+    auto frameImage = frameCopy.toImage()
+                               .convertToFormat(QImage::Format_ARGB32);
+
+    // Update the streams caps if the frame size changed
+    if (this->m_currentFrameSize.width() != frameImage.width()
+        || this->m_currentFrameSize.height() != frameImage.height()) {
+        AkVideoCaps newCaps(AkVideoCaps::Format_argbpack,
+                            frameImage.width(),
+                            frameImage.height(),
+                            this->m_fps);
+
+        this->m_devicesCaps[this->m_device] = newCaps;
+        this->m_currentFrameSize = {frameImage.width(), frameImage.height()};
+        emit self->sizeChanged(this->m_device, this->m_currentFrameSize);
+        emit self->streamsChanged({0});
+    }
+
+    if (this->m_showCursor && this->m_curScreen) {
         auto cursorPos = QCursor::pos();
         auto cursorScreen = qApp->screenAt(cursorPos);
 
@@ -477,7 +552,8 @@ void QtScreenDevPrivate::sendFrame(const QVideoFrame &frame)
     videoPacket.setIndex(0);
     videoPacket.setId(this->m_id);
 
-    auto lineSize = qMin<size_t>(frameImage.bytesPerLine(), videoPacket.lineSize(0));
+    auto lineSize = qMin<size_t>(frameImage.bytesPerLine(),
+                                 videoPacket.lineSize(0));
 
     for (int y = 0; y < frameImage.height(); ++y) {
         auto srcLine = frameImage.constScanLine(y);
@@ -485,7 +561,9 @@ void QtScreenDevPrivate::sendFrame(const QVideoFrame &frame)
         memcpy(dstLine, srcLine, lineSize);
     }
 
-    if (this->m_rotateFilter) {
+    frameCopy.unmap();
+
+    if (this->m_rotateFilter && this->m_curScreen) {
         auto angle = -this->screenRotation();
 
         if (!qFuzzyIsNull(angle)) {
@@ -506,11 +584,12 @@ void QtScreenDevPrivate::updateDevices()
 
     int i = 0;
 
+    // Screens
     for (auto &screen: QGuiApplication::screens()) {
         auto deviceId = QString("screen://%1").arg(i);
         devices << deviceId;
         descriptions[deviceId] = QString("Screen %1").arg(screen->name());
-        devicesCaps[deviceId] = AkVideoCaps(AkVideoCaps::Format_rgb24,
+        devicesCaps[deviceId] = AkVideoCaps(AkVideoCaps::Format_argbpack,
                                             screen->size().width(),
                                             screen->size().height(),
                                             this->m_fps);
@@ -520,6 +599,29 @@ void QtScreenDevPrivate::updateDevices()
 
         i++;
     }
+
+    // Windows
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0) && !defined(Q_OS_ANDROID)
+    this->m_capturableWindows.clear();
+    int windowIndex = 0;
+
+    for (const auto &window: QWindowCapture::capturableWindows()) {
+        auto windowId = QString("window://%1").arg(windowIndex);
+        devices << windowId;
+        descriptions[windowId] = window.description();
+
+        /* NOTE: We have no idea of the actual size of the window, set some
+         * default one and update it later while capturing.
+         */
+        devicesCaps[windowId] =
+                AkVideoCaps(AkVideoCaps::Format_argbpack,
+                            640,
+                            480,
+                            this->m_fps);
+        this->m_capturableWindows[windowId] = window;
+        windowIndex++;
+    }
+#endif
 
     if (devicesCaps.isEmpty()) {
         devices.clear();
@@ -538,6 +640,11 @@ void QtScreenDevPrivate::updateDevices()
         this->m_device = device;
         emit self->mediaChanged(device);
     }
+}
+
+bool QtScreenDevPrivate::isWindowDevice(const QString &device) const
+{
+    return device.startsWith("window://");
 }
 
 #include "moc_qtscreendev.cpp"

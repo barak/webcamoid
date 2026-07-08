@@ -2,9 +2,6 @@ name: Windows MSYS
 
 on: [push, pull_request]
 
-env:
-  NJOBS: 4
-
 jobs:
   build:
     runs-on: windows-latest
@@ -27,7 +24,10 @@ jobs:
       COMPILER: ${{ matrix.compiler }}
       UPLOAD: ${{ matrix.upload }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+        token: ${{ secrets.UPLOAD_TOKEN }}
     - uses: msys2/setup-msys2@v2
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
       with:
@@ -38,16 +38,18 @@ jobs:
           cmake
           git
           make
+          ninja
           pkgconf
           python3
+          unzip
           mingw-w64-${{ matrix.target_arch }}-binutils
           mingw-w64-${{ matrix.target_arch }}-ccache
           mingw-w64-${{ matrix.target_arch }}-clang
           mingw-w64-${{ matrix.target_arch }}-cmake
           mingw-w64-${{ matrix.target_arch }}-ffmpeg
+          mingw-w64-${{ matrix.target_arch }}-ninja
           mingw-w64-${{ matrix.target_arch }}-pkgconf
           mingw-w64-${{ matrix.target_arch }}-qt6
-          mingw-w64-${{ matrix.target_arch }}-vlc
     - uses: msys2/setup-msys2@v2
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       with:
@@ -58,20 +60,21 @@ jobs:
           cmake
           git
           make
+          ninja
           pkgconf
           python3
-          mingw-w64-${{ matrix.target_arch }}-SDL2
+          unzip
           mingw-w64-${{ matrix.target_arch }}-binutils
           mingw-w64-${{ matrix.target_arch }}-ccache
           mingw-w64-${{ matrix.target_arch }}-clang
           mingw-w64-${{ matrix.target_arch }}-cmake
           mingw-w64-${{ matrix.target_arch }}-ffmpeg
-          mingw-w64-${{ matrix.target_arch }}-gst-plugins-base
-          mingw-w64-${{ matrix.target_arch }}-gst-plugins-good
+          mingw-w64-${{ matrix.target_arch }}-ninja
           mingw-w64-${{ matrix.target_arch }}-pkgconf
           mingw-w64-${{ matrix.target_arch }}-portaudio
           mingw-w64-${{ matrix.target_arch }}-qt6
-          mingw-w64-${{ matrix.target_arch }}-vlc
+    - name: Install dependencies
+      run: ./ports/ci/windows-msys/install_deps.sh
     - name: Release Build
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
       run: ./ports/ci/windows-msys/build.sh
@@ -96,16 +99,15 @@ jobs:
         files: |
           webcamoid-packages/windows/*
     - name: Release Upload
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.upload }}
       with:
         repository: webcamoid/WebcamoidPrivate
         files: |
           webcamoid-packages/windows/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
+        token: ${{ secrets.UPLOAD_TOKEN }}
     - name: Daily Build Upload
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       if: ${{ !startsWith(github.ref, 'refs/tags/') && matrix.upload && github.ref == 'refs/heads/master' }}
       with:
         repository: webcamoid/WebcamoidPrivate
@@ -115,8 +117,7 @@ jobs:
           webcamoid-packages/windows/*
         name: Daily Build
         tag_name: daily-build
-      env:
-        GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
+        token: ${{ secrets.UPLOAD_TOKEN }}
 #  ArmBuild:
 #    runs-on: windows-11-arm
 #    defaults:
@@ -135,7 +136,10 @@ jobs:
 #      COMPILER: ${{ matrix.compiler }}
 #      UPLOAD: ${{ matrix.upload }}
 #    steps:
-#    - uses: actions/checkout@v2
+#    - uses: actions/checkout@v6
+#      with:
+#        submodules: true
+#        token: ${{ secrets.UPLOAD_TOKEN }}
 #    - uses: msys2/setup-msys2@v2
 #      if: ${{ startsWith(github.ref, 'refs/tags/') }}
 #      with:
@@ -147,16 +151,18 @@ jobs:
 #          cmake
 #          git
 #          make
+#          ninja
 #          pkgconf
 #          python3
+#          unzip
 #          mingw-w64-${{ matrix.target_arch }}-binutils
 #          mingw-w64-${{ matrix.target_arch }}-ccache
 #          mingw-w64-${{ matrix.target_arch }}-clang
 #          mingw-w64-${{ matrix.target_arch }}-cmake
 #          mingw-w64-${{ matrix.target_arch }}-ffmpeg
+#          mingw-w64-${{ matrix.target_arch }}-ninja
 #          mingw-w64-${{ matrix.target_arch }}-pkgconf
 #          mingw-w64-${{ matrix.target_arch }}-qt6
-#          mingw-w64-${{ matrix.target_arch }}-vlc
 #    - uses: msys2/setup-msys2@v2
 #      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
 #      with:
@@ -168,20 +174,19 @@ jobs:
 #          cmake
 #          git
 #          make
+#          ninja
 #          pkgconf
 #          python3
-#          mingw-w64-${{ matrix.target_arch }}-SDL2
+#          unzip
 #          mingw-w64-${{ matrix.target_arch }}-binutils
 #          mingw-w64-${{ matrix.target_arch }}-ccache
 #          mingw-w64-${{ matrix.target_arch }}-clang
 #          mingw-w64-${{ matrix.target_arch }}-cmake
 #          mingw-w64-${{ matrix.target_arch }}-ffmpeg
-#          mingw-w64-${{ matrix.target_arch }}-gst-plugins-base
-#          mingw-w64-${{ matrix.target_arch }}-gst-plugins-good
+#          mingw-w64-${{ matrix.target_arch }}-ninja
 #          mingw-w64-${{ matrix.target_arch }}-pkgconf
 #          mingw-w64-${{ matrix.target_arch }}-portaudio
 #          mingw-w64-${{ matrix.target_arch }}-qt6
-#          mingw-w64-${{ matrix.target_arch }}-vlc
 #    - name: Release Build
 #      if: ${{ startsWith(github.ref, 'refs/tags/') }}
 #      run: ./ports/ci/windows-msys/build.sh
@@ -206,16 +211,15 @@ jobs:
 #        files: |
 #          webcamoid-packages/windows/*
 #    - name: Release Upload
-#      uses: softprops/action-gh-release@v1
+#      uses: softprops/action-gh-release@v3
 #      if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.upload }}
 #      with:
 #        repository: webcamoid/WebcamoidPrivate
 #        files: |
 #          webcamoid-packages/windows/*
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
+#        token: ${{ secrets.UPLOAD_TOKEN }}
 #    - name: Daily Build Upload
-#      uses: softprops/action-gh-release@v1
+#      uses: softprops/action-gh-release@v3
 #      if: ${{ !startsWith(github.ref, 'refs/tags/') && matrix.upload && github.ref == 'refs/heads/master' }}
 #      with:
 #        repository: webcamoid/WebcamoidPrivate
@@ -225,5 +229,4 @@ jobs:
 #          webcamoid-packages/windows/*
 #        name: Daily Build
 #        tag_name: daily-build
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
+#        token: ${{ secrets.UPLOAD_TOKEN }}

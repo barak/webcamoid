@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -32,11 +32,13 @@ T.MenuBar {
     hoverEnabled: true
     delegate: MenuBarItem { }
 
+    readonly property bool rtl: mirrored != (Qt.application.layoutDirection === Qt.RightToLeft)
     readonly property color activeHighlight: AkTheme.palette.active.highlight
     readonly property color disabledHighlight: AkTheme.palette.disabled.highlight
 
     contentItem: Row {
         spacing: control.spacing
+        layoutDirection: control.rtl? Qt.RightToLeft: Qt.LeftToRight
 
         Repeater {
             model: control.contentModel

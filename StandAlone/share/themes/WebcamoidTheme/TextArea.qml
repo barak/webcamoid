@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -51,7 +51,9 @@ T.TextArea {
                              AkUnit.create(36 * AkTheme.controlScale,
                                         "dp").pixels)
     font: AkTheme.fontSettings.body1
+    horizontalAlignment: rtl? Text.AlignRight: Text.AlignLeft
 
+    readonly property bool rtl: mirrored != (Qt.application.layoutDirection === Qt.RightToLeft)
     readonly property int animationTime: 200
     readonly property real placeHolderPadding:
         AkUnit.create(4 * AkTheme.controlScale, "dp").pixels
@@ -77,8 +79,9 @@ T.TextArea {
         text: control.placeholderText
         font: control.font
         color: control.placeholderTextColor
+        horizontalAlignment: control.rtl? Text.AlignRight: Text.AlignLeft
         verticalAlignment: control.verticalAlignment
-        elide: Text.ElideRight
+        elide: control.rtl? Text.ElideLeft: Text.ElideRight
         renderType: control.renderType
         visible: !control.length
                  && !control.preeditText

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,13 +21,13 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-GridLayout {
-    columns: 2
-
+ColumnLayout {
     // Number of frames to store.
     Label {
         id: txtNFrames
         text: qsTr("Number of frames")
+        font.bold: true
+        Layout.fillWidth: true
     }
     TextField {
         text: FrameOverlap.nFrames
@@ -46,6 +46,8 @@ GridLayout {
     Label {
         id: txtStride
         text: qsTr("Stride")
+        font.bold: true
+        Layout.fillWidth: true
     }
     TextField {
         text: FrameOverlap.stride

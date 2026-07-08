@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2021  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -31,6 +31,11 @@ set(QT_COMPONENTS
     Core
     Concurrent
     Widgets)
+
+if (ANDROID)
+    list(APPEND QT_COMPONENTS
+         CorePrivate)
+endif()
 
 find_package(QT NAMES Qt${QT_VERSION_MAJOR} COMPONENTS
              ${QT_COMPONENTS}

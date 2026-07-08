@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2023  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -43,6 +43,7 @@ class AudioDevJNIAudio: public AudioDev
         Q_INVOKABLE QList<AkAudioCaps::ChannelLayout> supportedChannelLayouts(const QString &device) override;
         Q_INVOKABLE QList<int> supportedSampleRates(const QString &device) override;
         Q_INVOKABLE bool init(const QString &device, const AkAudioCaps &caps) override;
+        Q_INVOKABLE AkAudioCaps negotiatedCaps() const override;
         Q_INVOKABLE QByteArray read() override;
         Q_INVOKABLE bool write(const AkAudioPacket &frame) override;
         Q_INVOKABLE bool uninit() override;
@@ -50,7 +51,10 @@ class AudioDevJNIAudio: public AudioDev
     private:
         AudioDevJNIAudioPrivate *d;
 
-        friend class AudioDevJNIAudioPrivate;
+    public slots:
+        void updateDevices() override;
+
+    friend class AudioDevJNIAudioPrivate;
 };
 
 #endif // AUDIODEVJNIAUDIO_H

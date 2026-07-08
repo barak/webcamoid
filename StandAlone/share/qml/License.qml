@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2015  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -20,8 +20,14 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import AkControls as AK
 
-Page {
+AK.MenuOption {
+    //: Program license.
+    title: qsTr("License")
+    subtitle: qsTr("know your rights")
+    icon: "image://icons/note"
+
     ScrollView {
         id: scrollView
         anchors.fill: parent
@@ -34,6 +40,7 @@ Page {
             wrapMode: Text.WordWrap
             readOnly: true
             width: scrollView.width
+            horizontalAlignment: Text.AlignLeft
         }
     }
 }

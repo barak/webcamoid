@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2022  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -20,62 +20,34 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import AkControls as AK
 
-GridLayout {
-    columns: 3
-
-    Connections {
-        target: Rotate
-
-        function onAngleChanged(angle)
-        {
-            sldAngle.value = angle
-            spbAngle.value = angle
-        }
-    }
-
-    // Configure rotation angle.
+ColumnLayout {
+    // Configure the rotation angle.
     Label {
         id: lblAngle
-        text: qsTr("Angle")
+        text: qsTr("Angle %1°").arg(sldAngle.value)
+        font.bold: true
+        Layout.fillWidth: true
     }
-    Slider {
+    AK.StickySlider {
         id: sldAngle
         value: Rotate.angle
         stepSize: 1
         to: 360
+        stickyPoints: [0, 90, 180, 270, 360]
         Layout.fillWidth: true
         Accessible.name: lblAngle.text
 
         onValueChanged: Rotate.angle = value
     }
-    SpinBox {
-        id: spbAngle
-        value: Rotate.angle
-        to: sldAngle.to
-        stepSize: sldAngle.stepSize
-        editable: true
-        Accessible.name: lblAngle.text
 
-        onValueChanged: Rotate.angle = Number(value)
-    }
-
-    Label {
-        id: txtKeep
+    Switch {
         text: qsTr("Keep resolution")
-    }
-    RowLayout {
-        Layout.columnSpan: 2
+        checked: Rotate.keep
+        Accessible.name: text
         Layout.fillWidth: true
 
-        Label {
-            Layout.fillWidth: true
-        }
-        Switch {
-            checked: Rotate.keep
-            Accessible.name: txtKeep.text
-
-            onCheckedChanged: Rotate.keep = checked
-        }
+        onCheckedChanged: Rotate.keep = checked
     }
 }

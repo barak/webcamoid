@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2021  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -21,8 +21,8 @@ cmake_minimum_required(VERSION 3.16)
 project(DesktopCapture)
 
 add_subdirectory(src)
-add_subdirectory(src/androidscreen)
 add_subdirectory(src/ffmpeg)
 add_subdirectory(src/pipewire)
 add_subdirectory(src/qtscreen)
+add_subdirectory(src/wlroots)
 add_subdirectory(src/xlib)

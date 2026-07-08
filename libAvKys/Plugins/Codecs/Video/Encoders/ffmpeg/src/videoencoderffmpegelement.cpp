@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2024  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -133,6 +133,7 @@ struct CodecInfo
     AkVideoEncoderCodecID codecID;
     AkVideoCaps::PixelFormatList formats;
     AkPropertyOptions options;
+    bool isHardware {false};
 };
 
 struct PixelFormatsTable
@@ -266,6 +267,10 @@ class VideoEncoderFFmpegElementPrivate
         void updateOutputCaps();
         void encodeFrame(const AkVideoPacket &src);
         void sendFrame(const AVPacket *avPacket) const;
+        static void ffmpegLogCallback(void *ptr,
+                                      int level,
+                                      const char *fmt,
+                                      va_list vl);
 };
 
 VideoEncoderFFmpegElement::VideoEncoderFFmpegElement():
@@ -363,6 +368,20 @@ AkPropertyOptions VideoEncoderFFmpegElement::options() const
         return {};
 
     return it->options;
+}
+
+bool VideoEncoderFFmpegElement::hasHardwareSupport(const QString &codec) const
+{
+    auto it = std::find_if(this->d->m_codecs.constBegin(),
+                           this->d->m_codecs.constEnd(),
+                           [&codec] (const CodecInfo &codecInfo) -> bool {
+        return codecInfo.name == codec;
+    });
+
+    if (it == this->d->m_codecs.constEnd())
+        return false;
+
+    return it->isHardware;
 }
 
 AkPacket VideoEncoderFFmpegElement::iVideoStream(const AkVideoPacket &packet)
@@ -471,6 +490,13 @@ bool VideoEncoderFFmpegElement::setState(ElementState state)
 VideoEncoderFFmpegElementPrivate::VideoEncoderFFmpegElementPrivate(VideoEncoderFFmpegElement *self):
     self(self)
 {
+#ifdef Q_OS_ANDROID
+    static std::once_flag videoEncoderFFmpegElementCallOnce;
+    std::call_once(videoEncoderFFmpegElementCallOnce, [] {
+        av_log_set_callback(ffmpegLogCallback);
+    });
+#endif
+
     this->m_videoConverter.setAspectRatioMode(AkVideoConverter::AspectRatioMode_Fit);
 
     QObject::connect(self,
@@ -789,18 +815,20 @@ void VideoEncoderFFmpegElementPrivate::listCodecs()
                                 QString(codec->name):
                                 QString(codec->long_name);
 
-        if (codec->capabilities & AV_CODEC_CAP_HARDWARE) {
+        if (codec->capabilities & (AV_CODEC_CAP_HARDWARE | AV_CODEC_CAP_HYBRID)) {
             hwCodecs << CodecInfo {QString(codec->name),
                                    description,
                                    FFmpegCodecs::byFFCodecID(codec->id)->codecID,
                                    formats,
-                                   options};
+                                   options,
+                                   true};
         } else {
             swCodecs << CodecInfo {QString(codec->name),
                                    description,
                                    FFmpegCodecs::byFFCodecID(codec->id)->codecID,
                                    formats,
-                                   options};
+                                   options,
+                                   false};
         }
     }
 
@@ -1072,7 +1100,26 @@ bool VideoEncoderFFmpegElementPrivate::init()
          int(this->m_videoConverter.outputCaps().fps().den())};
     this->m_context->time_base = {this->m_context->framerate.den,
                                   this->m_context->framerate.num};
-    this->m_context->bit_rate = self->bitrate();
+
+    switch (self->bitrateMode()) {
+    case AkVideoEncoder::BitrateMode_CBR:
+        this->m_context->bit_rate     = self->bitrate();
+        this->m_context->rc_min_rate  = self->bitrate();
+        this->m_context->rc_max_rate  = self->bitrate();
+        this->m_context->rc_buffer_size = 2 * self->bitrate(); // buffer = 2s
+
+        break;
+
+    case AkVideoEncoder::BitrateMode_VBR:
+    default:
+        this->m_context->bit_rate     = self->bitrate();
+        this->m_context->rc_min_rate  = 0;
+        this->m_context->rc_max_rate  = 0;
+        this->m_context->rc_buffer_size = 0;
+
+        break;
+    }
+
     this->m_context->gop_size =
             qMax(self->gop() * this->m_videoConverter.outputCaps().fps().num()
                  / (1000 * this->m_videoConverter.outputCaps().fps().den()), 1);
@@ -1304,6 +1351,44 @@ void VideoEncoderFFmpegElementPrivate::sendFrame(const AVPacket *avPacket) const
     packet.setIndex(this->m_index);
 
     emit self->oStream(packet);
+}
+
+void VideoEncoderFFmpegElementPrivate::ffmpegLogCallback(void *ptr,
+                                                         int level,
+                                                         const char *fmt,
+                                                         va_list vl)
+{
+    if (level > av_log_get_level())
+        return;
+
+    char line[4096];
+    int printPrefix = 1;
+    av_log_format_line(ptr, level, fmt, vl, line, sizeof(line), &printPrefix);
+
+    auto message = QString::fromUtf8(line).trimmed();
+
+    if (message.isEmpty())
+        return;
+
+    switch (level) {
+        case AV_LOG_PANIC:
+        case AV_LOG_FATAL:
+        case AV_LOG_ERROR:
+            qCritical() << "FFmpeg:" << message;
+            break;
+
+        case AV_LOG_WARNING:
+            qWarning() << "FFmpeg:" << message;
+            break;
+
+        case AV_LOG_INFO:
+            qInfo() << "FFmpeg:" << message;
+            break;
+
+        default: // AV_LOG_VERBOSE, AV_LOG_DEBUG, AV_LOG_TRACE
+            qDebug() << "FFmpeg:" << message;
+            break;
+    }
 }
 
 #include "moc_videoencoderffmpegelement.cpp"

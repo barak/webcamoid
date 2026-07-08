@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2023  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -481,7 +481,14 @@ QList<int> AudioDevJNIAudio::supportedSampleRates(const QString &device)
 bool AudioDevJNIAudio::init(const QString &device, const AkAudioCaps &caps)
 {
     QMutexLocker mutexLocker(&this->d->m_mutex);
-    this->d->m_curCaps = caps;
+
+    if (this->d->m_curCaps != caps) {
+        this->d->m_curCaps = caps;
+        this->d->m_mutex.unlock();
+        emit this->negotiatedCapsChanged(this->d->m_curCaps);
+        this->d->m_mutex.lock();
+    }
+
     this->d->m_bufferSize =
             qMax(this->latency() * caps.rate() / 1000, 1)
                  * AkAudioCaps::bitsPerSample(caps.format())
@@ -495,6 +502,11 @@ bool AudioDevJNIAudio::init(const QString &device, const AkAudioCaps &caps)
     return device.startsWith("OutputDevice_")?
                 this->d->initPlayer(device, caps):
                 this->d->initRecorder(device, caps);
+}
+
+AkAudioCaps AudioDevJNIAudio::negotiatedCaps() const
+{
+    return this->d->m_curCaps;
 }
 
 QByteArray AudioDevJNIAudio::read()
@@ -595,6 +607,11 @@ bool AudioDevJNIAudio::uninit()
     }
 
     return true;
+}
+
+void AudioDevJNIAudio::updateDevices()
+{
+    this->d->updateDevices();
 }
 
 AudioDevJNIAudioPrivate::AudioDevJNIAudioPrivate(AudioDevJNIAudio *self):
@@ -930,8 +947,12 @@ void AudioDevJNIAudioPrivate::devicesUpdated(JNIEnv *env,
     Q_UNUSED(env)
     Q_UNUSED(obj)
 
+#if 0
     auto self = reinterpret_cast<AudioDevJNIAudioPrivate *>(intptr_t(userPtr));
     self->updateDevices();
+#else
+    Q_UNUSED(userPtr)
+#endif
 }
 
 void AudioDevJNIAudioPrivate::initAudioManager()
@@ -983,8 +1004,8 @@ void AudioDevJNIAudioPrivate::updateDevices()
     this->initAudioManager();
 
     static const QList<AkAudioCaps::SampleFormat> preferredFormats {
-        AkAudioCaps::SampleFormat_s16,
         AkAudioCaps::SampleFormat_s32,
+        AkAudioCaps::SampleFormat_s16,
         AkAudioCaps::SampleFormat_flt,
         AkAudioCaps::SampleFormat_u8,
     };
@@ -1137,7 +1158,7 @@ void AudioDevJNIAudioPrivate::updateDevices()
                             AkAudioCaps::Layout_stereo:
                             AkAudioCaps::Layout_mono;
 
-                static const int wantedSampleRate = 44100;
+                static const int wantedSampleRate = 48000;
                 int preferredSampleRate = 0;
                 int k = std::numeric_limits<int>::max();
 

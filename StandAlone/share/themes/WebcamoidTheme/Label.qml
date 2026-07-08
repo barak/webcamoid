@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -30,9 +30,11 @@ T.Label {
     linkColor: enabled?
                    activeLink:
                    disabledLink
-    elide: Text.ElideRight
+    horizontalAlignment: rtl? Text.AlignRight: Text.AlignLeft
+    elide: rtl? Text.ElideLeft: Text.ElideRight
     font: AkTheme.fontSettings.body1
 
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
     readonly property color activeLink: AkTheme.palette.active.link
     readonly property color activeWindowText: AkTheme.palette.active.windowText
     readonly property color disabledLink: AkTheme.palette.disabled.link

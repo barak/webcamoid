@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2022  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -465,24 +465,32 @@ PipewireScreenDev::PipewireScreenDev():
     ScreenDev()
 {
     this->d = new PipewireScreenDevPrivate(this);
-    size_t i = 0;
 
-    for (auto &screen: QGuiApplication::screens()) {
-        QObject::connect(screen,
-                         &QScreen::geometryChanged,
-                         this,
-                         [=]() { this->srceenResized(int(i)); });
-        i++;
+    auto binDir = QDir(BINDIR).absolutePath();
+    QDir appDir = QCoreApplication::applicationDirPath();
+    auto pwModulesDir = QDir(PIPEWIRE_MODULES_PATH).absolutePath();
+    auto relPwModulesDir = QDir(binDir).relativeFilePath(pwModulesDir);
+
+    if (appDir.cd(relPwModulesDir)) {
+        auto path = appDir.absolutePath();
+        path.replace("/", QDir::separator());
+
+        if (QFileInfo::exists(path)
+            && qEnvironmentVariableIsEmpty("PIPEWIRE_MODULE_DIR"))
+            qputenv("PIPEWIRE_MODULE_DIR", path.toLocal8Bit());
     }
 
-    QObject::connect(qApp,
-                     &QGuiApplication::screenAdded,
-                     this,
-                     &PipewireScreenDev::screenAdded);
-    QObject::connect(qApp,
-                     &QGuiApplication::screenRemoved,
-                     this,
-                     &PipewireScreenDev::screenRemoved);
+    auto spaPluginsDir = QDir(PIPEWIRE_SPA_PLUGINS_PATH).absolutePath();
+    auto relSpaPluginsDir = QDir(binDir).relativeFilePath(spaPluginsDir);
+
+    if (appDir.cd(relSpaPluginsDir)) {
+        auto path = appDir.absolutePath();
+        path.replace("/", QDir::separator());
+
+        if (QFileInfo::exists(path)
+            && qEnvironmentVariableIsEmpty("SPA_PLUGIN_DIR"))
+            qputenv("SPA_PLUGIN_DIR", path.toLocal8Bit());
+    }
 
     this->d->pwInit(nullptr, nullptr);
 }
@@ -546,6 +554,11 @@ AkVideoCaps PipewireScreenDev::caps(int stream)
                        this->d->m_fps);
 }
 
+bool PipewireScreenDev::canCaptureWindows() const
+{
+    return false;
+}
+
 bool PipewireScreenDev::canCaptureCursor() const
 {
     return true;
@@ -564,6 +577,13 @@ bool PipewireScreenDev::showCursor() const
 int PipewireScreenDev::cursorSize() const
 {
     return 0;
+}
+
+bool PipewireScreenDev::isWindow(const QString &media) const
+{
+    Q_UNUSED(media)
+
+    return false;
 }
 
 void PipewireScreenDev::setFps(const AkFrac &fps)
@@ -673,44 +693,8 @@ bool PipewireScreenDev::uninit()
     return true;
 }
 
-void PipewireScreenDev::screenAdded(QScreen *screen)
+void PipewireScreenDev::updateDevices()
 {
-    Q_UNUSED(screen)
-    size_t i = 0;
-
-    for (auto &screen_: QGuiApplication::screens()) {
-        if (screen_ == screen)
-            QObject::connect(screen_,
-                             &QScreen::geometryChanged,
-                             this,
-                             [=]() { this->srceenResized(int(i)); });
-
-        i++;
-    }
-
-    emit this->mediasChanged(this->medias());
-}
-
-void PipewireScreenDev::screenRemoved(QScreen *screen)
-{
-    Q_UNUSED(screen)
-
-    emit this->mediasChanged(this->medias());
-}
-
-void PipewireScreenDev::srceenResized(int screen)
-{
-    auto screens = QGuiApplication::screens();
-
-    if (screen < 0 || screen >= screens.size())
-        return;
-
-    auto widget = screens[screen];
-
-    if (!widget)
-        return;
-
-    emit this->sizeChanged("screen://pipewire", widget->size());
 }
 
 void PipewireScreenDev::responseReceived(quint32 response,

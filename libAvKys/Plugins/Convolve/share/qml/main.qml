@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,11 +21,15 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Ak
+import AkControls as AK
 
 ColumnLayout {
-    id: configs
+    id: root
+    layoutDirection: rtl? Qt.RightToLeft: Qt.LeftToRight
 
-    property int cellSize: 50
+    property int cellSize: AkUnit.create(50 * AkTheme.controlScale, "dp").pixels
+
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
 
     function updateKernel(index, value)
     {
@@ -34,19 +38,11 @@ ColumnLayout {
         Convolve.kernel = kernel
     }
 
-    Connections {
-        target: Convolve
-
-        function onBiasChanged(bias)
-        {
-            sldBias.value = bias
-            spbBias.value = bias
-        }
-    }
-
     Label {
         //: https://en.wikipedia.org/wiki/Kernel_(image_processing)
         text: qsTr("Convolve matrix")
+        font.bold: true
+        Layout.fillWidth: true
     }
     GridLayout {
         columns: 3
@@ -166,51 +162,40 @@ ColumnLayout {
         }
     }
 
-    GridLayout {
-        columns: 3
-
-        Label {
-            id: txtFactor
-            text: qsTr("Factor")
+    Label {
+        id: txtFactor
+        text: qsTr("Factor")
+        font.bold: true
+        Layout.fillWidth: true
+    }
+    TextField {
+        text: AkFrac.create(Convolve.factor).string
+        placeholderText: qsTr("Factor")
+        validator: RegularExpressionValidator {
+            regularExpression: /-?\d+\/\d+/
         }
-        TextField {
-            text: AkFrac.create(Convolve.factor).string
-            placeholderText: qsTr("Factor")
-            validator: RegularExpressionValidator {
-                regularExpression: /-?\d+\/\d+/
-            }
-            Layout.columnSpan: 2
-            Layout.fillWidth: true
-            Accessible.name: txtFactor.text
+        Layout.fillWidth: true
+        Accessible.name: txtFactor.text
 
-            onTextChanged: Convolve.factor = AkFrac.create(text).toVariant()
-        }
+        onTextChanged: Convolve.factor = AkFrac.create(text).toVariant()
+    }
 
-        Label {
-            id: txtBias
-            text: qsTr("Bias")
-        }
-        Slider {
-            id: sldBias
-            value: Convolve.bias
-            stepSize: 1
-            from: -255
-            to: 255
-            Layout.fillWidth: true
-            Accessible.name: txtBias.text
+    Label {
+        id: txtBias
+        text: qsTr("Bias")
+        font.bold: true
+        Layout.fillWidth: true
+    }
+    AK.StickySlider {
+        id: sldBias
+        value: Convolve.bias
+        stepSize: 1
+        from: -255
+        to: 255
+        stickyPoints: [0]
+        Layout.fillWidth: true
+        Accessible.name: txtBias.text
 
-            onValueChanged: Convolve.bias = value
-        }
-        SpinBox {
-            id: spbBias
-            value: Convolve.bias
-            stepSize: sldBias.stepSize
-            from: sldBias.from
-            to: sldBias.to
-            editable: true
-            Accessible.name: txtBias.text
-
-            onValueChanged: Convolve.bias = Number(value)
-        }
+        onValueChanged: Convolve.bias = value
     }
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2024  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -22,8 +22,6 @@ set -e
 
 if [ ! -z "${GITHUB_SHA}" ]; then
     export GIT_COMMIT_HASH="${GITHUB_SHA}"
-elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
-    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
 
 if [ -z "${DISABLE_CCACHE}" ]; then
@@ -31,10 +29,13 @@ if [ -z "${DISABLE_CCACHE}" ]; then
 fi
 
 if [ "${UPLOAD}" == 1 ]; then
-    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON -DNOQTCAMERA=ON -DNOQTSCREENCAPTURE=ON -DNOLSMASH=ON -DNOLIBMP4V2=ON -DNOLIBX264=ON -DNOFDKAAC=ON -DNOFAAC=ON -DNOLAME=ON -DNOLIBWEBM=ON -DNOLIBVPX=ON -DNOAOMAV1=ON -DNOSVTAV1=ON -DNORAVIE=ON -DNOLIBOPUS=ON -DNOLIBVORBIS=ON"
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOLIBAVDEVICE=ON -DNOQTCAMERA=ON"
 fi
 
 EXTRA_PARAMS="${EXTRA_PARAMS} -DNOFFMPEGSCREENCAP=ON"
+
+# Temporaly disable the screen capture
+EXTRA_PARAMS="${EXTRA_PARAMS} -DNOSCREENCAPTURE=OFF"
 
 if [ "${ENABLE_ADS}" == 1 ]; then
     EXTRA_PARAMS="${EXTRA_PARAMS} -DENABLE_ANDROID_ADS=ON"
@@ -49,6 +50,8 @@ if [ "${ENABLE_ADS}" == 1 ]; then
     else
         echo "Setting test ads"
     fi
+
+    rm -rf libAvKys/ExtraPlugins/*
 fi
 
 export JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:bin/java::')
@@ -116,7 +119,7 @@ for arch_ in $(echo "${TARGET_ARCH}" | tr ":" "\n"); do
     qt-cmake \
         -S . \
         -B "${buildDir}" \
-        -G "Unix Makefiles" \
+        -G "Ninja" \
         -DCMAKE_BUILD_TYPE=Release \
         -DQT_HOST_PATH=/usr \
         -DANDROID_PLATFORM="${ANDROID_MINIMUM_PLATFORM}" \
@@ -133,7 +136,7 @@ for arch_ in $(echo "${TARGET_ARCH}" | tr ":" "\n"); do
         -DLAME_INCLUDE_DIRS="${ANDROID_PREFIX_INCLUDE}" \
         ${EXTRA_PARAMS} \
         -DDAILY_BUILD="${DAILY_BUILD}"
-    cmake --build "${buildDir}" --parallel "${NJOBS}"
+    cmake --build "${buildDir}" --parallel "$(nproc)"
     cp -vf "${buildDir}/package_info.conf" build/
     cp -vf "${buildDir}/package_info_android.conf" build/
 done

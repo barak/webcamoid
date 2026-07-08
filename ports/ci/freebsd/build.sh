@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@ set -e
 
 if [ ! -z "${GITHUB_SHA}" ]; then
     export GIT_COMMIT_HASH="${GITHUB_SHA}"
-elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
-    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
+
+COMPILER=clang
 
 if [ "${COMPILER}" = clang ]; then
     COMPILER_C=clang
@@ -45,6 +45,7 @@ cmake \
     -LA \
     -S . \
     -B "${buildDir}" \
+    -G "Ninja" \
     -DQT_QMAKE_EXECUTABLE=qmake-qt6 \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
@@ -52,7 +53,6 @@ cmake \
     -DCMAKE_CXX_COMPILER="${COMPILER_CXX}" \
     -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
-    -DGST_PLUGINS_SCANNER_PATH=/usr/local/libexec/gstreamer-1.0/gst-plugin-scanner \
     -DDAILY_BUILD="${DAILY_BUILD}"
-cmake --build "${buildDir}" --parallel "${NJOBS}"
+cmake --build "${buildDir}" --parallel "$(nproc)"
 cmake --install "${buildDir}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -22,8 +22,6 @@ set -e
 
 if [ ! -z "${GITHUB_SHA}" ]; then
     export GIT_COMMIT_HASH="${GITHUB_SHA}"
-elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
-    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
 
 if [ "${COMPILER}" = clang ]; then
@@ -42,18 +40,8 @@ if [ -z "${DISABLE_CCACHE}" ]; then
 fi
 
 if [ "${UPLOAD}" == 1 ]; then
-    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON"
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOLIBAVDEVICE=ON"
 fi
-
-# Some anti-virus software seems to be detecting libVLC load as it were
-# malware:
-#
-# https://hijacklibs.net/entries/3rd_party/vlc/libvlc.html
-#
-# so disable it in all cases, even though its a legitimate usage in the case of
-# Webcamoid
-#
-# EXTRA_PARAMS="${EXTRA_PARAMS} -DNOVLC=ON"
 
 export PKG_CONFIG=${TARGET_ARCH}-w64-mingw32-pkg-config
 MINGW_PREFIX=/usr/${TARGET_ARCH}-w64-mingw32
@@ -69,6 +57,7 @@ mkdir "${buildDir}"
     -LA \
     -S . \
     -B "${buildDir}" \
+    -G "Ninja" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
     -DCMAKE_C_COMPILER="${COMPILER_C}" \
@@ -79,5 +68,5 @@ mkdir "${buildDir}"
     -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
     -DDAILY_BUILD="${DAILY_BUILD}"
-make -C "${buildDir}" -j"${NJOBS}"
-make -C "${buildDir}" install
+"${MINGW_PREFIX}/lib/qt6/bin/qt-cmake" --build "${buildDir}" --parallel "$(nproc)"
+"${MINGW_PREFIX}/lib/qt6/bin/qt-cmake" --install "${buildDir}"

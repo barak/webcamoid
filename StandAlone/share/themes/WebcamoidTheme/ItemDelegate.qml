@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -73,11 +73,13 @@ T.ItemDelegate {
                    || control.display == IconLabel.TextUnderIcon?
                        Qt.AlignCenter | Qt.AlignVCenter:
                        Qt.AlignLeft | Qt.AlignVCenter
+        enabled: control.enabled
+        elide: Label.ElideNone
+        wrapMode: Label.WordWrap
         anchors.leftMargin: control.leftPadding
         anchors.left: control.left
         anchors.rightMargin: control.rightPadding
         anchors.right: control.right
-        enabled: control.enabled
     }
 
     background: Rectangle {

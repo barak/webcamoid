@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2024  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -39,6 +39,7 @@ Dialog {
 
         Label {
             text: qsTr("Log file saved")
+            wrapMode: Text.WordWrap
             Layout.fillWidth: true
         }
     }

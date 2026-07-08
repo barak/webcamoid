@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ else
     export DOWNLOAD_CMD="curl --retry 10 -sS -kLOC -"
 fi
 
-dnf -y upgrade-minimal --exclude=filesystem
+dnf -y --refresh upgrade-minimal --exclude=filesystem
 dnf -y install \
     lib64fontconfig1 \
     lib64gl1 \
@@ -61,10 +61,13 @@ if [ -e "${qtIFW}" ]; then
         --accept-licenses \
         --accept-messages \
         --confirm-command \
-        install
-    cd .local
-    cp -rvf ~/QtIFW/* .
-    cd ..
+        install || true
+
+    if [ -d ~/QtIFW ]; then
+        cd .local
+        cp -rvf ~/QtIFW/* .
+        cd ..
+    fi
 fi
 
 # Install AppImageTool
@@ -87,12 +90,8 @@ dnf -y install \
     cmake \
     gcc-c++ \
     git \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
     lib64alsa2-devel \
     lib64ffmpeg-devel \
-    lib64gstreamer-plugins-base1.0-devel \
-    lib64jack-devel \
     lib64kmod-devel \
     lib64pipewire-devel \
     lib64portaudio-devel \
@@ -106,15 +105,14 @@ dnf -y install \
     lib64qt6widgets-devel \
     lib64usb1.0-devel \
     lib64v4l-devel \
-    lib64vlc-devel \
     lib64xext-devel \
     lib64xfixes-devel \
     make \
+    ninja \
     patchelf \
     qtbase6-common-devel \
     qtquickcontrols25 \
     qttools6 \
     qtwayland6 \
-    vlc-plugin-common \
     x11-server-xvfb \
     xauth

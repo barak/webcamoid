@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2022  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -20,45 +20,26 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import AkControls as AK
 
-GridLayout {
-    columns: 3
-
-    Connections {
-        target: Gamma
-
-        function onGammaChanged(gamma)
-        {
-            sldGamma.value = gamma
-            spbGamma.value = gamma
-        }
-    }
-
+ColumnLayout {
     // Configure image gamma.
     Label {
         id: lblGamma
         text: qsTr("Gamma")
+        font.bold: true
+        Layout.fillWidth: true
     }
-    Slider {
+    AK.StickySlider {
         id: sldGamma
         value: Gamma.gamma
         stepSize: 1
         from: -255
         to: 255
+        stickyPoints: [0]
         Layout.fillWidth: true
         Accessible.name: lblGamma.text
 
         onValueChanged: Gamma.gamma = value
-    }
-    SpinBox {
-        id: spbGamma
-        value: Gamma.gamma
-        from: sldGamma.from
-        to: sldGamma.to
-        stepSize: sldGamma.stepSize
-        editable: true
-        Accessible.name: lblGamma.text
-
-        onValueChanged: Gamma.gamma = Number(value)
     }
 }

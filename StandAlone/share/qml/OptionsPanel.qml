@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -58,6 +58,8 @@ Pane {
     property int minimumHeight: AkUnit.create(100 * AkTheme.controlScale, "dp").pixels
     property variant contents: Item {}
     property real k: 0
+
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
     readonly property color activeDark: AkTheme.palette.active.dark
     readonly property color disabledDark: AkTheme.palette.disabled.dark
 
@@ -157,18 +159,20 @@ Pane {
     }
 
     GridLayout {
-        anchors.fill: parent
+        layoutDirection: optionsPanel.rtl? Qt.RightToLeft: Qt.LeftToRight
         columns: 2
         rowSpacing: 0
+        anchors.fill: parent
 
         Label {
             text: optionsPanel.title
-            elide: Label.ElideRight
             font: AkTheme.fontSettings.h6
+            elide: Label.ElideNone
+            wrapMode: Label.WordWrap
             enabled: optionsPanel.enabled
             Layout.fillWidth: true
-            Layout.leftMargin:
-                AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            Layout.leftMargin: optionsPanel.rtl? 0 : AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            Layout.rightMargin: optionsPanel.rtl? AkUnit.create(16 * AkTheme.controlScale, "dp").pixels: 0
             Layout.topMargin:
                 edge == Qt.TopEdge?
                     AkUnit.create(16 * AkTheme.controlScale, "dp").pixels:
@@ -183,8 +187,9 @@ Pane {
             icon.source: "image://icons/no"
             flat: true
             enabled: optionsPanel.enabled
-            Layout.rightMargin:
-                AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            implicitWidth: implicitHeight
+            Layout.leftMargin: optionsPanel.rtl? AkUnit.create(16 * AkTheme.controlScale, "dp").pixels: 0
+            Layout.rightMargin: optionsPanel.rtl? 0: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
             Layout.topMargin:
                 edge == Qt.TopEdge?
                     AkUnit.create(16 * AkTheme.controlScale, "dp").pixels:

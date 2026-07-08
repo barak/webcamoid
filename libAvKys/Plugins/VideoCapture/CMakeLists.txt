@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2021  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -31,4 +31,3 @@ add_subdirectory(src/capture/qtcamera)
 add_subdirectory(src/capture/v4l2sys)
 add_subdirectory(src/capture/v4lutils)
 add_subdirectory(src/convert/ffmpeg)
-add_subdirectory(src/convert/gstreamer)

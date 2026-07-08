@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -42,6 +42,7 @@ T.RadioDelegate {
     hoverEnabled: true
     clip: true
 
+    readonly property bool rtl: mirrored != (Qt.application.layoutDirection === Qt.RightToLeft)
     readonly property int animationTime: 200
     readonly property color activeHighlight: AkTheme.palette.active.highlight
     readonly property color activeHighlightedText: AkTheme.palette.active.highlightedText
@@ -54,8 +55,10 @@ T.RadioDelegate {
 
     indicator: Item {
         id: radioDelegateIndicator
-        anchors.right: control.right
-        anchors.rightMargin: control.rightPadding
+        anchors.left: control.rtl? control.left: undefined
+        anchors.leftMargin: control.rtl? control.leftPadding: 0
+        anchors.right: control.rtl? undefined: control.right
+        anchors.rightMargin: control.rtl? 0: control.rightPadding
         anchors.verticalCenter: control.verticalCenter
         implicitWidth:
             AkUnit.create(24 * AkTheme.controlScale, "dp").pixels
@@ -109,11 +112,13 @@ T.RadioDelegate {
         color: control.highlighted?
                    control.activeHighlightedText:
                    control.activeWindowText
-        alignment: Qt.AlignLeft | Qt.AlignVCenter
-        anchors.leftMargin: control.leftPadding
-        anchors.left: control.left
-        anchors.right: radioDelegateIndicator.left
         enabled: control.enabled
+        elide: Label.ElideNone
+        wrapMode: Label.WordWrap
+        anchors.leftMargin: control.rtl? 0: control.leftPadding
+        anchors.left: control.rtl? radioButtonIndicator.right: control.left
+        anchors.rightMargin: control.rtl? control.rightPadding: 0
+        anchors.right: control.rtl? control.right: radioButtonIndicator.left
     }
 
     background: Rectangle {

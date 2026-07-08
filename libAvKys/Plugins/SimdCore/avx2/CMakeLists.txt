@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2025  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -50,16 +50,10 @@ include(CheckCXXCompilerFlag)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     check_cxx_compiler_flag("/arch:AVX2" COMPILER_SUPPORTS_AVX2)
-
-    if (COMPILER_SUPPORTS_AVX2)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
-    endif()
+    set(SIMD_FLAGS /arch:AVX2)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
-
-    if (COMPILER_SUPPORTS_AVX2)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
-    endif()
+    set(SIMD_FLAGS -mavx2)
 endif()
 
 if (BUILD_PROCESSOR_X86 AND COMPILER_SUPPORTS_AVX2 AND NOT NOSIMDAVX2)
@@ -72,6 +66,10 @@ if (BUILD_PROCESSOR_X86 AND COMPILER_SUPPORTS_AVX2 AND NOT NOSIMDAVX2)
 else ()
     add_library(SimdCore_avx2 EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
+
+if (COMPILER_SUPPORTS_AVX2)
+    target_compile_options(SimdCore_avx2 PRIVATE ${SIMD_FLAGS})
+endif()
 
 set_target_properties(SimdCore_avx2 PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}

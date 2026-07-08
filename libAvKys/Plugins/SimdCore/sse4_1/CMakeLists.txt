@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2025  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -44,22 +44,16 @@ set(SOURCES
     ../commons/plugin.h
     pspec.json)
 
-# Check if AVX2 is supported
+# Check if SSE4.1 is supported
 
 include(CheckCXXCompilerFlag)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     check_cxx_compiler_flag("/arch:SSE4.2" COMPILER_SUPPORTS_SSE4_1)
-
-    if (COMPILER_SUPPORTS_SSE4_1)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE4.2")
-    endif()
+    set(SIMD_FLAGS /arch:SSE4.2)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     check_cxx_compiler_flag("-msse4.1" COMPILER_SUPPORTS_SSE4_1)
-
-    if (COMPILER_SUPPORTS_SSE4_1)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
-    endif()
+    set(SIMD_FLAGS -msse4.1)
 endif()
 
 if (BUILD_PROCESSOR_X86 AND COMPILER_SUPPORTS_SSE4_1 AND NOT NOSIMDSSE4_1)
@@ -72,6 +66,10 @@ if (BUILD_PROCESSOR_X86 AND COMPILER_SUPPORTS_SSE4_1 AND NOT NOSIMDSSE4_1)
 else ()
     add_library(SimdCore_sse4_1 EXCLUDE_FROM_ALL ${SOURCES})
 endif ()
+
+if (COMPILER_SUPPORTS_SSE4_1)
+    target_compile_options(SimdCore_sse4_1 PRIVATE ${SIMD_FLAGS})
+endif()
 
 set_target_properties(SimdCore_sse4_1 PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BUILDDIR}/${AKPLUGINSDIR}

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2024  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -199,11 +199,11 @@ class AudioDevPipeWirePrivate
         spa_hook m_deviceHook;
         spa_hook m_streamHook;
         AkAudioCaps m_deviceCaps;
-        AkAudioCaps m_curCaps;
         QByteArray m_buffers;
         AkAudioConverter m_audioConvert;
         size_t m_maxBufferSize {0};
         bool m_isCapture {false};
+        int m_pendingNodes {0};
 
         // PipeWire function pointers
 
@@ -262,7 +262,7 @@ class AudioDevPipeWirePrivate
                                    uint32_t id,
                                    const struct spa_pod *param);
         static void onProcess(void *userData);
-        void pipewireDevicesLoop();
+        void updateDevices();
         const spa_pod *buildFormat(struct spa_pod_builder *podBuilder,
                                    spa_audio_format format,
                                    int channels,
@@ -647,24 +647,40 @@ AudioDevPipeWire::AudioDevPipeWire(QObject *parent):
 {
     this->d = new AudioDevPipeWirePrivate(this);
 
+    auto binDir = QDir(BINDIR).absolutePath();
+    QDir appDir = QCoreApplication::applicationDirPath();
+    auto pwModulesDir = QDir(PIPEWIRE_MODULES_PATH).absolutePath();
+    auto relPwModulesDir = QDir(binDir).relativeFilePath(pwModulesDir);
+
+    if (appDir.cd(relPwModulesDir)) {
+        auto path = appDir.absolutePath();
+        path.replace("/", QDir::separator());
+
+        if (QFileInfo::exists(path)
+            && qEnvironmentVariableIsEmpty("PIPEWIRE_MODULE_DIR"))
+            qputenv("PIPEWIRE_MODULE_DIR", path.toLocal8Bit());
+    }
+
+    auto spaPluginsDir = QDir(PIPEWIRE_SPA_PLUGINS_PATH).absolutePath();
+    auto relSpaPluginsDir = QDir(binDir).relativeFilePath(spaPluginsDir);
+
+    if (appDir.cd(relSpaPluginsDir)) {
+        auto path = appDir.absolutePath();
+        path.replace("/", QDir::separator());
+
+        if (QFileInfo::exists(path)
+            && qEnvironmentVariableIsEmpty("SPA_PLUGIN_DIR"))
+            qputenv("SPA_PLUGIN_DIR", path.toLocal8Bit());
+    }
+
     this->d->pwInit(nullptr, nullptr);
-    auto result =
-        QtConcurrent::run(&this->d->m_threadPool,
-                          &AudioDevPipeWirePrivate::pipewireDevicesLoop,
-                          this->d);
-    Q_UNUSED(result)
+    this->d->updateDevices();
 }
 
 AudioDevPipeWire::~AudioDevPipeWire()
 {
     this->uninit();
-
-    if (this->d->m_pwDevicesLoop) {
-        this->d->pwMainLoopQuit(this->d->m_pwDevicesLoop);
-        this->d->m_threadPool.waitForDone();
-        this->d->pwDeinit();
-    }
-
+    this->d->pwDeinit();
     delete this->d;
 }
 
@@ -755,7 +771,7 @@ AkAudioCaps AudioDevPipeWire::preferredFormat(const QString &device)
         auto layout = channelLayouts.contains(AkAudioCaps::Layout_mono)?
                           AkAudioCaps::Layout_mono:
                           channelLayouts.first();
-        caps = {format, layout, false, 8000};
+        caps = {format, layout, false, 48000};
     }
 
     this->d->m_mutex.unlock();
@@ -809,8 +825,6 @@ bool AudioDevPipeWire::init(const QString &device, const AkAudioCaps &caps)
         return false;
 
     this->d->m_curDevice = device;
-    this->d->m_curCaps = caps;
-    this->d->m_curCaps = caps;
 
     this->d->m_mutex.lock();
     this->d->m_isCapture = std::find(this->d->m_sources.cbegin(),
@@ -860,12 +874,17 @@ bool AudioDevPipeWire::init(const QString &device, const AkAudioCaps &caps)
         return false;
     }
 
+#if PW_CHECK_VERSION(0, 3, 44)
+    char cCurDev[2048];
+    snprintf(cCurDev, 2048, "%s", this->d->m_curDevice.toStdString().c_str());
+#endif
+
     spa_dict_item items[] = {
         {PW_KEY_MEDIA_TYPE, "Audio"},
         {PW_KEY_MEDIA_CATEGORY, this->d->m_isCapture? "Capture": "Playback"},
         {PW_KEY_MEDIA_ROLE, "Music"},
 #if PW_CHECK_VERSION(0, 3, 44)
-        {PW_KEY_TARGET_OBJECT, this->d->m_curDevice.toStdString().c_str()},
+        {PW_KEY_TARGET_OBJECT, cCurDev},
 #endif
     };
 
@@ -901,12 +920,17 @@ bool AudioDevPipeWire::init(const QString &device, const AkAudioCaps &caps)
                              PW_ID_ANY,
                              pw_stream_flags(PW_STREAM_FLAG_AUTOCONNECT
                                              | PW_STREAM_FLAG_MAP_BUFFERS
-                                             | PW_STREAM_FLAG_RT_PROCESS ),
+                                             | PW_STREAM_FLAG_RT_PROCESS),
                              params.data(),
                              params.size());
     this->d->pwThreadLoopUnlock(this->d->m_pwStreamLoop);
 
     return true;
+}
+
+AkAudioCaps AudioDevPipeWire::negotiatedCaps() const
+{
+    return this->d->m_deviceCaps;
 }
 
 QByteArray AudioDevPipeWire::read()
@@ -977,6 +1001,11 @@ bool AudioDevPipeWire::uninit()
     return true;
 }
 
+void AudioDevPipeWire::updateDevices()
+{
+    this->d->updateDevices();
+}
+
 AudioDevPipeWirePrivate::AudioDevPipeWirePrivate(AudioDevPipeWire *self):
     self(self)
 {
@@ -1020,6 +1049,14 @@ void AudioDevPipeWirePrivate::sequenceDone(void *userData, uint32_t id, int seq)
 
     auto self = reinterpret_cast<AudioDevPipeWirePrivate *>(userData);
     self->m_sequenceParams.remove(seq - 1);
+
+    // Each node fires sequenceDone once its EnumFormat params are done.
+    // When all pending nodes finish, the enumeration is complete and we
+    // can quit the loop.
+    self->m_pendingNodes--;
+
+    if (self->m_pendingNodes <= 0 && self->m_pwDevicesLoop)
+        self->pwMainLoopQuit(self->m_pwDevicesLoop);
 }
 
 void AudioDevPipeWirePrivate::readFormats(int seq, const spa_pod *param)
@@ -1196,6 +1233,9 @@ void AudioDevPipeWirePrivate::deviceAdded(void *userData,
                                    &hook,
                                    &pipewireAudioNodeEvents,
                                    self);
+    // Each bound node will trigger sequenceDone once; track how many
+    // are pending so updateDevices() knows when enumeration is complete.
+    self->m_pendingNodes++;
 
     if (isSink)
         emit self->self->outputsChanged(self->m_sinks.values());
@@ -1295,6 +1335,8 @@ void AudioDevPipeWirePrivate::onParamChanged(void *userData,
         self->m_audioConvert.setOutputCaps(self->m_deviceCaps);
         self->m_audioConvert.reset();
 
+        emit self->self->negotiatedCapsChanged(self->m_deviceCaps);
+
         break;
     }
 
@@ -1344,10 +1386,12 @@ void AudioDevPipeWirePrivate::onProcess(void *userData)
 
         auto remainingSize = self->m_buffers.size() - copySize;
 
-        if (remainingSize > 0)
+        if (remainingSize > 0) {
             self->m_buffers = self->m_buffers.mid(copySize, remainingSize);
-        else
+        } else {
             self->m_buffers.clear();
+            self->m_bufferIsNotFull.wakeAll();
+        }
 
         if (self->m_buffers.size() < self->m_maxBufferSize)
             self->m_bufferIsNotFull.wakeAll();
@@ -1363,7 +1407,7 @@ void AudioDevPipeWirePrivate::onProcess(void *userData)
     self->pwStreamQueueBuffer(self->m_pwStream, buffer);
 }
 
-void AudioDevPipeWirePrivate::pipewireDevicesLoop()
+void AudioDevPipeWirePrivate::updateDevices()
 {
     this->m_pwDevicesLoop = this->pwMainLoopNew(nullptr);
 

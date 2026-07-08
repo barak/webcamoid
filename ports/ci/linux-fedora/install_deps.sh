@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2017  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -62,10 +62,13 @@ if [ -e "${qtIFW}" ]; then
         --accept-licenses \
         --accept-messages \
         --confirm-command \
-        install
-    cd .local
-    cp -rvf ~/QtIFW/* .
-    cd ..
+        install || true
+
+    if [ -d ~/QtIFW ]; then
+        cd .local
+        cp -rvf ~/QtIFW/* .
+        cd ..
+    fi
 fi
 
 # Install AppImageTool
@@ -84,7 +87,6 @@ fi
 
 dnf -y upgrade-minimal --exclude=systemd,systemd-libs
 dnf -y install \
-    SDL2-devel \
     alsa-lib-devel \
     ccache \
     clang \
@@ -96,15 +98,12 @@ dnf -y install \
     file \
     gcc-c++ \
     git \
-    gstreamer1-plugins-base \
-    gstreamer1-plugins-base-devel \
-    gstreamer1-plugins-good \
-    jack-audio-connection-kit-devel \
     kmod-devel \
     libusb1-devel \
     libuvc-devel \
     libv4l-devel \
     make \
+    ninja-build \
     patchelf \
     pipewire-devel \
     portaudio-devel \
@@ -117,8 +116,6 @@ dnf -y install \
     qt6-qtsvg-devel \
     qt6-qttools-devel \
     qt6-qtwayland \
-    vlc-core \
-    vlc-devel \
     which \
     xorg-x11-server-Xvfb \
     xorg-x11-xauth

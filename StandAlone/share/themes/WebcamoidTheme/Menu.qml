@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -25,9 +25,11 @@ import Ak
 
 T.Menu {
     id: control
-    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+    implicitWidth: Math.max(AkUnit.create(128 * AkTheme.controlScale, "dp").pixels,
+                            contentItem.contentWidth + leftInset + rightInset,
                             contentWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
+    implicitHeight: Math.max(AkUnit.create(48 * AkTheme.controlScale, "dp").pixels,
+                             contentItem.contentHeight + topInset + bottomInset,
                              contentHeight + topPadding + bottomPadding)
     margins: 0
     padding: 0
@@ -94,8 +96,6 @@ T.Menu {
     }
 
     background: Rectangle {
-        implicitWidth: AkUnit.create(128 * AkTheme.controlScale, "dp").pixels
-        implicitHeight: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
         color: enabled?
                    control.activeWindow:
                    control.disabledWindow

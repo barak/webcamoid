@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -23,8 +23,11 @@ import QtQuick.Layouts
 import Ak
 import AkControls as AK
 
-GridLayout {
-    columns: 2
+ColumnLayout {
+    id: root
+    layoutDirection: rtl? Qt.RightToLeft: Qt.LeftToRight
+
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
 
     function invert(color) {
         return Qt.rgba(1.0 - color.r, 1.0 - color.g, 1.0 - color.b, 1)
@@ -33,6 +36,8 @@ GridLayout {
     Label {
         id: txtShowLines
         text: qsTr("Show lines")
+        font.bold: true
+        Layout.fillWidth: true
     }
     TextField {
         text: ScanLines.showSize
@@ -49,6 +54,8 @@ GridLayout {
     Label {
         id: txtHideLines
         text: qsTr("Hide lines")
+        font.bold: true
+        Layout.fillWidth: true
     }
     TextField {
         text: ScanLines.hideSize
@@ -62,21 +69,14 @@ GridLayout {
 
         onTextChanged: ScanLines.hideSize = Number(text)
     }
-    Label {
-        id: txtHideColor
+    AK.ColorButton {
         text: qsTr("Hide color")
-    }
-    RowLayout {
-        Item {
-            Layout.fillWidth: true
-        }
-        AK.ColorButton {
-            currentColor: AkUtils.fromRgba(ScanLines.hideColor)
-            title: qsTr("Choose the hide color")
-            showAlphaChannel: true
-            Accessible.description: txtHideColor.text
+        currentColor: AkUtils.fromRgba(ScanLines.hideColor)
+        title: qsTr("Choose the hide color")
+        showAlphaChannel: true
+        horizontalAlignment: root.rtl? Text.AlignRight: Text.AlignLeft
+        Layout.fillWidth: true
 
-            onCurrentColorChanged: ScanLines.hideColor = AkUtils.toRgba(currentColor)
-        }
+        onCurrentColorChanged: ScanLines.hideColor = AkUtils.toRgba(currentColor)
     }
 }

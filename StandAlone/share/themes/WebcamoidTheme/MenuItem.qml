@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2019  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -46,6 +46,7 @@ T.MenuItem {
     clip: true
     hoverEnabled: true
 
+    readonly property bool rtl: mirrored != (Qt.application.layoutDirection === Qt.RightToLeft)
     readonly property int animationTime: 200
     readonly property color activeHighlight: AkTheme.palette.active.highlight
     readonly property color activeHighlightedText: AkTheme.palette.active.highlightedText
@@ -63,9 +64,11 @@ T.MenuItem {
                    AkUnit.create(24 * AkTheme.controlScale, "dp").pixels: 0
         height: control.checkable?
                     AkUnit.create(24 * AkTheme.controlScale, "dp").pixels: 0
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        anchors.verticalCenter: control.verticalCenter
+        anchors.left: control.rtl? undefined: control.left
+        anchors.leftMargin: control.rtl? 0: control.leftMargin
+        anchors.right: control.rtl? control.right: undefined
+        anchors.rightMargin: control.rtl? control.rightMargin: 0
         visible: control.checkable && control.checked
 
         AkColorizedImage {
@@ -88,9 +91,11 @@ T.MenuItem {
         id: menuItemArrow
         width: visible? AkUnit.create(24 * AkTheme.controlScale, "dp").pixels: 0
         height: visible? AkUnit.create(24 * AkTheme.controlScale, "dp").pixels: 0
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+        anchors.verticalCenter: control.verticalCenter
+        anchors.left: control.rtl? control.left: undefined
+        anchors.leftMargin: control.rtl? control.leftMargin: 0
+        anchors.right: control.rtl? undefined: control.right
+        anchors.rightMargin: control.rtl? 0: control.rightMargin
         visible: control.subMenu
 
         AkColorizedImage {
@@ -121,16 +126,17 @@ T.MenuItem {
                        control.activeHighlightedText:
                        control.icon.color
         text: control.text
-        anchors.left: menuItemCheck.right
-        anchors.leftMargin: 0
-        anchors.right: menuItemArrow.left
-        anchors.rightMargin: 0
         font: control.font
         color: control.highlighted?
                    control.activeHighlightedText:
                    control.activeWindowText
-        alignment: Qt.AlignLeft | Qt.AlignVCenter
         enabled: control.enabled
+        elide: Label.ElideNone
+        wrapMode: Label.WordWrap
+        anchors.left: control.rtl? menuItemArrow.right: menuItemCheck.right
+        anchors.leftMargin: 0
+        anchors.right: control.rtl? menuItemCheck.left: menuItemArrow.left
+        anchors.rightMargin: 0
     }
 
     background: Rectangle {

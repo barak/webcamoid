@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,10 +21,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Ak
+import AkControls as AK
 import Webcamoid
 
 Dialog {
     id: videoEffectsDialog
+    title: qsTr("Add video effect")
     standardButtons: Dialog.Ok | Dialog.Cancel
     width: AkUnit.create(420 * AkTheme.controlScale, "dp").pixels
     height: AkUnit.create(320 * AkTheme.controlScale, "dp").pixels
@@ -33,7 +35,6 @@ Dialog {
     bottomPadding: 0
     leftPadding: 0
     rightPadding: 0
-    title: qsTr("Add video effect")
 
     Connections {
         target: mediaTools
@@ -63,12 +64,13 @@ Dialog {
             id: glyEffects
             width: scrollView.width
 
-            ComboBox {
+            AK.LabeledComboBox {
                 id: cbkEffects
-                Accessible.description: currentText
+                label: qsTr("Effect")
+                textRole: "description"
                 model: ListModel {
                 }
-                textRole: "description"
+                Accessible.description: currentText
                 Layout.fillWidth: true
 
                 function update() {
@@ -111,7 +113,9 @@ Dialog {
             }
             Item {
                 id: preview
-                Layout.minimumHeight: AkUnit.create(240 * AkTheme.controlScale, "dp").pixels
+                Layout.minimumHeight: effectPreview.visible?
+                                        AkUnit.create(240 * AkTheme.controlScale, "dp").pixels:
+                                        0
                 Layout.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
                 Layout.bottomMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
                 Layout.fillWidth: true

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -25,6 +25,8 @@ import Ak
 ScrollView {
     id: effectsView
 
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
+
     signal openVideoEffectsDialog()
     signal openVideoEffectOptions(int effectIndex)
 
@@ -42,6 +44,7 @@ ScrollView {
 
     ColumnLayout {
         width: effectsView.width
+        layoutDirection: effectsView.rtl? Qt.RightToLeft: Qt.LeftToRight
 
         Button {
             text: qsTr("Add effect")

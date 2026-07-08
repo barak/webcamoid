@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2021  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ set(QT_MINIMUM_VERSION 6.2 CACHE INTERNAL "")
 
 if (APPLE)
     set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 12.3)
 else ()
     set(CMAKE_CXX_STANDARD 11)
 endif ()
@@ -29,7 +29,7 @@ endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(VER_MAJ 9)
-set(VER_MIN 3)
+set(VER_MIN 4)
 set(VER_PAT 0)
 set(VERSION ${VER_MAJ}.${VER_MIN}.${VER_PAT})
 
@@ -43,15 +43,12 @@ set(ANDROID_OPENSSL_SUFFIX "_3" CACHE STRING "Set OpenSSL libraries suffix")
 set(ENABLE_ANDROID_DEBUGGING OFF CACHE BOOL "Enable debugging logs in Android")
 set(ENABLE_ANDROID_LOG_FILE OFF CACHE BOOL "Enable debugging logs in Android")
 set(ENABLE_IPO OFF CACHE BOOL "Enable interprocedural optimization")
-set(ENABLE_SINGLE_INSTANCE OFF CACHE BOOL "Enable single instance mode (Buggy)")
 set(NOCHECKUPDATES OFF CACHE BOOL "Disable updates check")
 set(NOOPENMP OFF CACHE BOOL "Disable OpenMP support")
 set(NOALSA OFF CACHE BOOL "Disable ALSA support")
 set(NODSHOW OFF CACHE BOOL "Disable DirectShow support")
 set(NOFFMPEG OFF CACHE BOOL "Disable FFmpeg support")
 set(NOFFMPEGSCREENCAP OFF CACHE BOOL "Disable FFmpeg screen capture support")
-set(NOGSTREAMER OFF CACHE BOOL "Disable GStreamer support")
-set(NOJACK OFF CACHE BOOL "Disable JACK support")
 set(NOLIBAVDEVICE OFF CACHE BOOL "Disable libavdevice support in FFmpeg")
 set(NOLIBUSB OFF CACHE BOOL "Disable libusb  support")
 set(NOLIBUVC OFF CACHE BOOL "Disable libuvc  support")
@@ -63,13 +60,13 @@ set(NOPULSEAUDIO OFF CACHE BOOL "Disable PulseAudio support")
 set(NOQTCAMERA OFF CACHE BOOL "Disable video capture using QCamera support")
 set(NOQTSCREENCAPTURE OFF CACHE BOOL "Disable screen capture using QScreenCapture")
 set(NOSCREENCAPTURE OFF CACHE BOOL "Disable screen capture")
-set(NOSDL OFF CACHE BOOL "Disable SDL support")
 set(NOV4L2 OFF CACHE BOOL "Disable V4L2 support")
 set(NOV4LUTILS OFF CACHE BOOL "Disable V4l-utils support")
 set(NOVIDEOEFFECTS OFF CACHE BOOL "No build video effects")
-set(NOVLC OFF CACHE BOOL "Disable VLC support")
 set(NOWASAPI OFF CACHE BOOL "Disable WASAPI support")
+set(NOWLROOTS OFF CACHE BOOL "Disable Wayland capture support using wlroots protocol")
 set(NOXLIBSCREENCAP OFF CACHE BOOL "Disable screen capture using Xlib")
+set(SHOWCASE_MODE OFF CACHE BOOL "Enable this option when you want to take good screenshots of the program")
 
 # SIMD optimizations
 
@@ -86,29 +83,7 @@ set(NOSIMDRVV OFF CACHE BOOL "Disable RVV SIMD optimizations")
 # Dynamic libraries load
 
 set(PIPEWIRE_DYNLOAD OFF CACHE BOOL "Load PipeWire libraries on runtime instead of linking")
-
-# Video formats support
-
-set(NOLSMASH OFF CACHE BOOL "Disable MP4 format support using L-SMASH")
-set(NOLIBMP4V2 OFF CACHE BOOL "Disable MP4 format support using libmp4v2")
-set(NOLIBWEBM OFF CACHE BOOL "Disable Webm format support")
-
-# Video codecs support
-
-set(NOLIBVPX OFF CACHE BOOL "Disable VPX codec support")
-set(NOSVTVP9 OFF CACHE BOOL "Disable SVT-VP9 codec support")
-set(NOAOMAV1 OFF CACHE BOOL "Disable AV1 AOMedia codec support")
-set(NOSVTAV1 OFF CACHE BOOL "Disable SVT-AV1 codec support")
-set(NORAVIE OFF CACHE BOOL "Disable rav1e codec support")
-set(NOLIBX264 OFF CACHE BOOL "Disable libx264 codec support")
-
-# Audio codecs support
-
-set(NOLIBOPUS OFF CACHE BOOL "Disable Opus codec support")
-set(NOLIBVORBIS OFF CACHE BOOL "Disable Vorbis codec support")
-set(NOFDKAAC OFF CACHE BOOL "Disable FDK-AAC codec support")
-set(NOFAAC OFF CACHE BOOL "Disable faac codec support")
-set(NOLAME OFF CACHE BOOL "Disable faac codec support")
+set(PULSEAUDIO_DYNLOAD OFF CACHE BOOL "Load PulseAudio libraries on runtime instead of linking")
 
 # Ads configurations
 
@@ -151,8 +126,6 @@ if (APPLE OR FAKE_APPLE)
     set(QMLDIR ${DATAROOTDIR}/qt/qml)
     set(LICENSEDIR ${DATAROOTDIR})
     set(TRANSLATIONSDIR ${DATAROOTDIR}/translations)
-    set(OUTPUT_VLC_PLUGINS_DIR ${EXECPREFIX}/Plugins/vlc)
-    set(OUTPUT_GST_PLUGINS_DIR ${EXECPREFIX}/Plugins/gstreamer-1.0)
     set(JARDIR ${DATAROOTDIR}/java)
 elseif (ANDROID)
     set(BUILDDIR android-build)
@@ -165,8 +138,6 @@ elseif (ANDROID)
     set(QMLDIR ${DATAROOTDIR}/qt/qml)
     set(LICENSEDIR ${DATAROOTDIR})
     set(TRANSLATIONSDIR ${DATAROOTDIR}/translations)
-    set(OUTPUT_VLC_PLUGINS_DIR ${LIBDIR})
-    set(OUTPUT_GST_PLUGINS_DIR ${LIBDIR})
     set(JARDIR libs)
 else ()
     include(GNUInstallDirs)
@@ -182,8 +153,7 @@ else ()
     set(DATAROOTDIR ${CMAKE_INSTALL_DATAROOTDIR})
     set(LICENSEDIR ${DATAROOTDIR}/licenses/webcamoid)
     set(TRANSLATIONSDIR ${DATAROOTDIR}/webcamoid/translations)
-    set(OUTPUT_VLC_PLUGINS_DIR ${LIBDIR}/vlc/plugins)
-    set(OUTPUT_GST_PLUGINS_DIR ${LIBDIR}/gstreamer-1.0)
+    set(OUTPUT_PULSEAUDIO_MODULES_DIR ${LIBDIR}/pulseaudio)
     set(OUTPUT_PIPEWIRE_MODULES_DIR ${LIBDIR}/pipewire)
     set(OUTPUT_PIPEWIRE_SPA_PLUGINS_DIR ${LIBDIR}/pipewire-spa)
     set(JARDIR ${DATAROOTDIR}/java)
@@ -306,8 +276,7 @@ if (WIN32 AND NOT MSVC)
     set(CMAKE_LINK_LIBRARY_SUFFIX "")
 endif ()
 
-set(VLC_PLUGINS_PATH "${OUTPUT_VLC_PLUGINS_DIR}" CACHE PATH "VLC plugins search path")
-set(GST_PLUGINS_PATH "${OUTPUT_GST_PLUGINS_DIR}" CACHE PATH "GStreamer plugins search path")
+set(PULSEAUDIO_MODULES_PATH "${OUTPUT_PULSEAUDIO_MODULES_DIR}" CACHE PATH "PulseAudio modules search path")
 set(PIPEWIRE_MODULES_PATH "${OUTPUT_PIPEWIRE_MODULES_DIR}" CACHE PATH "PipeWire modules search path")
 set(PIPEWIRE_SPA_PLUGINS_PATH "${OUTPUT_PIPEWIRE_SPA_PLUGINS_DIR}" CACHE PATH "PipeWire SPA plugins search path")
 
@@ -325,21 +294,7 @@ if (ANDROID)
     endif ()
 endif ()
 
-# Guess gst-plugin-scanner path.
-
 find_package(PkgConfig)
-pkg_check_modules(GSTREAMER_PKG gstreamer-1.0)
-
-if (GSTREAMER_PKG_FOUND)
-    pkg_get_variable(GST_PLUGINS_SCANNER_DIR gstreamer-1.0 pluginscannerdir)
-
-    if (NOT "${GST_PLUGINS_SCANNER_DIR}" STREQUAL "")
-        file(GLOB GST_PLUGINS_SCANNER
-             ${GST_PLUGINS_SCANNER_DIR}/gst-plugin-scanner*)
-    endif ()
-endif ()
-
-set(GST_PLUGINS_SCANNER_PATH "${GST_PLUGINS_SCANNER}" CACHE FILEPATH "GStreamer plugins scanner utility path")
 
 # Sudoer tool search directory
 
@@ -483,6 +438,16 @@ elseif (UNIX)
         }" IS_ARM_TARGET)
 
         check_cxx_source_compiles("
+        #ifndef __powerpc64__
+        #error Not POWERPC64
+        #endif
+
+        int main()
+        {
+            return 0;
+        }" IS_POWERPC64_TARGET)
+
+        check_cxx_source_compiles("
         #ifndef __riscv
             #error Not RISC-V
         #endif
@@ -504,11 +469,14 @@ elseif (UNIX)
         elseif (IS_ARM_TARGET)
             set(TARGET_ARCH arm32)
             set(BUILD_PROCESSOR_ARM TRUE CACHE INTERNAL "")
+        elseif (IS_POWERPC64_TARGET)
+            set(TARGET_ARCH ppc64)
+            set(BUILD_PROCESSOR_POWERPC64 TRUE CACHE INTERNAL "")
         elseif (IS_RISCV_TARGET)
             set(TARGET_ARCH riscv)
+            set(BUILD_PROCESSOR_RISCV TRUE CACHE INTERNAL "")
         else ()
             set(TARGET_ARCH unknown)
-            set(BUILD_PROCESSOR_RISCV TRUE CACHE INTERNAL "")
         endif ()
     endif ()
 endif ()
@@ -638,10 +606,52 @@ function(enable_openmp TARGET)
     message(STATUS "Enabling OpenMP support for ${TARGET}")
     target_link_libraries(${TARGET} PRIVATE OpenMP::OpenMP_CXX)
     target_compile_definitions(${TARGET} PRIVATE OPENMP_ENABLED)
-
-    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        target_compile_options(${TARGET} PRIVATE -fopenmp)
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-        target_compile_options(${TARGET} PRIVATE /openmp)
-    endif ()
 endfunction()
+
+# Try detecting Qmake executable.
+
+set(QT_QMAKE_EXECUTABLE qmake CACHE FILEPATH "Qt qmake path")
+find_program(QT_QMAKE_EXECUTABLE_BIN
+             NAMES "${QT_QMAKE_EXECUTABLE}"
+             CACHE FILEPATH "Detected qmake executable")
+
+# Retrieve useful variables related to Qt installation.
+
+if (QT_QMAKE_EXECUTABLE_BIN)
+    if(NOT QT_INSTALL_PREFIX)
+        execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_PREFIX
+                        OUTPUT_VARIABLE QT_INSTALL_PREFIX
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(QT_INSTALL_PREFIX "${QT_INSTALL_PREFIX}" CACHE PATH "Qt install prefix")
+    endif()
+
+    if(NOT QT_INSTALL_LIBS)
+        execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_LIBS
+                        OUTPUT_VARIABLE QT_INSTALL_LIBS
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(QT_INSTALL_LIBS "${QT_INSTALL_LIBS}" CACHE PATH "Qt libs directory")
+    endif()
+
+    if(NOT QT_INSTALL_BINS)
+        execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_BINS
+                        OUTPUT_VARIABLE QT_INSTALL_BINS
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(QT_INSTALL_BINS "${QT_INSTALL_BINS}" CACHE PATH "Qt bin directory")
+    endif()
+
+    if(NOT QT_INSTALL_PLUGINS)
+        execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_PLUGINS
+                        OUTPUT_VARIABLE QT_INSTALL_PLUGINS
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(QT_INSTALL_PLUGINS "${QT_INSTALL_PLUGINS}" CACHE PATH "Qt plugins directory")
+    endif()
+
+    if(NOT QT_INSTALL_QML)
+        execute_process(COMMAND ${QT_QMAKE_EXECUTABLE_BIN} -query QT_INSTALL_QML
+                        OUTPUT_VARIABLE QT_INSTALL_QML
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(QT_INSTALL_QML "${QT_INSTALL_QML}" CACHE PATH "Qt QML directory")
+    endif()
+endif ()
+
+set(QT_INSTALL_SRC "${QT_INSTALL_PREFIX}/src" CACHE PATH "Qt sources templates directory")

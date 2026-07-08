@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -64,12 +64,14 @@ class AKCOMMONS_EXPORT AkElement: public QObject
 
         Q_INVOKABLE virtual bool link(const QObject *dstElement,
                                       Qt::ConnectionType connectionType=Qt::AutoConnection) const;
-
         Q_INVOKABLE virtual bool link(const AkElementPtr &dstElement,
+                                      Qt::ConnectionType connectionType=Qt::AutoConnection) const;
+        Q_INVOKABLE virtual bool link(const AkElement &dstElement,
                                       Qt::ConnectionType connectionType=Qt::AutoConnection) const;
 
         Q_INVOKABLE virtual bool unlink(const QObject *dstElement) const;
         Q_INVOKABLE virtual bool unlink(const AkElementPtr &dstElement) const;
+        Q_INVOKABLE virtual bool unlink(const AkElement &dstElement) const;
 
         Q_INVOKABLE static bool link(const AkElementPtr &srcElement,
                                      const QObject *dstElement,

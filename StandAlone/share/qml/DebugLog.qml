@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2024  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -23,12 +23,23 @@ import QtQuick.Layouts
 import Qt.labs.platform as LABS
 import Qt.labs.settings 1.0
 import Ak
+import AkControls as AK
 
-Page {
+AK.MenuOption {
+    id: root
+    title: qsTr("Debug Log")
+    subtitle: qsTr("Information to help fixing bugs in %1.").arg(mediaTools.applicationName)
+    icon: "image://icons/bug"
+
+    property int leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+    property int rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+
+    readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
+
     ScrollView {
         id: scrollView
         anchors.fill: parent
-        contentHeight: pathsConfigs.height
+        contentHeight: layout.height
         clip: true
 
         property int skipLines: 0
@@ -51,92 +62,90 @@ Page {
             }
         }
 
-        GridLayout {
-            id: pathsConfigs
-            columns: 3
+        ColumnLayout {
+            id: layout
             width: scrollView.width
+            layoutDirection: root.rtl? Qt.RightToLeft: Qt.LeftToRight
 
             property bool isPathCustomizable: Ak.platform() != "android"
 
             Label {
                 id: txtFilesDirectory
                 text: qsTr("Logs directory")
-                visible: pathsConfigs.isPathCustomizable
-                height: pathsConfigs.isPathCustomizable? 0: undefined
-            }
-            TextField {
-                text: mediaTools.documentsDirectory
-                Accessible.name: txtFilesDirectory.text
-                selectByMouse: true
+                font.bold: true
+                visible: layout.isPathCustomizable
+                height: layout.isPathCustomizable? 0: undefined
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
                 Layout.fillWidth: true
-                visible: pathsConfigs.isPathCustomizable
-                height: pathsConfigs.isPathCustomizable? 0: undefined
-
-                onTextChanged: mediaTools.documentsDirectory = text
             }
-            Button {
-                text: qsTr("Search")
-                Accessible.description: qsTr("Search directory to save logs")
-                visible: pathsConfigs.isPathCustomizable
-                height: pathsConfigs.isPathCustomizable? 0: undefined
+            AK.ActionTextField {
+                icon.source: "image://icons/search"
+                labelText: mediaTools.documentsDirectory
+                placeholderText: txtFilesDirectory.text
+                buttonText: qsTr("Search directory to save logs")
+                visible: layout.isPathCustomizable
+                height: layout.isPathCustomizable? 0: undefined
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
+                Layout.fillWidth: true
 
-                onClicked: {
+                onLabelTextChanged: mediaTools.documentsDirectory = labelText
+                onButtonClicked: {
                     mediaTools.makedirs(mediaTools.documentsDirectory)
                     folderDialog.open()
                 }
             }
-            RowLayout {
-                Layout.columnSpan: 3
-                Layout.fillWidth: true
+            Button {
+                text: qsTr("Clear")
+                icon.source: "image://icons/reset"
+                flat: true
+                Accessible.description: qsTr("Clear the debug log")
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
 
-                Button {
-                    text: qsTr("Clear")
-                    Accessible.description: qsTr("Clear the debug log")
-                    icon.source: "image://icons/reset"
-                    flat: true
-
-                    onClicked: {
-                        scrollView.skipLines +=
-                            debugLog.text.split("\n").length
-                        debugLog.clear()
-                    }
+                onClicked: {
+                    scrollView.skipLines +=
+                        debugLog.text.split("\n").length
+                    debugLog.clear()
                 }
-                Button {
-                    text: qsTr("Save")
-                    Accessible.description: qsTr("Save the debug log")
-                    icon.source: "image://icons/save"
-                    flat: true
+            }
+            Button {
+                text: qsTr("Save")
+                icon.source: "image://icons/save"
+                flat: true
+                Accessible.description: qsTr("Save the debug log")
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
 
-                    onClicked: {
-                        let ok = mediaTools.saveLog()
+                onClicked: {
+                    let ok = mediaTools.saveLog()
 
-                        if (ok && pathsConfigs.isPathCustomizable)
-                            logSavedDialog.open()
-                    }
+                    if (ok && layout.isPathCustomizable)
+                        logSavedDialog.open()
                 }
             }
             TextArea {
                 id: debugLog
                 wrapMode: Text.WordWrap
                 readOnly: true
-                Layout.columnSpan: 3
+                horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
             }
         }
-    }
+        LogSavedDialog {
+            id: logSavedDialog
+            anchors.centerIn: Overlay.overlay
+        }
+        LABS.FolderDialog {
+            id: folderDialog
+            title: qsTr("Select the folder to save the logs")
+            folder: scrollView.filePrefix + mediaTools.documentsDirectory
 
-    LogSavedDialog {
-        id: logSavedDialog
-        anchors.centerIn: Overlay.overlay
-    }
-    LABS.FolderDialog {
-        id: folderDialog
-        title: qsTr("Select the folder to save the logs")
-        folder: scrollView.filePrefix + mediaTools.documentsDirectory
-
-        onAccepted: {
-            mediaTools.documentsDirectory =
-                mediaTools.urlToLocalFile(currentFolder)
+            onAccepted: {
+                mediaTools.documentsDirectory =
+                    mediaTools.urlToLocalFolder(currentFolder)
+            }
         }
     }
 }

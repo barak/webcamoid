@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2022  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -21,21 +21,21 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-GridLayout {
-    columns: 2
-
+ColumnLayout {
     Label {
         id: txtWidth
         text: qsTr("Width")
+        font.bold: true
+        Layout.fillWidth: true
     }
     TextField {
         text: AspectRatio.width
         placeholderText: qsTr("Aspect ratio width")
-        Accessible.name: txtWidth.text
         selectByMouse: true
         validator: RegularExpressionValidator {
             regularExpression: /[1-9][0-9]*/
         }
+        Accessible.name: txtWidth.text
         Layout.fillWidth: true
 
         onTextChanged: AspectRatio.width = Number(text)
@@ -43,15 +43,17 @@ GridLayout {
     Label {
         id: txtHeight
         text: qsTr("Height")
+        font.bold: true
+        Layout.fillWidth: true
     }
     TextField {
         text: AspectRatio.height
         placeholderText: qsTr("Aspect ratio height")
-        Accessible.name: txtHeight.text
         selectByMouse: true
         validator: RegularExpressionValidator {
             regularExpression: /[1-9][0-9]*/
         }
+        Accessible.name: txtHeight.text
         Layout.fillWidth: true
 
         onTextChanged: AspectRatio.height = Number(text)

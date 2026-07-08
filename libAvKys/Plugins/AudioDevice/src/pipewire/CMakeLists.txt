@@ -1,4 +1,4 @@
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2024  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -47,6 +47,9 @@ set(SOURCES
     src/plugin.h
     pspec.json)
 pkg_check_modules(PIPEWIRE libpipewire-0.3)
+add_definitions(-DBINDIR="${BINDIR}"
+                -DPIPEWIRE_MODULES_PATH="${PIPEWIRE_MODULES_PATH}"
+                -DPIPEWIRE_SPA_PLUGINS_PATH="${PIPEWIRE_SPA_PLUGINS_PATH}")
 
 if (NOT NOPIPEWIRE AND PIPEWIRE_FOUND AND NOT ANDROID AND NOT WIN32)
     qt_add_plugin(AudioDevice_pipewire

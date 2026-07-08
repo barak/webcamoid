@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2023  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -23,9 +23,6 @@ set -e
 if [[ "${UPLOAD}" != 1 || "${DAILY_BUILD}" = 1 || "${ENABLE_ADS}" != 1 ]]; then
     exit 0
 fi
-
-pacman --noconfirm --needed -S \
-    p7zip
 
 verMaj=$(grep VER_MAJ libAvKys/cmake/ProjectCommons.cmake | awk '{print $2}' | tr -d ')' | head -n 1)
 verMin=$(grep VER_MIN libAvKys/cmake/ProjectCommons.cmake | awk '{print $2}' | tr -d ')' | head -n 1)

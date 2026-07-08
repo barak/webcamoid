@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -231,6 +231,19 @@ QVector<QRect> FaceDetectElement::detectFaces(const AkVideoPacket &packet)
     }
 
     auto scanFrame = iFrame.scaled(scanSize, Qt::KeepAspectRatio);
+
+    return this->d->m_cascadeClassifier.detect(scanFrame);
+}
+
+QVector<QRect> FaceDetectElement::detectFaces(const QImage &image)
+{
+    QSize scanSize(this->d->m_scanSize);
+
+    if (this->d->m_haarFile.isEmpty() || scanSize.isEmpty() || image.isNull())
+        return {};
+
+    auto scanFrame = image.convertedTo(QImage::Format_ARGB32)
+                          .scaled(scanSize, Qt::KeepAspectRatio);
 
     return this->d->m_cascadeClassifier.detect(scanFrame);
 }

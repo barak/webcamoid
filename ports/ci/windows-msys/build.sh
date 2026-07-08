@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2019  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -22,8 +22,6 @@ set -e
 
 if [ ! -z "${GITHUB_SHA}" ]; then
     export GIT_COMMIT_HASH="${GITHUB_SHA}"
-elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
-    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
 
 if [ "${COMPILER}" = clang ]; then
@@ -39,25 +37,22 @@ if [ -z "${DISABLE_CCACHE}" ]; then
 fi
 
 if [ "${UPLOAD}" == 1 ]; then
-    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOGSTREAMER=ON -DNOLIBAVDEVICE=ON"
+    EXTRA_PARAMS="${EXTRA_PARAMS} -DNOLIBAVDEVICE=ON"
 fi
-
-# Disable VLC libary as it cause inestabilities
-EXTRA_PARAMS="${EXTRA_PARAMS} -DNOVLC=ON"
 
 # librav1e makes Webcamoid crash in Windows
 EXTRA_PARAMS="${EXTRA_PARAMS} -DFFMPEG_DISABLED_VIDEO_ENCODERS=librav1e"
 
 if [ "${TARGET_ARCH}" = i686 ]; then
     export PATH=/mingw32/bin:$PATH
-    export QT_QMAKE_EXECUTABLE=/mingw32/bin/qmake-qt6
-    export LRELEASE_TOOL=/mingw32/bin/lrelease-qt6
-    export LUPDATE_TOOL=/mingw32/bin/lupdate-qt6
+    export QT_QMAKE_EXECUTABLE=/mingw32/bin/qmake6
+    export LRELEASE_TOOL=/mingw32/bin/lrelease
+    export LUPDATE_TOOL=/mingw32/bin/lupdate
 else
     export PATH=/mingw64/bin:$PATH
-    export QT_QMAKE_EXECUTABLE=/mingw64/bin/qmake-qt6
-    export LRELEASE_TOOL=/mingw64/bin/lrelease-qt6
-    export LUPDATE_TOOL=/mingw64/bin/lupdate-qt6
+    export QT_QMAKE_EXECUTABLE=/mingw64/bin/qmake6
+    export LRELEASE_TOOL=/mingw64/bin/lrelease
+    export LUPDATE_TOOL=/mingw64/bin/lupdate
 fi
 
 INSTALL_PREFIX=${PWD}/webcamoid-data-${COMPILER}-${TARGET_ARCH}
@@ -67,7 +62,7 @@ cmake \
     -LA \
     -S . \
     -B "${buildDir}" \
-    -G "MSYS Makefiles" \
+    -G "Ninja" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
     -DCMAKE_C_COMPILER="${COMPILER_C}" \
@@ -78,5 +73,5 @@ cmake \
     -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     ${EXTRA_PARAMS} \
     -DDAILY_BUILD="${DAILY_BUILD}"
-cmake --build "${buildDir}" --parallel "${NJOBS}"
+cmake --build "${buildDir}" --parallel "$(nproc)"
 cmake --install "${buildDir}"

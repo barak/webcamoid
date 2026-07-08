@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -86,7 +86,8 @@ T.SwipeDelegate {
                        Qt.AlignCenter | Qt.AlignVCenter:
                        Qt.AlignLeft | Qt.AlignVCenter
         enabled: control.enabled
-        elide: Text.ElideRight
+        elide: Label.ElideNone
+        wrapMode: Label.WordWrap
     }
 
     background: Rectangle {

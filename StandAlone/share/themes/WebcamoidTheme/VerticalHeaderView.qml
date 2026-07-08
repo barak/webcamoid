@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2022  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@ T.VerticalHeaderView {
         implicitWidth: Math.max(control.width,
                                 text.implicitWidth + 2 * cellPadding)
         implicitHeight: text.implicitHeight + 2 * cellPadding
-        color: control.Material.backgroundColor
+        color: activeWindow
 
+        readonly property color activeWindow: AkTheme.palette.active.window
         readonly property real cellPadding:
             AkUnit.create(8 * AkTheme.controlScale, "dp").pixels
 

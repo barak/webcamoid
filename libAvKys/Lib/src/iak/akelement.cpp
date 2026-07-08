@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2016  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -91,7 +91,7 @@ QObject *AkElement::controlInterface(QQmlEngine *engine,
     this->controlInterfaceConfigure(context, controlId);
 
     // Create an item with the plugin context.
-    QObject *item = component.create(context);
+    auto item = component.create(context);
 
     if (!item) {
         delete context;
@@ -118,6 +118,12 @@ bool AkElement::link(const AkElementPtr &dstElement,
                       connectionType);
 }
 
+bool AkElement::link(const AkElement &dstElement,
+                     Qt::ConnectionType connectionType) const
+{
+    return this->link(static_cast<const QObject *>(&dstElement), connectionType);
+}
+
 bool AkElement::unlink(const QObject *dstElement) const
 {
     return AkElement::unlink(this, dstElement);
@@ -126,6 +132,11 @@ bool AkElement::unlink(const QObject *dstElement) const
 bool AkElement::unlink(const AkElementPtr &dstElement) const
 {
     return this->unlink(static_cast<QObject *>(dstElement.data()));
+}
+
+bool AkElement::unlink(const AkElement &dstElement) const
+{
+    return this->unlink(static_cast<const QObject *>(&dstElement));
 }
 
 bool AkElement::link(const AkElementPtr &srcElement,

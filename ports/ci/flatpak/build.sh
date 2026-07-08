@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Webcamoid, webcam capture application.
+# Webcamoid, camera capture application.
 # Copyright (C) 2022  Gonzalo Exequiel Pedone
 #
 # Webcamoid is free software: you can redistribute it and/or modify
@@ -22,8 +22,6 @@ set -e
 
 if [ ! -z "${GITHUB_SHA}" ]; then
     export GIT_COMMIT_HASH="${GITHUB_SHA}"
-elif [ ! -z "${CIRRUS_CHANGE_IN_REPO}" ]; then
-    export GIT_COMMIT_HASH="${CIRRUS_CHANGE_IN_REPO}"
 fi
 
 export GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -31,8 +29,6 @@ export GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 if [ -z "${GIT_BRANCH_NAME}" ]; then
     if [ ! -z "${GITHUB_REF_NAME}" ]; then
         export GIT_BRANCH_NAME="${GITHUB_REF_NAME}"
-    elif [ ! -z "${CIRRUS_BRANCH}" ]; then
-        export GIT_BRANCH_NAME="${CIRRUS_BRANCH}"
     else
         export GIT_BRANCH_NAME=master
     fi
@@ -62,7 +58,7 @@ finish-args:
   - --talk-name=org.freedesktop.Flatpak
 modules:
   - name: webcamoid
-    buildsystem: cmake
+    buildsystem: cmake-ninja
     config-opts:
       - -LA
       - -DCMAKE_BUILD_TYPE=Release
@@ -70,6 +66,8 @@ modules:
       - -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}"
     sources:
       - type: git
+        disable-shallow-clone: false
+        disable-submodules: true
         url: https://github.com/webcamoid/webcamoid.git
         branch: ${GIT_BRANCH_NAME}
         commit: ${GIT_COMMIT_HASH}

@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2015  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -62,6 +62,7 @@ ApplicationWindow {
                             .arg(mediaTools.currentTime())
                             .arg(recording.imageFormat))
         photoPreviewSaveAnimation.start()
+        picturesGallery.model.reload()
     }
 
     function snapshotToClipboard()
@@ -125,12 +126,22 @@ ApplicationWindow {
         function onVideoInputChanged(videoInput)
         {
             if (recording.state == AkElement.ElementStatePlaying
-                && captureSettingsDialog.useFlash
+                && recording.useFlash
                 && flash.isHardwareFlash
                 && videoLayer.deviceType(videoInput) == VideoLayer.InputCamera) {
                 videoLayer.torchMode = VideoLayer.Torch_On
             }
         }
+
+        function onStateChanged(state)
+        {
+            if (state == AkElement.ElementStateNull)
+                btnStreaming.checked = AkElement.ElementStateNull
+        }
+    }
+
+    Connections {
+        target: virtualCameras
 
         function onVcamCliInstallStarted()
         {
@@ -147,6 +158,25 @@ ApplicationWindow {
         {
             runCommandDialog.stop()
         }
+    }
+
+    Connections {
+        target: streaming
+
+        function onStreamingError(errorMsg)
+        {
+            streamingFailedDialog.showError(errorMsg)
+        }
+
+        function onStateChanged(state)
+        {
+            btnStreaming.checked = state == AkElement.ElementStatePlaying
+        }
+    }
+
+    HoverHandler {
+        id: hoverHandler
+        acceptedDevices: PointerDevice.Mouse
     }
 
     footer: Label {
@@ -170,8 +200,8 @@ ApplicationWindow {
         mipmap: true
         fillMode: Image.PreserveAspectFit
         x: k * AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        y: k * (controlsLayout.y
-                + (controlsLayout.height - photoPreview.height) / 2)
+        y: k * (mainLayout.y
+                + (mainLayout.height - photoPreview.height) / 2)
         width: k * (photoPreview.width - parent.width) + parent.width
         height: k * (photoPreview.height - parent.height) + parent.height
         visible: false
@@ -189,106 +219,161 @@ ApplicationWindow {
         x: k * (parent.width
                 - videoPreview.width
                 - AkUnit.create(16 * AkTheme.controlScale, "dp").pixels)
-        y: k * (controlsLayout.y
-                + (controlsLayout.height - videoPreview.height) / 2)
+        y: k * (mainLayout.y
+                + (mainLayout.height - videoPreview.height) / 2)
         width: k * (videoPreview.width - parent.width) + parent.width
         height: k * (videoPreview.height - parent.height) + parent.height
         visible: false
 
         property real k: 0
     }
-    Button {
-        id: leftControls
-        icon.source: "image://icons/menu"
-        text: qsTr("Main menu")
-        display: AbstractButton.IconOnly
-        width: AkUnit.create(36 * AkTheme.controlScale, "dp").pixels
-        height: AkUnit.create(36 * AkTheme.controlScale, "dp").pixels
-        anchors.top: parent.top
-        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        anchors.left: parent.left
-        anchors.leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        ToolTip.visible: hovered
-        ToolTip.text: text
-        Accessible.name: text
-        Accessible.description: qsTr("Open main menu")
-
-        onClicked: settings.popup()
-    }
-    SettingsMenu {
-        id: settings
-        width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
-
-        onOpenAudioSettings: mainPanel.openAudioSettings()
-        onOpenVideoSettings: mainPanel.openVideoSettings()
-        onOpenVideoEffectsPanel: mainPanel.openVideoEffects()
-        onOpenSettings: {
-            mediaTools.showAd(MediaTools.AdType_Interstitial);
-            settingsDialog.open();
-        }
-        onOpenDonationsDialog: Qt.openUrlExternally(mediaTools.projectDonationsUrl)
-        onOpenAboutDialog: aboutDialog.open()
-    }
-    Button {
-        id: rightControls
-        icon.source: "image://icons/settings"
-        text: qsTr("Capture options")
-        display: AbstractButton.IconOnly
-        width: AkUnit.create(36 * AkTheme.controlScale, "dp").pixels
-        height: AkUnit.create(36 * AkTheme.controlScale, "dp").pixels
-        anchors.top: parent.top
-        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        anchors.right: parent.right
-        anchors.rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        ToolTip.visible: hovered
-        ToolTip.text: text
-        Accessible.name: text
-        Accessible.description: qsTr("Open capture options menu")
-        enabled: videoLayer.state == AkElement.ElementStatePlaying
-
-        onClicked: localSettings.popup()
-    }
-    LocalSettingsMenu {
-        id: localSettings
-        width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
-
-        onCopyToClipboard: {
-            mediaTools.showAd(MediaTools.AdType_Interstitial);
-            snapshotToClipboard();
-        }
-        onOpenCaptureSettings: captureSettingsDialog.open()
-        onOpenRecordingSettings: settingsDialog.openAtIndex(1)
-    }
-    RecordingNotice {
-        anchors.top: parent.top
-        anchors.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-        anchors.horizontalCenter: parent.horizontalCenter
-        visible: recording.state == AkElement.ElementStatePlaying
-    }
     ColumnLayout {
-        id: controlsLayout
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        id: mainLayout
+        anchors.fill: parent
+        opacity: hoverHandler.hovered || !mediaTools.hideControlsOnPointerOut || Ak.platform() == "android"? 1: 0
+        visible: opacity > 0
 
-        Item {
-            id: cameraControls
-            Layout.margins:
-                AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
-            height: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+        readonly property real smallButton: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
+        readonly property real bigButton: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+        readonly property real previewSize: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
+        readonly property int animationTime: 200
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.InOutQuad
+            }
+        }
+
+        RowLayout {
+            id: topControls
+            Layout.topMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            Layout.leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            Layout.rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
             Layout.fillWidth: true
 
-            readonly property real smallButton: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
-            readonly property real bigButton: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
-            readonly property real previewSize: AkUnit.create(48 * AkTheme.controlScale, "dp").pixels
-            readonly property int animationTime: 200
+            Button {
+                id: leftControls
+                icon.source: "image://icons/menu"
+                text: qsTr("Main menu")
+                display: AbstractButton.IconOnly
+                implicitWidth: implicitHeight
+                ToolTip.visible: hovered
+                ToolTip.text: text
+                Accessible.name: text
+                Accessible.description: qsTr("Open main menu")
+
+                onClicked: settings.popup()
+
+                SettingsMenu {
+                    id: settings
+                    width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
+
+                    onOpenAudioSettings: mainPanel.openAudioSettings()
+                    onOpenVideoSettings: mainPanel.openVideoSettings()
+                    onOpenVideoEffectsPanel: mainPanel.openVideoEffects()
+                    onOpenSettings: {
+                        mediaTools.showAd(MediaTools.AdType_Interstitial);
+                        settingsDialog.open();
+                    }
+                    onOpenDonationsDialog: Qt.openUrlExternally(mediaTools.projectDonationsUrl)
+                    onOpenAboutDialog: aboutDialog.open()
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            RecordingNotice {
+                visible: recording.state == AkElement.ElementStatePlaying
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            DelayButton {
+                id: btnStreaming
+                icon.source: "image://icons/broadcast"
+                text: checked? qsTr("Stop streaming"): qsTr("Start streaming")
+                display: AbstractButton.IconOnly
+                implicitWidth: visible? implicitHeight: 0
+                ToolTip.visible: hovered && videoLayer.state == AkElement.ElementStatePlaying
+                ToolTip.text: streaming.platforms.length < 1?
+                                qsTr("You must add at least one streaming platform to the video outputs"):
+                              streaming.unconfiguredPlatforms.length > 0?
+                                qsTr("The following platforms are not configured:<br/><br/>%1").arg(streaming.unconfiguredPlatforms.join("<br/>")):
+                                text
+                Accessible.name: text
+                Accessible.description: text
+                enabled: videoLayer.state == AkElement.ElementStatePlaying
+                         && streaming.platforms.length > 0
+                visible: streaming.isStreamingSupported
+
+                function reset() {
+                    checked = false
+                }
+
+                Timer {
+                    id: delayStreamingTimer
+                    interval: 500
+                    repeat: false
+
+                    onTriggered: {
+                        streamingStartStopDialog.stopStreaming = false
+                        streamingStartStopDialog.open()
+                    }
+                }
+
+                onActivated: delayStreamingTimer.start()
+                onCheckedChanged: {
+                    if (!checked && videoLayer.state == AkElement.ElementStatePlaying) {
+                        streamingStartStopDialog.stopStreaming = true
+                        streamingStartStopDialog.open()
+                    }
+                }
+            }
+            Button {
+                id: rightControls
+                icon.source: "image://icons/settings"
+                text: qsTr("Capture options")
+                display: AbstractButton.IconOnly
+                implicitWidth: implicitHeight
+                ToolTip.visible: enabled && hovered
+                ToolTip.text: text
+                Accessible.name: text
+                Accessible.description: qsTr("Open capture options menu")
+                enabled: videoLayer.state == AkElement.ElementStatePlaying
+
+                onClicked: localSettings.popup()
+
+                LocalSettingsMenu {
+                    id: localSettings
+                    width: AkUnit.create(250 * AkTheme.controlScale, "dp").pixels
+
+                    onCopyToClipboard: {
+                        mediaTools.showAd(MediaTools.AdType_Interstitial);
+                        snapshotToClipboard();
+                    }
+                    onOpenCaptureSettings: settingsDialog.openAtIndex(0)
+                    onOpenRecordingSettings: settingsDialog.openAtIndex(1)
+                }
+            }
+        }
+        Item {
+            Layout.fillHeight: true
+        }
+        Item {
+            id: bottomControls
+            height: AkUnit.create(64 * AkTheme.controlScale, "dp").pixels
+            Layout.bottomMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            Layout.leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            Layout.rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+            Layout.fillWidth: true
 
             AK.ImageButton {
                 id: photoPreview
                 text: qsTr("Open last photo")
                 icon.source: pathToUrl(recording.lastPhotoPreview)
-                width: cameraControls.previewSize
-                height: cameraControls.previewSize
+                width: mainLayout.previewSize
+                height: mainLayout.previewSize
                 fillMode: AkColorizedImage.PreserveAspectCrop
                 cache: false
                 visible: photoPreview.status == Image.Ready
@@ -301,14 +386,20 @@ ApplicationWindow {
                 onClicked: {
                     if (photoPreview.status == Image.Ready) {
                         if (recording.latestPhotoUri.length > 1) {
-                            Qt.openUrlExternally(recording.latestPhotoUri)
+                            if (Ak.platform() == "android")
+                                picturesGallery.openAtUrl(recording.latestPhotoUri)
+                            else
+                                Qt.openUrlExternally(recording.latestPhotoUri)
                         } else {
                             let url = "" + photoPreview.icon.source
 
                             if (!url.startsWith(wdgMainWidget.filePrefix))
                                 url = wdgMainWidget.filePrefix + url
 
-                            Qt.openUrlExternally(url)
+                            if (Ak.platform() == "android")
+                                picturesGallery.openAtUrl(url)
+                            else
+                                Qt.openUrlExternally(url)
                         }
                     }
                 }
@@ -316,40 +407,40 @@ ApplicationWindow {
             RoundButton {
                 id: photoButton
                 icon.source: "image://icons/photo"
-                width: cameraControls.bigButton
-                height: cameraControls.bigButton
+                width: mainLayout.bigButton
+                height: mainLayout.bigButton
                 x: (parent.width - width) / 2
                 y: (parent.height - height) / 2
                 ToolTip.visible: hovered
                 ToolTip.text: qsTr("Take a photo")
                 Accessible.name:
-                    cameraControls.state == ""?
+                    mainLayout.state == ""?
                         qsTr("Take a photo"):
                         qsTr("Image capture mode")
                 Accessible.description:
-                    cameraControls.state == ""?
+                    mainLayout.state == ""?
                         qsTr("Make a capture and save it to an image file"):
                         qsTr("Put %1 in image capture mode").arg(mediaTools.applicationName)
                 focus: true
                 enabled: recording.state == AkElement.ElementStateNull
                          && (videoLayer.state == AkElement.ElementStatePlaying
-                             || cameraControls.state == "Video")
+                             || mainLayout.state == "Video")
 
                 onClicked: {
-                    if (cameraControls.state == "Video") {
-                        cameraControls.state = ""
+                    if (mainLayout.state == "Video") {
+                        mainLayout.state = ""
                     } else {
                         mediaTools.showAd(MediaTools.AdType_Interstitial);
 
-                        if (!captureSettingsDialog.useFlash
+                        if (!recording.useFlash
                             || videoLayer.deviceType(videoLayer.videoInput) != VideoLayer.InputCamera) {
                             savePhoto()
 
                             return
                         }
 
-                        if (captureSettingsDialog.delay == 0) {
-                            if (captureSettingsDialog.useFlash)
+                        if (recording.photoTimeout == 0) {
+                            if (recording.useFlash)
                                 flash.shot()
                             else
                                 savePhoto()
@@ -372,8 +463,8 @@ ApplicationWindow {
                 icon.source: recording.state == AkElement.ElementStateNull?
                                  "image://icons/video":
                                  "image://icons/record-stop"
-                width: cameraControls.smallButton
-                height: cameraControls.smallButton
+                width: mainLayout.smallButton
+                height: mainLayout.smallButton
                 x: parent.width - width
                 y: (parent.height - height) / 2
                 ToolTip.visible: hovered
@@ -381,27 +472,27 @@ ApplicationWindow {
                                   qsTr("Record video"):
                                   qsTr("Stop video recording")
                 Accessible.name:
-                    cameraControls.state == ""?
+                    mainLayout.state == ""?
                         qsTr("Video capture mode"):
                     recording.state == AkElement.ElementStateNull?
                         qsTr("Record video"):
                         qsTr("Stop video recording")
                 Accessible.description:
-                    cameraControls.state == ""?
+                    mainLayout.state == ""?
                         qsTr("Put %1 in video recording mode").arg(mediaTools.applicationName):
                     recording.state == AkElement.ElementStateNull?
                         qsTr("Start recording to a video file"):
                         qsTr("Stop current video recording")
                 enabled: videoLayer.state == AkElement.ElementStatePlaying
-                         || cameraControls.state == ""
+                         || mainLayout.state == ""
 
                 onClicked: {
-                    if (cameraControls.state == "") {
-                        cameraControls.state = "Video"
+                    if (mainLayout.state == "") {
+                        mainLayout.state = "Video"
                     } else if (recording.state == AkElement.ElementStateNull) {
                         mediaTools.showAd(MediaTools.AdType_Interstitial);
 
-                        if (captureSettingsDialog.useFlash
+                        if (recording.useVideoFlash
                             && flash.isHardwareFlash
                             && videoLayer.deviceType(videoLayer.videoInput) == VideoLayer.InputCamera) {
                             videoLayer.torchMode = VideoLayer.Torch_On
@@ -411,6 +502,7 @@ ApplicationWindow {
                     } else {
                         recording.state = AkElement.ElementStateNull
                         videoLayer.torchMode = VideoLayer.Torch_Off
+                        moviesGallery.model.reload()
                         videoPreviewSaveAnimation.start()
                     }
                 }
@@ -434,85 +526,29 @@ ApplicationWindow {
                 onClicked: {
                     if (videoPreview.status == Image.Ready) {
                         if (recording.latestVideoUri.length > 1) {
-                            Qt.openUrlExternally(recording.latestVideoUri)
+                            if (Ak.platform() == "android")
+                                moviesGallery.openAtUrl(recording.latestVideoUri)
+                            else
+                                Qt.openUrlExternally(recording.latestVideoUri)
                         } else {
                             let url = recording.lastVideo
 
                             if (!url.startsWith(wdgMainWidget.filePrefix))
                                 url = wdgMainWidget.filePrefix + url
 
-                            Qt.openUrlExternally(url)
+                            if (Ak.platform() == "android")
+                                moviesGallery.openAtUrl(url)
+                            else
+                                Qt.openUrlExternally(url)
                         }
                     }
-                }
-            }
-
-            states: [
-                State {
-                    name: "Video"
-
-                    PropertyChanges {
-                        target: photoPreview
-                        width: 0
-                        height: 0
-                        visible: false
-                    }
-                    PropertyChanges {
-                        target: photoButton
-                        width: cameraControls.smallButton
-                        height: cameraControls.smallButton
-                        x: 0
-                    }
-                    PropertyChanges {
-                        target: videoButton
-                        width: cameraControls.bigButton
-                        height: cameraControls.bigButton
-                        x: (parent.width - width) / 2
-                    }
-                    PropertyChanges {
-                        target: videoPreview
-                        width: cameraControls.previewSize
-                        height: cameraControls.previewSize
-                        visible: true
-                    }
-                    PropertyChanges {
-                        target: localSettings
-                        videoSettings: true
-                    }
-                    PropertyChanges {
-                        target: captureSettingsDialog
-                        videoSettings: true
-                    }
-                }
-            ]
-
-            transitions: Transition {
-                PropertyAnimation {
-                    target: photoPreview
-                    properties: "width,height,visible"
-                    duration: cameraControls.animationTime
-                }
-                PropertyAnimation {
-                    target: photoButton
-                    properties: "radius,x"
-                    duration: cameraControls.animationTime
-                }
-                PropertyAnimation {
-                    target: videoButton
-                    properties: "radius,x"
-                    duration: cameraControls.animationTime
-                }
-                PropertyAnimation {
-                    target: videoPreview
-                    properties: "width,height,visible"
-                    duration: cameraControls.animationTime
                 }
             }
         }
         ProgressBar {
             id: pgbPhotoShot
-            Layout.fillWidth: true
             visible: updateProgress.running
+            Layout.fillWidth: true
 
             property double start: 0
 
@@ -521,16 +557,81 @@ ApplicationWindow {
                     updateProgress.stop()
                     value = 0
 
-                    if (captureSettingsDialog.useFlash)
+                    if (recording.useFlash)
                         flash.shot()
                     else
                         savePhoto()
                 }
             }
         }
+
+        states: [
+            State {
+                name: "Video"
+
+                PropertyChanges {
+                    target: photoPreview
+                    width: 0
+                    height: 0
+                    visible: false
+                }
+                PropertyChanges {
+                    target: photoButton
+                    width: mainLayout.smallButton
+                    height: mainLayout.smallButton
+                    x: 0
+                }
+                PropertyChanges {
+                    target: videoButton
+                    width: mainLayout.bigButton
+                    height: mainLayout.bigButton
+                    x: (parent.width - width) / 2
+                }
+                PropertyChanges {
+                    target: videoPreview
+                    width: mainLayout.previewSize
+                    height: mainLayout.previewSize
+                    visible: true
+                }
+                PropertyChanges {
+                    target: localSettings
+                    videoSettings: true
+                }
+                PropertyChanges {
+                    target: captureSettingsDialog
+                    videoSettings: true
+                }
+            }
+        ]
+
+        transitions: Transition {
+            PropertyAnimation {
+                target: photoPreview
+                properties: "width,height,visible"
+                duration: mainLayout.animationTime
+            }
+            PropertyAnimation {
+                target: photoButton
+                properties: "radius,x"
+                duration: mainLayout.animationTime
+            }
+            PropertyAnimation {
+                target: videoButton
+                properties: "radius,x"
+                duration: mainLayout.animationTime
+            }
+            PropertyAnimation {
+                target: videoPreview
+                properties: "width,height,visible"
+                duration: mainLayout.animationTime
+            }
+        }
     }
     MainPanel {
         id: mainPanel
+        implicitWidth: Math.min(Math.max(AkUnit.create(250 * AkTheme.controlScale, "dp").pixels,
+                                         (1.5 * wdgMainWidget.width > wdgMainWidget.height? 0.25: 0.75) * wdgMainWidget.width),
+                                wdgMainWidget.width)
 
         onOpenErrorDialog: (title, message) =>
             videoOutputError.openError(title, message)
@@ -538,6 +639,7 @@ ApplicationWindow {
             mediaTools.showAd(MediaTools.AdType_Interstitial);
             videoEffectsDialog.open()
         }
+        onOpenLocalStreamingAdvancedDialog: localStreamingAdvanced.open()
     }
     Rectangle {
         id: flashRectangle
@@ -633,7 +735,7 @@ ApplicationWindow {
 
         onTriggered: {
             pgbPhotoShot.value = (new Date().getTime() - pgbPhotoShot.start)
-                                 / captureSettingsDialog.delay
+                                 / (1000 * recording.photoTimeout)
         }
     }
     Flash {
@@ -659,9 +761,43 @@ ApplicationWindow {
         message: qsTr("Running commands")
         anchors.centerIn: Overlay.overlay
     }
+    AK.MediaGalleryDialog {
+        id: picturesGallery
+        width: parent.width
+        height: parent.height
+        directory: recording.imagesDirectory
+
+        onOpenMedia: (url) => { picturesGalleryViewer.openAtUrl(url) }
+    }
+    AK.MediaViewerDialog {
+        id: picturesGalleryViewer
+        width: parent.width
+        height: parent.height
+        model: picturesGallery.model
+    }
+    AK.MediaGalleryDialog {
+        id: moviesGallery
+        width: parent.width
+        height: parent.height
+        directory: recording.videoDirectory
+
+        onOpenMedia: (url) => { moviesGalleryViewer.openAtUrl(url) }
+    }
+    AK.MediaViewerDialog {
+        id: moviesGalleryViewer
+        width: parent.width
+        height: parent.height
+        model: moviesGallery.model
+    }
     CaptureSettingsDialog {
         id: captureSettingsDialog
         anchors.centerIn: Overlay.overlay
+    }
+    StreamingStartStopDialog {
+        id: streamingStartStopDialog
+        anchors.centerIn: Overlay.overlay
+
+        onRejected: btnStreaming.checked = !btnStreaming.checked
     }
     VideoEffectsDialog {
         id: videoEffectsDialog
@@ -676,6 +812,15 @@ ApplicationWindow {
     VideoOutputError {
         id: videoOutputError
         anchors.centerIn: Overlay.overlay
+    }
+    StreamingFailedDialog {
+        id: streamingFailedDialog
+        anchors.centerIn: Overlay.overlay
+    }
+    LocalStreamingAdvanced {
+        id: localStreamingAdvanced
+        width: parent.width
+        height: parent.height
     }
     UpdatesDialog {
         id: updatesDialog

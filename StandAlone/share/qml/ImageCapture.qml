@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2020  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -22,8 +22,17 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt.labs.platform as LABS
 import Ak
+import AkControls as AK
 
-Page {
+AK.MenuOption {
+    id: root
+    title: qsTr("Image Capture")
+    subtitle: qsTr("Configure photografy quality and formats.")
+    icon: "image://icons/photo"
+
+    property int leftMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+    property int rightMargin: AkUnit.create(16 * AkTheme.controlScale, "dp").pixels
+
     ScrollView {
         id: scrollView
         anchors.fill: parent
@@ -34,49 +43,46 @@ Page {
                                                  "file:///":
                                                  "file://"
 
-        GridLayout {
+        ColumnLayout {
             id: layout
             width: scrollView.width
-            columns: 3
 
             property bool isPathCustomizable: Ak.platform() != "android"
 
             Label {
                 id: txtImagesDirectory
                 text: qsTr("Images directory")
+                font.bold: true
                 visible: layout.isPathCustomizable
                 height: layout.isPathCustomizable? 0: undefined
-            }
-            TextField {
-                text: recording.imagesDirectory
-                Accessible.name: txtImagesDirectory.text
-                selectByMouse: true
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
                 Layout.fillWidth: true
-                visible: layout.isPathCustomizable
-                height: layout.isPathCustomizable? 0: undefined
-
-                onTextChanged: recording.imagesDirectory = text
             }
-            Button {
-                text: qsTr("Search")
-                Accessible.description: qsTr("Search directory to save images")
+            AK.ActionTextField {
+                icon.source: "image://icons/search"
+                labelText: recording.imagesDirectory
+                placeholderText: txtImagesDirectory.text
+                buttonText: qsTr("Select the save directory")
                 visible: layout.isPathCustomizable
                 height: layout.isPathCustomizable? 0: undefined
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
+                Layout.fillWidth: true
 
-                onClicked: {
+                onLabelTextChanged: recording.imagesDirectory = labelText
+                onButtonClicked: {
                     mediaTools.makedirs(recording.imagesDirectory)
                     folderDialog.open()
                 }
             }
-            Label {
-                id: txtFileFormat
-                text: qsTr("File format")
-            }
-            ComboBox {
-                Accessible.description: txtFileFormat.text
+            AK.LabeledComboBox {
+                label: qsTr("File format")
                 textRole: "description"
+                Accessible.description: label
                 Layout.fillWidth: true
-                Layout.columnSpan: 2
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
                 model: ListModel {
                 }
 
@@ -102,37 +108,148 @@ Page {
             Label {
                 id: txtQuality
                 text: qsTr("Quality")
-            }
-            Slider {
-                id: sldQuality
-                from: spbQuality.from
-                to: spbQuality.to
-                value: recording.imageSaveQuality
-                stepSize: spbQuality.stepSize
+                font.bold: true
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
                 Layout.fillWidth: true
-                Accessible.name: txtQuality.text
-
-                onValueChanged: recording.imageSaveQuality = value
             }
-            SpinBox {
-                id: spbQuality
-                from: -1
-                to: 100
-                value: recording.imageSaveQuality
-                stepSize: 1
-                Accessible.name: txtQuality.text
+            RowLayout {
+                Slider {
+                    id: sldQuality
+                    from: spbQuality.from
+                    to: spbQuality.to
+                    value: recording.imageSaveQuality
+                    stepSize: spbQuality.stepSize
+                    Layout.leftMargin: root.leftMargin
+                    Layout.fillWidth: true
+                    Accessible.name: txtQuality.text
 
-                onValueChanged: recording.imageSaveQuality = value
+                    onValueChanged: recording.imageSaveQuality = value
+                }
+                SpinBox {
+                    id: spbQuality
+                    from: -1
+                    to: 100
+                    value: recording.imageSaveQuality
+                    stepSize: 1
+                    Accessible.name: txtQuality.text
+                    Layout.rightMargin: root.rightMargin
+
+                    onValueChanged: recording.imageSaveQuality = value
+                }
+            }
+            Label {
+                text: qsTr("Flash settings")
+                font: AkTheme.fontSettings.h6
+                Layout.topMargin: AkUnit.create(12 * AkTheme.controlScale, "dp").pixels
+                Layout.bottomMargin: AkUnit.create(12 * AkTheme.controlScale, "dp").pixels
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
+                Layout.fillWidth: true
+            }
+            Switch {
+                id: chkFlash
+                text: qsTr("Use flash")
+                checked: recording.useFlash
+                Accessible.name: text
+                Accessible.description: qsTr("Use flash when taking a photo")
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
+                Layout.fillWidth: true
+
+                onCheckedChanged: recording.useFlash = checked
+            }
+            AK.LabeledComboBox {
+                id: cbxTimeShot
+                label: qsTr("Delay")
+                textRole: "text"
+                enabled: chkFlash.checked
+                Accessible.name: qsTr("Photo timer")
+                Accessible.description: qsTr("The time to wait before the photo is taken")
+                Layout.leftMargin: root.leftMargin
+                Layout.rightMargin: root.rightMargin
+                Layout.fillWidth: true
+                model: ListModel {
+                    id: lstTimeOptions
+
+                    ListElement {
+                        text: qsTr("Now")
+                        time: 0
+                    }
+                }
+
+                property real delay: 0
+
+                // Function to find the nearest index to the given time (in seconds)
+                function findClosestIndex(seconds)
+                {
+                    if (lstTimeOptions.count === 0)
+                        return -1
+
+                    let closestIndex = 0
+                    let minDiff = Math.abs(lstTimeOptions.get(0).time - seconds)
+
+                    for (let i = 1; i < lstTimeOptions.count; ++i) {
+                        let diff = Math.abs(lstTimeOptions.get(i).time - seconds)
+
+                        if (diff < minDiff) {
+                            minDiff = diff
+                            closestIndex = i
+                        }
+                    }
+
+                    return closestIndex
+                }
+
+                // Function to update the delay property
+                function updateDelay() {
+                    if (currentIndex >= 0) {
+                        let item = lstTimeOptions.get(currentIndex)
+
+                        if (item)
+                            delay = 1000 * item.time
+                    } else {
+                        delay = 0
+                    }
+                }
+
+                Component.onCompleted: {
+                    for (var i = 5; i <= 30; i += 5)
+                        lstTimeOptions.append({
+                            text: qsTr("%1 seconds").arg(i),
+                            time: i
+                        })
+
+                    // After cloading the model, select the nearest value saved
+                    cbxTimeShot.currentIndex = cbxTimeShot.findClosestIndex(recording.photoTimeout)
+
+                    // Update the delay with the selected value
+                    cbxTimeShot.updateDelay()
+                }
+
+                onCurrentIndexChanged: {
+                    if (currentIndex >= 0) {
+                        let item = lstTimeOptions.get(currentIndex)
+
+                        if (item) {
+                            recording.photoTimeout = item.time
+                            delay = 1000 * item.time
+                        }
+                    } else {
+                        recording.photoTimeout = 0
+                        delay = 0
+                    }
+                }
             }
         }
-    }
-    LABS.FolderDialog {
-        id: folderDialog
-        title: qsTr("Select the folder to save your photos")
-        folder: scrollView.filePrefix + recording.imagesDirectory
+        LABS.FolderDialog {
+            id: folderDialog
+            title: qsTr("Select the folder to save your photos")
+            folder: scrollView.filePrefix + recording.imagesDirectory
 
-        onAccepted: {
-            recording.imagesDirectory = mediaTools.urlToLocalFile(currentFolder)
+            onAccepted: {
+                recording.imagesDirectory = mediaTools.urlToLocalFolder(currentFolder)
+            }
         }
     }
 }

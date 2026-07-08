@@ -1,16 +1,18 @@
-# Webcamoid, The ultimate webcam suite! #
+# Webcamoid, The ultimate camera suite! #
 
-[Webcamoid](https://webcamoid.github.io/) is a full featured and multiplatform webcam suite.
+[Webcamoid](https://webcamoid.github.io/) is a full featured and multiplatform camera suite.
 
 <a target="_blank" href="https://webcamoid.github.io/"><img src="https://webcamoid.github.io/theme/images/screenshots/Main.webp" style="height: 240px;" /></a>
 
-## Features ##
+## Description ##
 
-Unleash your creativity with Webcamoid, the versatile, cross-platform webcam software designed for everyone!  
+Unleash your creativity with Webcamoid, the versatile, cross-platform camera software designed for everyone!  
 Available on GNU/Linux, Mac, Windows, Android, and FreeBSD, Webcamoid lets you capture stunning photos and videos with ease. Manage multiple webcams effortlessly, each with customizable controls tailored to your needs.  
-Transform your webcam experience with over 60 fun and creative effects to add flair to your videos and snapshots. Whether you're streaming, recording, or just having fun, Webcamoid supports a wide range of recording formats and even lets you use custom network streams or local files as capture sources. Plus, with desktop capture functionality, you can record your screen seamlessly.  
-Webcamoid's virtual webcam feature allows you to feed your enhanced video to other programs, making it perfect for video calls, streaming, or content creation on GNU/Linux, Mac, and Windows. Translated into multiple languages, Webcamoid is accessible to users worldwide.  
-Download Webcamoid today and turn your webcam into a powerhouse of creativity and functionality!
+Transform your camera experience with over 60 fun and creative effects to add flair to your videos and snapshots. Whether you're streaming, recording, or just having fun, Webcamoid supports a wide range of recording formats and even lets you use custom network streams or local files as capture sources. Plus, with desktop capture functionality, you can record your screen seamlessly, including individual windows.  
+Go live directly from Webcamoid to Twitch, YouTube, Kick, and more, with support for streaming to multiple destinations at once. You can also use Local Streaming to send video and audio over HTTP to any browser or player on your local network, no drivers required.  
+Webcamoid's virtual camera feature lets you feed your enhanced video to other programs for video calls, streaming, or content creation on GNU/Linux and Windows (virtual camera NOT available on Android and Mac platforms).  
+Fully translated into 68 languages, Webcamoid is accessible to users worldwide.  
+Download Webcamoid today and turn your camera into a powerhouse of creativity and functionality!
 
 ## Build and Install ##
 
@@ -37,26 +39,22 @@ Import an issue in Bountyhub, set a price and get your issue solved or a feature
 
 [![Webcamoid on BountyHub](https://img.shields.io/badge/Webcamoid-on%20BountyHub-yellow)](https://bountyhub.dev/bounties?repo=webcamoid/webcamoid)
 
-## Donations campaings ##
-
-Do you want to use Webcamoid in MacOs X, you can colabore in the donations campaing for buying MacBook.
-
-[![Go to GoGetFunding](https://img.shields.io/badge/campaign-GoGetFunding-blue?style=for-the-badge)](https://gogetfunding.com/buying-a-macbook-for-webcamoid-macos-development/)
-
 ## Status ##
 
 [![Android](https://github.com/webcamoid/webcamoid/actions/workflows/android.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/android.yml)
 [![Arch Linux](https://github.com/webcamoid/webcamoid/actions/workflows/linux-arch.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-arch.yml)
 [![Debian](https://github.com/webcamoid/webcamoid/actions/workflows/linux-debian.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-debian.yml)
 [![Fedora](https://github.com/webcamoid/webcamoid/actions/workflows/linux-fedora.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-fedora.yml)
-[![Mageia](https://github.com/webcamoid/webcamoid/actions/workflows/linux-mageia.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-mageia.yml)
 [![Linux MinGW](https://github.com/webcamoid/webcamoid/actions/workflows/linux-mingw.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-mingw.yml)
+[![Linux Mint](https://github.com/webcamoid/webcamoid/actions/workflows/linux-mint.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-mint.yml)
+[![Mageia](https://github.com/webcamoid/webcamoid/actions/workflows/linux-mageia.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-mageia.yml)
 [![OpenSUSE](https://github.com/webcamoid/webcamoid/actions/workflows/linux-opensuse.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-opensuse.yml)
 [![Ubuntu](https://github.com/webcamoid/webcamoid/actions/workflows/linux-ubuntu.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-ubuntu.yml)
+[![Linux Homebrew](https://github.com/webcamoid/webcamoid/actions/workflows/linux-brew.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/linux-brew.yml)
 [![Flatpak](https://github.com/webcamoid/webcamoid/actions/workflows/flatpak.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/flatpak.yml)
+[![FreeBSD](https://github.com/webcamoid/webcamoid/actions/workflows/freebsd.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/freebsd.yml)
 [![Mac](https://github.com/webcamoid/webcamoid/actions/workflows/mac.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/mac.yml)
 [![Windows MSYS](https://github.com/webcamoid/webcamoid/actions/workflows/windows-msys.yml/badge.svg)](https://github.com/webcamoid/webcamoid/actions/workflows/windows-msys.yml)
-[![Build status](https://api.cirrus-ci.com/github/webcamoid/webcamoid.svg)](https://cirrus-ci.com/github/webcamoid/webcamoid)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/08a585dc07a14b8bad2bbb39d6628fdd)](https://www.codacy.com/gh/webcamoid/webcamoid/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webcamoid/webcamoid&amp;utm_campaign=Badge_Grade)
 [![Translation status](https://hosted.weblate.org/widgets/webcamoid/-/svg-badge.svg)](https://hosted.weblate.org/engage/webcamoid/?utm_source=widget)
 [![Project Stats](https://www.openhub.net/p/Webcamoid/widgets/project_thin_badge.gif)](https://www.openhub.net/p/Webcamoid)

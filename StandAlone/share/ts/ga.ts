@@ -1,0 +1,4968 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ga">
+<context>
+    <name>About</name>
+    <message>
+        <location filename="../qml/About.qml" line="31"/>
+        <source>About %1</source>
+        <extracomment>Information of the program, like name, description, version,</extracomment>
+        <translation>Faoi %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="32"/>
+        <source>%1 version, copyleft, and build information.</source>
+        <translation>Eolas faoi leagan %1, faoi chóipchlé, agus faoi thógáil.</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="82"/>
+        <source>Built from</source>
+        <extracomment>Built from &quot;short commit hash&quot;</extracomment>
+        <translation>Tógtha ó</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="88"/>
+        <source>Built from %1</source>
+        <translation>Tógtha ó %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="90"/>
+        <source>Open the commit in your web browser</source>
+        <translation>Oscail an cur isteach i do bhrabhsálaí gréasáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="96"/>
+        <source>Using Qt %1</source>
+        <translation>Ag úsáid Qt %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="102"/>
+        <source>Webcam capture application.</source>
+        <translation>Aip gabhála ceamara gréasáin.</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="109"/>
+        <source>A multi-platform camera application for picture and video capture.</source>
+        <translation>Aip ceamara il-ardán le haghaidh gabhála pictiúr agus físe.</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="123"/>
+        <source>Website</source>
+        <translation>Suíomh Gréasáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/About.qml" line="129"/>
+        <source>Go to %1 website</source>
+        <translation>Téigh go suíomh gréasáin %1</translation>
+    </message>
+</context>
+<context>
+    <name>AddPlatformDialog</name>
+    <message>
+        <location filename="../qml/AddPlatformDialog.qml" line="33"/>
+        <source>Add platform</source>
+        <translation>Cuir ardán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddPlatformDialog.qml" line="42"/>
+        <source>Platform</source>
+        <translation>Ardán</translation>
+    </message>
+</context>
+<context>
+    <name>AddStreamingPlatformDialog</name>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="28"/>
+        <source>Add platform</source>
+        <translation>Cuir ardán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="57"/>
+        <source>Name</source>
+        <translation>Ainm</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="63"/>
+        <source>My Platform</source>
+        <translation>Mo Ardán</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="68"/>
+        <source>Website</source>
+        <translation>Suíomh Gréasáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="79"/>
+        <source>Streaming URL</source>
+        <translation>URL sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="90"/>
+        <source>Key configs URL</source>
+        <translation>URL cumraíochtaí eochrach</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="101"/>
+        <source>Documentation URL</source>
+        <translation>URL doiciméadaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddStreamingPlatformDialog.qml" line="113"/>
+        <source>Needs key</source>
+        <translation>Teastaíonn eochair</translation>
+    </message>
+</context>
+<context>
+    <name>AddVideoFormat</name>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="52"/>
+        <source>Add Video Format</source>
+        <translation>Cuir Formáid Físe leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="53"/>
+        <source>Change Video Format</source>
+        <translation>Athraigh Formáid Físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="105"/>
+        <source>Remove format</source>
+        <translation>Bain formáid</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="116"/>
+        <source>Format</source>
+        <translation>Formáid</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="128"/>
+        <source>Width</source>
+        <translation>Leithead</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="141"/>
+        <source>Height</source>
+        <translation>Airde</translation>
+    </message>
+    <message>
+        <location filename="../qml/AddVideoFormat.qml" line="154"/>
+        <source>Frame rate</source>
+        <translation>Ráta fráma</translation>
+    </message>
+</context>
+<context>
+    <name>AkMediaGalleryModel</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="170"/>
+        <source>Share file</source>
+        <translation>Comhroinn comhad</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="276"/>
+        <source>Share files</source>
+        <translation>Comhroinn comhaid</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="359"/>
+        <source>Use as...</source>
+        <translation>Úsáid mar...</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="396"/>
+        <source>Copy to...</source>
+        <translation>Cóipeáil go...</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="402"/>
+        <source>All Files (*)</source>
+        <translation>Gach Comhad (*)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/src/qml/akmediagallerymodel.cpp" line="418"/>
+        <source>Move to...</source>
+        <translation>Bog go...</translation>
+    </message>
+</context>
+<context>
+    <name>AudioCodecOptions</name>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="28"/>
+        <source>Audio Codec Options</source>
+        <translation>Roghanna Comhfhuaigh Fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="223"/>
+        <source>Audio codec</source>
+        <translation>Comhfhuaigh fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="240"/>
+        <source>Bitrate</source>
+        <translation>Ráta giotán</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="247"/>
+        <source>Bitrate (bits/secs)</source>
+        <translation>Ráta giotán (giotán/soic)</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioCodecOptions.qml" line="256"/>
+        <source>Advanced options</source>
+        <translation>Roghanna casta</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputAdd</name>
+    <message>
+        <location filename="../qml/AudioInputAdd.qml" line="30"/>
+        <source>Select the audio source to add</source>
+        <translation>Roghnaigh an fhoinse fuaime le cur leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputAdd.qml" line="55"/>
+        <source>Audio input</source>
+        <translation>Ionchur fuaime</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputDeviceOptions</name>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="29"/>
+        <source>Audio Input Settings</source>
+        <translation>Socruithe Ionchuir Fuaime</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="124"/>
+        <source>Sample Format</source>
+        <extracomment>A sample represents the strength of the wave at a certain time. A sample can be expressed as the number of bits defining it (more bits better sound), the type of data representing it (signed integer, unsigned integer, floating point), and the endianness of the data (big endian, little endian). The sample format is the representation of that information. For example, &apos;s16le&apos; means that each sample format is represented by a 16 bits signed integer arranged as little endian.</extracomment>
+        <translation>Formáid Sampla</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="142"/>
+        <source>Channels</source>
+        <translation>Cainéil</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="161"/>
+        <source>Sample Rate</source>
+        <extracomment>Number of audio samples per channel to be played per second.</extracomment>
+        <translation>Ráta Samplaí</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputDeviceOptions.qml" line="188"/>
+        <source>Latency (ms)</source>
+        <extracomment>The latency is the amount of accumulated audio ready to play, measured in time. Higher latency == smoother audio playback, but more desynchronization with the video. Lowerer latency == audio synchronization near to the video, but glitchy audio playback. https://en.wikipedia.org/wiki/Latency_(audio)</extracomment>
+        <translation>Moille (ms)</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputSourceItem</name>
+    <message>
+        <location filename="../qml/AudioInputSourceItem.qml" line="72"/>
+        <source>Remove</source>
+        <translation>Bain</translation>
+    </message>
+</context>
+<context>
+    <name>AudioInputs</name>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="62"/>
+        <source>Add audio input</source>
+        <translation>Cuir ionchur fuaime leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="74"/>
+        <source>Add device input</source>
+        <translation>Cuir ionchur gléis leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="80"/>
+        <source>Add video source</source>
+        <translation>Cuir foinse físe leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioInputs.qml" line="93"/>
+        <source>Configure audio input settings</source>
+        <translation>Cumraigh socruithe ionchuir fuaime</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOptions</name>
+    <message>
+        <location filename="../qml/AudioOptions.qml" line="34"/>
+        <source>Outputs</source>
+        <translation>Aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOptions.qml" line="37"/>
+        <source>Sources</source>
+        <translation>Foinsí</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOutputDeviceOptions</name>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="29"/>
+        <source>Audio Device Options</source>
+        <translation>Roghanna Gléas Fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="120"/>
+        <source>Audio input</source>
+        <translation>Ionchur fuaime</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="186"/>
+        <source>Sample Format</source>
+        <extracomment>An sample represents the strength of the wave at a certain time. A sample can be expressed as the number of bits defining it (more bits better sound), the type of data representing it (signed integer, unsigned integer, floating point), and the endianness of the data (big endian, little endian). The sample format is the representation of that information. For example, &apos;s16le&apos; means that each sample format is represented by a 16 bits signed integer arranged as little endian.</extracomment>
+        <translation>Formáid Sampla</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="207"/>
+        <source>Channels</source>
+        <translation>Cainéil</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="229"/>
+        <source>Sample Rate</source>
+        <extracomment>Number of audio samples per channel to be played per second.</extracomment>
+        <translation>Ráta Samplaí</translation>
+    </message>
+    <message>
+        <location filename="../qml/AudioOutputDeviceOptions.qml" line="259"/>
+        <source>Latency (ms)</source>
+        <extracomment>The latency is the amount of accumulated audio ready to play, measured in time. Higher latency == smoother audio playback, but more desynchronization with the video. Lowerer latency == audio synchronization near to the video, but glitchy audio playback. https://en.wikipedia.org/wiki/Latency_(audio)</extracomment>
+        <translation>Moille (ms)</translation>
+    </message>
+</context>
+<context>
+    <name>AudioOutputs</name>
+    <message>
+        <location filename="../qml/AudioOutputs.qml" line="39"/>
+        <source>Configure output</source>
+        <translation>Cumraigh aschur</translation>
+    </message>
+</context>
+<context>
+    <name>CaptureSettingsDialog</name>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="32"/>
+        <source>Video capture settings</source>
+        <translation>Socruithe gabhála físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="33"/>
+        <source>Image capture settings</source>
+        <translation>Socruithe gabhála íomhá</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="58"/>
+        <source>Use flash</source>
+        <translation>Úsáid splanc</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="61"/>
+        <source>Use flash when taking a photo</source>
+        <translation>Úsáid splanc agus grianghraf á ghlacadh</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="66"/>
+        <source>Delay</source>
+        <translation>Moill</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="70"/>
+        <source>Photo timer</source>
+        <translation>Amadóir grianghraf</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="71"/>
+        <source>The time to wait before the photo is taken</source>
+        <translation>An t-am le fanacht sula nglactar an grianghraf</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="77"/>
+        <source>Now</source>
+        <translation>Anois</translation>
+    </message>
+    <message>
+        <location filename="../qml/CaptureSettingsDialog.qml" line="86"/>
+        <source>%1 seconds</source>
+        <translation>%1 soicind</translation>
+    </message>
+</context>
+<context>
+    <name>ColorSchemeAddEdit</name>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="66"/>
+        <source>Edit color scheme</source>
+        <translation>Cuir scéim datha in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="67"/>
+        <source>Create a new color scheme</source>
+        <translation>Cruthaigh scéim datha nua</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="71"/>
+        <source>Color Palette %1</source>
+        <translation>Pailéad Dathanna %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="94"/>
+        <source>Palette name</source>
+        <translation>Ainm pailéid</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="103"/>
+        <source>Enabled</source>
+        <translation>Cumasaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="106"/>
+        <source>Disabled</source>
+        <translation>Díchumasaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="110"/>
+        <source>Preview</source>
+        <translation>Réamhamharc</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="169"/>
+        <source>Window text &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;</source>
+        <translation>Téacs fuinneoige &lt;a href=&quot;#&quot;&gt;nasc&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="215"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="697"/>
+        <source>Button text</source>
+        <translation>Téacs cnaipe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="260"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="837"/>
+        <source>Tooltip text</source>
+        <translation>Téacs leid uirlise</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="349"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="730"/>
+        <source>Placeholder text</source>
+        <translation>Téacs ionadchoimeádáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="350"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="722"/>
+        <source>Text</source>
+        <translation>Téacs</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="541"/>
+        <source>Progress %1%</source>
+        <translation>Dul chun cinn %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="649"/>
+        <source>Color group</source>
+        <translation>Grúpa dathanna</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="650"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="680"/>
+        <source>Window</source>
+        <translation>Fuinneog</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="651"/>
+        <source>Buttons</source>
+        <translation>Cnaipí</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="652"/>
+        <source>Input Controls</source>
+        <translation>Rialúcháin Ionchuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="653"/>
+        <source>Control accents</source>
+        <translation>Béim rialúcháin</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="654"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="820"/>
+        <source>Highlight</source>
+        <translation>Aibhsigh</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="655"/>
+        <source>Tooltips</source>
+        <translation>Leideanna uirlise</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="656"/>
+        <source>Hyperlinks</source>
+        <translation>Hipearnascanna</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="672"/>
+        <source>Window text</source>
+        <translation>Téacs fuinneoige</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="674"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="682"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="699"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="707"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="724"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="732"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="740"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="748"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="765"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="773"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="781"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="789"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="797"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="814"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="822"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="839"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="847"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="864"/>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="872"/>
+        <source>Choose the color for %1</source>
+        <translation>Roghnaigh an dath le haghaidh %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="705"/>
+        <source>Button</source>
+        <translation>Cnaipe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="738"/>
+        <source>Base</source>
+        <translation>Bun</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="746"/>
+        <source>Alternate base</source>
+        <translation>Bun mhalartach</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="763"/>
+        <source>Light</source>
+        <translation>Éadrom</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="771"/>
+        <source>Mid light</source>
+        <translation>Meánéadrom</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="779"/>
+        <source>Mid</source>
+        <translation>Meán</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="787"/>
+        <source>Dark</source>
+        <translation>Dorcha</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="795"/>
+        <source>Shadow</source>
+        <translation>Scáth</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="812"/>
+        <source>Highlighted text</source>
+        <translation>Téacs aibhsithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="845"/>
+        <source>ToolTip base</source>
+        <translation>Bun leid uirlise</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="862"/>
+        <source>Link</source>
+        <translation>Nasc</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="870"/>
+        <source>Visited link</source>
+        <translation>Nasc ar tugadh cuairt air</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="961"/>
+        <source>Brightness</source>
+        <translation>Gile</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="977"/>
+        <source>Contrast</source>
+        <translation>Codarsnacht</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="994"/>
+        <source>Contrast color</source>
+        <translation>Dath codarsnacht</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="996"/>
+        <source>Choose the contrast color</source>
+        <translation>Roghnaigh an dath codarsnacht</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemeAddEdit.qml" line="1001"/>
+        <source>Saturation</source>
+        <translation>Sáithiú</translation>
+    </message>
+</context>
+<context>
+    <name>ColorSchemes</name>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="29"/>
+        <source>Customize Colors</source>
+        <translation>Saincheap Dathanna</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="31"/>
+        <source>Change %1 colors.</source>
+        <extracomment>Changer the program colors</extracomment>
+        <translation>Athraigh dathanna %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="52"/>
+        <source>Color scheme</source>
+        <translation>Scéim datha</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="64"/>
+        <source>Add</source>
+        <translation>Cuir leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="69"/>
+        <source>Create a new color scheme from the current selected one</source>
+        <translation>Cruthaigh scéim datha nua ón gceann roghnaithe reatha</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="74"/>
+        <source>Edit</source>
+        <translation>Cuir in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="80"/>
+        <source>Edit the selected color scheme</source>
+        <translation>Cuir an scéim datha roghnaithe in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="85"/>
+        <source>Remove</source>
+        <translation>Bain</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="91"/>
+        <source>Delete the selected color scheme</source>
+        <translation>Scrios an scéim datha roghnaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="99"/>
+        <source>Import</source>
+        <translation>Iompórtáil</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="104"/>
+        <source>Add a new color scheme from a file</source>
+        <translation>Cuir scéim datha nua ó chomhad leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="109"/>
+        <source>Export</source>
+        <translation>Easpórtáil</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="113"/>
+        <source>Save the selected color scheme into a file</source>
+        <translation>Sábháil an scéim datha roghnaithe i gcomhad</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="128"/>
+        <source>Export color scheme</source>
+        <translation>Easpórtáil scéim datha</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="140"/>
+        <source>Enabled</source>
+        <translation>Cumasaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="143"/>
+        <source>Disabled</source>
+        <translation>Díchumasaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="147"/>
+        <source>Preview</source>
+        <translation>Réamhamharc</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="168"/>
+        <source>Window text &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;</source>
+        <translation>Téacs fuinneoige &lt;a href=&quot;#&quot;&gt;nasc&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="174"/>
+        <source>Button text</source>
+        <translation>Téacs cnaipe</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="179"/>
+        <source>Tooltip text</source>
+        <translation>Téacs leid uirlise</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="188"/>
+        <source>Placeholder text</source>
+        <translation>Téacs ionadchoimeádáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="189"/>
+        <source>Text</source>
+        <translation>Téacs</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="219"/>
+        <source>Progress %1%</source>
+        <translation>Dul chun cinn %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="246"/>
+        <source>Select the color scheme to import</source>
+        <translation>Roghnaigh an scéim datha le hiompórtáil</translation>
+    </message>
+    <message>
+        <location filename="../qml/ColorSchemes.qml" line="280"/>
+        <source>Save the color scheme to a file</source>
+        <translation>Sábháil an scéim datha i gcomhad</translation>
+    </message>
+</context>
+<context>
+    <name>Commons</name>
+    <message>
+        <location filename="../qml/Commons.qml" line="28"/>
+        <source>The virtual camera is in use by the following applications:</source>
+        <translation>Tá an ceamara fíorúil in úsáid ag na haipeanna seo a leanas:</translation>
+    </message>
+    <message>
+        <location filename="../qml/Commons.qml" line="40"/>
+        <source>Stop the camera in those applications or close them and try again.</source>
+        <translation>Stop an ceamara sna haipeanna sin nó dún iad agus bain triail eile as.</translation>
+    </message>
+</context>
+<context>
+    <name>Contributors</name>
+    <message>
+        <location filename="../qml/Contributors.qml" line="31"/>
+        <source>Contributors</source>
+        <extracomment>List of people contributing to the project: software</extracomment>
+        <translation>Rannpháirtithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Contributors.qml" line="32"/>
+        <source>Great people who collaborated to make %1 better</source>
+        <translation>Daoine iontacha a chomhoibrigh chun %1 a fheabhsú</translation>
+    </message>
+    <message>
+        <location filename="../qml/Contributors.qml" line="49"/>
+        <source>Thanks to all these cool people that helped contributing to Webcamoid all these years.</source>
+        <translation>Buíochas le gach duine iontach seo a chuidigh le rannpháirtíocht a dhéanamh i Webcamoid le blianta fada anuas.</translation>
+    </message>
+</context>
+<context>
+    <name>DebugLog</name>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="30"/>
+        <source>Debug Log</source>
+        <translation>Loga Dífhabhtaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="31"/>
+        <source>Information to help fixing bugs in %1.</source>
+        <translation>Eolas chun cabhrú le fabhtanna i %1 a shocrú.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="74"/>
+        <source>Logs directory</source>
+        <translation>Comhadlann logaí</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="86"/>
+        <source>Search directory to save logs</source>
+        <translation>Comhadlann chuardaigh le logaí a shábháil</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="100"/>
+        <source>Clear</source>
+        <translation>Glan</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="103"/>
+        <source>Clear the debug log</source>
+        <translation>Glan an loga dífhabhtaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="114"/>
+        <source>Save</source>
+        <translation>Sábháil</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="117"/>
+        <source>Save the debug log</source>
+        <translation>Sábháil an loga dífhabhtaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/DebugLog.qml" line="142"/>
+        <source>Select the folder to save the logs</source>
+        <translation>Roghnaigh an fillteán le logaí a shábháil ann</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadDialog</name>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="35"/>
+        <source>Downloading %1</source>
+        <translation>Ag íoslódáil %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="155"/>
+        <source>&lt;b&gt;From:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Ó:&lt;/b&gt; %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="160"/>
+        <source>&lt;b&gt;To:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Go:&lt;/b&gt; %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="165"/>
+        <source>&lt;b&gt;Size:&lt;/b&gt; %1 %2B / %3 %4B</source>
+        <translation>&lt;b&gt;Méid:&lt;/b&gt; %1 %2B / %3 %4B</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="173"/>
+        <source>&lt;b&gt;Speed:&lt;/b&gt; %1 %2B/s</source>
+        <translation>&lt;b&gt;Luas:&lt;/b&gt; %1 %2B/s</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadDialog.qml" line="179"/>
+        <source>&lt;b&gt;Time remaining:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;An t-am atá fágtha:&lt;/b&gt; %1</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadFailedDialog</name>
+    <message>
+        <location filename="../qml/DownloadFailedDialog.qml" line="34"/>
+        <source>Download failed</source>
+        <translation>Theip ar an íoslódáil</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadSucceededDialog</name>
+    <message>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="34"/>
+        <source>Download ready</source>
+        <translation>Íoslódáil réidh</translation>
+    </message>
+    <message>
+        <location filename="../qml/DownloadSucceededDialog.qml" line="52"/>
+        <source>Install the virtual camera?</source>
+        <translation>An gcuirfidh tú an ceamara fíorúil suiteáil?</translation>
+    </message>
+</context>
+<context>
+    <name>GeneralConfig</name>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="28"/>
+        <source>General Options</source>
+        <translation>Roghanna Ginearálta</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="29"/>
+        <source>Configure capture, recording frameworks, and others.</source>
+        <translation>Cumraigh creatlach gabhála, taifeadta, agus eile.</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="77"/>
+        <source>Play sources on start</source>
+        <translation>Seinn foinsí ar thosú</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="87"/>
+        <source>Only allow one instance of %1</source>
+        <translation>Ná ceadaigh ach aon chás amháin de %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="99"/>
+        <source>Hide controls on pointer out</source>
+        <translation>Folaigh rialúcháin nuair a théann an pointeoir amach</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="111"/>
+        <source>Frameworks and libraries</source>
+        <translation>Creatlaigh agus leabharlanna</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="121"/>
+        <source>Video capture</source>
+        <translation>Gabháil físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="139"/>
+        <source>Screen capture</source>
+        <translation>Gabháil scáileáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="157"/>
+        <source>Audio capture/playback</source>
+        <translation>Gabháil/athsheinm fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="175"/>
+        <source>Video convert</source>
+        <translation>Comhshó físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="193"/>
+        <source>Video playback</source>
+        <translation>Athsheinm físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="211"/>
+        <source>Virtual camera driver</source>
+        <translation>Tiománaí ceamara fíorúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/GeneralConfig.qml" line="234"/>
+        <source>Root method</source>
+        <extracomment>The preferred method for executing commands with elevated privileges in the system.</extracomment>
+        <translation>Modh fréimhe</translation>
+    </message>
+</context>
+<context>
+    <name>ImageCapture</name>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="29"/>
+        <source>Image Capture</source>
+        <translation>Gabháil Íomhá</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="30"/>
+        <source>Configure photografy quality and formats.</source>
+        <translation>Cumraigh cáilíocht agus formáidí grianghrafadóireachta.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="54"/>
+        <source>Images directory</source>
+        <translation>Comhadlann íomhánna</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="66"/>
+        <source>Select the save directory</source>
+        <translation>Roghnaigh an chomhadlann shábhála</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="80"/>
+        <source>File format</source>
+        <translation>Formáid comhaid</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="110"/>
+        <source>Quality</source>
+        <translation>Cáilíocht</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="142"/>
+        <source>Flash settings</source>
+        <translation>Socruithe splince</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="152"/>
+        <source>Use flash</source>
+        <translation>Úsáid splanc</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="155"/>
+        <source>Use flash when taking a photo</source>
+        <translation>Úsáid splanc agus grianghraf á ghlacadh</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="164"/>
+        <source>Delay</source>
+        <translation>Moill</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="167"/>
+        <source>Photo timer</source>
+        <translation>Amadóir grianghraf</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="168"/>
+        <source>The time to wait before the photo is taken</source>
+        <translation>An t-am le fanacht sula nglactar an grianghraf</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="176"/>
+        <source>Now</source>
+        <translation>Anois</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="219"/>
+        <source>%1 seconds</source>
+        <translation>%1 soicind</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImageCapture.qml" line="247"/>
+        <source>Select the folder to save your photos</source>
+        <translation>Roghnaigh an fillteán le do ghrianghraif a shábháil ann</translation>
+    </message>
+</context>
+<context>
+    <name>License</name>
+    <message>
+        <location filename="../qml/License.qml" line="27"/>
+        <source>License</source>
+        <extracomment>Program license.</extracomment>
+        <translation>Ceadúnas</translation>
+    </message>
+    <message>
+        <location filename="../qml/License.qml" line="28"/>
+        <source>know your rights</source>
+        <translation>aithnigh do chearta</translation>
+    </message>
+</context>
+<context>
+    <name>LocalSettingsMenu</name>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="36"/>
+        <source>Copy to clipboard</source>
+        <translation>Cóipeáil chuig an ngearrthaisce</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="43"/>
+        <source>Recording settings</source>
+        <translation>Socruithe taifeadta</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalSettingsMenu.qml" line="44"/>
+        <source>Capture settings</source>
+        <translation>Socruithe gabhála</translation>
+    </message>
+</context>
+<context>
+    <name>LocalStreamingAdvanced</name>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="31"/>
+        <source>Local streaming advanced options</source>
+        <translation>Roghanna casta sruthaithe áitiúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="130"/>
+        <source>Local streaming quality</source>
+        <translation>Cáilíocht sruthaithe áitiúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="155"/>
+        <source>Streaming quality</source>
+        <translation>Cáilíocht sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="208"/>
+        <source>Custom</source>
+        <translation>Saincheaptha</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="211"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Cáilíocht físe: %1×%2 %3 SFA</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="212"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Ráta giotán físe: %1 Mbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="213"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Ráta samplaí fuaime: %1 kHz</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="214"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Ráta giotán fuaime: %1 kbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="223"/>
+        <source>Video quality</source>
+        <translation>Cáilíocht físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="241"/>
+        <source>Output width</source>
+        <translation>Leithead aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="264"/>
+        <source>Output height</source>
+        <translation>Airde aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="287"/>
+        <source>Output frame rate</source>
+        <translation>Ráta fráma aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="310"/>
+        <source>Video bitrate (kbps)</source>
+        <translation>Ráta giotán físe (kbps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="330"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Céimeanna príomhfhramanna (ms)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="349"/>
+        <source>Video codec</source>
+        <translation>Comhfhuaigh físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="432"/>
+        <source>Audio quality</source>
+        <translation>Cáilíocht fuaime</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="450"/>
+        <source>Sample rate</source>
+        <translation>Ráta samplaí</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="473"/>
+        <source>Audio bitrate (kbps)</source>
+        <translation>Ráta giotán fuaime (kbps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingAdvanced.qml" line="494"/>
+        <source>Audio codec</source>
+        <translation>Comhfhuaigh fuaim</translation>
+    </message>
+</context>
+<context>
+    <name>LocalStreamingOptions</name>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="99"/>
+        <source>Remove</source>
+        <translation>Bain</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="116"/>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="135"/>
+        <source>Format</source>
+        <translation>Formáid</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="193"/>
+        <source>Resource name</source>
+        <translation>Ainm acmhainne</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="216"/>
+        <source>Streaming URL</source>
+        <translation>URL sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="234"/>
+        <source>Open URL in the webbrowser</source>
+        <translation>Oscail URL sa bhrabhsálaí gréasáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/LocalStreamingOptions.qml" line="244"/>
+        <source>Advanced options</source>
+        <translation>Roghanna casta</translation>
+    </message>
+</context>
+<context>
+    <name>LogSavedDialog</name>
+    <message>
+        <location filename="../qml/LogSavedDialog.qml" line="31"/>
+        <source>Done</source>
+        <translation>Críochnaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/LogSavedDialog.qml" line="41"/>
+        <source>Log file saved</source>
+        <translation>Comhad loga sábháilte</translation>
+    </message>
+</context>
+<context>
+    <name>MainPanel</name>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="27"/>
+        <source>Audio</source>
+        <translation>Fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="29"/>
+        <source>Video</source>
+        <translation>Físeán</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="31"/>
+        <source>Effects</source>
+        <translation>Éifeachtaí</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="33"/>
+        <source>Video Source Options</source>
+        <translation>Roghanna Foinse Físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="35"/>
+        <source>Virtual Camera Options</source>
+        <translation>Roghanna Ceamara Fíorúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="37"/>
+        <source>Streaming Platform Options</source>
+        <translation>Roghanna Ardáin Sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="39"/>
+        <source>Local Streaming Options</source>
+        <translation>Roghanna Sruthaithe Áitiúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/MainPanel.qml" line="40"/>
+        <source>%1 options</source>
+        <translation>Roghanna %1</translation>
+    </message>
+</context>
+<context>
+    <name>MediaGalleryDialog</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="84"/>
+        <source>%1 selected</source>
+        <translation>%1 roghnaithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="128"/>
+        <source>Select all</source>
+        <translation>Roghnaigh go léir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="135"/>
+        <source>Deselect all</source>
+        <translation>Díroghnaigh go léir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="286"/>
+        <source>The directory is empty</source>
+        <translation>Tá an chomhadlann folamh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="294"/>
+        <source>Confirm delete</source>
+        <translation>Deimhnigh scriosadh</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="302"/>
+        <source>Delete %n picture(s) permanently?</source>
+        <translation>
+            <numerusform>Scrios %n pictiúr go buan?</numerusform>
+            <numerusform>Scrios %n phictiúr go buan?</numerusform>
+            <numerusform>Scrios %n bpictiúr go buan?</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaGalleryDialog.qml" line="309"/>
+        <source>This action can&apos;t be undone.</source>
+        <translation>Ní féidir an gníomh seo a chealú.</translation>
+    </message>
+</context>
+<context>
+    <name>MediaTools</name>
+    <message>
+        <location filename="../../src/mediatools.cpp" line="1226"/>
+        <source>%1/log %2.txt</source>
+        <translation>%1/log %2.txt</translation>
+    </message>
+</context>
+<context>
+    <name>MediaViewerDialog</name>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="138"/>
+        <source>Use as</source>
+        <translation>Úsáid mar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="143"/>
+        <source>Open with</source>
+        <translation>Oscail le</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="148"/>
+        <source>Delete</source>
+        <translation>Scrios</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="156"/>
+        <source>Move to</source>
+        <translation>Bog go</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Lib/share/qml/AkControls/MediaViewerDialog.qml" line="161"/>
+        <source>Copy to</source>
+        <translation>Cóipeáil go</translation>
+    </message>
+</context>
+<context>
+    <name>OptionsPanel</name>
+    <message>
+        <location filename="../qml/OptionsPanel.qml" line="203"/>
+        <source>Close %1 panel</source>
+        <translation>Dún painéal %1</translation>
+    </message>
+</context>
+<context>
+    <name>PipewireScreenDev</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/pipewire/src/pipewirescreendev.cpp" line="538"/>
+        <source>PipeWire Screen</source>
+        <translation>Scáileán PipeWire</translation>
+    </message>
+</context>
+<context>
+    <name>PluginConfig</name>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="29"/>
+        <location filename="../qml/PluginConfig.qml" line="49"/>
+        <source>Plugins</source>
+        <translation>Breiseáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="30"/>
+        <source>Enable and disable %1 plugins</source>
+        <translation>Cumasaigh agus díchumasaigh breiseáin %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="46"/>
+        <source>Paths</source>
+        <translation>Cosáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="197"/>
+        <source>Search plugins in subfolders</source>
+        <translation>Cuardaigh breiseáin i bhfofhillteáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="209"/>
+        <source>Add path</source>
+        <translation>Cuir cosán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="252"/>
+        <source>Update</source>
+        <translation>Nuashonraigh</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="255"/>
+        <source>Update plugins list</source>
+        <translation>Nuashonraigh liosta breiseán</translation>
+    </message>
+    <message>
+        <location filename="../qml/PluginConfig.qml" line="285"/>
+        <source>Add plugins search path</source>
+        <translation>Cuir cosán cuardaigh breiseán leis</translation>
+    </message>
+</context>
+<context>
+    <name>PluginsPathItem</name>
+    <message>
+        <location filename="../qml/PluginsPathItem.qml" line="52"/>
+        <source>Remove</source>
+        <translation>Bain</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="44"/>
+        <source>Webcam capture application.</source>
+        <translation>Aip gabhála ceamara gréasáin.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="47"/>
+        <source>Load settings from PATH. If PATH is empty, load configs from application directory.</source>
+        <translation>Luchtaigh socruithe ó PATH. Má tá PATH folamh, luchtaigh cumraíochtaí ón gcomhadlann feidhmchláir.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="49"/>
+        <source>PATH</source>
+        <translation>PATH</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="54"/>
+        <source>Search in the specified plugins paths recursively.</source>
+        <translation>Cuardaigh sna cosáin breiseán sonraithe go hathchúrsach.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="59"/>
+        <source>Semi-colon separated list of paths to search for plugins.</source>
+        <translation>Liosta cosán deighilte le leathstad le haghaidh cuardach breiseán.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="61"/>
+        <location filename="../../src/clioptions.cpp" line="70"/>
+        <source>PATH1;PATH2;PATH3;...</source>
+        <translation>PATH1;PATH2;PATH3;...</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="68"/>
+        <source>Semi-colon separated list of paths to avoid loading.</source>
+        <extracomment>Blacklist of plugins that could have conflicts when loading in Webcamoid.</extracomment>
+        <translation>Liosta cosán deighilte le leathstad le seachaint luchtaithe.</translation>
+    </message>
+    <message>
+        <location filename="../../src/clioptions.cpp" line="74"/>
+        <source>Open a new instance of %1.</source>
+        <translation>Oscail cás nua de %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording.cpp" line="1512"/>
+        <source>%1/Video %2.%3</source>
+        <translation>%1/Físeán %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="724"/>
+        <source>3GP Video</source>
+        <translation>Físeán 3GP</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="725"/>
+        <source>AVI Video</source>
+        <translation>Físeán AVI</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="726"/>
+        <source>Windows Bitmap</source>
+        <translation>Bitmap Windows</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="727"/>
+        <source>Microsoft Windows Cursor</source>
+        <translation>Cursor Microsoft Windows</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="729"/>
+        <source>Flash Video</source>
+        <extracomment>Adobe FLV Flash video</extracomment>
+        <translation>Físeán Flash</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="730"/>
+        <source>Animated GIF</source>
+        <translation>GIF beoite</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="731"/>
+        <source>Graphic Interchange Format</source>
+        <translation>Formáid Malartaithe Grafaice</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="732"/>
+        <source>Apple Icon Image</source>
+        <translation>Íomhá Deilbhín Apple</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="733"/>
+        <source>Microsoft Windows Icon</source>
+        <translation>Deilbhín Microsoft Windows</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="734"/>
+        <source>Joint Photographic Experts Group</source>
+        <translation>Comhghrúpa Saineolaithe Grianghrafadóireachta</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="735"/>
+        <source>MKV Video</source>
+        <translation>Físeán MKV</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="736"/>
+        <source>Animated PNG</source>
+        <translation>PNG beoite</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="737"/>
+        <source>Multiple-image Network Graphics</source>
+        <translation>Grafaicí Líonra Il-íomhá</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="738"/>
+        <source>QuickTime Video</source>
+        <translation>Físeán QuickTime</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="739"/>
+        <source>MP4 Video</source>
+        <translation>Físeán MP4</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="740"/>
+        <source>MPEG Video</source>
+        <translation>Físeán MPEG</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="741"/>
+        <source>Ogg Video</source>
+        <translation>Físeán Ogg</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="742"/>
+        <source>Portable Bitmap</source>
+        <translation>Bitmap Inphorta</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="743"/>
+        <source>Portable Graymap</source>
+        <translation>Graymap Inphorta</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="744"/>
+        <source>Portable Network Graphics</source>
+        <translation>Grafaicí Líonra Inphorta</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="745"/>
+        <source>Portable Pixmap</source>
+        <translation>Pixmap Inphorta</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="747"/>
+        <source>RealMedia Video</source>
+        <extracomment>Don&apos;t translate &quot;RealMedia&quot;, leave it as is.</extracomment>
+        <translation>Físeán RealMedia</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="748"/>
+        <source>Scalable Vector Graphics</source>
+        <translation>Grafaicí Veicteora Scáláilte</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="749"/>
+        <source>Truevision TGA</source>
+        <translation>Truevision TGA</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="750"/>
+        <source>Tagged Image File Format</source>
+        <translation>Formáid Comhaid Íomhá Clibeáilte</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="751"/>
+        <source>DVD Video</source>
+        <translation>Físeán DVD</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="752"/>
+        <source>Wireless Bitmap</source>
+        <translation>Bitmap Gan Sreang</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="753"/>
+        <source>WebM Video</source>
+        <translation>Físeán WebM</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="754"/>
+        <source>WebP</source>
+        <translation>WebP</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="756"/>
+        <source>Windows Media Video</source>
+        <extracomment>Also known as WMV, is a video file format.</extracomment>
+        <translation>Físeán Windows Media</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="757"/>
+        <source>X11 Bitmap</source>
+        <translation>Bitmap X11</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="758"/>
+        <source>X11 Pixmap</source>
+        <translation>Pixmap X11</translation>
+    </message>
+</context>
+<context>
+    <name>RecordingNotice</name>
+    <message>
+        <location filename="../qml/RecordingNotice.qml" line="64"/>
+        <source>Recording</source>
+        <translation>Ag taifeadadh</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsMenu</name>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="60"/>
+        <source>Video</source>
+        <translation>Físeán</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="66"/>
+        <source>Audio</source>
+        <translation>Fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="72"/>
+        <source>Effects</source>
+        <translation>Éifeachtaí</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="78"/>
+        <source>Preferences</source>
+        <translation>Sainroghanna</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="84"/>
+        <source>Donate</source>
+        <translation>Tabhair síntiús</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="90"/>
+        <source>Help</source>
+        <translation>Cabhair</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="96"/>
+        <source>About</source>
+        <translation>Faoi</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsMenu.qml" line="103"/>
+        <source>Play sources</source>
+        <translation>Seinn foinsí</translation>
+    </message>
+</context>
+<context>
+    <name>Streaming</name>
+    <message>
+        <location filename="../qml/Streaming.qml" line="29"/>
+        <source>Streaming</source>
+        <translation>Sruthú</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="30"/>
+        <source>Configure video streaming to many platforms.</source>
+        <translation>Cumraigh sruthú físe go dtí go leor ardán.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="122"/>
+        <location filename="../qml/Streaming.qml" line="147"/>
+        <source>Streaming quality</source>
+        <translation>Cáilíocht sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="200"/>
+        <source>Custom</source>
+        <translation>Saincheaptha</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="203"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Cáilíocht físe: %1×%2 %3 SFA</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="204"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Ráta giotán físe: %1 Mbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="205"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Ráta samplaí fuaime: %1 kHz</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="206"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Ráta giotán fuaime: %1 kbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="214"/>
+        <source>Advanced settings</source>
+        <translation>Socruithe casta</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="229"/>
+        <source>Video quality</source>
+        <translation>Cáilíocht físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="247"/>
+        <source>Output width</source>
+        <translation>Leithead aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="270"/>
+        <source>Output height</source>
+        <translation>Airde aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="293"/>
+        <source>Output frame rate</source>
+        <translation>Ráta fráma aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="316"/>
+        <source>Video bitrate (kbps)</source>
+        <translation>Ráta giotán físe (kbps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="336"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Céimeanna príomhfhramanna (ms)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="353"/>
+        <source>Video codec</source>
+        <translation>Comhfhuaigh físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="436"/>
+        <source>Audio quality</source>
+        <translation>Cáilíocht fuaime</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="454"/>
+        <source>Sample rate</source>
+        <translation>Ráta samplaí</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="477"/>
+        <source>Audio bitrate (kbps)</source>
+        <translation>Ráta giotán fuaime (kbps)</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="498"/>
+        <source>Audio codec</source>
+        <translation>Comhfhuaigh fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="521"/>
+        <source>Streaming platform settings</source>
+        <translation>Socruithe ardáin sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="532"/>
+        <source>Platform</source>
+        <translation>Ardán</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="540"/>
+        <source>Add platform</source>
+        <translation>Cuir ardán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="547"/>
+        <source>Remove platform</source>
+        <translation>Bain ardán</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="561"/>
+        <source>Website</source>
+        <translation>Suíomh Gréasáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="581"/>
+        <source>Visit website</source>
+        <translation>Tabhair cuairt ar an suíomh gréasáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="596"/>
+        <source>Streaming URL</source>
+        <translation>URL sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="627"/>
+        <source>Hide streaming URL</source>
+        <translation>Folaigh URL sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="628"/>
+        <source>Show streaming URL</source>
+        <translation>Taispeáin URL sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="647"/>
+        <source>Streaming key</source>
+        <translation>Eochair sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="680"/>
+        <source>Hide streaming key</source>
+        <translation>Folaigh eochair sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="681"/>
+        <source>Show streaming key</source>
+        <translation>Taispeáin eochair sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="700"/>
+        <source>Streaming configuration help</source>
+        <translation>Cabhair cumraíochta sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/Streaming.qml" line="712"/>
+        <source>Get streaming key</source>
+        <translation>Faigh eochair sruthaithe</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingFailedDialog</name>
+    <message>
+        <location filename="../qml/StreamingFailedDialog.qml" line="31"/>
+        <source>Streaming failed</source>
+        <translation>Theip ar an sruthú</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingPlatformOptions</name>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="60"/>
+        <source>Remove</source>
+        <translation>Bain</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="72"/>
+        <source>Website</source>
+        <translation>Suíomh Gréasáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="92"/>
+        <source>Visit website</source>
+        <translation>Tabhair cuairt ar an suíomh gréasáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="107"/>
+        <source>Streaming URL</source>
+        <translation>URL sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="138"/>
+        <source>Hide streaming URL</source>
+        <translation>Folaigh URL sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="139"/>
+        <source>Show streaming URL</source>
+        <translation>Taispeáin URL sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="158"/>
+        <source>Streaming key</source>
+        <translation>Eochair sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="191"/>
+        <source>Hide streaming key</source>
+        <translation>Folaigh eochair sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="192"/>
+        <source>Show streaming key</source>
+        <translation>Taispeáin eochair sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="211"/>
+        <source>Streaming configuration help</source>
+        <translation>Cabhair cumraíochta sruthaithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingPlatformOptions.qml" line="223"/>
+        <source>Get streaming key</source>
+        <translation>Faigh eochair sruthaithe</translation>
+    </message>
+</context>
+<context>
+    <name>StreamingStartStopDialog</name>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="33"/>
+        <source>Start streaming</source>
+        <translation>Tosaigh sruthú</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="34"/>
+        <source>Stop streaming</source>
+        <translation>Stop sruthú</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="50"/>
+        <source>Thousands of people will start watching you around the world on internet.&lt;br/&gt;Are you sure that you want to start streaming?</source>
+        <translation>Tosóidh na mílte duine ag féachaint ort ar fud an domhain ar an idirlíon.&lt;br/&gt;An bhfuil tú cinnte gur mian leat tús a chur leis an sruthú?</translation>
+    </message>
+    <message>
+        <location filename="../qml/StreamingStartStopDialog.qml" line="51"/>
+        <source>Are you sure that you want to stop streaming?</source>
+        <translation>An bhfuil tú cinnte gur mian leat deireadh a chur leis an sruthú?</translation>
+    </message>
+</context>
+<context>
+    <name>TableColor</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="40"/>
+        <source>Select the new color</source>
+        <translation>Roghnaigh an dath nua</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="42"/>
+        <source>Color %1</source>
+        <translation>Dath %1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="51"/>
+        <source>Remove color</source>
+        <translation>Bain dath</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/TableColor.qml" line="52"/>
+        <source>Remove color %1</source>
+        <translation>Bain dath %1</translation>
+    </message>
+</context>
+<context>
+    <name>ThirdPartyLicenses</name>
+    <message>
+        <location filename="../qml/ThirdPartyLicenses.qml" line="31"/>
+        <source>3rd Party Licenses</source>
+        <extracomment>License for 3rd party components used in Webcamoid, like</extracomment>
+        <translation>Ceadúnais Tríú Páirtí</translation>
+    </message>
+    <message>
+        <location filename="../qml/ThirdPartyLicenses.qml" line="32"/>
+        <source>Licenses for the code incorporated into %1</source>
+        <translation>Ceadúnais don chód ionchorpraíthe i %1</translation>
+    </message>
+</context>
+<context>
+    <name>UpdatesConfig</name>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="31"/>
+        <source>Updates</source>
+        <translation>Nuashonruithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="32"/>
+        <source>Configure the update frequency.</source>
+        <translation>Cumraigh an minicíocht nuashonraithe.</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="93"/>
+        <source>Notify about new versions</source>
+        <translation>Fógra faoi leaganacha nua</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="104"/>
+        <source>Show updates dialog</source>
+        <translation>Taispeáin comhfhreagras nuashonraithe</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="113"/>
+        <source>Check new versions</source>
+        <translation>Seiceáil leaganacha nua</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="121"/>
+        <source>Daily</source>
+        <translation>Laethúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="125"/>
+        <source>Every two days</source>
+        <translation>Gach dhá lá</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="129"/>
+        <source>Weekly</source>
+        <translation>Seachtainiúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="133"/>
+        <source>Every two weeks</source>
+        <translation>Gach dhá sheachtain</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="137"/>
+        <source>Monthly</source>
+        <translation>Míosúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="141"/>
+        <source>Never</source>
+        <translation>Riamh</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="153"/>
+        <source>&lt;b&gt;Last updated&lt;/b&gt;: %1</source>
+        <translation>&lt;b&gt;Nuashonraithe go deireanach&lt;/b&gt;: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="172"/>
+        <source>Your version of %1 is outdated. Latest version is &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation>Tá do leagan de %1 as dáta. Is é &lt;b&gt;%2&lt;/b&gt; an leagan is déanaí.</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="180"/>
+        <source>Upgrade Now!</source>
+        <translation>Uasghrádú Anois!</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="196"/>
+        <source>Thanks for using a &lt;b&gt;development version&lt;/b&gt;!&lt;br /&gt;It will be very helpful if you can report any bug and suggestions you have.</source>
+        <translation>Go raibh maith agat as úsáid a bhaint as &lt;b&gt;leagan forbartha&lt;/b&gt;!&lt;br /&gt;Bheadh sé an-chabhrach má d&apos;fhéadfá aon fhabht agus moltaí atá agat a thuairisciú.</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesConfig.qml" line="203"/>
+        <source>Report a Bug</source>
+        <translation>Tuairiscigh Fabht</translation>
+    </message>
+</context>
+<context>
+    <name>UpdatesDialog</name>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="30"/>
+        <source>New version available!</source>
+        <translation>Leagan nua ar fáil!</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="74"/>
+        <source>Download %1 %2 NOW!</source>
+        <translation>Íoslódáil %1 %2 ANOIS!</translation>
+    </message>
+    <message>
+        <location filename="../qml/UpdatesDialog.qml" line="81"/>
+        <source>Show this dialog next time</source>
+        <translation>Taispeáin an comhfhreagras seo an chéad uair eile</translation>
+    </message>
+</context>
+<context>
+    <name>VCamInstallFailedDialog</name>
+    <message>
+        <location filename="../qml/VCamInstallFailedDialog.qml" line="31"/>
+        <source>Installation failed</source>
+        <translation>Theip ar an suiteáil</translation>
+    </message>
+</context>
+<context>
+    <name>VCamInstallSucceededDialog</name>
+    <message>
+        <location filename="../qml/VCamInstallSucceededDialog.qml" line="31"/>
+        <source>Installation succeeded</source>
+        <translation>D&apos;éirigh leis an suiteáil</translation>
+    </message>
+    <message>
+        <location filename="../qml/VCamInstallSucceededDialog.qml" line="40"/>
+        <source>Restart Webcamoid?</source>
+        <translation>Atosaigh Webcamoid?</translation>
+    </message>
+</context>
+<context>
+    <name>VCamManualDownloadDialog</name>
+    <message>
+        <location filename="../qml/VCamManualDownloadDialog.qml" line="31"/>
+        <source>Can&apos;t get latest version</source>
+        <translation>Ní féidir an leagan is déanaí a fháil</translation>
+    </message>
+    <message>
+        <location filename="../qml/VCamManualDownloadDialog.qml" line="40"/>
+        <source>Download the virtual camera manually?</source>
+        <translation>An íoslódálfaidh tú an ceamara fíorúil de láimh?</translation>
+    </message>
+</context>
+<context>
+    <name>VideoCodecOptions</name>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="28"/>
+        <source>Video Codec Options</source>
+        <translation>Roghanna Comhfhuaigh Físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="234"/>
+        <source>Video codec</source>
+        <translation>Comhfhuaigh físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="251"/>
+        <source>Bitrate</source>
+        <translation>Ráta giotán</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="258"/>
+        <source>Bitrate (bits/secs)</source>
+        <translation>Ráta giotán (giotán/soic)</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="268"/>
+        <source>Keyframes stride (ms)</source>
+        <translation>Céimeanna príomhfhramanna (ms)</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="275"/>
+        <source>1000</source>
+        <translation>1000</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoCodecOptions.qml" line="284"/>
+        <source>Advanced options</source>
+        <translation>Roghanna casta</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectOptions</name>
+    <message>
+        <location filename="../qml/VideoEffectOptions.qml" line="56"/>
+        <source>Remove</source>
+        <translation>Bain</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectOptions.qml" line="61"/>
+        <source>Remove %1 video effect</source>
+        <translation>Bain éifeacht físe %1</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsDialog</name>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="29"/>
+        <source>Add video effect</source>
+        <translation>Cuir éifeacht físe leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="69"/>
+        <source>Effect</source>
+        <translation>Éifeacht</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsDialog.qml" line="133"/>
+        <source>Chain effect</source>
+        <extracomment>Apply the effect over the other effects.</extracomment>
+        <translation>Éifeacht slabhra</translation>
+    </message>
+</context>
+<context>
+    <name>VideoEffectsList</name>
+    <message>
+        <location filename="../qml/VideoEffectsList.qml" line="50"/>
+        <source>Add effect</source>
+        <translation>Cuir éifeacht leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoEffectsList.qml" line="57"/>
+        <source>Remove all effects</source>
+        <translation>Bain gach éifeacht</translation>
+    </message>
+</context>
+<context>
+    <name>VideoFormatOptions</name>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="28"/>
+        <source>Video Format Options</source>
+        <translation>Roghanna Formáid Físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="208"/>
+        <source>File format</source>
+        <translation>Formáid comhaid</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoFormatOptions.qml" line="223"/>
+        <source>Advanced options</source>
+        <translation>Roghanna casta</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddEdit</name>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="185"/>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="124"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="169"/>
+        <source>Description</source>
+        <translation>Cur síos</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="82"/>
+        <source>Edit media file source</source>
+        <translation>Cuir foinse comhaid meán in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="86"/>
+        <source>Edit media URL source</source>
+        <translation>Cuir foinse URL meán in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="90"/>
+        <source>Add media file source</source>
+        <translation>Cuir foinse comhaid meán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="91"/>
+        <source>Add media URL source</source>
+        <translation>Cuir foinse URL meán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="130"/>
+        <location filename="../qml/VideoInputAddEdit.qml" line="175"/>
+        <source>Source title</source>
+        <translation>Teideal foinse</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="140"/>
+        <source>Path</source>
+        <translation>Cosán</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="148"/>
+        <source>File path</source>
+        <translation>Cosán comhaid</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="149"/>
+        <source>Search file to use as source</source>
+        <translation>Cuardaigh comhad le húsáid mar fhoinse</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddEdit.qml" line="234"/>
+        <source>Choose the file to add as source</source>
+        <translation>Roghnaigh an comhad le cur leis mar fhoinse</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddScreen</name>
+    <message>
+        <location filename="../qml/VideoInputAddScreen.qml" line="30"/>
+        <source>Select the screen to add</source>
+        <translation>Roghnaigh an scáileán le cur leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddScreen.qml" line="55"/>
+        <source>Screen</source>
+        <translation>Scáileán</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputAddWindow</name>
+    <message>
+        <location filename="../qml/VideoInputAddWindow.qml" line="30"/>
+        <source>Select the window to add</source>
+        <translation>Roghnaigh an fhuinneog le cur leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputAddWindow.qml" line="55"/>
+        <source>Window</source>
+        <translation>Fuinneog</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputOptions</name>
+    <message>
+        <location filename="../qml/VideoInputOptions.qml" line="61"/>
+        <source>Edit</source>
+        <translation>Cuir in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputOptions.qml" line="74"/>
+        <source>Remove</source>
+        <translation>Bain</translation>
+    </message>
+</context>
+<context>
+    <name>VideoInputs</name>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="105"/>
+        <source>Configure source</source>
+        <translation>Cumraigh foinse</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="63"/>
+        <source>Add source</source>
+        <translation>Cuir foinse leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="76"/>
+        <source>Add screen</source>
+        <translation>Cuir scáileán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="77"/>
+        <source>Add screen source</source>
+        <translation>Cuir foinse scáileáin leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="83"/>
+        <source>Add window</source>
+        <translation>Cuir fuinneog leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="91"/>
+        <source>Add media file</source>
+        <translation>Cuir comhad meán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="97"/>
+        <source>Add media URL</source>
+        <translation>Cuir URL meán leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoInputs.qml" line="117"/>
+        <source>No cameras found</source>
+        <translation>Níor aimsíodh aon cheamaraí</translation>
+    </message>
+</context>
+<context>
+    <name>VideoLayer</name>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="131"/>
+        <source>All Image and Video Files</source>
+        <translation>Gach Comhad Íomhá agus Físe</translation>
+    </message>
+    <message>
+        <location filename="../../src/videolayer.cpp" line="168"/>
+        <source>All Files</source>
+        <translation>Gach Comhad</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOptions</name>
+    <message>
+        <location filename="../qml/VideoOptions.qml" line="45"/>
+        <source>Sources</source>
+        <translation>Foinsí</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOptions.qml" line="48"/>
+        <source>Outputs</source>
+        <translation>Aschuir</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputAddEdit</name>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="233"/>
+        <source>Edit Virtual Camera</source>
+        <translation>Cuir Ceamara Fíorúil in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="234"/>
+        <source>Add Virtual Camera</source>
+        <translation>Cuir Ceamara Fíorúil leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="275"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="346"/>
+        <source>Virtual camera name</source>
+        <translation>Ainm ceamara fíorúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="296"/>
+        <source>Add format</source>
+        <translation>Cuir formáid leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="306"/>
+        <source>Clear formats</source>
+        <translation>Glan formáidí</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="368"/>
+        <source>Format</source>
+        <translation>Formáid</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="379"/>
+        <source>Width</source>
+        <translation>Leithead</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="392"/>
+        <source>Height</source>
+        <translation>Airde</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="405"/>
+        <source>Frame rate</source>
+        <translation>Ráta fráma</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="430"/>
+        <source>Can&apos;t edit the virtual camera</source>
+        <translation>Ní féidir an ceamara fíorúil a chur in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="431"/>
+        <source>Can&apos;t add the virtual camera</source>
+        <translation>Ní féidir an ceamara fíorúil a chur leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="441"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="451"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="487"/>
+        <source>Error editing the virtual camera</source>
+        <translation>Earráid agus an ceamara fíorúil á chur in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="442"/>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="452"/>
+        <source>Error adding the virtual camera</source>
+        <translation>Earráid agus an ceamara fíorúil á chur leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="443"/>
+        <source>Camera description can&apos;t be empty.</source>
+        <translation>Ní féidir an cur síos ceamara a bheith folamh.</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="453"/>
+        <source>Camera description and formats can&apos;t be empty.</source>
+        <translation>Ní féidir an cur síos ceamara agus formáidí a bheith folamh.</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputAddEdit.qml" line="497"/>
+        <source>Error creating the virtual camera</source>
+        <translation>Earráid agus an ceamara fíorúil á chruthú</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputPicture</name>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="30"/>
+        <source>Virtual camera output picture</source>
+        <translation>Pictiúr aschuir ceamara fíorúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="75"/>
+        <source>Virtual camera default output picture</source>
+        <translation>Pictiúr réamhshocraithe aschuir ceamara fíorúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="76"/>
+        <source>Search image to use as default output picture</source>
+        <translation>Cuardaigh íomhá le húsáid mar phictiúr réamhshocraithe aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="97"/>
+        <source>Can&apos;t set virtual camera picture</source>
+        <translation>Ní féidir pictiúr ceamara fíorúil a shocrú</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="101"/>
+        <source>Error Removing Virtual Cameras</source>
+        <translation>Earráid agus Ceamaraí Fíorúla á mbaint</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputPicture.qml" line="113"/>
+        <source>Please choose an image file</source>
+        <translation>Roghnaigh comhad íomhá le do thoil</translation>
+    </message>
+</context>
+<context>
+    <name>VideoOutputs</name>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="90"/>
+        <source>Add output</source>
+        <translation>Cuir aschur leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="102"/>
+        <source>Add virtual camera</source>
+        <translation>Cuir ceamara fíorúil leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="115"/>
+        <source>Error Creating Virtual Camera</source>
+        <translation>Earráid agus Ceamara Fíorúil á Chruthú</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="123"/>
+        <source>Add streaming platform</source>
+        <translation>Cuir ardán sruthaithe leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="131"/>
+        <source>Add local streaming</source>
+        <translation>Cuir sruthú áitiúil leis</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoOutputs.qml" line="196"/>
+        <source>Local Streaming</source>
+        <translation>Sruthú Áitiúil</translation>
+    </message>
+</context>
+<context>
+    <name>VideoRecording</name>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="31"/>
+        <source>Video Recording</source>
+        <translation>Taifeadadh Físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="32"/>
+        <source>Configure video recording format and codecs.</source>
+        <translation>Cumraigh formáid agus comhfhuaigh taifeadta físe.</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="114"/>
+        <source>Videos directory</source>
+        <translation>Comhadlann físeán</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="126"/>
+        <source>Select the save directory</source>
+        <translation>Roghnaigh an chomhadlann shábhála</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="140"/>
+        <source>Record audio</source>
+        <translation>Taifead fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="151"/>
+        <source>Use flash</source>
+        <translation>Úsáid splanc</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="154"/>
+        <source>Use flash when recording a video</source>
+        <translation>Úsáid splanc agus físeán á thaifeadadh</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="165"/>
+        <location filename="../qml/VideoRecording.qml" line="190"/>
+        <source>Recording quality</source>
+        <translation>Cáilíocht taifeadta</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="240"/>
+        <source>Custom</source>
+        <translation>Saincheaptha</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="244"/>
+        <source>Video quality: %1×%2 %3 FPS</source>
+        <translation>Cáilíocht físe: %1×%2 %3 SFA</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="245"/>
+        <source>Video bitrate: %1 Mbps</source>
+        <translation>Ráta giotán físe: %1 Mbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="246"/>
+        <source>Audio sample rate: %1 kHz</source>
+        <translation>Ráta samplaí fuaime: %1 kHz</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="247"/>
+        <source>Audio bitrate: %1 kbps</source>
+        <translation>Ráta giotán fuaime: %1 kbps</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="255"/>
+        <source>Advanced settings</source>
+        <translation>Socruithe casta</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="268"/>
+        <source>Video quality</source>
+        <translation>Cáilíocht físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="286"/>
+        <source>Output width</source>
+        <translation>Leithead aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="309"/>
+        <source>Output height</source>
+        <translation>Airde aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="332"/>
+        <source>Output Frame rate</source>
+        <translation>Ráta Fráma Aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="357"/>
+        <source>Audio quality</source>
+        <translation>Cáilíocht fuaime</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="375"/>
+        <source>Sample rate</source>
+        <translation>Ráta samplaí</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="400"/>
+        <source>File format and codecs</source>
+        <translation>Formáid comhaid agus comhfhuaigh</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="411"/>
+        <source>Configure the file format</source>
+        <translation>Cumraigh an fhormáid comhaid</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="413"/>
+        <source>Configure the file format for recording</source>
+        <translation>Cumraigh an fhormáid comhaid le haghaidh taifeadta</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="421"/>
+        <source>Configure the video codec</source>
+        <translation>Cumraigh an comhfhuaigh físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="423"/>
+        <source>Configure the video codec for recording</source>
+        <translation>Cumraigh an comhfhuaigh físe le haghaidh taifeadta</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="431"/>
+        <source>Configure the audio codec</source>
+        <translation>Cumraigh an comhfhuaigh fuaim</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="434"/>
+        <source>Configure the audio codec for recording</source>
+        <translation>Cumraigh an comhfhuaigh fuaim le haghaidh taifeadta</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideoRecording.qml" line="468"/>
+        <source>Select the folder to save your videos</source>
+        <translation>Roghnaigh an fillteán le do fhíseáin a shábháil ann</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraInstallDialog</name>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="32"/>
+        <source>Virtual camera install</source>
+        <translation>Suiteáil ceamara fíorúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="52"/>
+        <source>The virtual camera in Windows may not work properly and may cause inestability in the system.&lt;br/&gt;</source>
+        <translation>Seans nach n-oibreoidh an ceamara fíorúil i Windows i gceart agus go bhféadfadh sé éagobhsaíocht a chruthú sa chóras.&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="53"/>
+        <source>If you want to share audio and video of your current seesion, consider using &lt;b&gt;local streaming&lt;/b&gt; which is more stable and powerful.&lt;br/&gt;&lt;br/&gt;</source>
+        <translation>Más mian leat fuaim agus físeán do sheisiún reatha a roinnt, smaoinigh ar &lt;b&gt;sruthú áitiúil&lt;/b&gt; a úsáid atá níos cobhsaí agus níos cumhachtaí.&lt;br/&gt;&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="54"/>
+        <source>Are you sure that you want to continue?</source>
+        <translation>An bhfuil tú cinnte gur mian leat leanúint ar aghaidh?</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="56"/>
+        <source>The virtual camera is not installed, do you want to install it?</source>
+        <translation>Níl an ceamara fíorúil suiteáilte, an bhfuil fonn ort é a shuiteáil?</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraInstallDialog.qml" line="57"/>
+        <source>The virtual camera is not installed. Please, install &lt;b&gt;v4l2loopback&lt;/b&gt;.</source>
+        <translation>Níl an ceamara fíorúil suiteáilte. Le do thoil, suiteáil &lt;b&gt;v4l2loopback&lt;/b&gt;.</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraOptions</name>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="65"/>
+        <source>Edit</source>
+        <translation>Cuir in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="77"/>
+        <source>Can&apos;t Edit The Virtual Camera</source>
+        <translation>Ní féidir an Ceamara Fíorúil a chur in eagar</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="84"/>
+        <source>Set output picture</source>
+        <translation>Socraigh pictiúr aschuir</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="95"/>
+        <source>Remove</source>
+        <translation>Bain</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="110"/>
+        <source>Error removing the virtual camera</source>
+        <translation>Earráid agus an ceamara fíorúil á bhaint</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraOptions.qml" line="114"/>
+        <source>Can&apos;t Remove The Virtual Camera</source>
+        <translation>Ní féidir an Ceamara Fíorúil a bhaint</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameraUpdateDialog</name>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="33"/>
+        <source>Virtual camera update</source>
+        <translation>Nuashonrú ceamara fíorúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="54"/>
+        <source>The virtual camera is outdated (%1), install the latest version (%2)?</source>
+        <translation>Tá an ceamara fíorúil as dáta (%1), an gcuirfidh tú an leagan is déanaí suiteáil (%2)?</translation>
+    </message>
+    <message>
+        <location filename="../qml/VirtualCameraUpdateDialog.qml" line="62"/>
+        <source>Show this dialog next time</source>
+        <translation>Taispeáin an dialóg seo an chéad uair eile</translation>
+    </message>
+</context>
+<context>
+    <name>VirtualCameras</name>
+    <message>
+        <location filename="../../src/virtualcameras.cpp" line="567"/>
+        <source>Virtual Camera</source>
+        <translation>Ceamara Fíorúil</translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="30"/>
+        <source>Hue</source>
+        <translation>Dath</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="79"/>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="48"/>
+        <source>Saturation</source>
+        <translation>Sáithiú</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/AdjustHSL/share/qml/main.qml" line="66"/>
+        <source>Luminance</source>
+        <translation>Loinnir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="28"/>
+        <source>Number of scratches</source>
+        <translation>Líon scríobanna</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="45"/>
+        <source>Aging intensity</source>
+        <translation>Déine aoisithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="64"/>
+        <source>Dust density</source>
+        <translation>Dlús deannaigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="83"/>
+        <source>Scratch density</source>
+        <translation>Dlús scríobanna</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="102"/>
+        <source>Scratch brightness</source>
+        <translation>Gile scríobanna</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Aging/share/qml/main.qml" line="121"/>
+        <source>Pits density</source>
+        <translation>Dlús poill</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="28"/>
+        <source>Vertical sync</source>
+        <translation>Sioncronú ingearach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="46"/>
+        <source>Horizontal offset</source>
+        <translation>Fothaiseán cothrománach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="64"/>
+        <source>Horizontal sync factor</source>
+        <translation>Fachtóir sioncronaithe cothrománaigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="82"/>
+        <source>Horizontal sync smoothness</source>
+        <translation>Minicíocht sioncronaithe cothrománaigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="99"/>
+        <source>Hue dephasing factor</source>
+        <translation>Fachtóir díchéimnithe datha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/AnalogTV/share/qml/main.qml" line="117"/>
+        <source>Noise</source>
+        <translation>Torann</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="27"/>
+        <source>Width</source>
+        <translation>Leithead</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="33"/>
+        <source>Aspect ratio width</source>
+        <translation>Leithead cóimheas gné</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="45"/>
+        <source>Height</source>
+        <translation>Airde</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/AspectRatio/share/qml/main.qml" line="51"/>
+        <source>Aspect ratio height</source>
+        <translation>Airde cóimheas gné</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Blur/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/OilPaint/share/qml/main.qml" line="27"/>
+        <source>Radius</source>
+        <translation>Ga</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="47"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="235"/>
+        <source>Number of colors</source>
+        <translation>Líon dathanna</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="64"/>
+        <source>Color difference</source>
+        <translation>Difear datha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="81"/>
+        <source>Show edges</source>
+        <translation>Taispeáin imill</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="36"/>
+        <source>Canny mode</source>
+        <extracomment>https://en.wikipedia.org/wiki/Canny_edge_detector</extracomment>
+        <translation>Modh Canny</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="47"/>
+        <source>Equalize</source>
+        <extracomment>https://en.wikipedia.org/wiki/Histogram_equalization</extracomment>
+        <translation>Cothromaigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="92"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="58"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="125"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="114"/>
+        <source>Threshold</source>
+        <translation>Tairsí</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="77"/>
+        <source>Linecolor</source>
+        <translation>Dath líne</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="79"/>
+        <source>Choose the line color</source>
+        <translation>Roghnaigh dath na líne</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="111"/>
+        <source>Line color</source>
+        <translation>Dath líne</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="113"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="182"/>
+        <source>Choose a color</source>
+        <translation>Roghnaigh dath</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="124"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Cartoon/share/qml/main.qml" line="130"/>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="167"/>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="206"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="212"/>
+        <source>Scan block</source>
+        <translation>Bloc scanadh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="42"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="42"/>
+        <source>Transform matrix</source>
+        <extracomment>https://en.wikipedia.org/wiki/Transformation_matrix</extracomment>
+        <translation>Maitrís claochlaithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="58"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="58"/>
+        <source>Column 0, Row 0</source>
+        <translation>Colún 0, Sraith 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="70"/>
+        <source>Column 1, Row 0</source>
+        <translation>Colún 1, Sraith 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="82"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="82"/>
+        <source>Column 2, Row 0</source>
+        <translation>Colún 2, Sraith 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="94"/>
+        <source>Column 3, Row 0</source>
+        <translation>Colún 3, Sraith 0</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="108"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="97"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="96"/>
+        <source>Column 0, Row 1</source>
+        <translation>Colún 0, Sraith 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="121"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="120"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="108"/>
+        <source>Column 1, Row 1</source>
+        <translation>Colún 1, Sraith 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="133"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="121"/>
+        <location filename="../../../libAvKys/Plugins/MatrixTransform/share/qml/main.qml" line="120"/>
+        <source>Column 2, Row 1</source>
+        <translation>Colún 2, Sraith 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="145"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="144"/>
+        <source>Column 3, Row 1</source>
+        <translation>Colún 3, Sraith 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="159"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="135"/>
+        <source>Column 0, Row 2</source>
+        <translation>Colún 0, Sraith 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="171"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="147"/>
+        <source>Column 1, Row 2</source>
+        <translation>Colún 1, Sraith 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="183"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="159"/>
+        <source>Column 2, Row 2</source>
+        <translation>Colún 2, Sraith 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ChangeHSL/share/qml/main.qml" line="195"/>
+        <location filename="../../../libAvKys/Plugins/ColorTransform/share/qml/main.qml" line="194"/>
+        <source>Column 3, Row 2</source>
+        <translation>Colún 3, Sraith 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="43"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="43"/>
+        <source>Mode</source>
+        <translation>Modh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="56"/>
+        <source>Natural</source>
+        <translation>Nádúrtha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="60"/>
+        <source>Fixed</source>
+        <translation>Seasta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="70"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="76"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="66"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="72"/>
+        <source>Symbols</source>
+        <translation>Siombailí</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="86"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="94"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="82"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="90"/>
+        <source>Font</source>
+        <translation>Cló</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="95"/>
+        <source>Search the font to be used</source>
+        <translation>Cuardaigh an cló le húsáid</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="103"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="100"/>
+        <source>Hinting</source>
+        <translation>Treoir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="111"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="108"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="139"/>
+        <source>Default</source>
+        <translation>Réamhshocrú</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="115"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="112"/>
+        <source>No hinting</source>
+        <translation>Gan treoir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="116"/>
+        <source>Vertical hinting</source>
+        <translation>Treoir ingearach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="123"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="120"/>
+        <source>Full hinting</source>
+        <translation>Treoir iomlán</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="134"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="131"/>
+        <source>Style</source>
+        <extracomment>Different font rendering strategies</extracomment>
+        <translation>Stíl</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="143"/>
+        <source>Bitmap</source>
+        <translation>Bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="150"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="147"/>
+        <source>Device</source>
+        <translation>Gléas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="154"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="151"/>
+        <source>Outline</source>
+        <translation>Imline</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="158"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="155"/>
+        <source>Force outline</source>
+        <translation>Fórsáil imline</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="162"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="159"/>
+        <source>Match</source>
+        <translation>Meaitseáil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="166"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="163"/>
+        <source>Quality</source>
+        <translation>Cáilíocht</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="170"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="167"/>
+        <source>Antialias</source>
+        <translation>Frith-ailéis</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="171"/>
+        <source>No antialias</source>
+        <translation>Gan frith-ailéis</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="178"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="175"/>
+        <source>Compatible with OpenGL</source>
+        <translation>Comhoiriúnach le OpenGL</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="182"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="179"/>
+        <source>Force integer metrics</source>
+        <translation>Fórsáil méadair slánuimhir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="186"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="183"/>
+        <source>No subpixel antialias</source>
+        <translation>Gan frith-ailéis fophicteilín</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="190"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="187"/>
+        <source>No font merging</source>
+        <translation>Gan chumasc cló</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="198"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="205"/>
+        <source>Foreground color</source>
+        <translation>Dath tulra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="200"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="207"/>
+        <source>Choose the foreground color</source>
+        <translation>Roghnaigh an dath tulra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="208"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="87"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="214"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="137"/>
+        <source>Background color</source>
+        <translation>Dath cúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="210"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Edge/share/qml/main.qml" line="89"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="216"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="139"/>
+        <source>Choose the background color</source>
+        <translation>Roghnaigh an dath cúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="218"/>
+        <source>Reversed</source>
+        <translation>Aisiompaithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Charify/share/qml/main.qml" line="228"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="316"/>
+        <source>Please choose a font</source>
+        <translation>Roghnaigh cló le do thoil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="35"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Dice/share/qml/main.qml" line="27"/>
+        <source>Size</source>
+        <translation>Méid</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="33"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="59"/>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="125"/>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="33"/>
+        <source>Color</source>
+        <translation>Dath</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Cinema/share/qml/main.qml" line="54"/>
+        <source>Choose the strips color</source>
+        <translation>Roghnaigh dath na straoca</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="36"/>
+        <source>Select the color to filter</source>
+        <translation>Roghnaigh an dath le scagadh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/Plugins/ColorFilter/share/qml/main.qml" line="67"/>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="81"/>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="72"/>
+        <source>Soft</source>
+        <translation>Bog</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="61"/>
+        <source>Choose the color to filter</source>
+        <translation>Roghnaigh an dath le scagadh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="71"/>
+        <source>Color Difference</source>
+        <translation>Difear Datha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="88"/>
+        <source>Smoothness</source>
+        <translation>Míne</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="104"/>
+        <source>Normalize</source>
+        <translation>Normálaigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="114"/>
+        <source>Background type</source>
+        <translation>Cineál cúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="121"/>
+        <source>No background</source>
+        <translation>Gan chúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="129"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="242"/>
+        <source>Image</source>
+        <translation>Íomhá</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="163"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="118"/>
+        <source>Source palette</source>
+        <translation>Pailéad foinse</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="164"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="119"/>
+        <source>Search the image file to use as palette</source>
+        <translation>Cuardaigh an comhad íomhá le húsáid mar phailéad</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorKey/share/qml/main.qml" line="174"/>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="142"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="832"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="842"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="222"/>
+        <source>Please choose an image file</source>
+        <translation>Roghnaigh comhad íomhá le do thoil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="34"/>
+        <source>Old color</source>
+        <translation>Sean-dath</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="36"/>
+        <source>Select the color to replace</source>
+        <translation>Roghnaigh an dath le hathsholáthar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="48"/>
+        <source>New color</source>
+        <translation>Dath nua</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorReplace/share/qml/main.qml" line="50"/>
+        <source>Select the new color</source>
+        <translation>Roghnaigh an dath nua</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="50"/>
+        <source>Color table</source>
+        <translation>Tábla dathanna</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="58"/>
+        <source>Base</source>
+        <extracomment>Base color, show the image without modifications</extracomment>
+        <translation>Bun</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="62"/>
+        <source>Metal</source>
+        <translation>Miotal</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="67"/>
+        <source>Heat</source>
+        <extracomment>https://en.wikipedia.org/wiki/Heat_map</extracomment>
+        <translation>Teas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="71"/>
+        <source>Old Photo</source>
+        <translation>Sean-Ghrianghraf</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="75"/>
+        <source>Red &amp; Green</source>
+        <translation>Dearg &amp; Glas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="80"/>
+        <source>Sepia</source>
+        <extracomment>https://en.wikipedia.org/wiki/Sepia_(color)</extracomment>
+        <translation>Sepia</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="84"/>
+        <source>X-Pro</source>
+        <translation>X-Pro</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="88"/>
+        <source>X-Ray</source>
+        <translation>X-gha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="92"/>
+        <source>Yellow &amp; Blue</source>
+        <translation>Buí &amp; Gorm</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ColorTap/share/qml/main.qml" line="96"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="463"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="527"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="104"/>
+        <source>Custom</source>
+        <translation>Saincheaptha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Contrast/share/qml/main.qml" line="29"/>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="44"/>
+        <source>Contrast</source>
+        <translation>Codarsnacht</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="43"/>
+        <source>Convolve matrix</source>
+        <extracomment>https://en.wikipedia.org/wiki/Kernel_(image_processing)</extracomment>
+        <translation>Maitrís fhillte</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Emboss/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="167"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="52"/>
+        <location filename="../../../libAvKys/Plugins/Saturated/share/qml/main.qml" line="27"/>
+        <source>Factor</source>
+        <translation>Fachtóir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Emboss/share/qml/main.qml" line="46"/>
+        <location filename="../../../libAvKys/Plugins/Convolve/share/qml/main.qml" line="185"/>
+        <source>Bias</source>
+        <translation>Claonadh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="33"/>
+        <source>Edit</source>
+        <translation>Cuir in eagar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="35"/>
+        <source>Enable edition mode</source>
+        <translation>Cumasaigh modh eagarthóireachta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="42"/>
+        <source>Pixels/%</source>
+        <translation>Picteilíní/%</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="43"/>
+        <source>Select cropping unit</source>
+        <translation>Roghnaigh aonad bearrtha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="50"/>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="184"/>
+        <source>Reset</source>
+        <translation>Athshocraigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="52"/>
+        <source>Reset parameters</source>
+        <translation>Athshocraigh paraiméadair</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="57"/>
+        <location filename="../../../libAvKys/Plugins/Rotate/share/qml/main.qml" line="46"/>
+        <source>Keep resolution</source>
+        <translation>Coinnigh rún</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="66"/>
+        <source>Left</source>
+        <translation>Clé</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="83"/>
+        <source>Right</source>
+        <translation>Deas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="100"/>
+        <source>Top</source>
+        <translation>Barr</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="117"/>
+        <source>Bottom</source>
+        <translation>Bun</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="133"/>
+        <source>Fill color</source>
+        <translation>Dath líonta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Crop/share/qml/main.qml" line="135"/>
+        <source>Choose the filling color</source>
+        <translation>Roghnaigh an dath líonta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="42"/>
+        <source>Grab mode</source>
+        <translation>Modh greamaithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="50"/>
+        <source>Random square</source>
+        <translation>Cearnóg randamach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="54"/>
+        <source>Vertical increase</source>
+        <translation>Méadú ingearach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="58"/>
+        <source>Horizontal increase</source>
+        <translation>Méadú cothrománach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="62"/>
+        <source>Rings increase</source>
+        <translation>Méadú fáinní</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="78"/>
+        <source>Block size</source>
+        <translation>Méid bloc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/Plugins/DelayGrab/share/qml/main.qml" line="97"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="33"/>
+        <location filename="../../../libAvKys/Plugins/Quark/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Quark/share/qml/main.qml" line="33"/>
+        <source>Number of frames</source>
+        <translation>Líon frámaí</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="69"/>
+        <source>Mu</source>
+        <extracomment>Mu factor (µ letter from greek), represents the average of a group of values. https://en.wikipedia.org/wiki/Arithmetic_mean</extracomment>
+        <translation>Mu</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Denoise/share/qml/main.qml" line="93"/>
+        <source>Sigma</source>
+        <extracomment>Sigma factor (σ letter from greek), represents the standard deviation of a group of values. https://en.wikipedia.org/wiki/Standard_deviation</extracomment>
+        <translation>Sigma</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="49"/>
+        <location filename="../../../libAvKys/Plugins/FpsControl/share/qml/main.qml" line="44"/>
+        <location filename="../../../libAvKys/Plugins/ImageSrc/share/qml/main.qml" line="56"/>
+        <source>Frame rate</source>
+        <translation>Ráta fráma</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="297"/>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="80"/>
+        <source>Show cursor</source>
+        <translation>Taispeáinn an cúrsóir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/DesktopCapture/src/share/qml/main.qml" line="92"/>
+        <source>Cursor size</source>
+        <translation>Méid cúrsóir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="34"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="73"/>
+        <source>Amplitude</source>
+        <translation>Aimplitiúid</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="54"/>
+        <source>Frequency</source>
+        <translation>Minicíocht</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="68"/>
+        <location filename="../../../libAvKys/Plugins/Distort/share/qml/main.qml" line="74"/>
+        <source>Grid size</source>
+        <translation>Méid greille</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="27"/>
+        <source>Speed</source>
+        <translation>Luas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="45"/>
+        <source>Zoom rate</source>
+        <translation>Ráta súmála</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Dizzy/share/qml/main.qml" line="62"/>
+        <source>Strength</source>
+        <translation>Neart</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="103"/>
+        <source>Haar file</source>
+        <extracomment>https://en.wikipedia.org/wiki/Haar-like_feature</extracomment>
+        <translation>Comhad Haar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="71"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="111"/>
+        <source>Eye</source>
+        <translation>Súil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="75"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="115"/>
+        <source>Eye glasses</source>
+        <translation>Gloiní súl</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="79"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="119"/>
+        <source>Frontal face alternative 1</source>
+        <translation>Aghaidh éadain malartach 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="83"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="123"/>
+        <source>Frontal face alternative 2</source>
+        <translation>Aghaidh éadain malartach 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="87"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="127"/>
+        <source>Frontal face alternative 3</source>
+        <translation>Aghaidh éadain malartach 3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="91"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="131"/>
+        <source>Frontal face default</source>
+        <translation>Aghaidh éadain réamhshocraithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="95"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="135"/>
+        <source>Full body</source>
+        <translation>Corp iomlán</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="99"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="139"/>
+        <source>Left Eye 1</source>
+        <translation>Súil Chlé 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="103"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="143"/>
+        <source>Lower body</source>
+        <translation>Corp íochtarach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="107"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="147"/>
+        <source>Eye pair big</source>
+        <translation>Péire súl mór</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="111"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="151"/>
+        <source>Eye pair small</source>
+        <translation>Péire súl beag</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="115"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="155"/>
+        <source>Left ear</source>
+        <translation>Cluas chlé</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="119"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="159"/>
+        <source>Left eye 2</source>
+        <translation>Súil chlé 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="123"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="163"/>
+        <source>Mouth</source>
+        <translation>Béal</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="127"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="167"/>
+        <source>Nose</source>
+        <translation>Srón</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="131"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="171"/>
+        <source>Right ear</source>
+        <translation>Cluas dheas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="135"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="175"/>
+        <source>Right Eye 1</source>
+        <translation>Súil Dheas 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="139"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="179"/>
+        <source>Upper body 1</source>
+        <translation>Corp uachtarach 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="143"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="183"/>
+        <source>Profile face</source>
+        <translation>Aghaidh próifíle</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="147"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="187"/>
+        <source>Right eye 2</source>
+        <translation>Súil dheas 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="151"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="191"/>
+        <source>Smile</source>
+        <translation>Gáire</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="155"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="195"/>
+        <source>Upper body</source>
+        <translation>Corp uachtarach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="226"/>
+        <source>Marker type</source>
+        <translation>Cineál marcóra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="234"/>
+        <source>Rectangle</source>
+        <translation>Dronuilleog</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="238"/>
+        <source>Ellipse</source>
+        <translation>Éilips</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="246"/>
+        <source>Pixelate</source>
+        <translation>Picteilínigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="113"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="93"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="250"/>
+        <source>Blur</source>
+        <translation>Doiléirigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="254"/>
+        <source>Blur Outer</source>
+        <translation>Doiléirigh Seachtrach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="258"/>
+        <source>Background Image</source>
+        <translation>Íomhá Cúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="269"/>
+        <source>Marker style</source>
+        <translation>Stíl marcóra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="277"/>
+        <source>Solid</source>
+        <translation>Soladach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="281"/>
+        <source>Dash</source>
+        <translation>Fleasc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="285"/>
+        <source>Dot</source>
+        <translation>Ponc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="289"/>
+        <source>Dash dot</source>
+        <translation>Fleasc-ponc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="293"/>
+        <source>Dash dot dot</source>
+        <translation>Fleasc-ponc-ponc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="303"/>
+        <source>Marker color</source>
+        <translation>Dath marcóra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="305"/>
+        <source>Select marker color</source>
+        <translation>Roghnaigh dath marcóra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="316"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="322"/>
+        <source>Marker width</source>
+        <translation>Leithead marcóra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="336"/>
+        <source>Masks</source>
+        <translation>Maisc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="343"/>
+        <source>Angel</source>
+        <translation>Aingeal</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="347"/>
+        <source>Bear</source>
+        <translation>Béar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="351"/>
+        <source>Beaver</source>
+        <translation>Béabhar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="355"/>
+        <source>Cat</source>
+        <translation>Cat</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="359"/>
+        <source>Chicken</source>
+        <translation>Sicín</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="363"/>
+        <source>Cow</source>
+        <translation>Bó</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="367"/>
+        <source>Devil</source>
+        <translation>Diabhal</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="371"/>
+        <source>Dog</source>
+        <translation>Madra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="379"/>
+        <source>Elephant</source>
+        <translation>Eilifint</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="423"/>
+        <source>Mouse</source>
+        <translation>Luch</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="435"/>
+        <source>Pumpkin</source>
+        <translation>Puimpcín</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="451"/>
+        <source>Skull</source>
+        <translation>Bláthchloigeann</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="375"/>
+        <source>Dragon</source>
+        <translation>Dragún</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="383"/>
+        <source>Elk</source>
+        <translation>Eilc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="387"/>
+        <source>Frog</source>
+        <translation>Frog</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="391"/>
+        <source>Ghost</source>
+        <translation>Taibhse</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="395"/>
+        <source>Giraffe</source>
+        <translation>Giorráid</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="399"/>
+        <source>Gnu</source>
+        <translation>Gnu</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="403"/>
+        <source>Goat</source>
+        <translation>Gabhar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="407"/>
+        <source>Hippo</source>
+        <translation>Dobharchú</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="411"/>
+        <source>Horse</source>
+        <translation>Capall</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="415"/>
+        <source>Koala</source>
+        <translation>Cóála</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="419"/>
+        <source>Monkey</source>
+        <translation>Moncaí</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="427"/>
+        <source>Panda</source>
+        <translation>Panda</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="431"/>
+        <source>Penguin</source>
+        <translation>Piongain</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="439"/>
+        <source>Raccoon</source>
+        <translation>Racún</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="443"/>
+        <source>Rhino</source>
+        <translation>Róineas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="447"/>
+        <source>Sheep</source>
+        <translation>Caora</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="455"/>
+        <source>Triceratops</source>
+        <translation>Tríchearatop</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="459"/>
+        <source>Zebra</source>
+        <translation>Séabra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="473"/>
+        <source>Marker picture</source>
+        <translation>Pictiúr marcóra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="491"/>
+        <source>Replace face with this picture</source>
+        <translation>Cuir an pictiúr seo in ionad na haghaidhe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="492"/>
+        <source>Search the image to put into the detected rectangle</source>
+        <translation>Cuardaigh an íomhá le cur isteach sa dronuilleog braite</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="516"/>
+        <source>Background</source>
+        <translation>Cúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="523"/>
+        <source>Black Square</source>
+        <translation>Cearnóg Dhubh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="537"/>
+        <source>Background picture</source>
+        <translation>Pictiúr cúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="555"/>
+        <source>Replace background with this picture</source>
+        <translation>Cuir an pictiúr seo in ionad an chúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="556"/>
+        <source>Search the image to use as background</source>
+        <translation>Cuardaigh an íomhá le húsáid mar chúlra</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="580"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="586"/>
+        <source>Pixel grid size</source>
+        <translation>Méid greille picteilín</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="600"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="606"/>
+        <source>Blur radius</source>
+        <translation>Ga doiléirithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="618"/>
+        <source>Face Area Settings</source>
+        <translation>Socruithe Réimse Aghaidhe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="623"/>
+        <source>Advanced face area settings for background blur or image below.</source>
+        <translation>Socruithe casta réimse aghaidhe le haghaidh doiléirithe cúlra nó íomhá thíos.</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="63"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="632"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="741"/>
+        <source>Scale</source>
+        <translation>Scála</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="652"/>
+        <source>Horizontal Offset</source>
+        <translation>Fothaiseán Cothrománach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="671"/>
+        <source>Vertical Offset</source>
+        <translation>Fothaiseán Ingearach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="691"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="761"/>
+        <source>Width Adjust %</source>
+        <translation>Coigeartú Leithead %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="710"/>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="779"/>
+        <source>Height Adjust %</source>
+        <translation>Coigeartú Airde %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="730"/>
+        <source>Round Area</source>
+        <translation>Limistéar Cruinn</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="798"/>
+        <source>Horizontal Radius %</source>
+        <translation>Ga Cothrománach %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FaceDetect/share/qml/main.qml" line="815"/>
+        <source>Vertical Radius %</source>
+        <translation>Ga Ingearach %</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="191"/>
+        <source>Face bracketing duration (seconds)</source>
+        <translation>Fad lúibín aghaidhe (soicind)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="207"/>
+        <source>Face bracket count</source>
+        <translation>Líon lúibíní aghaidhe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="223"/>
+        <source>Zoom out rate</source>
+        <translation>Ráta súmála amach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="239"/>
+        <source>Zoom in rate</source>
+        <translation>Ráta súmála isteach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="255"/>
+        <source>Face padding (% of face size)</source>
+        <translation>Paidréal aghaidhe (% de mhéid aghaidhe)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="272"/>
+        <source>Padding top</source>
+        <translation>Paidréal barr</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="290"/>
+        <source>Padding left</source>
+        <translation>Paidréal clé</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="308"/>
+        <source>Padding right</source>
+        <translation>Paidréal deas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="325"/>
+        <source>Padding bottom</source>
+        <translation>Paidréal bun</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="339"/>
+        <source>Face margin (% of face size)</source>
+        <translation>Corrlach aghaidhe (% de mhéid aghaidhe)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="357"/>
+        <source>Margin top</source>
+        <translation>Corrlach barr</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="376"/>
+        <source>Margin left</source>
+        <translation>Corrlach clé</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="395"/>
+        <source>Margin right</source>
+        <translation>Corrlach deas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="412"/>
+        <source>Margin bottom</source>
+        <translation>Corrlach bun</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="427"/>
+        <source>Aspect ratio</source>
+        <translation>Cóimheas gné</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="438"/>
+        <source>e.g. 16:9, 4:3</source>
+        <translation>m.sh. 16:9, 4:3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="464"/>
+        <source>Lock viewport</source>
+        <translation>Glasáil amharcán</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/FaceTrack/share/qml/main.qml" line="474"/>
+        <source>Debug mode</source>
+        <translation>Modh dífhabhtaithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="81"/>
+        <source>Add color</source>
+        <translation>Cuir dath leis</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="88"/>
+        <source>Clear all colors</source>
+        <translation>Glan gach dath</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FalseColor/share/qml/main.qml" line="102"/>
+        <source>Select the color to add</source>
+        <extracomment>Select the color to add to the color table</extracomment>
+        <translation>Roghnaigh an dath le cur leis</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="56"/>
+        <source>Hard</source>
+        <translation>Críonna</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="60"/>
+        <source>Luminance soft</source>
+        <translation>Loinnir bog</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="64"/>
+        <source>Luminance hard</source>
+        <translation>Loinnir crua</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="75"/>
+        <source>Cooling</source>
+        <translation>Fuarú</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="95"/>
+        <source>Dissolve</source>
+        <translation>Díscaoil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="132"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="109"/>
+        <location filename="../../../libAvKys/Plugins/Zoom/share/qml/main.qml" line="27"/>
+        <source>Zoom</source>
+        <translation>Súmáil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="173"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="146"/>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="135"/>
+        <source>Luma threshold</source>
+        <extracomment>Minimum luminance/light/white level/intensity in a gray or black and white picture. https://en.wikipedia.org/wiki/Luma_(video)</extracomment>
+        <translation>Tairsí loinnir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="194"/>
+        <source>Alpha diff</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Difear alfa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="217"/>
+        <source>Alpha variation</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Athrú alfa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="251"/>
+        <source>Cold color</source>
+        <translation>Dath fuar</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="253"/>
+        <source>Choose the fire cold color</source>
+        <translation>Roghnaigh dath fuar na tine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="260"/>
+        <source>Hot color</source>
+        <translation>Dath te</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Fire/share/qml/main.qml" line="262"/>
+        <source>Choose the fire hot color</source>
+        <translation>Roghnaigh dath te na tine</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Flip/share/qml/main.qml" line="26"/>
+        <source>Flip horizontally</source>
+        <translation>Cas go cothrománach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Flip/share/qml/main.qml" line="34"/>
+        <source>Flip vertically</source>
+        <translation>Cas go hingearach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FpsControl/share/qml/main.qml" line="74"/>
+        <source>Fill gaps</source>
+        <translation>Líon bearnaí</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/Plugins/FrameOverlap/share/qml/main.qml" line="54"/>
+        <source>Stride</source>
+        <translation>Céim</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Gamma/share/qml/main.qml" line="29"/>
+        <source>Gamma</source>
+        <translation>Gamma</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="57"/>
+        <source>Pattern</source>
+        <translation>Patrún</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="64"/>
+        <source>90° Halftone 6x6</source>
+        <translation>Leath-thon 6x6 90°</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="68"/>
+        <source>Cluster 3</source>
+        <translation>Braislín 3</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="72"/>
+        <source>Cluster 4</source>
+        <translation>Braislín 4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="76"/>
+        <source>Cluster 8</source>
+        <translation>Braislín 8</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="80"/>
+        <source>Lines 4x4</source>
+        <translation>Línte 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="84"/>
+        <source>Magic 2x2</source>
+        <translation>Draíocht 2x2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="88"/>
+        <source>Magic 4x4</source>
+        <translation>Draíocht 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="92"/>
+        <source>Ordered 4x4</source>
+        <translation>Orduithe 4x4</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="96"/>
+        <source>Ordered 6x6</source>
+        <translation>Orduithe 6x6</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="100"/>
+        <source>Ordered 8x8</source>
+        <translation>Orduithe 8x8</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="123"/>
+        <source>Bitmap pattern</source>
+        <translation>Patrún bitmap</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="124"/>
+        <source>Search the image to use as pattern</source>
+        <translation>Cuardaigh an íomhá le húsáid mar phatrún</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="148"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="154"/>
+        <source>Pattern size</source>
+        <translation>Méid patrúin</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="166"/>
+        <source>Lightning</source>
+        <translation>Tintreach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="183"/>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="189"/>
+        <source>Slope</source>
+        <translation>Fána</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="202"/>
+        <source>Interception</source>
+        <translation>Gabháil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Halftone/share/qml/main.qml" line="208"/>
+        <source>Intercept</source>
+        <translation>Gabhadh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="51"/>
+        <source>Spiral 1</source>
+        <translation>Bíseach 1</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="55"/>
+        <source>Spiral 2</source>
+        <translation>Bíseach 2</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="59"/>
+        <source>Parabola</source>
+        <translation>Parabóla</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="63"/>
+        <source>Horizontal stripe</source>
+        <translation>Stripa cothrománach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="72"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Hypnotic/share/qml/main.qml" line="78"/>
+        <source>Speed increment</source>
+        <translation>Breisitheas luais</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ImageSrc/share/qml/main.qml" line="46"/>
+        <source>Force frame rate</source>
+        <translation>Fórsáil ráta fráma</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Implode/share/qml/main.qml" line="28"/>
+        <source>Amount</source>
+        <translation>Méid</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="36"/>
+        <source>Choose the automata color</source>
+        <extracomment>https://en.wikipedia.org/wiki/Life-like_cellular_automaton</extracomment>
+        <translation>Roghnaigh dath an uathoibreáin</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Life/share/qml/main.qml" line="68"/>
+        <source>Luma Threshold</source>
+        <extracomment>Minimum luminance/light/white level/intensity in a gray or black and white picture. https://en.wikipedia.org/wiki/Luma_(video)</extracomment>
+        <translation>Tairsí Loinnir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="48"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="54"/>
+        <source>Number of drops</source>
+        <translation>Líon titimí</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="91"/>
+        <source>Select font</source>
+        <translation>Roghnaigh cló</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="196"/>
+        <source>Cursor color</source>
+        <translation>Dath cúrsóir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="198"/>
+        <source>Choose the cursor color</source>
+        <translation>Roghnaigh dath an chúrsóir</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="225"/>
+        <source>Minimum drop length</source>
+        <translation>Fad titime íosta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="231"/>
+        <source>Min. drop length</source>
+        <translation>Fad titime min.</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="243"/>
+        <source>Maximum drop length</source>
+        <translation>Fad titime uasta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="249"/>
+        <source>Max. drop length</source>
+        <translation>Fad titime max.</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="261"/>
+        <source>Minimum speed</source>
+        <translation>Luas íosta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="267"/>
+        <source>Min. speed</source>
+        <translation>Luas min.</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="279"/>
+        <source>Maximum speed</source>
+        <translation>Luas uasta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="285"/>
+        <source>Max. speed</source>
+        <translation>Luas max.</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Matrix/share/qml/main.qml" line="306"/>
+        <source>Show rain</source>
+        <translation>Taispeáin báisteach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="123"/>
+        <source>Video track</source>
+        <translation>Rian físe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="135"/>
+        <source>Audio track</source>
+        <translation>Rian fuaime</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="147"/>
+        <source>Subtitles track</source>
+        <translation>Rian fotheideal</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/MultiSrc/src/share/qml/main.qml" line="160"/>
+        <source>Synchronise</source>
+        <translation>Sioncronaigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Nervous/share/qml/main.qml" line="45"/>
+        <source>Simple</source>
+        <translation>Simplí</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Opacity/share/qml/main.qml" line="28"/>
+        <source>Opacity</source>
+        <translation>Opacht</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Otsu/share/qml/main.qml" line="28"/>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="61"/>
+        <source>Levels</source>
+        <translation>Leibhéil</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Photocopy/share/qml/main.qml" line="27"/>
+        <source>Brightness</source>
+        <translation>Gile</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="56"/>
+        <source>Hard color</source>
+        <translation>Dath críonna</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="60"/>
+        <source>Soft color</source>
+        <translation>Dath bog</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="64"/>
+        <source>Hard natural</source>
+        <translation>Crua nádúrtha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="68"/>
+        <source>Soft natural</source>
+        <translation>Bog nádúrtha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="72"/>
+        <source>Luminance hard color</source>
+        <translation>Dath loinnir crua</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="76"/>
+        <source>Luminance soft color</source>
+        <translation>Dath loinnir bog</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="80"/>
+        <source>Luminance hard natural</source>
+        <translation>Loinnir crua nádúrtha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="84"/>
+        <source>Luminance soft natural</source>
+        <translation>Loinnir bog nádúrtha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="165"/>
+        <source>Alpha differential</source>
+        <extracomment>Alpha channel, also known as the transparency component of a pixel in an image.</extracomment>
+        <translation>Difearéal alfa</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Radiactive/share/qml/main.qml" line="180"/>
+        <source>Radiation color</source>
+        <translation>Dath radaíochta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="51"/>
+        <source>Motion detect</source>
+        <translation>Braithe gluaiseacht</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="55"/>
+        <source>Rain</source>
+        <translation>Báisteach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="63"/>
+        <source>General parameters</source>
+        <translation>Paraiméadair ghinearálta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="89"/>
+        <source>Decay</source>
+        <translation>Meath</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="104"/>
+        <source>Motion detection parameters</source>
+        <translation>Paraiméadair braite gluaiseachta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="150"/>
+        <source>Rain parameters</source>
+        <translation>Paraiméadair báistí</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="160"/>
+        <source>Minimum drop size</source>
+        <translation>Méid titime íosta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="176"/>
+        <source>Maximum drop size</source>
+        <translation>Méid titime uasta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="192"/>
+        <source>Drop thickness</source>
+        <translation>Tiús titime</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Ripple/share/qml/main.qml" line="209"/>
+        <source>Drop frequency</source>
+        <translation>Minicíocht titime</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="38"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="44"/>
+        <source>Show lines</source>
+        <translation>Taispeáin línte</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="56"/>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="62"/>
+        <source>Hide lines</source>
+        <translation>Folaigh línte</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="73"/>
+        <source>Hide color</source>
+        <translation>Dath folaigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/ScanLines/share/qml/main.qml" line="75"/>
+        <source>Choose the hide color</source>
+        <translation>Roghnaigh an dath folaigh</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Shagadelic/share/qml/main.qml" line="27"/>
+        <location filename="../../../libAvKys/Plugins/Shagadelic/share/qml/main.qml" line="33"/>
+        <source>Mask</source>
+        <translation>Masc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Temperature/share/qml/main.qml" line="27"/>
+        <source>Temperature</source>
+        <translation>Teocht</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="129"/>
+        <source>Video format</source>
+        <translation>Formáid físe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="146"/>
+        <source>Resolution</source>
+        <translation>Réiteach</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="164"/>
+        <source>FPS</source>
+        <translation>SFA</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/VideoCapture/src/share/qml/main.qml" line="188"/>
+        <source>Reset to default values</source>
+        <translation>Athshocraigh go luachanna réamhshocraithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="35"/>
+        <source>Choose the vignette color</source>
+        <translation>Roghnaigh dath an vinéid</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="46"/>
+        <source>Aspect</source>
+        <extracomment>Aspect ratio</extracomment>
+        <translation>Gné</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Vignette/share/qml/main.qml" line="80"/>
+        <source>Softness</source>
+        <translation>Bogacht</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="33"/>
+        <source>Palette</source>
+        <translation>Pailéad</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="43"/>
+        <source>Frame length</source>
+        <translation>Fad fráma</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="111"/>
+        <source>Hue offset</source>
+        <translation>Fothaiseán datha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="126"/>
+        <source>Light</source>
+        <translation>Solas</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="136"/>
+        <source>Light threshold</source>
+        <translation>Tairsí solais</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="153"/>
+        <source>Light color</source>
+        <translation>Dath solais</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="155"/>
+        <source>Choose the color of the light</source>
+        <translation>Roghnaigh dath an tsolais</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="162"/>
+        <source>Shadow</source>
+        <translation>Scáth</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="172"/>
+        <source>Shadow threshold</source>
+        <translation>Tairsí scátha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="189"/>
+        <source>Shadow color</source>
+        <translation>Dath scátha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Warhol/share/qml/main.qml" line="191"/>
+        <source>Choose the color of the shadow</source>
+        <translation>Roghnaigh dath an scátha</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="27"/>
+        <source>Ripples</source>
+        <translation>Tonnta</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Warp/share/qml/main.qml" line="43"/>
+        <source>Duration (in seconds)</source>
+        <translation>Fad (i soicind)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="28"/>
+        <source>X-Axis</source>
+        <translation>Ais-X</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="38"/>
+        <source>Amplitude (X)</source>
+        <translation>Aimplitiúid (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="54"/>
+        <source>Frequency (X)</source>
+        <translation>Minicíocht (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="70"/>
+        <source>Phase (X)</source>
+        <translation>Céim (X)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="85"/>
+        <source>Y-Axis</source>
+        <translation>Ais-Y</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="95"/>
+        <source>Amplitude (Y)</source>
+        <translation>Aimplitiúid (Y)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="111"/>
+        <source>Frequency (Y)</source>
+        <translation>Minicíocht (Y)</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Wave/share/qml/main.qml" line="127"/>
+        <source>Phase (Y)</source>
+        <translation>Céim (Y)</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="46"/>
+        <source>Daily Build</source>
+        <translation>Tógáil Laethúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="60"/>
+        <source>%1/Picture %2.%3</source>
+        <translation>%1/Pictiúr %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="258"/>
+        <source>Main menu</source>
+        <translation>Príomhroghchlár</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="264"/>
+        <source>Open main menu</source>
+        <translation>Oscail príomhroghchlár</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="295"/>
+        <source>Start streaming</source>
+        <translation>Tosaigh sruthú</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="295"/>
+        <source>Stop streaming</source>
+        <translation>Stop sruthú</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="300"/>
+        <source>You must add at least one streaming platform to the video outputs</source>
+        <translation>Ní mór duit ar a laghad ardán sruthaithe amháin a chur leis na haschuir físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="302"/>
+        <source>The following platforms are not configured:&lt;br/&gt;&lt;br/&gt;%1</source>
+        <translation>Níl na hardáin seo a leanas cumraithe:&lt;br/&gt;&lt;br/&gt;%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="336"/>
+        <source>Capture options</source>
+        <translation>Roghanna gabhála</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="342"/>
+        <source>Open capture options menu</source>
+        <translation>Oscail roghchlár roghanna gabhála</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="373"/>
+        <source>Open last photo</source>
+        <translation>Oscail an grianghraf deireanach</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="384"/>
+        <source>Open last photo taken</source>
+        <translation>Oscail an grianghraf deireanach a tógadh</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="415"/>
+        <location filename="../qml/main.qml" line="418"/>
+        <source>Take a photo</source>
+        <translation>Tóg grianghraf</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="419"/>
+        <source>Image capture mode</source>
+        <translation>Modh gabhála íomhá</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="422"/>
+        <source>Make a capture and save it to an image file</source>
+        <translation>Déan gabháil agus sábháil i gcomhad íomhá</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="423"/>
+        <source>Put %1 in image capture mode</source>
+        <translation>Cuir %1 i modh gabhála íomhá</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="472"/>
+        <location filename="../qml/main.qml" line="478"/>
+        <source>Record video</source>
+        <translation>Taifead físeán</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="473"/>
+        <location filename="../qml/main.qml" line="479"/>
+        <source>Stop video recording</source>
+        <translation>Stop taifeadadh físeáin</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="476"/>
+        <source>Video capture mode</source>
+        <translation>Modh gabhála físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="482"/>
+        <source>Put %1 in video recording mode</source>
+        <translation>Cuir %1 i modh taifeadta físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="484"/>
+        <source>Start recording to a video file</source>
+        <translation>Tosaigh ag taifeadadh chuig comhad físe</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="485"/>
+        <source>Stop current video recording</source>
+        <translation>Stop taifeadadh físe reatha</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="512"/>
+        <source>Open last video</source>
+        <translation>Oscail an físeán deireanach</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="524"/>
+        <source>Open last recorded video</source>
+        <translation>Oscail an físeán deireanach a taifeadadh</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="760"/>
+        <source>Installing virtual camera</source>
+        <translation>Ag suiteáil ceamara fíorúil</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="761"/>
+        <source>Running commands</source>
+        <translation>Ag rith orduithe</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/Plugins/Rotate/share/qml/main.qml" line="29"/>
+        <source>Angle %1°</source>
+        <translation>Uillinn %1°</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Pixelate/share/qml/main.qml" line="27"/>
+        <source>Block width</source>
+        <translation>Leithead bloc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Pixelate/share/qml/main.qml" line="44"/>
+        <source>Block height</source>
+        <translation>Airde bloc</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="28"/>
+        <source>Center X</source>
+        <translation>Lár X</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="47"/>
+        <source>Center Y</source>
+        <translation>Lár Y</translation>
+    </message>
+    <message>
+        <location filename="../../../libAvKys/ExtraPlugins/Swirl/share/qml/main.qml" line="66"/>
+        <source>Degrees</source>
+        <translation>Céimeanna</translation>
+    </message>
+</context>
+</TS>

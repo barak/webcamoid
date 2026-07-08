@@ -1,4 +1,4 @@
-/* Webcamoid, webcam capture application.
+/* Webcamoid, camera capture application.
  * Copyright (C) 2024  Gonzalo Exequiel Pedone
  *
  * Webcamoid is free software: you can redistribute it and/or modify
@@ -74,7 +74,7 @@ class AKCOMMONS_EXPORT AkAudioEncoder: public AkElement
 
     public:
         explicit AkAudioEncoder(QObject *parent=nullptr);
-        ~AkAudioEncoder();
+        virtual ~AkAudioEncoder();
 
         Q_INVOKABLE virtual QStringList codecs() const = 0;
         Q_INVOKABLE virtual AkAudioEncoderCodecID codecID(const QString &codec) const = 0;
