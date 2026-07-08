@@ -1,3 +1,29 @@
+webcamoid (9.4.0-1) unstable; urgency=medium
+
+  * New upstream release.  Upstream highlights:
+    - Local HTTP streaming (serve audio/video over the LAN to browsers and
+      players) and basic RTMP streaming to platforms, as more portable
+      alternatives to the virtual camera.
+    - Reworked audio layer: multiple selectable audio inputs with per-input
+      volume, output volume control, and dynamically loadable PulseAudio.
+    - New OpenGL ES 2.0 effects pipeline with many effects ported to it.
+    - Screen capture on wlroots-based Wayland compositors (wlr-screencopy)
+      and capture of individual windows.
+    - Media gallery with playback controls, quality-preset sliders for
+      recording and streaming, right-to-left language, and single-instance
+      support.
+    - Various fixes: audio/video sync, PipeWire camera capture, V4L2 format
+      detection, and Windows virtual camera creation.
+    - Removed the macOS virtual camera, AudioGen, the GStreamer/VLC playback
+      plugins, and MultiSink (muxers/encoders now used directly).
+  * Drop build dependencies on GStreamer, VLC, JACK and SDL; plugins
+    removed upstream.
+  * Drop build dependency on qml6-module-qtquick-nativestyle, which is no
+    longer in unstable (merged into QtQuick Controls in Qt 6.10).
+  * Remove now-unnecessary build-breaking -pie linker flags
+
+ -- Barak A. Pearlmutter <bap@debian.org>  Wed, 08 Jul 2026 22:43:49 +0100
+
 webcamoid (9.3.0-2) unstable; urgency=medium
 
   * Oops! Swizzle dependencies to qt6 modules (closes: #1089101)
